@@ -1,0 +1,85 @@
+from functools import lru_cache
+
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
+
+    # App
+    APP_NAME: str = "BELDOMiK"
+    APP_VERSION: str = "0.1.0"
+    DEBUG: bool = False
+    ENVIRONMENT: str = "development"
+
+    # API
+    API_V1_PREFIX: str = "/api/v1"
+    HOST: str = "0.0.0.0"
+    PORT: int = 8000
+
+    # Database
+    DATABASE_URL: str = Field(
+        default="postgresql+psycopg2://postgres:postgres@localhost:5432/beldomik",
+        validation_alias="DATABASE_URL",
+    )
+    DATABASE_POOL_SIZE: int = 10
+    DATABASE_MAX_OVERFLOW: int = 20
+
+    # Redis
+    REDIS_URL: str = "redis://localhost:6379/0"
+
+    # Security
+    SECRET_KEY: str = Field(default="change-me-in-production", validation_alias="SECRET_KEY")
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 30
+
+    # Telegram
+    TELEGRAM_BOT_TOKEN: str = Field(default="", validation_alias="TELEGRAM_BOT_TOKEN")
+    TELEGRAM_BOT_USERNAME: str = Field(
+        default="BELDOMiK_BOT", validation_alias="TELEGRAM_BOT_USERNAME"
+    )
+    TELEGRAM_WEBAPP_URL: str = Field(default="", validation_alias="TELEGRAM_WEBAPP_URL")
+
+    # Object Storage (S3-compatible)
+    S3_ENDPOINT_URL: str = Field(default="", validation_alias="S3_ENDPOINT_URL")
+    S3_ACCESS_KEY: str = Field(default="", validation_alias="S3_ACCESS_KEY")
+    S3_SECRET_KEY: str = Field(default="", validation_alias="S3_SECRET_KEY")
+    S3_BUCKET_NAME: str = Field(default="beldomik", validation_alias="S3_BUCKET_NAME")
+    S3_REGION: str = Field(default="auto", validation_alias="S3_REGION")
+    S3_PUBLIC_URL: str = Field(default="", validation_alias="S3_PUBLIC_URL")
+
+    # File Upload
+    MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10 MB
+    ALLOWED_IMAGE_TYPES: list[str] = ["image/jpeg", "image/png", "image/webp", "image/avif"]
+    MAX_IMAGES_PER_PROPERTY: int = 20
+
+    # Currency
+    DEFAULT_CURRENCY: str = "BYN"
+    SUPPORTED_CURRENCIES: list[str] = ["BYN", "USD"]
+    EXCHANGE_RATE_API_URL: str = "https://www.nbrb.by/api/exrates/rates/431"  # USD to BYN
+
+    # Pagination
+    DEFAULT_PAGE_SIZE: int = 20
+    MAX_PAGE_SIZE: int = 100
+
+    # CORS
+    CORS_ORIGINS: list[str] = ["*"]
+
+    # Rate Limiting
+    RATE_LIMIT_REQUESTS: int = 100
+    RATE_LIMIT_WINDOW: int = 60  # seconds
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
+
+
+settings = get_settings()
