@@ -6,6 +6,7 @@ import { MapPage } from '@/pages/MapPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { SearchPage } from '@/pages/SearchPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
+import { PropertyDetailPage } from '@/features/property-detail/components/PropertyDetailPage';
 
 export function App() {
   return (
@@ -13,6 +14,7 @@ export function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/catalog" replace />} />
         <Route path="/catalog" element={<CatalogPage />} />
+        <Route path="/property/:id" element={<PropertyDetailPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/map" element={<MapPage />} />
         <Route path="/favorites" element={<FavoritesPage />} />

@@ -1,21 +1,21 @@
 import { useHaptics } from '@/shared/lib/haptics';
+import { useNavigate } from 'react-router-dom';
 import { formatPriceByn, formatPricePerSqm, formatArea, formatRooms, formatFloor, formatDateShort } from '@/shared/lib/format';
 import type { PropertyShort } from '@/shared/api/types';
 
 interface PropertyCardProps {
   property: PropertyShort;
   onFavoriteToggle?: (propertyId: number, isFavorite: boolean) => void;
-  onPress?: (propertyId: number) => void;
   className?: string;
 }
 
 export function PropertyCard({
   property,
   onFavoriteToggle,
-  onPress,
   className = '',
 }: PropertyCardProps) {
   const { trigger } = useHaptics();
+  const navigate = useNavigate();
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -25,7 +25,7 @@ export function PropertyCard({
 
   const handlePress = () => {
     trigger('light');
-    onPress?.(property.id);
+    navigate(`/property/${property.id}`);
   };
 
   const hasPhoto = property.photo_url && property.photo_url.length > 0;

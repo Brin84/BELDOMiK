@@ -71,6 +71,7 @@ export interface PropertyShort {
   neighborhood_name?: string;
   street_name?: string;
   metro_station_name?: string;
+  metro_distance?: number;
   rooms?: number;
   rooms_count?: number;
   area?: number;
@@ -100,32 +101,55 @@ export interface PropertyShort {
   description?: string;
 }
 
-export interface PropertyDetail extends Omit<PropertyShort, 'price_usd'> {
-  description?: string;
-  address?: string;
-  floor?: number;
-  floors_total?: number;
-  build_year?: number;
-  repair_type?: string;
-  has_balcony?: boolean;
-  has_furniture?: boolean;
-  has_elevator?: boolean;
-  has_parking?: boolean;
-  latitude?: number;
-  longitude?: number;
-  photos: PropertyPhoto[];
-  owner: PropertyOwner;
-  price_per_sqm?: number;
-  price_usd?: number | null;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface PropertyPhoto {
   id: number;
+  property_id: number;
   url: string;
-  thumbnail_url: string;
+  thumbnail_url: string | null;
+  webp_url: string | null;
+  avif_url: string | null;
   sort_order: number;
+  width: number | null;
+  height: number | null;
+  file_size: number | null;
+  mime_type: string | null;
+  created_at: string;
+}
+
+export interface PropertyFeature {
+  id: number;
+  property_id: number;
+  feature_key: string;
+  feature_value: string;
+}
+
+export interface PropertyPrice {
+  id: number;
+  property_id: number;
+  price_byn: number;
+  price_usd: number | null;
+  price_per_m2_byn: number | null;
+  price_per_m2_usd: number | null;
+  exchange_rate: number | null;
+  change_reason: string | null;
+  is_current: boolean;
+  changed_at: string;
+}
+
+export interface PropertyDetail extends PropertyShort {
+  agency_id: number | null;
+  photos: PropertyPhoto[];
+  features: PropertyFeature[];
+  price_history: PropertyPrice[];
+  published_at: string | null;
+  living_area?: number | null;
+  kitchen_area?: number | null;
+  // Contact info (from backend)
+  phone?: string | null;
+  email?: string | null;
+  telegram?: string | null;
+  // Owner info (may be populated from separate endpoint)
+  owner?: PropertyOwner | null;
 }
 
 export interface PropertyOwner {

@@ -171,10 +171,6 @@ export function CatalogPage() {
               <PropertyCard
                 key={property.id}
                 property={property}
-                onPress={() => {
-                  hapticFeedback?.impactOccurred('light');
-                  // TODO: Navigate to PropertyDetail
-                }}
                 onFavoriteToggle={() => {
                   // TODO: Connect to favorites API
                 }}
@@ -227,10 +223,6 @@ export function CatalogPage() {
                 <PropertyCard
                   key={property.id}
                   property={property}
-                  onPress={() => {
-                    hapticFeedback?.impactOccurred('light');
-                    // TODO: Navigate to PropertyDetail
-                  }}
                   onFavoriteToggle={() => {
                     // TODO: Connect to favorites API
                   }}

@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { api, API_ENDPOINTS } from '@/shared/api';
-import type { PropertyShort, PropertyFilterParams, PaginatedResponse } from '@/shared/api/types';
+import type { PropertyShort, PropertyDetail, PropertyFilterParams, PaginatedResponse } from '@/shared/api/types';
 
 export interface PropertiesState {
   // Data
   properties: PropertyShort[];
   hotProperties: PropertyShort[];
+  propertyDetail: PropertyDetail | null;
 
   // Pagination
   page: number;
@@ -19,21 +20,26 @@ export interface PropertiesState {
   // UI State
   isLoading: boolean;
   isLoadingMore: boolean;
+  isLoadingDetail: boolean;
   error: string | null;
+  errorDetail: string | null;
   hasMore: boolean;
 
   // Request cancellation
   abortController: AbortController | null;
+  abortControllerDetail: AbortController | null;
 
   // Actions
   fetchProperties: (reset?: boolean) => Promise<void>;
   loadMore: () => Promise<void>;
+  fetchPropertyDetail: (id: number) => Promise<void>;
   setFilters: (filters: Partial<PropertyFilterParams>) => void;
   resetFilters: () => void;
   setOperation: (operationId: number | undefined) => void;
   setCity: (cityId: number | undefined) => void;
   refresh: () => Promise<void>;
   clearError: () => void;
+  clearPropertyDetail: () => void;
 }
 
 const defaultFilters: PropertyFilterParams = {
@@ -46,6 +52,7 @@ const defaultFilters: PropertyFilterParams = {
 export const usePropertiesStore = create<PropertiesState>((set, get) => ({
   properties: [],
   hotProperties: [],
+  propertyDetail: null,
 
   page: 1,
   pageSize: 20,
@@ -56,10 +63,13 @@ export const usePropertiesStore = create<PropertiesState>((set, get) => ({
 
   isLoading: false,
   isLoadingMore: false,
+  isLoadingDetail: false,
   error: null,
+  errorDetail: null,
   hasMore: true,
 
   abortController: null,
+  abortControllerDetail: null,
 
   fetchProperties: async (reset = false) => {
     const { filters, abortController } = get();
@@ -156,4 +166,33 @@ export const usePropertiesStore = create<PropertiesState>((set, get) => ({
   },
 
   clearError: () => set({ error: null }),
+
+  fetchPropertyDetail: async (id: number) => {
+    const { abortControllerDetail } = get();
+
+    // Cancel any in-flight detail request
+    if (abortControllerDetail) {
+      abortControllerDetail.abort();
+    }
+    const controller = new AbortController();
+    set({ abortControllerDetail: controller, isLoadingDetail: true, errorDetail: null, propertyDetail: null });
+
+    try {
+      const response = await api.get<PropertyDetail>(API_ENDPOINTS.properties.detail(id), undefined, {
+        signal: controller.signal,
+      });
+
+      if (controller.signal.aborted) return;
+
+      set({ propertyDetail: response, isLoadingDetail: false });
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return;
+      }
+      const message = error instanceof Error ? error.message : 'Failed to load property details';
+      set({ errorDetail: message, isLoadingDetail: false, propertyDetail: null });
+    }
+  },
+
+  clearPropertyDetail: () => set({ propertyDetail: null, errorDetail: null, isLoadingDetail: false }),
 }));
