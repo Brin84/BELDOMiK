@@ -40,6 +40,7 @@ class AuthError extends Error {
 
 interface RequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined | null>;
+  signal?: AbortSignal;
 }
 
 function buildUrl(path: string, params?: RequestOptions['params']): string {
@@ -113,12 +114,13 @@ class ApiClient {
   }
 
   async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-    const { params, headers, ...init } = options;
+    const { params, headers, signal, ...init } = options;
     const url = buildUrl(path, params);
 
     const makeRequest = async (): Promise<Response> => {
       return fetch(url, {
         ...init,
+        signal,
         headers: {
           'Content-Type': 'application/json',
           ...(this.getAccessToken() ? { Authorization: `Bearer ${this.getAccessToken()}` } : {}),
@@ -149,8 +151,8 @@ class ApiClient {
     return response.json() as Promise<T>;
   }
 
-  get<T>(path: string, params?: RequestOptions['params']): Promise<T> {
-    return this.request<T>(path, { method: 'GET', params });
+  get<T>(path: string, params?: RequestOptions['params'], options?: { signal?: AbortSignal }): Promise<T> {
+    return this.request<T>(path, { method: 'GET', params, signal: options?.signal });
   }
 
   post<T>(path: string, body?: unknown, params?: RequestOptions['params']): Promise<T> {

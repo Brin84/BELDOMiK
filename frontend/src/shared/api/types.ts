@@ -49,26 +49,58 @@ export interface PaginatedResponse<T> {
   items: T[];
   total: number;
   page: number;
-  size: number;
+  page_size: number;
   pages: number;
 }
 
 export interface PropertyShort {
   id: number;
-  title: string;
-  price: number;
+  title?: string;
+  price_byn: number | null;
+  price_usd: number | null;
+  price_per_m2_byn: number | null;
   currency: 'BYN' | 'USD' | 'RUB';
   operation: string;
+  operation_name: string;
   property_type: string;
+  type_name: string;
   city: string;
+  city_name: string;
   district?: string;
+  district_name?: string;
+  neighborhood_name?: string;
+  street_name?: string;
+  metro_station_name?: string;
   rooms?: number;
+  rooms_count?: number;
   area?: number;
+  total_area?: number;
+  floor?: number;
+  floors_total?: number;
+  total_floors?: number;
   photo_url?: string;
+  photo_count: number;
   status: PropertyStatus;
+  is_favorite: boolean;
+  favorites_count: number;
+  views_count: number;
+  created_at: string;
+  updated_at: string;
+  owner_id: number;
+  owner_name?: string;
+  // Additional fields from backend
+  latitude?: number;
+  longitude?: number;
+  build_year?: number;
+  renovation?: string;
+  furniture?: boolean;
+  balcony?: boolean;
+  parking?: boolean;
+  elevator?: boolean;
+  description?: string;
 }
 
-export interface PropertyDetail extends PropertyShort {
+export interface PropertyDetail extends Omit<PropertyShort, 'price_usd'> {
   description?: string;
   address?: string;
   floor?: number;
@@ -84,7 +116,7 @@ export interface PropertyDetail extends PropertyShort {
   photos: PropertyPhoto[];
   owner: PropertyOwner;
   price_per_sqm?: number;
-  price_usd?: number;
+  price_usd?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -110,20 +142,56 @@ export interface PropertyOwner {
 }
 
 export interface PropertyFilterParams {
-  operation?: string;
-  property_type?: string;
+  operation_id?: number;
+  type_id?: number;
+
   region_id?: number;
   city_id?: number;
-  district_ids?: number[];
-  metro_station_ids?: number[];
-  price_min?: number;
-  price_max?: number;
-  rooms?: number[];
-  area_min?: number;
-  area_max?: number;
-  sort_by?: 'date' | 'price_asc' | 'price_desc';
+  district_id?: number;
+  neighborhood_id?: number;
+  street_id?: number;
+  metro_station_id?: number;
+
+  rooms_count?: number;
+
+  total_area_min?: number;
+  total_area_max?: number;
+
+  price_byn_min?: number;
+  price_byn_max?: number;
+
+  floor_min?: number;
+  floor_max?: number;
+
+  total_floors_min?: number;
+  total_floors_max?: number;
+
+  build_year_min?: number;
+  build_year_max?: number;
+
+  renovation?: string;
+  furniture?: boolean;
+  balcony?: boolean;
+  parking?: boolean;
+  elevator?: boolean;
+
+  metro_distance_max?: number;
+
+  sort_by?:
+    | 'created_at'
+    | 'created_at_desc'
+    | 'price_byn'
+    | 'price_byn_desc'
+    | 'total_area'
+    | 'total_area_desc';
+
+  sort_order?: 'asc' | 'desc';
+
   page?: number;
-  size?: number;
+  page_size?: number;
+
+  with_photos_only?: boolean;
+  is_favorite_only?: boolean;
 }
 
 export interface PropertyCreate {
