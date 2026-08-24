@@ -1,12 +1,29 @@
+import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppShell } from '@/widgets/layout/AppShell';
 import { CatalogPage } from '@/pages/CatalogPage';
 import { FavoritesPage } from '@/pages/FavoritesPage';
-import { MapPage } from '@/pages/MapPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { SearchPage } from '@/pages/SearchPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { PropertyDetailPage } from '@/features/property-detail/components/PropertyDetailPage';
+
+// Lazy load MapPage for code splitting
+const MapPage = lazy(() => import('@/pages/MapPage').then(module => ({ default: module.MapPage })));
+
+function MapPageFallback() {
+  return (
+    <div className="flex items-center justify-center" style={{ height: 'calc(var(--tg-viewport-stable-height, 100vh))' }}>
+      <div className="text-center p-4">
+        <svg className="animate-spin mx-auto mb-3 h-8 w-8" viewBox="0 0 24 24" style={{ color: 'var(--tg-theme-hint-color)', opacity: 0.5 }}>
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+        </svg>
+        <p className="text-tg-hint text-sm">Загрузка карты...</p>
+      </div>
+    </div>
+  );
+}
 
 export function App() {
   return (
@@ -16,7 +33,11 @@ export function App() {
         <Route path="/catalog" element={<CatalogPage />} />
         <Route path="/property/:id" element={<PropertyDetailPage />} />
         <Route path="/search" element={<SearchPage />} />
-        <Route path="/map" element={<MapPage />} />
+        <Route path="/map" element={
+          <Suspense fallback={<MapPageFallback />}>
+            <MapPage />
+          </Suspense>
+        } />
         <Route path="/favorites" element={<FavoritesPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="*" element={<NotFoundPage />} />

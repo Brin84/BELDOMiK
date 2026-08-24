@@ -416,6 +416,7 @@ export function MapPage() {
             onZoomChange={handleZoomChange}
             darkMode={colorScheme === 'dark'}
             viewportStableHeight={viewportStableHeight || window.innerHeight}
+            onRetry={handleRetry}
           />
 
           {/* Map Controls */}

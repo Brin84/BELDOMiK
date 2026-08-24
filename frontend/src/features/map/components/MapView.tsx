@@ -4,6 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import Supercluster from 'supercluster';
 import { useHaptics } from '@/shared/lib/haptics';
 import type { PropertyShort } from '@/shared/api/types';
+import { MAP_CONFIG } from '../config';
 
 interface MapViewProps {
   properties: PropertyShort[];
@@ -15,6 +16,7 @@ interface MapViewProps {
   onZoomChange: (zoom: number) => void;
   darkMode: boolean;
   viewportStableHeight: number;
+  onRetry?: () => void;
 }
 
 export function MapView({
@@ -27,6 +29,7 @@ export function MapView({
   onZoomChange,
   darkMode,
   viewportStableHeight,
+  onRetry,
 }: MapViewProps) {
   const { trigger } = useHaptics();
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -38,14 +41,7 @@ export function MapView({
 
   // Create cluster index
   const clusterIndex = useMemo(() => {
-    const index = new Supercluster({
-      radius: 60,
-      maxZoom: 16,
-      minZoom: 0,
-      extent: 512,
-      nodeSize: 64,
-      log: false,
-    });
+    const index = new Supercluster(MAP_CONFIG.superclusterOptions);
 
     const points = properties
       .filter((p) => p.latitude !== undefined && p.longitude !== undefined)
@@ -73,9 +69,7 @@ export function MapView({
     try {
       const map = new maplibregl.Map({
         container: mapContainerRef.current,
-        style: darkMode
-          ? 'https://demotiles.maplibre.org/style.json'
-          : 'https://demotiles.maplibre.org/style.json',
+        style: darkMode ? MAP_CONFIG.darkStyleUrl : MAP_CONFIG.styleUrl,
         center,
         zoom,
         attributionControl: false,
@@ -100,8 +94,8 @@ export function MapView({
             features: [],
           },
           cluster: true,
-          clusterMaxZoom: 16,
-          clusterRadius: 60,
+          clusterMaxZoom: MAP_CONFIG.clusterMaxZoom,
+          clusterRadius: MAP_CONFIG.clusterRadius,
         });
 
         // Cluster circles
@@ -285,7 +279,7 @@ export function MapView({
         const markerId = `price-marker-${property.id}`;
         if (!map.hasImage(markerId)) {
           const canvas = document.createElement('canvas');
-          const size = 48;
+          const size = MAP_CONFIG.priceMarkerSize;
           canvas.width = size;
           canvas.height = size;
           const ctx = canvas.getContext('2d')!;
@@ -411,7 +405,20 @@ export function MapView({
             <circle cx="12" cy="12" r="3" />
           </svg>
           <p className="text-tg-text font-medium mb-1">{mapError}</p>
-          <p className="text-tg-hint text-sm">Попробуйте обновить страницу</p>
+          {onRetry ? (
+            <button
+              onClick={onRetry}
+              className="mt-3 px-4 py-2 rounded-xl font-medium transition-colors"
+              style={{
+                backgroundColor: 'var(--tg-theme-button-color)',
+                color: 'var(--tg-theme-button-text-color)',
+              }}
+            >
+              Повторить загрузку
+            </button>
+          ) : (
+            <p className="text-tg-hint text-sm">Попробуйте обновить страницу</p>
+          )}
         </div>
       </div>
     );
