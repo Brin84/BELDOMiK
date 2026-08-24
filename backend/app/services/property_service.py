@@ -2,7 +2,7 @@
 import logging
 from datetime import UTC, datetime
 
-from sqlalchemy import and_, func
+from sqlalchemy import and_, exists, func
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.geography import City, District, MetroStation, Neighborhood, Street
@@ -136,9 +136,9 @@ class PropertyService:
     def get_property(
         db: Session,
         property_id: int,
-        _user_id: int | None = None,
+        user_id: int | None = None,
     ) -> Property | None:
-        """Get property by ID with all relations."""
+        """Get property by ID with all relations and favorite status."""
         query = (
             db.query(Property)
             .options(
@@ -157,7 +157,21 @@ class PropertyService:
             )
             .filter(Property.id == property_id)
         )
-        return query.first()
+        property_obj = query.first()
+
+        # Add is_favorite attribute if user is authenticated
+        if property_obj and user_id:
+            from app.models.favorite import Favorite
+            from sqlalchemy import exists
+            property_obj.is_favorite = db.query(
+                exists().where(
+                    (Favorite.user_id == user_id) & (Favorite.property_id == property_id)
+                )
+            ).scalar()
+        elif property_obj:
+            property_obj.is_favorite = False
+
+        return property_obj
 
     @staticmethod
     def get_properties_for_list(
@@ -166,6 +180,15 @@ class PropertyService:
         user_id: int | None = None,
     ) -> tuple[list[Property], int]:
         """Get filtered properties for list view with optimized query."""
+        # Subquery for favorite check
+        fav_subq = None
+        if user_id:
+            fav_subq = (
+                db.query(Favorite.property_id)
+                .filter(Favorite.user_id == user_id)
+                .subquery()
+            )
+
         # Base query with joins for commonly needed fields
         query = (
             db.query(
@@ -182,6 +205,10 @@ class PropertyService:
                 MetroStation.name.label("metro_station_name"),
                 PropertyType.name.label("type_name"),
                 OperationType.name.label("operation_name"),
+                # is_favorite computed field
+                exists().where(
+                    and_(Favorite.user_id == user_id, Favorite.property_id == Property.id)
+                ).label("is_favorite") if user_id else False,
             )
             .outerjoin(PropertyPrice, and_(
                 PropertyPrice.property_id == Property.id,
@@ -358,7 +385,7 @@ class PropertyService:
                 operation_name=row[12],
                 owner_id=prop.owner_id,
                 owner_name=prop.owner.first_name if prop.owner else None,
-                is_favorite=False,  # TODO: implement if needed
+                is_favorite=row[13] if user_id else False,
             )
             items.append(item)
 

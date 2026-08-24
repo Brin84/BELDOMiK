@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
+import { useFavoritesStore } from '@/features/favorites';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { PropertyPhotoGallery } from '@/entities/property/components/PropertyPhotoGallery';
@@ -20,6 +21,7 @@ export function PropertyDetailPage() {
   const { trigger } = useHaptics();
   const { backButton, mainButton } = useTelegram();
   const { fetchPropertyDetail, propertyDetail, isLoadingDetail, errorDetail, clearPropertyDetail } = usePropertiesStore();
+  const { toggleFavorite } = useFavoritesStore();
 
   const propertyId = id ? parseInt(id, 10) : null;
 
@@ -151,8 +153,15 @@ export function PropertyDetailPage() {
         favoritesCount={property.favorites_count}
         propertyTitle={property.title || `Объявление #${property.id}`}
         propertyUrl={typeof window !== 'undefined' ? window.location.href : undefined}
-        onFavoriteToggle={async (_pid, _currentState) => {
-          // TODO: Implement when favorites API is available
+        onFavoriteToggle={async (propertyId, _currentState) => {
+          trigger('light');
+          try {
+            await toggleFavorite(propertyId);
+            // Refresh property detail to update is_favorite there too
+            await fetchPropertyDetail(propertyId);
+          } catch {
+            // Error already handled in store
+          }
         }}
       />
     </div>

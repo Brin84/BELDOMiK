@@ -49,7 +49,8 @@ def list_properties(
         sort_by=sort_by,
     )
 
-    return PropertyService.search_properties(db, filters, page, page_size)
+    user_id = current_user.id if current_user else None
+    return PropertyService.search_properties(db, filters, page, page_size, user_id)
 
 
 @router.get("/{property_id}", response_model=PropertyResponse)
@@ -59,7 +60,8 @@ def get_property(
     current_user: User | None = Depends(get_optional_user),
 ):
     """Get a single property by ID."""
-    property_obj = PropertyService.get_property(db, property_id, current_user)
+    user_id = current_user.id if current_user else None
+    property_obj = PropertyService.get_property(db, property_id, user_id)
     if not property_obj:
         raise HTTPException(status_code=404, detail="Property not found")
     return PropertyResponse.model_validate(property_obj)

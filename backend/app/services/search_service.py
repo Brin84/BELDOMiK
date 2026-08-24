@@ -1,9 +1,10 @@
 """Search service for map and advanced queries."""
 from typing import Any
 
-from sqlalchemy import func
+from sqlalchemy import and_, exists, func
 from sqlalchemy.orm import Session, joinedload
 
+from app.models.property import Favorite
 from app.models.geography import City
 from app.models.property import Property, PropertyPhoto, PropertyPrice
 from app.models.property_types import OperationType, PropertyType
@@ -21,6 +22,7 @@ class SearchService:
         lng_max: float,
         filters: dict[str, Any] | None = None,
         limit: int = 500,
+        user_id: int | None = None,
     ) -> list[dict[str, Any]]:
         """Get properties within bounding box for map display."""
         query = (
@@ -45,6 +47,10 @@ class SearchService:
                 City.name.label("city_name"),
                 PropertyType.name.label("type_name"),
                 OperationType.name.label("operation_name"),
+                # is_favorite computed field
+                exists().where(
+                    and_(Favorite.user_id == user_id, Favorite.property_id == Property.id)
+                ).label("is_favorite") if user_id else False,
             )
             .outerjoin(PropertyPrice, PropertyPrice.property_id == Property.id)
             .outerjoin(PropertyPhoto, PropertyPhoto.property_id == Property.id)
@@ -104,6 +110,7 @@ class SearchService:
                 "city_name": r.city_name,
                 "type_name": r.type_name,
                 "operation_name": r.operation_name,
+                "is_favorite": r.is_favorite if user_id else False,
             }
             for r in results
         ]

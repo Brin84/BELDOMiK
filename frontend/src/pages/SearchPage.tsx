@@ -4,6 +4,7 @@ import { useHaptics } from '@/shared/lib/haptics';
 import { useDebounce } from '@/shared/lib/hooks';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useGeographyStore } from '@/features/geography/geographyStore';
+import { useFavoritesStore } from '@/features/favorites';
 import { PropertyCard } from '@/entities/property';
 import { ListSkeleton, EmptyState, InlineError } from '@/shared/ui';
 import { FilterBottomSheet, ActiveFilterChips, SortSelector, QuickFilters } from '@/features/search/components';
@@ -34,6 +35,7 @@ export function SearchPage() {
     clearError,
     // fetchProperties is available but not used directly - filters trigger auto-fetch
   } = usePropertiesStore();
+  const { toggleFavorite } = useFavoritesStore();
   const {
     regions,
     neighborhoods,
@@ -261,11 +263,17 @@ export function SearchPage() {
 
   // Handle favorite toggle
   const handleFavoriteToggle = useCallback(
-    (_propertyId: number, _isFavorite: boolean) => {
+    async (propertyId: number, _isFavorite: boolean) => {
       trigger('light');
-      // TODO: Connect to favorites API when available
+      try {
+        await toggleFavorite(propertyId);
+        // Note: properties store will auto-refresh on filter changes,
+        // or user can pull-to-refresh
+      } catch {
+        // Error already handled in store
+      }
     },
-    [trigger]
+    [trigger, toggleFavorite]
   );
 
   // Handle load more

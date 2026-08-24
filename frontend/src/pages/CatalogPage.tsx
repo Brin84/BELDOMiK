@@ -1,11 +1,14 @@
 import { useEffect, useCallback } from 'react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
+import { useHaptics } from '@/shared/lib/haptics';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useGeographyStore } from '@/features/geography/geographyStore';
+import { useFavoritesStore } from '@/features/favorites';
 import { PropertyCard } from '@/entities/property';
 import { ListSkeleton, EmptyState, InlineError } from '@/shared/ui';
 
 export function CatalogPage() {
+  const { trigger } = useHaptics();
   const { backButton, mainButton, hapticFeedback } = useTelegram();
   const {
     properties,
@@ -23,6 +26,7 @@ export function CatalogPage() {
     clearError,
   } = usePropertiesStore();
   const { fetchRegions, getCityById } = useGeographyStore();
+  const { toggleFavorite } = useFavoritesStore();
 
   // Initialize on mount
   useEffect(() => {
@@ -171,8 +175,15 @@ export function CatalogPage() {
               <PropertyCard
                 key={property.id}
                 property={property}
-                onFavoriteToggle={() => {
-                  // TODO: Connect to favorites API
+                onFavoriteToggle={async (propertyId) => {
+                  trigger('light');
+                  try {
+                    await toggleFavorite(propertyId);
+                    // Refresh properties store to update is_favorite there too
+                    await fetchProperties(true);
+                  } catch {
+                    // Error already handled in store
+                  }
                 }}
               />
             ))}
@@ -223,8 +234,15 @@ export function CatalogPage() {
                 <PropertyCard
                   key={property.id}
                   property={property}
-                  onFavoriteToggle={() => {
-                    // TODO: Connect to favorites API
+                  onFavoriteToggle={async (propertyId) => {
+                    trigger('light');
+                    try {
+                      await toggleFavorite(propertyId);
+                      // Refresh properties store to update is_favorite there too
+                      await fetchProperties(true);
+                    } catch {
+                      // Error already handled in store
+                    }
                   }}
                 />
               ))}

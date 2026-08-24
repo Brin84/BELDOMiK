@@ -35,8 +35,9 @@ def search_map(
     if price_byn_max:
         filters["price_byn_max"] = price_byn_max
 
+    user_id = current_user.id if current_user else None
     results = SearchService.get_properties_for_map(
-        db, lat_min, lng_min, lat_max, lng_max, filters, limit
+        db, lat_min, lng_min, lat_max, lng_max, filters, limit, user_id
     )
     return {"properties": results, "count": len(results)}
 
