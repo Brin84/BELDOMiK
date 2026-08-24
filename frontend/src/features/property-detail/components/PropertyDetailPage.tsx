@@ -107,7 +107,7 @@ export function PropertyDetailPage() {
   const property = propertyDetail;
 
   return (
-    <div className="p-4 pb-28 space-y-4">
+    <div className="p-4 pb-28 space-y-4" style={{ paddingBottom: 'max(28px, env(safe-area-inset-bottom, 0px))' }}>
       {/* Photo Gallery */}
       <PropertyPhotoGallery photos={property.photos || []} />
 
@@ -151,9 +151,8 @@ export function PropertyDetailPage() {
         favoritesCount={property.favorites_count}
         propertyTitle={property.title || `Объявление #${property.id}`}
         propertyUrl={typeof window !== 'undefined' ? window.location.href : undefined}
-        onFavoriteToggle={async (pid, currentState) => {
+        onFavoriteToggle={async (_pid, _currentState) => {
           // TODO: Implement when favorites API is available
-          console.log('Toggle favorite:', pid, currentState);
         }}
       />
     </div>

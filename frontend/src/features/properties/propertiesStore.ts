@@ -36,7 +36,12 @@ export interface PropertiesState {
   setFilters: (filters: Partial<PropertyFilterParams>) => void;
   resetFilters: () => void;
   setOperation: (operationId: number | undefined) => void;
+  setRegion: (regionId: number | undefined) => void;
   setCity: (cityId: number | undefined) => void;
+  setDistrict: (districtId: number | undefined) => void;
+  setNeighborhood: (neighborhoodId: number | undefined) => void;
+  setStreet: (streetId: number | undefined) => void;
+  setMetroStation: (metroStationId: number | undefined) => void;
   refresh: () => Promise<void>;
   clearError: () => void;
   clearPropertyDetail: () => void;
@@ -47,6 +52,48 @@ const defaultFilters: PropertyFilterParams = {
   page_size: 20,
   sort_by: 'created_at_desc',
   sort_order: 'desc',
+};
+
+// Helper to create updated filters with cascade reset
+const withCascadeReset = (
+  filters: PropertyFilterParams,
+  updates: Partial<PropertyFilterParams>
+): PropertyFilterParams => {
+  const newFilters = { ...filters, ...updates };
+
+  // Cascade reset logic
+  // If region changes, reset everything below
+  if (updates.region_id !== undefined && updates.region_id !== filters.region_id) {
+    newFilters.city_id = undefined;
+    newFilters.district_id = undefined;
+    newFilters.neighborhood_id = undefined;
+    newFilters.street_id = undefined;
+    newFilters.metro_station_id = undefined;
+  }
+
+  // If city changes, reset everything below
+  if (updates.city_id !== undefined && updates.city_id !== filters.city_id) {
+    newFilters.district_id = undefined;
+    newFilters.neighborhood_id = undefined;
+    newFilters.street_id = undefined;
+    newFilters.metro_station_id = undefined;
+  }
+
+  // If district changes, reset neighborhood and street
+  if (updates.district_id !== undefined && updates.district_id !== filters.district_id) {
+    newFilters.neighborhood_id = undefined;
+    newFilters.street_id = undefined;
+  }
+
+  // If neighborhood changes, reset street
+  if (updates.neighborhood_id !== undefined && updates.neighborhood_id !== filters.neighborhood_id) {
+    newFilters.street_id = undefined;
+  }
+
+  // Metro station change does NOT reset other geography
+  // (it's a parallel filter, not hierarchical)
+
+  return newFilters;
 };
 
 export const usePropertiesStore = create<PropertiesState>((set, get) => ({
@@ -142,9 +189,9 @@ export const usePropertiesStore = create<PropertiesState>((set, get) => ({
   },
 
   setFilters: (newFilters: Partial<PropertyFilterParams>) => {
-    set((state) => ({
-      filters: { ...state.filters, ...newFilters, page: 1 },
-    }));
+    const { filters } = get();
+    const updatedFilters = withCascadeReset(filters, newFilters);
+    set({ filters: { ...updatedFilters, page: 1 } });
     get().fetchProperties(true);
   },
 
@@ -154,11 +201,53 @@ export const usePropertiesStore = create<PropertiesState>((set, get) => ({
   },
 
   setOperation: (operationId: number | undefined) => {
-    get().setFilters({ operation_id: operationId });
+    const { filters } = get();
+    const updatedFilters = withCascadeReset(filters, { operation_id: operationId });
+    set({ filters: { ...updatedFilters, page: 1 } });
+    get().fetchProperties(true);
+  },
+
+  setRegion: (regionId: number | undefined) => {
+    const { filters } = get();
+    const updatedFilters = withCascadeReset(filters, { region_id: regionId });
+    set({ filters: { ...updatedFilters, page: 1 } });
+    get().fetchProperties(true);
   },
 
   setCity: (cityId: number | undefined) => {
-    get().setFilters({ city_id: cityId, region_id: undefined });
+    const { filters } = get();
+    const updatedFilters = withCascadeReset(filters, { city_id: cityId });
+    set({ filters: { ...updatedFilters, page: 1 } });
+    get().fetchProperties(true);
+  },
+
+  setDistrict: (districtId: number | undefined) => {
+    const { filters } = get();
+    const updatedFilters = withCascadeReset(filters, { district_id: districtId });
+    set({ filters: { ...updatedFilters, page: 1 } });
+    get().fetchProperties(true);
+  },
+
+  setNeighborhood: (neighborhoodId: number | undefined) => {
+    const { filters } = get();
+    const updatedFilters = withCascadeReset(filters, { neighborhood_id: neighborhoodId });
+    set({ filters: { ...updatedFilters, page: 1 } });
+    get().fetchProperties(true);
+  },
+
+  setStreet: (streetId: number | undefined) => {
+    const { filters } = get();
+    const updatedFilters = withCascadeReset(filters, { street_id: streetId });
+    set({ filters: { ...updatedFilters, page: 1 } });
+    get().fetchProperties(true);
+  },
+
+  setMetroStation: (metroStationId: number | undefined) => {
+    const { filters } = get();
+    // Metro station doesn't cascade reset other geography
+    const updatedFilters = { ...filters, metro_station_id: metroStationId, page: 1 };
+    set({ filters: updatedFilters });
+    get().fetchProperties(true);
   },
 
   refresh: async () => {
