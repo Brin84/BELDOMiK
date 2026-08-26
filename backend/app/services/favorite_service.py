@@ -12,12 +12,12 @@ class FavoriteService:
 
     @staticmethod
     def add_favorite(db: Session, user_id: int, property_id: int) -> Favorite | None:
-        """Add property to favorites."""
+        """Add property to favorites atomically."""
         property_obj = db.query(Property).filter(Property.id == property_id).first()
         if not property_obj:
             return None
 
-        # Check if already favorited
+        # Check if already favorited first (avoids integrity error)
         existing = db.query(Favorite).filter(
             Favorite.user_id == user_id,
             Favorite.property_id == property_id,
@@ -28,16 +28,31 @@ class FavoriteService:
         favorite = Favorite(user_id=user_id, property_id=property_id)
         db.add(favorite)
 
-        # Increment counter
-        property_obj.favorites_count += 1
+        # Atomically increment counter using SQL
+        db.query(Property).filter(Property.id == property_id).update(
+            {Property.favorites_count: Property.favorites_count + 1},
+            synchronize_session=False
+        )
 
-        db.commit()
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+            # Check if it was a duplicate key error (race condition)
+            existing = db.query(Favorite).filter(
+                Favorite.user_id == user_id,
+                Favorite.property_id == property_id,
+            ).first()
+            if existing:
+                return existing
+            raise
+
         db.refresh(favorite)
         return favorite
 
     @staticmethod
     def remove_favorite(db: Session, user_id: int, property_id: int) -> bool:
-        """Remove property from favorites."""
+        """Remove property from favorites atomically."""
         favorite = db.query(Favorite).filter(
             Favorite.user_id == user_id,
             Favorite.property_id == property_id,
@@ -45,9 +60,16 @@ class FavoriteService:
         if not favorite:
             return False
 
-        property_obj = db.query(Property).filter(Property.id == property_id).first()
-        if property_obj:
-            property_obj.favorites_count = max(0, property_obj.favorites_count - 1)
+        # Atomically decrement counter using SQL (ensure it doesn't go below 0)
+        # Use CASE WHEN for SQLite compatibility
+        from sqlalchemy import case
+        db.query(Property).filter(Property.id == property_id).update(
+            {Property.favorites_count: case(
+                (Property.favorites_count > 0, Property.favorites_count - 1),
+                else_=0
+            )},
+            synchronize_session=False
+        )
 
         db.delete(favorite)
         db.commit()

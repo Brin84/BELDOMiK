@@ -19,6 +19,9 @@ export interface FavoritesState {
   isLoadingMore: boolean;
   error: string | null;
 
+  // Request deduplication
+  pendingRequests: Set<number>;
+
   // Actions
   fetchFavorites: (reset?: boolean) => Promise<void>;
   loadMore: () => Promise<void>;
@@ -46,12 +49,19 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
   isLoadingMore: false,
   error: null,
 
+  pendingRequests: new Set(),
+
   fetchFavorites: async (reset = false) => {
     const { pageSize, isLoading, isLoadingMore, hasMore } = get();
 
+    // Guard against concurrent requests
+    if (isLoading || isLoadingMore) {
+      return;
+    }
+
     if (reset) {
       set({ page: 1, favorites: [], hasMore: true, error: null });
-    } else if (isLoading || isLoadingMore || !hasMore) {
+    } else if (!hasMore) {
       return;
     }
 
@@ -101,7 +111,11 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
   },
 
   toggleFavorite: async (propertyId: number) => {
-    const { favoriteIds } = get();
+    const { favoriteIds, pendingRequests } = get();
+    // Request deduplication: skip if already processing
+    if (pendingRequests.has(propertyId)) {
+      return;
+    }
     const isFavorite = favoriteIds.has(propertyId);
 
     if (isFavorite) {
@@ -112,42 +126,94 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
   },
 
   addFavorite: async (propertyId: number) => {
+    // Request deduplication
+    const { pendingRequests } = get();
+    if (pendingRequests.has(propertyId)) {
+      return;
+    }
+
+    // Store previous state for rollback
+    const previousFavoriteIds = new Set(get().favoriteIds);
+    const previousFavorites = [...get().favorites];
+
+    // Mark as pending
+    set((state) => ({
+      pendingRequests: new Set([...state.pendingRequests, propertyId]),
+    }));
+
+    // Optimistically update local state BEFORE API call
+    set((state) => {
+      const newFavoriteIds = new Set(state.favoriteIds);
+      newFavoriteIds.add(propertyId);
+      return { favoriteIds: newFavoriteIds };
+    });
+
     try {
       await api.post(API_ENDPOINTS.favorites.add(propertyId));
-
-      // Optimistically update local state
-      set((state) => {
-        const newFavoriteIds = new Set(state.favoriteIds);
-        newFavoriteIds.add(propertyId);
-        return { favoriteIds: newFavoriteIds };
-      });
 
       // Refresh to get full property data
       await get().fetchFavoriteIds();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to add to favorites';
-      set({ error: message });
+      // Rollback optimistic update on error
+      set({
+        favoriteIds: previousFavoriteIds,
+        favorites: previousFavorites,
+        error: error instanceof Error ? error.message : 'Failed to add to favorites',
+      });
       throw error;
+    } finally {
+      // Clear pending request
+      set((state) => {
+        const newPending = new Set(state.pendingRequests);
+        newPending.delete(propertyId);
+        return { pendingRequests: newPending };
+      });
     }
   },
 
   removeFavorite: async (propertyId: number) => {
+    // Request deduplication
+    const { pendingRequests } = get();
+    if (pendingRequests.has(propertyId)) {
+      return;
+    }
+
+    // Store previous state for rollback
+    const previousFavoriteIds = new Set(get().favoriteIds);
+    const previousFavorites = [...get().favorites];
+
+    // Mark as pending
+    set((state) => ({
+      pendingRequests: new Set([...state.pendingRequests, propertyId]),
+    }));
+
+    // Optimistically update local state BEFORE API call
+    set((state) => {
+      const newFavoriteIds = new Set(state.favoriteIds);
+      newFavoriteIds.delete(propertyId);
+      const newFavorites = state.favorites.filter((f) => f.id !== propertyId);
+      return { favoriteIds: newFavoriteIds, favorites: newFavorites };
+    });
+
     try {
       await api.delete(API_ENDPOINTS.favorites.remove(propertyId));
 
-      // Optimistically update local state
-      set((state) => {
-        const newFavoriteIds = new Set(state.favoriteIds);
-        newFavoriteIds.delete(propertyId);
-        const newFavorites = state.favorites.filter((f) => f.id !== propertyId);
-        return { favoriteIds: newFavoriteIds, favorites: newFavorites };
-      });
-
       await get().fetchFavoriteIds();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to remove from favorites';
-      set({ error: message });
+      // Rollback optimistic update on error
+      set({
+        favoriteIds: previousFavoriteIds,
+        favorites: previousFavorites,
+        error: error instanceof Error ? error.message : 'Failed to remove from favorites',
+      });
       throw error;
+    } finally {
+      // Clear pending request
+      set((state) => {
+        const newPending = new Set(state.pendingRequests);
+        newPending.delete(propertyId);
+        return { pendingRequests: newPending };
+      });
     }
   },
 
