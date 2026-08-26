@@ -172,6 +172,7 @@ export const usePropertiesStore = create<PropertiesState>((set, get) => ({
       }
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
+        set({ isLoading: false, isLoadingMore: false });
         return; // Ignore aborted requests
       }
       const message = error instanceof Error ? error.message : 'Failed to load properties';
@@ -276,6 +277,7 @@ export const usePropertiesStore = create<PropertiesState>((set, get) => ({
       set({ propertyDetail: response, isLoadingDetail: false });
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
+        set({ isLoadingDetail: false });
         return;
       }
       const message = error instanceof Error ? error.message : 'Failed to load property details';
