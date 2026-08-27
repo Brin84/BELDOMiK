@@ -188,7 +188,10 @@ export function ProfilePage() {
               backgroundColor: 'var(--tg-theme-secondary-bg-color)',
               border: '2px dashed var(--tg-theme-hint-color)',
             }}
-            onClick={() => trigger('light')}
+            onClick={() => {
+              trigger('medium');
+              navigate('/create-listing');
+            }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-button-color)' }}>
               <line x1="12" y1="5" x2="12" y2="19" />
@@ -234,6 +237,26 @@ export function ProfilePage() {
       <section>
         <h2 className="text-tg-text text-lg font-semibold mb-3">Настройки</h2>
         <div className="space-y-3">
+          <button
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
+            style={{
+              backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+            }}
+            onClick={() => {
+              trigger('light');
+              navigate('/analytics');
+            }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
+            <span style={{ color: 'var(--tg-theme-text-color)' }}>📊 Аналитика рынка</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
           <button
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
             style={{

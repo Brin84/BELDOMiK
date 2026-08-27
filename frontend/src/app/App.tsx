@@ -7,6 +7,8 @@ import { ProfilePage } from '@/pages/ProfilePage';
 import { SearchPage } from '@/pages/SearchPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { PropertyDetailPage } from '@/features/property-detail/components/PropertyDetailPage';
+import { CreateListingPage } from '@/features/create-listing/components/CreateListingWizard';
+import { AnalyticsPage } from '@/pages/AnalyticsPage';
 
 // Lazy load MapPage for code splitting
 const MapPage = lazy(() => import('@/pages/MapPage').then(module => ({ default: module.MapPage })));
@@ -40,6 +42,8 @@ export function App() {
         } />
         <Route path="/favorites" element={<FavoritesPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/create-listing" element={<CreateListingPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AppShell>

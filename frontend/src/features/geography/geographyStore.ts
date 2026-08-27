@@ -35,6 +35,8 @@ export interface GeographyState {
   getRegionById: (id: number) => Region | undefined;
   getCityById: (id: number) => City | undefined;
   getDistrictById: (id: number) => District | undefined;
+  getNeighborhoodById: (id: number) => Neighborhood | undefined;
+  getStreetById: (id: number) => Street | undefined;
   getMetroStationById: (id: number) => MetroStation | undefined;
   getPropertyTypeById: (id: number) => PropertyType | undefined;
   getOperationTypeById: (id: number) => OperationTypeData | undefined;
@@ -147,6 +149,8 @@ export const useGeographyStore = create<GeographyState>((set, get) => ({
   getRegionById: (id: number) => get().regions.find((r) => r.id === id),
   getCityById: (id: number) => get().cities.find((c) => c.id === id),
   getDistrictById: (id: number) => get().districts.find((d) => d.id === id),
+  getNeighborhoodById: (id: number) => get().neighborhoods.find((n) => n.id === id),
+  getStreetById: (id: number) => get().streets.find((s) => s.id === id),
   getMetroStationById: (id: number) => get().metroStations.find((s) => s.id === id),
   getPropertyTypeById: (id: number) => get().propertyTypes.find((t) => t.id === id),
   getOperationTypeById: (id: number) => get().operationTypes.find((t) => t.id === id),

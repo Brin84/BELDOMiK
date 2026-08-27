@@ -14,6 +14,7 @@ import { PropertyLocation } from '@/entities/property/components/PropertyLocatio
 import { PropertyOwner } from '@/entities/property/components/PropertyOwner';
 import { PropertyContacts } from '@/entities/property/components/PropertyContacts';
 import { PropertyActions } from '@/entities/property/components/PropertyActions';
+import { PriceHistoryView } from '@/features/analytics/components/PriceHistoryView';
 
 export function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -164,6 +165,9 @@ export function PropertyDetailPage() {
           }
         }}
       />
+
+      {/* Price History */}
+      <PriceHistoryView propertyId={property.id} />
     </div>
   );
 }
