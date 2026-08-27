@@ -11,6 +11,7 @@ import { CreateListingPage } from '@/features/create-listing/components/CreateLi
 import { AnalyticsPage } from '@/pages/AnalyticsPage';
 import { MyListingsPage } from '@/features/my-listings/MyListingsPage';
 import { ComparisonPage } from '@/pages/ComparisonPage';
+import { ToastProvider } from '@/shared/ui/Toast';
 
 // Lazy load MapPage for code splitting
 const MapPage = lazy(() => import('@/pages/MapPage').then(module => ({ default: module.MapPage })));
@@ -31,8 +32,9 @@ function MapPageFallback() {
 
 export function App() {
   return (
-    <AppShell>
-      <Routes>
+    <ToastProvider>
+      <AppShell>
+        <Routes>
         <Route path="/" element={<Navigate to="/catalog" replace />} />
         <Route path="/catalog" element={<CatalogPage />} />
         <Route path="/property/:id" element={<PropertyDetailPage />} />
@@ -51,5 +53,6 @@ export function App() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AppShell>
+    </ToastProvider>
   );
 }

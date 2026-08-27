@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { formatPriceByn, formatPricePerSqm, formatArea, formatRooms, formatFloor, formatDateShort } from '@/shared/lib/format';
 import type { PropertyShort } from '@/shared/api/types';
 import { useComparisonStore } from '@/features/comparison/comparisonStore';
+import { useToast } from '@/shared/ui/Toast';
 
 interface PropertyCardProps {
   property: PropertyShort;
@@ -20,6 +21,7 @@ export function PropertyCard({
   const { trigger } = useHaptics();
   const navigate = useNavigate();
   const { addToComparison, removeFromComparison, isInComparison } = useComparisonStore();
+  const { showToast } = useToast();
 
   const inComparison = isInComparison(property.id);
 
@@ -34,11 +36,13 @@ export function PropertyCard({
     trigger('light');
     if (inComparison) {
       removeFromComparison(property.id);
+      showToast('Убрано из сравнения', 'info');
     } else {
       const added = addToComparison(property);
       if (!added) {
-        // Max reached - could show a toast here
-        trigger('error');
+        showToast('Максимум 4 объявления для сравнения', 'warning');
+      } else {
+        showToast('Добавлено к сравнению', 'success');
       }
     }
   };
