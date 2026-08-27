@@ -1,4 +1,13 @@
 """Test configuration and fixtures."""
+import os
+
+# Set test environment variables BEFORE importing app modules
+os.environ["TELEGRAM_BOT_TOKEN"] = "test_bot_token_12345:ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+os.environ["SECRET_KEY"] = "test-secret-key-for-testing-only"
+os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+os.environ["DATABASE_POOL_SIZE"] = "1"
+os.environ["DATABASE_MAX_OVERFLOW"] = "0"
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine

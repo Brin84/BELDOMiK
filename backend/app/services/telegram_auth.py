@@ -66,7 +66,7 @@ class TelegramAuthService:
         ).hexdigest()
 
         if not hmac.compare_digest(calculated_hash, received_hash):
-            logger.warning("Telegram init_data validation failed", received=received_hash[:8])
+            logger.warning("Telegram init_data validation failed, received=%s", received_hash[:8])
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid init_data signature",

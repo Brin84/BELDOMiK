@@ -155,10 +155,6 @@ class AuthService:
             user.username = tg_user_data["username"]
         if tg_user_data.get("language_code"):
             user.language_code = tg_user_data["language_code"]
-        if tg_user_data.get("is_premium") is not None:
-            user.is_premium = tg_user_data["is_premium"]
-        if tg_user_data.get("allows_write_to_pm") is not None:
-            user.allows_write_to_pm = tg_user_data["allows_write_to_pm"]
         user.is_active = True
 
         db.commit()

@@ -16,6 +16,12 @@ class UserBase(BaseSchema):
     role: str = "owner"
     is_active: bool = True
     is_blocked: bool = False
+    telegram_id: int | None = None
+
+    @property
+    def telegram_id_property(self) -> int:
+        """Alias for tg_id for frontend compatibility."""
+        return self.tg_id
 
 
 class UserCreate(BaseSchema):
@@ -40,6 +46,15 @@ class UserRead(UserBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    telegram_id: int
+
+    @classmethod
+    def model_validate(cls, obj):
+        data = obj if isinstance(obj, dict) else obj.__dict__
+        if 'tg_id' in data and 'telegram_id' not in data:
+            data = dict(data)
+            data['telegram_id'] = data['tg_id']
+        return super().model_validate(data)
 
 
 # Alias for backward compatibility with routes

@@ -34,12 +34,10 @@ def telegram_auth(
     user.last_name = user_data.get("last_name", user.last_name)
     user.username = user_data.get("username", user.username)
     user.language_code = user_data.get("language_code", user.language_code)
-    user.is_premium = user_data.get("is_premium", user.is_premium)
-    user.allows_write_to_pm = user_data.get("allows_write_to_pm", user.allows_write_to_pm)
     db.commit()
 
     # Create tokens
-    tokens = AuthService.create_tokens(user.id)
+    tokens = AuthService.create_tokens(user.id, user.tg_id)
 
     return TokenResponse(
         access_token=tokens["access_token"],
@@ -71,7 +69,7 @@ def refresh_token(
             detail="User not found",
         )
 
-    tokens = AuthService.create_tokens(user.id)
+    tokens = AuthService.create_tokens(user.id, user.tg_id)
     return RefreshTokenResponse(
         access_token=tokens["access_token"],
         refresh_token=tokens["refresh_token"],
