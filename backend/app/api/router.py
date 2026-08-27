@@ -12,6 +12,7 @@ from app.api.routes import (
     property_types,
     saved_searches,
     search,
+    webhook,
 )
 
 api_router = APIRouter(prefix="/api/v1")
@@ -26,3 +27,4 @@ api_router.include_router(search.router)
 api_router.include_router(moderation.router)
 api_router.include_router(monetization.router)
 api_router.include_router(analytics.router)
+api_router.include_router(webhook.router)

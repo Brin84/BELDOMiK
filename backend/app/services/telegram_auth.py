@@ -115,5 +115,8 @@ class TelegramAuthService:
     @staticmethod
     def verify_webhook_secret(secret: str) -> bool:
         """Verify webhook secret for secure webhook calls from Telegram."""
-        expected = settings.TELEGRAM_BOT_TOKEN
+        expected = settings.TELEGRAM_WEBHOOK_SECRET
+        if not expected:
+            # Fallback to bot token if webhook secret not set
+            expected = settings.TELEGRAM_BOT_TOKEN
         return hmac.compare_digest(secret, expected)

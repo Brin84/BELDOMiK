@@ -46,6 +46,7 @@ class Settings(BaseSettings):
         default="BELDOMiK_BOT", validation_alias="TELEGRAM_BOT_USERNAME"
     )
     TELEGRAM_WEBAPP_URL: str = Field(default="", validation_alias="TELEGRAM_WEBAPP_URL")
+    TELEGRAM_WEBHOOK_SECRET: str = Field(default="", validation_alias="TELEGRAM_WEBHOOK_SECRET")
 
     # Object Storage (S3-compatible)
     S3_ENDPOINT_URL: str = Field(default="", validation_alias="S3_ENDPOINT_URL")
