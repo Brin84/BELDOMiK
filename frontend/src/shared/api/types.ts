@@ -332,12 +332,26 @@ export interface Favorite {
 export interface SavedSearch {
   id: number;
   user_id: number;
-  name: string;
-  filters: PropertyFilterParams;
-  notify_enabled: boolean;
-  notify_frequency: 'immediate' | 'daily' | 'disabled';
+  name: string | null;
+  filters_json: string;
+  notify_frequency: 'immediate' | 'daily' | 'weekly' | 'disabled';
+  is_active: boolean;
+  last_notified_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface SavedSearchCreate {
+  name?: string;
+  filters_json: string;
+  notify_frequency?: 'immediate' | 'daily' | 'weekly' | 'disabled';
+}
+
+export interface SavedSearchUpdate {
+  name?: string | null;
+  filters_json?: string;
+  notify_frequency?: 'immediate' | 'daily' | 'weekly' | 'disabled';
+  is_active?: boolean;
 }
 
 export interface Promotion {
