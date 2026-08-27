@@ -2,13 +2,32 @@ import { useTelegram } from '@/app/providers/TelegramProvider';
 import { EmptyState } from '@/shared/ui';
 import { useAuthStore } from '@/features/auth';
 import { useHaptics } from '@/shared/lib/haptics';
+import { useNavigate } from 'react-router-dom';
+import { SavedSearchList } from '@/features/saved-searches/components';
 import type { UserRole } from '@/shared/api';
 
 export function ProfilePage() {
   const { user, status, logout } = useAuthStore();
   const { mainButton } = useTelegram();
   const { trigger } = useHaptics();
+  const navigate = useNavigate();
   const isAuthenticated = status === 'authenticated' && user;
+
+  const handleApplySavedSearch = (filtersJson: string) => {
+    trigger('selection');
+    // Navigate to search page with filters applied
+    // We'll encode the filters in the URL or use sessionStorage
+    sessionStorage.setItem('applySavedSearchFilters', filtersJson);
+    navigate('/search');
+  };
+
+  const handleEditSavedSearch = (savedSearch: { id: number; name: string | null; filters_json: string; notify_frequency: string }) => {
+    trigger('light');
+    // For now, we'll navigate to search page with the filters pre-filled
+    // A more complete implementation would open a modal
+    sessionStorage.setItem('editSavedSearch', JSON.stringify(savedSearch));
+    navigate('/search');
+  };
 
   if (!isAuthenticated) {
     return (
@@ -188,33 +207,28 @@ export function ProfilePage() {
             style={{
               backgroundColor: 'var(--tg-theme-secondary-bg-color)',
             }}
-            onClick={() => trigger('light')}
+            onClick={() => {
+              trigger('light');
+              navigate('/favorites');
+            }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
-            <span style={{ color: 'var(--tg-theme-text-color)' }}>❤️ Избранное ({0})</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-          <button
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
-            style={{
-              backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-            }}
-            onClick={() => trigger('light')}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <span style={{ color: 'var(--tg-theme-text-color)' }}>🔔 Сохранённые поиски ({0})</span>
+            <span style={{ color: 'var(--tg-theme-text-color)' }}>❤️ Избранное</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
         </div>
+      </section>
+
+      <section>
+        <h2 className="text-tg-text text-lg font-semibold mb-3">🔔 Сохранённые поиски</h2>
+        <SavedSearchList
+          onApplySearch={handleApplySavedSearch}
+          onEditSearch={handleEditSavedSearch}
+        />
       </section>
 
       <section>

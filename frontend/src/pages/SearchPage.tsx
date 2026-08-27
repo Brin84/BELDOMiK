@@ -8,6 +8,7 @@ import { useFavoritesStore } from '@/features/favorites';
 import { PropertyCard } from '@/entities/property';
 import { ListSkeleton, EmptyState, InlineError } from '@/shared/ui';
 import { FilterBottomSheet, ActiveFilterChips, SortSelector, QuickFilters } from '@/features/search/components';
+import { SavedSearchForm } from '@/features/saved-searches/components';
 import { formatPriceByn, formatArea } from '@/shared/lib/format';
 import type { PropertyFilterParams } from '@/shared/api/types';
 
@@ -60,6 +61,39 @@ export function SearchPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
   const [filterBottomSheetOpen, setFilterBottomSheetOpen] = useState(false);
+  const [saveSearchModalOpen, setSaveSearchModalOpen] = useState(false);
+
+  // Apply saved search filters from sessionStorage on mount
+  useEffect(() => {
+    const savedFilters = sessionStorage.getItem('applySavedSearchFilters');
+    const editSavedSearch = sessionStorage.getItem('editSavedSearch');
+
+    if (savedFilters) {
+      try {
+        const filtersObj = JSON.parse(savedFilters);
+        setFilters(filtersObj);
+        trigger('selection');
+      } catch {
+        console.error('Failed to parse saved search filters');
+      } finally {
+        sessionStorage.removeItem('applySavedSearchFilters');
+      }
+    }
+
+    if (editSavedSearch) {
+      try {
+        const savedSearch = JSON.parse(editSavedSearch);
+        const filtersObj = JSON.parse(savedSearch.filters_json);
+        setFilters(filtersObj);
+        setSaveSearchModalOpen(true);
+        trigger('selection');
+      } catch {
+        console.error('Failed to parse edit saved search');
+      } finally {
+        sessionStorage.removeItem('editSavedSearch');
+      }
+    }
+  }, [setFilters, trigger]);
 
   // Load geography data on mount
   useEffect(() => {
@@ -464,6 +498,29 @@ export function SearchPage() {
         getFilterLabel={getFilterLabel}
       />
 
+      {/* Save Search Button */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => {
+            trigger('light');
+            setSaveSearchModalOpen(true);
+          }}
+          className="w-full py-3 px-4 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+          style={{
+            backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+            border: '1px solid var(--tg-theme-hint-color)',
+            color: 'var(--tg-theme-text-color)',
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" />
+            <polyline points="7 3 7 8 15 8" />
+          </svg>
+          Сохранить текущий поиск
+        </button>
+      </div>
+
       {/* Error State */}
       {error && <InlineError message={error} onDismiss={clearError} />}
 
@@ -568,6 +625,14 @@ export function SearchPage() {
         onReset={handleResetAll}
         hasActiveFilters={hasActiveFilters}
       />
+
+      {/* Save Search Modal */}
+      {saveSearchModalOpen && (
+        <SavedSearchForm
+          onClose={() => setSaveSearchModalOpen(false)}
+          onSuccess={() => setSaveSearchModalOpen(false)}
+        />
+      )}
 
       {/* Footer info */}
       <p className="text-center text-tg-hint text-sm pt-8" style={{ color: 'var(--tg-theme-hint-color)' }}>
