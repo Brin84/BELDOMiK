@@ -278,7 +278,6 @@ class TestTelegramWebAppAuth:
 
     def test_refresh_token_expired(self, client, db_session: Session):
         """Test refresh with expired token returns 401."""
-        from app.services.auth import AuthService
 
         # Create a user first
         user = User(tg_id=111222333, username="refreshuser", first_name="Refresh")
@@ -286,8 +285,9 @@ class TestTelegramWebAppAuth:
         db_session.commit()
 
         # Generate expired refresh token
-        from jose import jwt
         from datetime import UTC, datetime, timedelta
+
+        from jose import jwt
 
         expire = datetime.now(UTC) - timedelta(days=1)  # Expired yesterday
         payload = {

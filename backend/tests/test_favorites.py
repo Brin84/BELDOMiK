@@ -3,7 +3,7 @@ import pytest
 from sqlalchemy.orm import Session
 
 from app.models.geography import City, Region
-from app.models.property import Favorite, Property, PropertyPrice, PropertyStatus
+from app.models.property import Property, PropertyPrice, PropertyStatus
 from app.models.property_types import OperationType, PropertyType
 from app.models.user import User
 from app.services.favorite_service import FavoriteService
@@ -133,9 +133,13 @@ class TestFavoriteService:
         db_session.refresh(test_property)
         assert test_property.favorites_count == 0
 
-    def test_remove_favorite_not_exists(self, db_session: Session, test_user: User, test_property: Property):
+    def test_remove_favorite_not_exists(
+        self, db_session: Session, test_user: User, test_property: Property
+    ):
         """Test removing non-existent favorite returns False."""
-        success = FavoriteService.remove_favorite(db_session, test_user.id, test_property.id)
+        success = FavoriteService.remove_favorite(
+            db_session, test_user.id, test_property.id
+        )
         assert success is False
 
     def test_remove_favorite_does_not_go_negative(
@@ -232,12 +236,16 @@ class TestFavoriteService:
             FavoriteService.add_favorite(db_session, test_user.id, prop.id)
 
         # Test first page
-        favorites, total = FavoriteService.get_user_favorites(db_session, test_user.id, page=1, page_size=2)
+        favorites, total = FavoriteService.get_user_favorites(
+            db_session, test_user.id, page=1, page_size=2
+        )
         assert total == 4
         assert len(favorites) == 2
 
         # Test second page
-        favorites, total = FavoriteService.get_user_favorites(db_session, test_user.id, page=2, page_size=2)
+        favorites, total = FavoriteService.get_user_favorites(
+            db_session, test_user.id, page=2, page_size=2
+        )
         assert total == 4
         assert len(favorites) == 2
 

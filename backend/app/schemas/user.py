@@ -49,7 +49,7 @@ class UserRead(UserBase):
     telegram_id: int
 
     @classmethod
-    def model_validate(cls, obj):
+    def model_validate(cls, obj: dict | object) -> "UserRead":
         data = obj if isinstance(obj, dict) else obj.__dict__
         if 'tg_id' in data and 'telegram_id' not in data:
             data = dict(data)

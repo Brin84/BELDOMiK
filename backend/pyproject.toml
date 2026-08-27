@@ -60,7 +60,7 @@ select = ["E", "F", "I", "UP", "B", "C4", "ANN", "ARG", "PTH", "TID", "TRY", "SI
 ignore = ["ANN101", "ANN102", "ANN201", "ANN202", "ARG001", "ARG002", "B008", "RUF012", "TRY003"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101", "S106"]
+"tests/*" = ["S101", "S106", "ANN001", "ANN002", "ANN003"]
 "alembic/*" = ["S101", "S106"]
 # E712: сравнение колонок SQLAlchemy с True/False — требуемый синтаксис ORM.
 "app/services/*" = ["E712"]

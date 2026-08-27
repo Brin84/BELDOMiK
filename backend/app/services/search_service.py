@@ -4,9 +4,8 @@ from typing import Any
 from sqlalchemy import and_, exists, func
 from sqlalchemy.orm import Session, joinedload
 
-from app.models.property import Favorite
 from app.models.geography import City
-from app.models.property import Property, PropertyPhoto, PropertyPrice
+from app.models.property import Favorite, Property, PropertyPhoto, PropertyPrice
 from app.models.property_types import OperationType, PropertyType
 
 

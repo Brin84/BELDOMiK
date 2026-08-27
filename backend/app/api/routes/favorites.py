@@ -119,7 +119,13 @@ def list_favorites(
         ))
 
     pages = (total + page_size - 1) // page_size
-    return FavoritesListResponse(items=items, total=total, page=page, page_size=page_size, pages=pages)
+    return FavoritesListResponse(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size,
+        pages=pages,
+    )
 
 
 @router.get("/check/{property_id}")
