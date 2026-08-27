@@ -180,6 +180,44 @@ class ApiClient {
   delete<T>(path: string): Promise<T> {
     return this.request<T>(path, { method: 'DELETE' });
   }
+
+  // Multipart form data upload (for file uploads)
+  async postFormData<T>(path: string, formData: FormData): Promise<T> {
+    const url = buildUrl(path);
+
+    const makeRequest = async (): Promise<Response> => {
+      return fetch(url, {
+        method: 'POST',
+        signal: undefined,
+        headers: {
+          ...(this.getAccessToken() ? { Authorization: `Bearer ${this.getAccessToken()}` } : {}),
+          // Don't set Content-Type for FormData - browser sets it with boundary
+        },
+        body: formData,
+      });
+    };
+
+    let response = await makeRequest();
+
+    if (response.status === 401 && this.getRefreshToken() && path !== API_ENDPOINTS.auth.refresh) {
+      const refreshed = await this.doRefresh();
+      if (refreshed) {
+        response = await makeRequest();
+      } else {
+        throw new AuthError();
+      }
+    }
+
+    if (!response.ok) {
+      throw await ApiError.fromResponse(response);
+    }
+
+    if (response.status === 204) {
+      return undefined as T;
+    }
+
+    return response.json() as Promise<T>;
+  }
 }
 
 export const api = new ApiClient();

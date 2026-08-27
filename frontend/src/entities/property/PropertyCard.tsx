@@ -2,25 +2,45 @@ import { useHaptics } from '@/shared/lib/haptics';
 import { useNavigate } from 'react-router-dom';
 import { formatPriceByn, formatPricePerSqm, formatArea, formatRooms, formatFloor, formatDateShort } from '@/shared/lib/format';
 import type { PropertyShort } from '@/shared/api/types';
+import { useComparisonStore } from '@/features/comparison/comparisonStore';
 
 interface PropertyCardProps {
   property: PropertyShort;
   onFavoriteToggle?: (propertyId: number, isFavorite: boolean) => void;
+  showComparisonButton?: boolean;
   className?: string;
 }
 
 export function PropertyCard({
   property,
   onFavoriteToggle,
+  showComparisonButton = true,
   className = '',
 }: PropertyCardProps) {
   const { trigger } = useHaptics();
   const navigate = useNavigate();
+  const { addToComparison, removeFromComparison, isInComparison } = useComparisonStore();
+
+  const inComparison = isInComparison(property.id);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     trigger('light');
     onFavoriteToggle?.(property.id, !property.is_favorite);
+  };
+
+  const handleComparisonClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    trigger('light');
+    if (inComparison) {
+      removeFromComparison(property.id);
+    } else {
+      const added = addToComparison(property);
+      if (!added) {
+        // Max reached - could show a toast here
+        trigger('error');
+      }
+    }
   };
 
   const handlePress = () => {
@@ -128,6 +148,38 @@ export function PropertyCard({
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
               </svg>
             </button>
+
+            {/* Comparison button */}
+            {showComparisonButton && (
+              <button
+                onClick={handleComparisonClick}
+                className="absolute top-2 right-2 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200"
+                style={{
+                  backgroundColor: inComparison
+                    ? 'rgba(0, 122, 255, 0.9)'
+                    : 'rgba(255, 255, 255, 0.9)',
+                  backdropFilter: 'blur(8px)',
+                }}
+                aria-label={inComparison ? 'Убрать из сравнения' : 'Добавить к сравнению'}
+                aria-pressed={inComparison}
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ color: inComparison ? 'white' : '#1a1a1a' }}
+                >
+                  <polyline points="4 14 10 20 20 4" />
+                  <line x1="14" y1="4" x2="14" y2="20" />
+                  <line x1="4" y1="10" x2="4" y2="20" />
+                </svg>
+              </button>
+            )}
           </>
         ) : (
           <div className="w-full h-full flex items-center justify-center">

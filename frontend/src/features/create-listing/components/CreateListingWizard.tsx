@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useAuthStore } from '@/features/auth';
@@ -16,6 +16,7 @@ export function CreateListingWizard() {
   const { backButton } = useTelegram();
   const { user, status } = useAuthStore();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     currentStep,
     setStep,
@@ -24,14 +25,28 @@ export function CreateListingWizard() {
     validateStep,
     validateAll,
     submit,
+    submitForModeration,
     reset,
+    loadDraft,
     isSubmitting,
+    draftId,
     error,
     canProceed,
     completionPercentage,
   } = useCreateListingStore();
 
   const isAuthenticated = status === 'authenticated' && user;
+
+  // Load draft from URL parameter on mount
+  useEffect(() => {
+    const draftParam = searchParams.get('draft');
+    if (draftParam) {
+      const draftId = parseInt(draftParam, 10);
+      if (!isNaN(draftId)) {
+        loadDraft(draftId);
+      }
+    }
+  }, [searchParams, loadDraft]);
 
   // Check auth on mount
   useEffect(() => {
@@ -74,7 +89,9 @@ export function CreateListingWizard() {
       return;
     }
 
-    const result = await submit();
+    // If editing existing draft, update it; otherwise create new
+    // Then submit for moderation
+    const result = draftId ? await submitForModeration() : await submit();
 
     if (result) {
       trigger('success');

@@ -1,4 +1,4 @@
-import type { PropertyDetail } from '@/shared/api/types';
+import type { PropertyDetail, PropertyStatus } from '@/shared/api/types';
 import {
   formatPriceByn,
   formatPricePerSqm,
@@ -7,6 +7,29 @@ import {
   formatFloor,
   formatDate,
 } from '@/shared/lib/format';
+
+const STATUS_LABELS: Record<PropertyStatus, { label: string; color: string; bg: string }> = {
+  draft: { label: 'Черновик', color: '#ff9500', bg: 'rgba(255, 149, 0, 0.1)' },
+  pending_moderation: { label: 'На модерации', color: '#007aff', bg: 'rgba(0, 122, 255, 0.1)' },
+  published: { label: 'Опубликовано', color: '#34c759', bg: 'rgba(52, 199, 89, 0.1)' },
+  rejected: { label: 'Отклонено', color: '#ff3b30', bg: 'rgba(255, 59, 48, 0.1)' },
+  blocked: { label: 'Заблокировано', color: '#ff3b30', bg: 'rgba(255, 59, 48, 0.1)' },
+  archived: { label: 'В архиве', color: '#8e8e93', bg: 'rgba(142, 142, 147, 0.1)' },
+  sold: { label: 'Продано', color: '#5856d6', bg: 'rgba(88, 86, 214, 0.1)' },
+  rented: { label: 'Сдано', color: '#5856d6', bg: 'rgba(88, 86, 214, 0.1)' },
+};
+
+function StatusBadge({ status }: { status: PropertyStatus }) {
+  const config = STATUS_LABELS[status] || { label: status, color: '#8e8e93', bg: 'rgba(142, 142, 147, 0.1)' };
+  return (
+    <span
+      className="px-2 py-1 rounded-full text-xs font-medium"
+      style={{ backgroundColor: config.bg, color: config.color }}
+    >
+      {config.label}
+    </span>
+  );
+}
 
 interface PropertyInfoSectionProps {
   property: PropertyDetail;
@@ -22,16 +45,19 @@ export function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
 
   return (
     <section className="bg-tg-bg rounded-2xl p-4 space-y-4">
-      {/* Price */}
-      <div>
-        <div className="text-tg-text font-bold text-3xl leading-none">
-          {formatPriceByn(price, { compact: true })}
-        </div>
-        {pricePerSqm && (
-          <div className="text-tg-hint text-sm mt-1" style={{ color: 'var(--tg-theme-hint-color)' }}>
-            {formatPricePerSqm(pricePerSqm)}
+      {/* Price and Status */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1">
+          <div className="text-tg-text font-bold text-3xl leading-none">
+            {formatPriceByn(price, { compact: true })}
           </div>
-        )}
+          {pricePerSqm && (
+            <div className="text-tg-hint text-sm mt-1" style={{ color: 'var(--tg-theme-hint-color)' }}>
+              {formatPricePerSqm(pricePerSqm)}
+            </div>
+          )}
+        </div>
+        <StatusBadge status={property.status} />
       </div>
 
       {/* Operation and Type */}

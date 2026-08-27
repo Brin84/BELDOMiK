@@ -11,14 +11,24 @@ interface Step4PhotosProps {
 export function Step4Photos({ onNext, onPrev }: Step4PhotosProps) {
   const { trigger } = useHaptics();
   const { mainButton, backButton } = useTelegram();
-  const { currentStep } = useCreateListingStore();
+  const { currentStep, photos, addPhotos, removePhoto, reorderPhotos } = useCreateListingStore();
 
-  const [photos, setPhotos] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const MAX_PHOTOS = 20;
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+  // Sync previews with photos from store
+  useEffect(() => {
+    const newPreviews = photos.map(photo => URL.createObjectURL(photo));
+    // Clean up old previews
+    previews.forEach(p => URL.revokeObjectURL(p));
+    setPreviews(newPreviews);
+    return () => {
+      newPreviews.forEach(p => URL.revokeObjectURL(p));
+    };
+  }, [photos]);
 
   // Setup Telegram buttons
   useEffect(() => {
@@ -62,7 +72,6 @@ export function Step4Photos({ onNext, onPrev }: Step4PhotosProps) {
     trigger('selection');
     const newFiles = Array.from(files);
     const validFiles: File[] = [];
-    const newPreviews: string[] = [];
 
     for (const file of newFiles) {
       // Validate file type
@@ -87,12 +96,10 @@ export function Step4Photos({ onNext, onPrev }: Step4PhotosProps) {
       }
 
       validFiles.push(file);
-      newPreviews.push(URL.createObjectURL(file));
     }
 
     if (validFiles.length > 0) {
-      setPhotos((prev) => [...prev, ...validFiles]);
-      setPreviews((prev) => [...prev, ...newPreviews]);
+      addPhotos(validFiles);
     }
 
     // Reset input
@@ -101,26 +108,13 @@ export function Step4Photos({ onNext, onPrev }: Step4PhotosProps) {
     }
   };
 
-  const removePhoto = (index: number) => {
+  const handleRemovePhoto = (index: number) => {
     trigger('light');
-    URL.revokeObjectURL(previews[index]);
-    setPhotos((prev) => prev.filter((_, i) => i !== index));
-    setPreviews((prev) => prev.filter((_, i) => i !== index));
+    removePhoto(index);
   };
 
-  const reorderPhotos = (fromIndex: number, toIndex: number) => {
-    setPhotos((prev) => {
-      const newPhotos = [...prev];
-      const [removed] = newPhotos.splice(fromIndex, 1);
-      newPhotos.splice(toIndex, 0, removed);
-      return newPhotos;
-    });
-    setPreviews((prev) => {
-      const newPreviews = [...prev];
-      const [removed] = newPreviews.splice(fromIndex, 1);
-      newPreviews.splice(toIndex, 0, removed);
-      return newPreviews;
-    });
+  const handleReorderPhotos = (fromIndex: number, toIndex: number) => {
+    reorderPhotos(fromIndex, toIndex);
   };
 
   const openFilePicker = () => {
@@ -206,7 +200,7 @@ export function Step4Photos({ onNext, onPrev }: Step4PhotosProps) {
                 </div>
               )}
               <button
-                onClick={() => removePhoto(index)}
+                onClick={() => handleRemovePhoto(index)}
                 className="absolute top-2 right-2 p-1.5 rounded-full flex items-center justify-center transition-colors"
                 style={{ backgroundColor: 'rgba(255,59,48,0.9)', color: 'white' }}
                 aria-label="Удалить фото"
@@ -217,7 +211,7 @@ export function Step4Photos({ onNext, onPrev }: Step4PhotosProps) {
                 </svg>
               </button>
               <button
-                onClick={() => index > 0 && reorderPhotos(index, 0)}
+                onClick={() => index > 0 && handleReorderPhotos(index, 0)}
                 disabled={index === 0}
                 className="absolute bottom-2 left-2 p-1.5 rounded-full flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
                 style={{ backgroundColor: 'rgba(0,0,0,0.7)', color: 'white' }}

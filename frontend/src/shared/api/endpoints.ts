@@ -26,6 +26,7 @@ export const API_ENDPOINTS = {
     delete: (id: number) => `/api/v1/properties/${id}`,
     myProperties: '/api/v1/properties/user/my',
     photos: (id: number) => `/api/v1/properties/${id}/photos`,
+    photosUpload: (id: number) => `/api/v1/properties/${id}/photos/upload`,
     priceHistory: (id: number) => `/api/v1/properties/${id}/price`,
   },
   favorites: {
@@ -45,6 +46,9 @@ export const API_ENDPOINTS = {
   },
   search: {
     map: '/api/v1/search/map',
+    compare: '/api/v1/search/compare',
+  },
+  comparison: {
     compare: '/api/v1/search/compare',
   },
   moderation: {

@@ -66,9 +66,13 @@ export interface PropertyShort {
   type_name: string;
   city: string;
   city_name: string;
+  region?: string;
+  region_name?: string;
   district?: string;
   district_name?: string;
+  neighborhood?: string;
   neighborhood_name?: string;
+  street?: string;
   street_name?: string;
   metro_station_name?: string;
   metro_distance?: number;
@@ -99,6 +103,7 @@ export interface PropertyShort {
   parking?: boolean;
   elevator?: boolean;
   description?: string;
+  address?: string;
 }
 
 export interface PropertyPhoto {

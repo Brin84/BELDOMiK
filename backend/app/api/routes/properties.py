@@ -1,8 +1,9 @@
 """Property routes."""
-from fastapi import APIRouter, Body, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user, get_db, get_optional_user
+from app.core.config import settings
 from app.models.property import Property, PropertyPhoto, PropertyPrice
 from app.models.user import User
 from app.schemas.property import (
@@ -12,6 +13,7 @@ from app.schemas.property import (
     PropertyUpdate,
 )
 from app.services.property_service import PropertyListResponse, PropertyService
+from app.services.upload_service import upload_service
 
 router = APIRouter(prefix="/properties", tags=["Properties"])
 
@@ -92,6 +94,19 @@ def update_property(
     return PropertyResponse.model_validate(property_obj)
 
 
+@router.post("/{property_id}/submit", response_model=PropertyResponse)
+def submit_for_moderation(
+    property_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Submit property for moderation."""
+    property_obj = PropertyService.submit_for_moderation(db, property_id, current_user.id)
+    if not property_obj:
+        raise HTTPException(status_code=404, detail="Property not found, not owned, or cannot be submitted")
+    return PropertyResponse.model_validate(property_obj)
+
+
 @router.delete("/{property_id}")
 def delete_property(
     property_id: int,
@@ -123,7 +138,7 @@ def add_photo(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Add a photo to a property."""
+    """Add a photo to a property (URL-based)."""
     property_obj = db.query(Property).filter(Property.id == property_id).first()
     if not property_obj or property_obj.owner_id != current_user.id:
         raise HTTPException(status_code=404, detail="Property not found or not owned")
@@ -137,6 +152,51 @@ def add_photo(
     db.add(photo)
     db.commit()
     return {"message": "Photo added", "id": photo.id}
+
+
+@router.post("/{property_id}/photos/upload", response_model=dict)
+async def upload_photos(
+    property_id: int,
+    files: list[UploadFile] = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Upload multiple photos to a property (multipart form)."""
+    property_obj = db.query(Property).filter(Property.id == property_id).first()
+    if not property_obj or property_obj.owner_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Property not found or not owned")
+
+    if len(files) > settings.MAX_IMAGES_PER_PROPERTY:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Maximum {settings.MAX_IMAGES_PER_PROPERTY} images allowed per property",
+        )
+
+    uploaded_photos = []
+    for index, file in enumerate(files):
+        # Validate and upload
+        success, url, error = await upload_service.upload_upload_file(file, property_id)
+        if not success:
+            raise HTTPException(status_code=400, detail=error or "Upload failed")
+
+        # Determine if this is the main photo (first one if no main exists)
+        existing_main = db.query(PropertyPhoto).filter(
+            PropertyPhoto.property_id == property_id,
+            PropertyPhoto.is_main == True,
+        ).first()
+        is_main = not existing_main and index == 0
+
+        photo = PropertyPhoto(
+            property_id=property_id,
+            url=url,
+            is_main=is_main,
+            sort_order=index,
+        )
+        db.add(photo)
+        uploaded_photos.append({"id": photo.id, "url": url, "is_main": is_main})
+
+    db.commit()
+    return {"message": f"Uploaded {len(uploaded_photos)} photos", "photos": uploaded_photos}
 
 
 @router.post("/{property_id}/price", response_model=dict)

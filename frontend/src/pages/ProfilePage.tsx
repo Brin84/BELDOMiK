@@ -136,48 +136,17 @@ export function ProfilePage() {
             style={{
               backgroundColor: 'var(--tg-theme-secondary-bg-color)',
             }}
-            onClick={() => trigger('light')}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-              <path d="M3 9h18" />
-              <path d="M9 21V9" />
-            </svg>
-            <span style={{ color: 'var(--tg-theme-text-color)' }}>Активные ({0})</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-          <button
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
-            style={{
-              backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+            onClick={() => {
+              trigger('medium');
+              navigate('/my-listings');
             }}
-            onClick={() => trigger('light')}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
               <path d="M3 9h18" />
               <path d="M9 21V9" />
             </svg>
-            <span style={{ color: 'var(--tg-theme-text-color)' }}>На модерации ({0})</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-          <button
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
-            style={{
-              backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-            }}
-            onClick={() => trigger('light')}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-              <path d="M3 9h18" />
-              <path d="M9 21V9" />
-            </svg>
-            <span style={{ color: 'var(--tg-theme-text-color)' }}>Архив ({0})</span>
+            <span style={{ color: 'var(--tg-theme-text-color)' }}>Все мои объявления</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
