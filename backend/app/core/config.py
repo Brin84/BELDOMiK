@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     APP_VERSION: str = "0.1.0"
     DEBUG: bool = False
     ENVIRONMENT: str = "development"
+    DEV_MODE: bool = False
 
     # API
     API_V1_PREFIX: str = "/api/v1"
@@ -25,11 +26,16 @@ class Settings(BaseSettings):
 
     # Database
     DATABASE_URL: str = Field(
-        default="postgresql+psycopg2://postgres:postgres@localhost:5432/beldomik",
+        default="postgresql+psycopg://postgres:postgres@localhost:5432/beldomik",
         validation_alias="DATABASE_URL",
     )
-    DATABASE_POOL_SIZE: int = 10
-    DATABASE_MAX_OVERFLOW: int = 20
+    DATABASE_POOL_SIZE: int = 5
+    DATABASE_MAX_OVERFLOW: int = 10
+
+    # Public URLs (used for SPA, webhook and links)
+    FRONTEND_URL: str = Field(default="", validation_alias="FRONTEND_URL")
+    BACKEND_PUBLIC_URL: str = Field(default="", validation_alias="BACKEND_PUBLIC_URL")
+    CHANNEL_URL: str = Field(default="", validation_alias="CHANNEL_URL")
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
@@ -47,6 +53,9 @@ class Settings(BaseSettings):
     )
     TELEGRAM_WEBAPP_URL: str = Field(default="", validation_alias="TELEGRAM_WEBAPP_URL")
     TELEGRAM_WEBHOOK_SECRET: str = Field(default="", validation_alias="TELEGRAM_WEBHOOK_SECRET")
+
+    # Admin Telegram IDs (auto-assigned admin role on first login)
+    ADMIN_IDS: list[int] = []
 
     # Object Storage (S3-compatible)
     S3_ENDPOINT_URL: str = Field(default="", validation_alias="S3_ENDPOINT_URL")

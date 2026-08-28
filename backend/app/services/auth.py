@@ -116,6 +116,7 @@ class AuthService:
         Returns (user, is_new).
         """
         tg_id = int(tg_user_data["id"])
+        is_admin = tg_id in settings.ADMIN_IDS
 
         user = db.query(User).filter(User.tg_id == tg_id).first()
 
@@ -129,7 +130,7 @@ class AuthService:
                 language_code=tg_user_data.get("language_code"),
                 is_bot=tg_user_data.get("is_bot", False),
                 tg_verified=True,
-                role="owner",
+                role="admin" if is_admin else "owner",
                 is_active=True,
                 is_blocked=False,
             )
@@ -143,7 +144,7 @@ class AuthService:
             db.add(profile)
             db.commit()
 
-            logger.info("New user created", user_id=user.id, tg_id=tg_id)
+            logger.info("New user created", user_id=user.id, tg_id=tg_id, role=user.role)
             return user, True
 
         # Update existing user data (name can change)
@@ -156,6 +157,10 @@ class AuthService:
         if tg_user_data.get("language_code"):
             user.language_code = tg_user_data["language_code"]
         user.is_active = True
+
+        # Promote to admin if listed in ADMIN_IDS (idempotent)
+        if is_admin and user.role != "admin":
+            user.role = "admin"
 
         db.commit()
         return user, False

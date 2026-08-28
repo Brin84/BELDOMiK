@@ -116,7 +116,7 @@ async def set_webhook():
             detail="Telegram bot token not configured",
         )
 
-    webhook_url = f"{settings.TELEGRAM_WEBAPP_URL.rstrip('/')}/api/v1/webhook/telegram"
+    webhook_url = f"{settings.BACKEND_PUBLIC_URL.rstrip('/')}/api/v1/webhook/telegram"
     secret_token = settings.TELEGRAM_WEBHOOK_SECRET or settings.TELEGRAM_BOT_TOKEN
 
     import httpx

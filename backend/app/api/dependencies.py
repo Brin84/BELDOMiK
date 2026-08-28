@@ -75,7 +75,7 @@ def get_admin_user(
     current_user: User = Depends(get_current_user),
 ) -> User:
     """Require admin role."""
-    if not current_user.is_admin:
+    if current_user.role not in ("admin", "moderator"):
         raise HTTPException(status_code=403, detail="Admin access required")
     return current_user
 
@@ -84,7 +84,7 @@ def get_moderator_user(
     current_user: User = Depends(get_current_user),
 ) -> User:
     """Require moderator or admin role."""
-    if not current_user.is_moderator and not current_user.is_admin:
+    if current_user.role not in ("admin", "moderator"):
         raise HTTPException(status_code=403, detail="Moderator access required")
     return current_user
 
