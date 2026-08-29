@@ -6,6 +6,7 @@ from app.api.routes import (
     auth,
     favorites,
     geography,
+    internal,
     moderation,
     monetization,
     properties,
@@ -28,3 +29,4 @@ api_router.include_router(moderation.router)
 api_router.include_router(monetization.router)
 api_router.include_router(analytics.router)
 api_router.include_router(webhook.router)
+api_router.include_router(internal.router)

@@ -86,6 +86,9 @@ class Settings(BaseSettings):
     RATE_LIMIT_REQUESTS: int = 100
     RATE_LIMIT_WINDOW: int = 60  # seconds
 
+    # Scheduler (Cloud Scheduler keep-alive)
+    SCHEDULER_SECRET: str = Field(default="", validation_alias="SCHEDULER_SECRET")
+
 
 @lru_cache
 def get_settings() -> Settings:

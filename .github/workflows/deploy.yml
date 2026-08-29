@@ -111,10 +111,56 @@ jobs:
             --set-secrets=S3_SECRET_KEY=beldomik-r2-secret-key:latest
             --set-secrets=S3_REGION=beldomik-r2-region:latest
             --set-secrets=S3_PUBLIC_URL=beldomik-r2-public-url:latest
+            --set-secrets=SCHEDULER_SECRET=beldomik-scheduler-secret:latest
+            --set-secrets=ADMIN_IDS=beldomik-admin-ids:latest
 
       # === Show deployed URL ====================================
       - name: Show deployed URL
         run: 'echo "Backend deployed to: ${{ steps.deploy.outputs.url }}"'
+
+      # === Cloud Scheduler keep-alive (prevents cold start) =====
+      # Free tier: 3 jobs/month/project. One job every 8 min = within limit.
+      # Pings /api/internal/scheduler/run which is lightweight.
+      - name: Create/Update Cloud Scheduler keep-alive job
+        if: success()
+        run: |
+          set -euo pipefail
+          BACKEND_URL="${{ steps.deploy.outputs.url }}"
+          if [ -z "$BACKEND_URL" ]; then
+            BACKEND_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} --region ${{ env.GCP_REGION }} --format='value(status.url)')
+          fi
+          JOB_NAME="beldomik-keepalive"
+          SCHEDULE="*/8 * * * *"
+          TARGET_URL="${BACKEND_URL}/api/internal/scheduler/run"
+          echo "Configuring Cloud Scheduler job ${JOB_NAME} -> ${TARGET_URL} every 8 min"
+
+          # Cloud Scheduler API already enabled (done manually). CI/CD service account
+          # lacks serviceusage.services.enable permission — skip enable step.
+
+          # Get SCHEDULER_SECRET from Secret Manager (for header)
+          SCHEDULER_SECRET=$(gcloud secrets versions access latest --secret=beldomik-scheduler-secret --project=${{ env.GCP_PROJECT_ID }})
+
+          # Update existing job (created manually — CI lacks cloudscheduler.jobs.create permission)
+          if gcloud scheduler jobs describe ${JOB_NAME} --location=${{ env.GCP_REGION }} --project=${{ env.GCP_PROJECT_ID }} >/dev/null 2>&1; then
+            echo "Job exists, updating schedule/headers..."
+            gcloud scheduler jobs update http ${JOB_NAME} \
+              --location=${{ env.GCP_REGION }} \
+              --project=${{ env.GCP_PROJECT_ID }} \
+              --schedule="${SCHEDULE}" \
+              --uri="${TARGET_URL}" \
+              --http-method=POST \
+              --update-headers="X-Scheduler-Secret=${SCHEDULER_SECRET}" \
+              --message-body='{}' \
+              --time-zone="Europe/Minsk" \
+              --oidc-service-account-email="${{ env.RUNTIME_SERVICE_ACCOUNT }}" \
+              --attempt-deadline=30s \
+              --quiet
+          else
+            echo "ERROR: Cloud Scheduler job '${JOB_NAME}' not found. Job must be created manually (CI lacks create permission)."
+            exit 1
+          fi
+        env:
+          CLOUDSDK_CORE_PROJECT: ${{ env.GCP_PROJECT_ID }}
 
   # ============================================================
   # POST-DEPLOY VERIFICATION
