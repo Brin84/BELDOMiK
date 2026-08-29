@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 from app.api.dependencies import get_db
 from app.core.config import settings
 from app.services.telegram_auth import TelegramAuthService
-from app.services.notification_service import NotificationService
 
 router = APIRouter(prefix="/webhook", tags=["Webhook"])
 
@@ -27,11 +26,11 @@ async def telegram_webhook(request: Request, db: Session = Depends(get_db)):
 
     try:
         update = await request.json()
-    except Exception:
+    except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid JSON",
-        )
+        ) from e
 
     # Process the update
     await process_telegram_update(db, update)
@@ -71,7 +70,7 @@ async def handle_start_command(db: Session, chat_id: int, user: dict, text: str)
     """Handle /start command with optional deep link."""
     # Extract deep link parameter if present (e.g., /start property_123)
     parts = text.split(maxsplit=1)
-    deep_link = parts[1] if len(parts) > 1 else None
+    _ = parts[1] if len(parts) > 1 else None  # deep_link for future use
 
     welcome_text = (
         f"👋 Привет, {user.get('first_name', '')}!\n\n"

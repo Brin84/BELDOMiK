@@ -103,7 +103,10 @@ def submit_for_moderation(
     """Submit property for moderation."""
     property_obj = PropertyService.submit_for_moderation(db, property_id, current_user.id)
     if not property_obj:
-        raise HTTPException(status_code=404, detail="Property not found, not owned, or cannot be submitted")
+        raise HTTPException(
+            status_code=404,
+            detail="Property not found, not owned, or cannot be submitted",
+        )
     return PropertyResponse.model_validate(property_obj)
 
 

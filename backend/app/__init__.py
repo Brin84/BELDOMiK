@@ -1,0 +1,1 @@
+"""BELDOMiK application package."""

@@ -390,6 +390,10 @@ class TestTelegramAuthService:
     def test_verify_webhook_secret(self):
         """Test webhook secret verification."""
         # Use the webhook secret from settings (or fallback to bot token if not set)
-        expected_secret = settings.TELEGRAM_WEBHOOK_SECRET or settings.TELEGRAM_BOT_TOKEN or "test_bot_token_12345"
+        expected_secret = (
+            settings.TELEGRAM_WEBHOOK_SECRET
+            or settings.TELEGRAM_BOT_TOKEN
+            or "test_bot_token_12345"
+        )
         assert TelegramAuthService.verify_webhook_secret(expected_secret) is True
         assert TelegramAuthService.verify_webhook_secret("wrong_secret") is False

@@ -1,12 +1,15 @@
 """BELDOMiK - Telegram Mini App Real Estate Marketplace for Belarus."""
 import logging
 import os
+from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.responses import Response
 
 from app.api.router import api_router
 from app.core.config import settings
@@ -21,14 +24,15 @@ def _find_frontend_dist() -> str | None:
     In the container the build is copied to /app/frontend/dist (see Dockerfile).
     Locally it may live next to this file or in the repo root.
     """
+    base_dir = Path(__file__).parent
     candidates = [
         os.environ.get("FRONTEND_DIST", ""),
         "/app/frontend/dist",
-        os.path.join(os.path.dirname(__file__), "frontend", "dist"),
-        os.path.join(os.getcwd(), "frontend", "dist"),
+        str(base_dir / "frontend" / "dist"),
+        str(Path.cwd() / "frontend" / "dist"),
     ]
     for path in candidates:
-        if path and os.path.isdir(path):
+        if path and Path(path).is_dir():
             return path
     return None
 
@@ -92,30 +96,37 @@ FRONTEND_DIST = _find_frontend_dist()
 
 if FRONTEND_DIST:
     # Vite build assets (JS, CSS, images with hashed filenames)
-    assets_dir = os.path.join(FRONTEND_DIST, "assets")
-    if os.path.isdir(assets_dir):
-        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+    from pathlib import Path
+
+    dist_path = Path(FRONTEND_DIST)
+    assets_dir = dist_path / "assets"
+    if assets_dir.is_dir():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
 
     # SPA fallback: serve index.html for any non-API 404
     @app.middleware("http")
-    async def spa_fallback(request: Request, call_next):
+    async def spa_fallback(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         response = await call_next(request)
         if (
             response.status_code == 404
             and not request.url.path.startswith("/api/")
-            # Не подменяем отсутствующий статический файл (старый хэш-бандл
-            # после деплоя) index.html — браузер исполнил бы HTML как JS.
-            and not os.path.splitext(request.url.path)[1]
+            # Do not serve index.html for missing static files (old hashed bundles
+            # after deploy) — browser would execute HTML as JS.
+            and not Path(request.url.path).suffix
         ):
-            index_path = os.path.join(FRONTEND_DIST, "index.html")
-            if os.path.isfile(index_path):
-                return FileResponse(index_path, media_type="text/html")
+            index_path = dist_path / "index.html"
+            if index_path.is_file():
+                return FileResponse(str(index_path), media_type="text/html")
         return response
 
-    # Кэш-стратегия SPA: no-cache форсирует перевалидацию index.html,
-    # хэшированные ассеты кэшируются навсегда.
+    # Cache strategy: no-cache forces index.html revalidation,
+    # hashed assets are cached forever.
     @app.middleware("http")
-    async def cache_headers(request: Request, call_next):
+    async def cache_headers(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         response = await call_next(request)
         if response.status_code == 200:
             if request.url.path.startswith("/assets/"):
@@ -126,9 +137,9 @@ if FRONTEND_DIST:
 
     @app.get("/")
     async def serve_index():
-        index_path = os.path.join(FRONTEND_DIST, "index.html")
-        if os.path.isfile(index_path):
-            return FileResponse(index_path, media_type="text/html")
+        index_path = dist_path / "index.html"
+        if index_path.is_file():
+            return FileResponse(str(index_path), media_type="text/html")
         return JSONResponse({"detail": "Frontend not built"}, status_code=404)
 else:
     @app.get("/")
