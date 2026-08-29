@@ -161,8 +161,6 @@ class PropertyService:
 
         # Add is_favorite attribute if user is authenticated
         if property_obj and user_id:
-            from app.models.favorite import Favorite
-            from sqlalchemy import exists
             property_obj.is_favorite = db.query(
                 exists().where(
                     (Favorite.user_id == user_id) & (Favorite.property_id == property_id)
