@@ -44,7 +44,7 @@ async def lifespan(app: FastAPI):
     setup_logging()
     dist = _find_frontend_dist()
     if dist:
-        logger.info("Frontend SPA directory found", path=dist)
+        logger.info("Frontend SPA directory found: %s", dist)
     else:
         logger.warning("Frontend SPA directory NOT found — API-only mode")
     yield
