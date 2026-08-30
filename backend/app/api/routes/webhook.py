@@ -1,5 +1,10 @@
 """Telegram Bot Webhook routes."""
+import asyncio
+from contextlib import suppress
+
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_db
@@ -129,19 +134,35 @@ async def set_webhook():
     webhook_url = f"{settings.BACKEND_PUBLIC_URL.rstrip('/')}/api/v1/webhook/telegram"
     secret_token = settings.TELEGRAM_WEBHOOK_SECRET or settings.TELEGRAM_BOT_TOKEN
 
-    import httpx
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook",
-            json={
-                "url": webhook_url,
-                "secret_token": secret_token,
-                "allowed_updates": ["message", "callback_query"],
-                "drop_pending_updates": True,
-            },
+    payload = {
+        "url": webhook_url,
+        "secret_token": secret_token,
+        "allowed_updates": ["message", "callback_query"],
+        "drop_pending_updates": True,
+    }
+
+    # Telegram throttles setWebhook (429). Retry with backoff so CI re-registration
+    # stays reliable instead of surfacing a 500 to the caller.
+    async with httpx.AsyncClient(timeout=30) as client:
+        for attempt in range(5):
+            resp = await client.post(
+                f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook",
+                json=payload,
+            )
+            if resp.status_code == 200:
+                return resp.json()
+
+            backoff = 2 ** attempt
+            if resp.status_code == 429:
+                with suppress(ValueError):
+                    backoff = resp.json().get("result", {}).get("retry_after") or backoff
+            if attempt < 4:
+                await asyncio.sleep(max(backoff, 1))
+
+        return JSONResponse(
+            status_code=resp.status_code,
+            content={"ok": False, "error_code": resp.status_code, "detail": resp.text[:500]},
         )
-        resp.raise_for_status()
-        return resp.json()
 
 
 @router.get("/delete")
@@ -153,7 +174,6 @@ async def delete_webhook():
             detail="Telegram bot token not configured",
         )
 
-    import httpx
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/deleteWebhook",
@@ -172,7 +192,6 @@ async def webhook_info():
             detail="Telegram bot token not configured",
         )
 
-    import httpx
     async with httpx.AsyncClient() as client:
         resp = await client.get(
             f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/getWebhookInfo",
