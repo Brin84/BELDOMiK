@@ -12,7 +12,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # ===== Stage 2: Python runtime (FastAPI API + SPA server) =====
-FROM python:3.13-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 

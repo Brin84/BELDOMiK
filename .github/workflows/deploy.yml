@@ -97,7 +97,7 @@ jobs:
             --ingress=all
             --allow-unauthenticated
             --service-account=${{ env.RUNTIME_SERVICE_ACCOUNT }}
-            --set-env-vars=DEV_MODE=false,ENVIRONMENT=production,ADMIN_IDS=[1007399707]
+            --set-env-vars=DEV_MODE=false,ENVIRONMENT=production
             --set-secrets=TELEGRAM_BOT_TOKEN=beldomik-bot-token:latest
             --set-secrets=TELEGRAM_BOT_USERNAME=beldomik-bot-username:latest
             --set-secrets=TELEGRAM_WEBHOOK_SECRET=beldomik-bot-webhook-secret:latest
