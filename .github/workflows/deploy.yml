@@ -131,7 +131,7 @@ jobs:
           fi
           JOB_NAME="beldomik-keepalive"
           SCHEDULE="*/8 * * * *"
-          TARGET_URL="${BACKEND_URL}/api/internal/scheduler/run"
+          TARGET_URL="${BACKEND_URL}/api/v1/internal/scheduler/run"
           echo "Configuring Cloud Scheduler job ${JOB_NAME} -> ${TARGET_URL} every 8 min"
 
           # Cloud Scheduler API already enabled (done manually). CI/CD service account
