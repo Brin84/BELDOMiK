@@ -104,6 +104,7 @@ jobs:
             --set-secrets=DATABASE_URL=beldomik-database-url:latest
             --set-secrets=FRONTEND_URL=beldomik-frontend-url:latest
             --set-secrets=BACKEND_PUBLIC_URL=beldomik-backend-public-url:latest
+            --set-secrets=TELEGRAM_WEBAPP_URL=beldomik-webapp-url:latest
             --set-secrets=CHANNEL_URL=beldomik-channel-url:latest
             --set-secrets=S3_ENDPOINT_URL=beldomik-r2-endpoint:latest
             --set-secrets=S3_BUCKET_NAME=beldomik-r2-bucket:latest

@@ -83,6 +83,17 @@ async def handle_start_command(db: Session, chat_id: int, user: dict, text: str)
     )
 
     from app.services.notification_service import NotificationService
+
+    # WebApp URL is the frontend SPA (Cloud Run serves it at /).
+    # Use TELEGRAM_WEBAPP_URL, falling back to FRONTEND_URL / BACKEND_PUBLIC_URL.
+    # A t.me/.../app deep link is NOT a valid inline web_app button URL
+    # (Telegram rejects it with BUTTON_URL_INVALID).
+    webapp_url = (
+        settings.TELEGRAM_WEBAPP_URL
+        or settings.FRONTEND_URL
+        or settings.BACKEND_PUBLIC_URL
+    ).rstrip("/") + "/"
+
     await NotificationService.send_telegram_message(
         chat_id=chat_id,
         text=welcome_text,
@@ -90,7 +101,7 @@ async def handle_start_command(db: Session, chat_id: int, user: dict, text: str)
             "inline_keyboard": [
                 [{
                     "text": "🏠 Открыть BELDOMiK",
-                    "web_app": {"url": settings.TELEGRAM_WEBAPP_URL or "https://t.me/BELDOMiK_BOT/app"}
+                    "web_app": {"url": webapp_url}
                 }]
             ]
         }
