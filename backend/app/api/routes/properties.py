@@ -245,6 +245,7 @@ async def upload_photos(
             sort_order=index,
         )
         db.add(photo)
+        db.flush()  # populate photo.id so the response includes a real id
         uploaded_photos.append({"id": photo.id, "url": url, "is_main": is_main})
 
     db.commit()
