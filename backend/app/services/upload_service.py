@@ -83,9 +83,12 @@ class UploadService:
 
                 client = storage.Client()  # uses ADC (Cloud Run service account / gcloud)
                 self.gcs_bucket = client.bucket(settings.GCS_BUCKET_NAME)
-                # Force a metadata round-trip to fail fast if the bucket or
-                # credentials are not actually available.
-                self.gcs_bucket.exists()
+                # Probe access with an OBJECT-level call (objects.list), not
+                # bucket.exists() — objectAdmin grants storage.objects.list but
+                # NOT storage.buckets.get, so exists() would 403 for a runtime
+                # SA scoped to object only. list_blobs fails fast if the bucket
+                # or credentials are actually unavailable.
+                list(self.gcs_bucket.list_blobs(max_results=1))
                 self._backend_name = "gcs"
                 logger.info("Upload storage: GCS bucket %s", settings.GCS_BUCKET_NAME)
             except Exception as exc:
