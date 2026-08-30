@@ -28,6 +28,7 @@ COPY backend/pyproject.toml .
 COPY backend/README.md .
 COPY backend/app ./app
 COPY backend/alembic ./alembic
+COPY backend/alembic.ini .
 COPY backend/entrypoint.sh .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -e .
