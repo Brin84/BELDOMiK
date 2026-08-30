@@ -65,10 +65,26 @@ class Settings(BaseSettings):
     S3_REGION: str = Field(default="auto", validation_alias="S3_REGION")
     S3_PUBLIC_URL: str = Field(default="", validation_alias="S3_PUBLIC_URL")
 
+    # Object Storage (Google Cloud Storage) — used on Cloud Run via runtime
+    # service account (ADC), falls back to S3/local when not configured.
+    # GCS bucket is uniform-access + public objectViewer => keys readable at
+    # https://storage.googleapis.com/{GCS_BUCKET_NAME}/{object_key}
+    GCS_BUCKET_NAME: str = Field(default="beldomik-photos", validation_alias="GCS_BUCKET_NAME")
+    GCS_PUBLIC_URL: str = Field(
+        default="https://storage.googleapis.com",
+        validation_alias="GCS_PUBLIC_URL",
+    )
+
+    # Local upload dir (dev fallback, served at /uploads)
+    UPLOAD_DIR: str = Field(default="uploads", validation_alias="UPLOAD_DIR")
+
     # File Upload
     MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10 MB
     ALLOWED_IMAGE_TYPES: list[str] = ["image/jpeg", "image/png", "image/webp", "image/avif"]
     MAX_IMAGES_PER_PROPERTY: int = 20
+    # Server-side image compression (same approach as baraholka)
+    PHOTO_MAX_DIMENSION: int = 1600
+    PHOTO_QUALITY: int = 80
 
     # Currency
     DEFAULT_CURRENCY: str = "BYN"

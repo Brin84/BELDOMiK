@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.models.geography import City
-from app.models.property import Property, PropertyPrice, PropertyStatus
+from app.models.property import Property, PropertyPhoto, PropertyPrice, PropertyStatus
 from app.models.property_types import OperationType, PropertyType
 from app.models.user import User
 
@@ -74,6 +74,11 @@ def property_seed(db_session: Session, seed_test_data) -> dict:
         db_session.commit()
         db_session.refresh(prop)
         created_ids.append(prop.id)
+
+    # Give property A a photo so with_photos_only is testable.
+    a = db_session.get(Property, created_ids[0])
+    db_session.add(PropertyPhoto(property_id=a.id, url="https://example.com/a.jpg"))
+    db_session.commit()
 
     published_ids = [created_ids[0], created_ids[1], created_ids[2]]
     return {
@@ -156,6 +161,14 @@ class TestPropertiesList:
             "/api/v1/properties",
             params={"area_min": 50, "area_max": 80},
         )
+        assert resp.status_code == 200, resp.text
+        data = resp.json()
+        assert [p["id"] for p in data["items"]] == [property_seed["a"]]
+
+    def test_filter_with_photos_only(self, client: TestClient, property_seed):
+        # Only property A has a photo; the count aggregate must live in HAVING,
+        # not WHERE (Postgres rejects aggregate in WHERE).
+        resp = client.get("/api/v1/properties", params={"with_photos_only": True})
         assert resp.status_code == 200, resp.text
         data = resp.json()
         assert [p["id"] for p in data["items"]] == [property_seed["a"]]

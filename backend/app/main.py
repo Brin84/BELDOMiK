@@ -1,4 +1,5 @@
 """BELDOMiK - Telegram Mini App Real Estate Marketplace for Belarus."""
+
 import logging
 import os
 from collections.abc import Awaitable, Callable
@@ -90,6 +91,12 @@ def health_check_api():
     return {"status": "healthy"}
 
 
+# ─── Uploaded images (local dev fallback; cloud backends serve via their URL) ─
+if settings.ENVIRONMENT != "production":
+    Path(settings.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
+    app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
+
+
 # ─── Production: serve frontend static files ────────────────────────────────
 # In the Docker container the built frontend lives at /app/frontend/dist
 FRONTEND_DIST = _find_frontend_dist()
@@ -142,6 +149,7 @@ if FRONTEND_DIST:
             return FileResponse(str(index_path), media_type="text/html")
         return JSONResponse({"detail": "Frontend not built"}, status_code=404)
 else:
+
     @app.get("/")
     def root_api_only():
         return {

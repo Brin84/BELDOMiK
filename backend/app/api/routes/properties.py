@@ -1,4 +1,5 @@
 """Property routes."""
+
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
 from sqlalchemy.orm import Session
 
@@ -208,21 +209,33 @@ async def upload_photos(
     if len(files) > settings.MAX_IMAGES_PER_PROPERTY:
         raise HTTPException(
             status_code=400,
-            detail=f"Maximum {settings.MAX_IMAGES_PER_PROPERTY} images allowed per property",
+            detail=f"Maximum {settings.MAX_IMAGES_PER_PROPERTY} images per batch",
+        )
+    existing_count = (
+        db.query(PropertyPhoto).filter(PropertyPhoto.property_id == property_id).count()
+    )
+    if existing_count + len(files) > settings.MAX_IMAGES_PER_PROPERTY:
+        raise HTTPException(
+            status_code=400,
+            detail="Property already has the maximum number of images",
         )
 
     uploaded_photos = []
     for index, file in enumerate(files):
-        # Validate and upload
+        # Validate and upload (server-side compression in upload_service)
         success, url, error = await upload_service.upload_upload_file(file, property_id)
         if not success:
             raise HTTPException(status_code=400, detail=error or "Upload failed")
 
         # Determine if this is the main photo (first one if no main exists)
-        existing_main = db.query(PropertyPhoto).filter(
-            PropertyPhoto.property_id == property_id,
-            PropertyPhoto.is_main == True,
-        ).first()
+        existing_main = (
+            db.query(PropertyPhoto)
+            .filter(
+                PropertyPhoto.property_id == property_id,
+                PropertyPhoto.is_main == True,
+            )
+            .first()
+        )
         is_main = not existing_main and index == 0
 
         photo = PropertyPhoto(

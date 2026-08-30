@@ -288,7 +288,9 @@ class PropertyService:
         if filters.metro_distance_max:
             query = query.filter(Property.metro_distance <= filters.metro_distance_max)
         if filters.with_photos_only:
-            query = query.filter(func.count(PropertyPhoto.id) > 0)
+            # Aggregate must live in HAVING (after GROUP BY), not WHERE —
+            # Postgres raises "aggregate functions are not allowed in WHERE".
+            query = query.having(func.count(PropertyPhoto.id) > 0)
         if filters.is_favorite_only and user_id:
             fav_subq = db.query(Favorite.property_id).filter(Favorite.user_id == user_id).subquery()
             query = query.filter(Property.id.in_(fav_subq))
