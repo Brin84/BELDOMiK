@@ -305,8 +305,21 @@ class PropertyService:
                 pass
 
         # Sorting
-        sort_column = getattr(Property, filters.sort_by, Property.created_at)
-        if filters.sort_order == "desc":
+        # sort_by may be a bare column ("created_at", "price_byn") or a
+        # composite slug from the frontend ("created_at_desc", "total_area").
+        sort_by = filters.sort_by or "created_at"
+        sort_order = filters.sort_order or "desc"
+        if sort_by.endswith("_desc") or sort_by.endswith("_asc"):
+            sort_order = "desc" if sort_by.endswith("_desc") else "asc"
+            sort_by = sort_by.rsplit("_", 1)[0]
+
+        # Price columns live on PropertyPrice (already outer-joined and in GROUP BY).
+        sort_column = (
+            getattr(PropertyPrice, sort_by)
+            if sort_by in ("price_byn", "price_usd", "price_per_m2_byn")
+            else getattr(Property, sort_by, Property.created_at)
+        )
+        if sort_order == "desc":
             query = query.order_by(sort_column.desc())
         else:
             query = query.order_by(sort_column.asc())

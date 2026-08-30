@@ -175,7 +175,11 @@ export function SearchPage() {
   const handleSortChange = useCallback(
     (sortBy: string) => {
       trigger('selection');
-      setFilters({ sort_by: sortBy as PropertyFilterParams['sort_by'] });
+      // Composite slugs ("created_at_desc") carry their direction; bare slugs
+      // ("price_byn", "total_area", "created_at") sort ascending by default.
+      // Backend normalizes composite slugs and honors sort_order for bare ones.
+      const order = sortBy.endsWith('_desc') ? 'desc' : 'asc';
+      setFilters({ sort_by: sortBy as PropertyFilterParams['sort_by'], sort_order: order });
     },
     [trigger, setFilters]
   );
