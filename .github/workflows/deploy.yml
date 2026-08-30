@@ -223,7 +223,7 @@ jobs:
           fi
           echo "Registering Telegram webhook via ${BACKEND_URL}/api/v1/webhook/set"
           for i in {1..5}; do
-            if curl -sf -X POST "${BACKEND_URL}/api/v1/webhook/set"; then
+            if curl -sf -X GET "${BACKEND_URL}/api/v1/webhook/set"; then
               echo "[OK] Webhook registration request succeeded"
               exit 0
             fi
