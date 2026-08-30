@@ -174,11 +174,10 @@ def get_my_properties(
 def add_photo(
     property_id: int,
     photo_url: str = Body(..., embed=True),
-    is_main: bool = Body(False, embed=True),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Add a photo to a property (URL-based)."""
+    """Add a photo to a property (URL-based). Main photo = sort_order 0."""
     property_obj = db.query(Property).filter(Property.id == property_id).first()
     if not property_obj or property_obj.owner_id != current_user.id:
         raise HTTPException(status_code=404, detail="Property not found or not owned")
@@ -186,7 +185,6 @@ def add_photo(
     photo = PropertyPhoto(
         property_id=property_id,
         url=photo_url,
-        is_main=is_main,
         sort_order=0,
     )
     db.add(photo)
@@ -227,21 +225,23 @@ async def upload_photos(
         if not success:
             raise HTTPException(status_code=400, detail=error or "Upload failed")
 
-        # Determine if this is the main photo (first one if no main exists)
-        existing_main = (
-            db.query(PropertyPhoto)
+        # Main photo is the one with sort_order 0 (the schema has no is_main
+        # column — photos are ordered by sort_order). First uploaded photo
+        # becomes main if none exists yet; the flag is returned for API
+        # convenience only.
+        has_main = (
+            db.query(PropertyPhoto.id)
             .filter(
                 PropertyPhoto.property_id == property_id,
-                PropertyPhoto.is_main == True,
+                PropertyPhoto.sort_order == 0,
             )
             .first()
         )
-        is_main = not existing_main and index == 0
+        is_main = not has_main and index == 0
 
         photo = PropertyPhoto(
             property_id=property_id,
             url=url,
-            is_main=is_main,
             sort_order=index,
         )
         db.add(photo)
