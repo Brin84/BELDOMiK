@@ -37,14 +37,15 @@ def property_seed(db_session: Session, seed_test_data) -> dict:
     op_type = db_session.query(OperationType).filter(OperationType.name == "Продажа").first()
 
     rows = [
-        (250000, 65.0, 2, _utc(2026, 8, 20), PropertyStatus.PUBLISHED),  # A price 250k
-        (100000, 40.0, 1, _utc(2026, 8, 28), PropertyStatus.PUBLISHED),  # B price 100k
-        (150000, 90.0, 3, _utc(2026, 8, 25), PropertyStatus.PUBLISHED),  # C price 150k
-        (500000, 300.0, 5, _utc(2026, 8, 30), PropertyStatus.DRAFT),  # D hidden
+        # (price, total_area, rooms, created_at, status, living_area, kitchen_area)
+        (250000, 65.0, 2, _utc(2026, 8, 20), PropertyStatus.PUBLISHED, 45.0, 9.0),  # A price 250k
+        (100000, 40.0, 1, _utc(2026, 8, 28), PropertyStatus.PUBLISHED, 28.0, 12.0),  # B price 100k
+        (150000, 90.0, 3, _utc(2026, 8, 25), PropertyStatus.PUBLISHED, 60.0, 8.0),  # C price 150k
+        (500000, 300.0, 5, _utc(2026, 8, 30), PropertyStatus.DRAFT, 200.0, 40.0),  # D hidden
     ]
 
     created_ids = []
-    for price_byn, total_area, rooms_count, created_at, status in rows:
+    for price_byn, total_area, rooms_count, created_at, status, living_area, kitchen_area in rows:
         prop = Property(
             owner_id=owner.id,
             type_id=prop_type.id,
@@ -52,6 +53,8 @@ def property_seed(db_session: Session, seed_test_data) -> dict:
             city_id=city.id,
             address=f"Test Address {price_byn}",
             total_area=total_area,
+            living_area=living_area,
+            kitchen_area=kitchen_area,
             rooms_count=rooms_count,
             floor=3,
             total_floors=9,
@@ -78,6 +81,9 @@ def property_seed(db_session: Session, seed_test_data) -> dict:
     # Give property A a photo so with_photos_only is testable.
     a = db_session.get(Property, created_ids[0])
     db_session.add(PropertyPhoto(property_id=a.id, url="https://example.com/a.jpg"))
+    # Property C is an agency listing — used by the «без посредников» (direct) filter.
+    c = db_session.get(Property, created_ids[2])
+    c.agency_id = 1
     db_session.commit()
 
     published_ids = [created_ids[0], created_ids[1], created_ids[2]]
@@ -172,3 +178,62 @@ class TestPropertiesList:
         assert resp.status_code == 200, resp.text
         data = resp.json()
         assert [p["id"] for p in data["items"]] == [property_seed["a"]]
+
+    def test_q_search_by_address(self, client: TestClient, property_seed):
+        # Free-text search matches address (ILINE over joined fields).
+        resp = client.get("/api/v1/properties", params={"q": "Test Address 250000"})
+        assert resp.status_code == 200, resp.text
+        data = resp.json()
+        assert [p["id"] for p in data["items"]] == [property_seed["a"]]
+
+    def test_q_search_by_city(self, client: TestClient, property_seed):
+        # City.name is joined, so the same text matches location names.
+        # NOTE: SQLite lower() is ASCII-only, so the Cyrillic query must match
+        # the stored case here; on Postgres ILIKE handles Cyrillic properly.
+        resp = client.get("/api/v1/properties", params={"q": "Минск"})
+        assert resp.status_code == 200, resp.text
+        data = resp.json()
+        # All published properties are in Минск
+        assert len(data["items"]) == 3
+
+    def test_q_search_no_results(self, client: TestClient, property_seed):
+        resp = client.get("/api/v1/properties", params={"q": "несуществующий_текст"})
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["items"] == []
+        assert resp.json()["total"] == 0
+
+    def test_q_search_escapes_wildcards(self, client: TestClient, property_seed):
+        # '%' in the query must not expand to everything; it is escaped.
+        resp = client.get("/api/v1/properties", params={"q": "%"})
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["total"] == 0
+
+    def test_is_direct_only(self, client: TestClient, property_seed):
+        # «Без посредников»: C (agency_id) is filtered out, owners A and B remain.
+        resp = client.get("/api/v1/properties", params={"is_direct_only": True})
+        assert resp.status_code == 200, resp.text
+        data = resp.json()
+        assert [p["id"] for p in data["items"]] == [
+            property_seed["b"],
+            property_seed["a"],
+        ]
+
+    def test_living_area_range(self, client: TestClient, property_seed):
+        # living: A=45, B=28, C=60
+        resp = client.get("/api/v1/properties", params={"living_area_min": 40})
+        assert resp.status_code == 200, resp.text
+        data = resp.json()
+        assert [p["id"] for p in data["items"]] == [
+            property_seed["c"],
+            property_seed["a"],
+        ]
+
+    def test_kitchen_area_range(self, client: TestClient, property_seed):
+        # kitchen: A=9, B=12, C=8
+        resp = client.get("/api/v1/properties", params={"kitchen_area_max": 10})
+        assert resp.status_code == 200, resp.text
+        data = resp.json()
+        assert [p["id"] for p in data["items"]] == [
+            property_seed["c"],
+            property_seed["a"],
+        ]

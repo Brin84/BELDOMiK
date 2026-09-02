@@ -83,6 +83,16 @@ export function FilterBottomSheet({
     onFiltersChange({ metro_distance_max: num });
   };
 
+  const handleAreaInputChange = (
+    field: 'living_area_min' | 'living_area_max' | 'kitchen_area_min' | 'kitchen_area_max',
+    value: string,
+  ) => {
+    const num = value === '' ? undefined : parseFloat(value);
+    if (num !== undefined && (num < 0 || num > 5000)) return;
+    trigger('selection');
+    onFiltersChange({ [field]: num });
+  };
+
   const handleBooleanFilterChange = (field: keyof PropertyFilterParams, value: boolean | undefined) => {
     trigger('selection');
     onFiltersChange({ [field]: value });
@@ -336,6 +346,117 @@ export function FilterBottomSheet({
                   }}
                   placeholder={String(new Date().getFullYear())}
                   inputMode="numeric"
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Без посредников */}
+          <section>
+            <button
+              onClick={() => handleBooleanFilterChange('is_direct_only', filters.is_direct_only ? undefined : true)}
+              className="w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-colors"
+              style={{
+                backgroundColor: filters.is_direct_only
+                  ? 'var(--tg-theme-button-color)'
+                  : 'var(--tg-theme-secondary-bg-color)',
+                color: filters.is_direct_only
+                  ? 'var(--tg-theme-button-text-color)'
+                  : 'var(--tg-theme-text-color)',
+                border: filters.is_direct_only ? 'none' : '1px solid var(--tg-theme-hint-color)',
+              }}
+              aria-pressed={filters.is_direct_only === true}
+            >
+              <span className="font-medium">🤝 Без посредников</span>
+              <span className="text-sm" style={{ opacity: 0.7 }}>Только собственники</span>
+            </button>
+          </section>
+
+          {/* Living Area */}
+          <section>
+            <h3 className="text-tg-text font-medium mb-3">Жилая площадь (м²)</h3>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label htmlFor="living-area-min" className="block text-tg-hint text-sm mb-1">От</label>
+                <input
+                  id="living-area-min"
+                  type="number"
+                  min="0"
+                  max="5000"
+                  value={filters.living_area_min ?? ''}
+                  onChange={(e) => handleAreaInputChange('living_area_min', e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
+                  style={{
+                    backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+                    border: '1px solid var(--tg-theme-hint-color)',
+                    color: 'var(--tg-theme-text-color)',
+                  }}
+                  placeholder="0"
+                  inputMode="decimal"
+                />
+              </div>
+              <div className="flex-1">
+                <label htmlFor="living-area-max" className="block text-tg-hint text-sm mb-1">До</label>
+                <input
+                  id="living-area-max"
+                  type="number"
+                  min="0"
+                  max="5000"
+                  value={filters.living_area_max ?? ''}
+                  onChange={(e) => handleAreaInputChange('living_area_max', e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
+                  style={{
+                    backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+                    border: '1px solid var(--tg-theme-hint-color)',
+                    color: 'var(--tg-theme-text-color)',
+                  }}
+                  placeholder="100"
+                  inputMode="decimal"
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Kitchen Area */}
+          <section>
+            <h3 className="text-tg-text font-medium mb-3">Площадь кухни (м²)</h3>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label htmlFor="kitchen-area-min" className="block text-tg-hint text-sm mb-1">От</label>
+                <input
+                  id="kitchen-area-min"
+                  type="number"
+                  min="0"
+                  max="5000"
+                  value={filters.kitchen_area_min ?? ''}
+                  onChange={(e) => handleAreaInputChange('kitchen_area_min', e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
+                  style={{
+                    backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+                    border: '1px solid var(--tg-theme-hint-color)',
+                    color: 'var(--tg-theme-text-color)',
+                  }}
+                  placeholder="0"
+                  inputMode="decimal"
+                />
+              </div>
+              <div className="flex-1">
+                <label htmlFor="kitchen-area-max" className="block text-tg-hint text-sm mb-1">До</label>
+                <input
+                  id="kitchen-area-max"
+                  type="number"
+                  min="0"
+                  max="5000"
+                  value={filters.kitchen_area_max ?? ''}
+                  onChange={(e) => handleAreaInputChange('kitchen_area_max', e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
+                  style={{
+                    backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+                    border: '1px solid var(--tg-theme-hint-color)',
+                    color: 'var(--tg-theme-text-color)',
+                  }}
+                  placeholder="20"
+                  inputMode="decimal"
                 />
               </div>
             </div>

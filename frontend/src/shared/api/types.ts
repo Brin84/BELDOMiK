@@ -174,6 +174,8 @@ export interface PropertyFilterParams {
   operation_id?: number;
   type_id?: number;
 
+  q?: string;
+
   region_id?: number;
   city_id?: number;
   district_id?: number;
@@ -185,6 +187,11 @@ export interface PropertyFilterParams {
 
   total_area_min?: number;
   total_area_max?: number;
+
+  living_area_min?: number;
+  living_area_max?: number;
+  kitchen_area_min?: number;
+  kitchen_area_max?: number;
 
   price_byn_min?: number;
   price_byn_max?: number;
@@ -221,6 +228,7 @@ export interface PropertyFilterParams {
 
   with_photos_only?: boolean;
   is_favorite_only?: boolean;
+  is_direct_only?: boolean;
 }
 
 export interface PropertyCreate {

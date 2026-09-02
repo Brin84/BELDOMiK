@@ -15,6 +15,7 @@ export interface GeographyState {
 
   loadedRegions: boolean;
   loadedCities: boolean;
+  loadedAllCities: boolean;
   loadedDistricts: boolean;
   loadedNeighborhoods: boolean;
   loadedStreets: boolean;
@@ -24,6 +25,7 @@ export interface GeographyState {
 
   fetchRegions: () => Promise<void>;
   fetchCities: (regionId: number) => Promise<void>;
+  fetchAllCities: () => Promise<void>;
   fetchDistricts: (cityId: number) => Promise<void>;
   fetchNeighborhoods: (cityId: number) => Promise<void>;
   fetchStreets: (cityId: number) => Promise<void>;
@@ -55,6 +57,7 @@ export const useGeographyStore = create<GeographyState>((set, get) => ({
 
   loadedRegions: false,
   loadedCities: false,
+  loadedAllCities: false,
   loadedDistricts: false,
   loadedNeighborhoods: false,
   loadedStreets: false,
@@ -79,6 +82,21 @@ export const useGeographyStore = create<GeographyState>((set, get) => ({
     } catch (error) {
       console.error('Failed to fetch cities:', error);
     }
+  },
+
+  fetchAllCities: async () => {
+    if (get().loadedAllCities) return;
+    await get().fetchRegions();
+    const all: City[] = [];
+    for (const region of get().regions) {
+      try {
+        const data = await api.get<City[]>(API_ENDPOINTS.geography.cities, { region_id: region.id });
+        all.push(...data);
+      } catch (error) {
+        console.error('Failed to fetch cities:', error);
+      }
+    }
+    set({ cities: all, loadedCities: true, loadedAllCities: true });
   },
 
   fetchDistricts: async (cityId: number) => {

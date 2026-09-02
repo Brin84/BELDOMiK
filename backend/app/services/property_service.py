@@ -2,7 +2,7 @@
 import logging
 from datetime import UTC, datetime
 
-from sqlalchemy import and_, exists, func
+from sqlalchemy import and_, exists, func, or_
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.geography import City, District, MetroStation, Neighborhood, Street
@@ -247,6 +247,25 @@ class PropertyService:
             query = query.filter(Property.neighborhood_id == filters.neighborhood_id)
         if filters.street_id:
             query = query.filter(Property.street_id == filters.street_id)
+        if filters.q:
+            # Krisha-style free-text search: match against address, description
+            # and the already-joined location names. Escape LIKE wildcards so a
+            # literal '%' or '_' in the query can't broaden the match.
+            escaped = (
+                filters.q.strip()
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_")
+            )
+            term = f"%{escaped}%"
+            query = query.filter(or_(
+                Property.address.ilike(term, escape="\\"),
+                Property.description.ilike(term, escape="\\"),
+                City.name.ilike(term, escape="\\"),
+                District.name.ilike(term, escape="\\"),
+                Neighborhood.name.ilike(term, escape="\\"),
+                Street.name.ilike(term, escape="\\"),
+            ))
         if filters.type_id:
             query = query.filter(Property.type_id == filters.type_id)
         if filters.operation_id:
@@ -269,6 +288,14 @@ class PropertyService:
             query = query.filter(Property.total_area >= filters.total_area_min)
         if filters.total_area_max:
             query = query.filter(Property.total_area <= filters.total_area_max)
+        if filters.living_area_min:
+            query = query.filter(Property.living_area >= filters.living_area_min)
+        if filters.living_area_max:
+            query = query.filter(Property.living_area <= filters.living_area_max)
+        if filters.kitchen_area_min:
+            query = query.filter(Property.kitchen_area >= filters.kitchen_area_min)
+        if filters.kitchen_area_max:
+            query = query.filter(Property.kitchen_area <= filters.kitchen_area_max)
         if filters.price_byn_min:
             query = query.filter(PropertyPrice.price_byn >= filters.price_byn_min)
         if filters.price_byn_max:
@@ -283,6 +310,9 @@ class PropertyService:
             query = query.filter(Property.parking == filters.parking)
         if filters.elevator is not None:
             query = query.filter(Property.elevator == filters.elevator)
+        if filters.is_direct_only:
+            # «Без посредников» — только объявления собственников
+            query = query.filter(Property.agency_id.is_(None))
         if filters.metro_station_id:
             query = query.filter(Property.metro_station_id == filters.metro_station_id)
         if filters.metro_distance_max:

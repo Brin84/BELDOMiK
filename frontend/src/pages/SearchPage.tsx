@@ -71,6 +71,7 @@ export function SearchPage() {
     if (savedFilters) {
       try {
         const filtersObj = JSON.parse(savedFilters);
+        if (typeof filtersObj.q === 'string') setSearchQuery(filtersObj.q);
         setFilters(filtersObj);
         trigger('selection');
       } catch {
@@ -84,6 +85,7 @@ export function SearchPage() {
       try {
         const savedSearch = JSON.parse(editSavedSearch);
         const filtersObj = JSON.parse(savedSearch.filters_json);
+        if (typeof filtersObj.q === 'string') setSearchQuery(filtersObj.q);
         setFilters(filtersObj);
         setSaveSearchModalOpen(true);
         trigger('selection');
@@ -184,13 +186,13 @@ export function SearchPage() {
     [trigger, setFilters]
   );
 
-  // Handle search query change
+  // Handle search query change — debounced ILINE text search over
+  // address/description/location (the backend 'q' parameter).
   useEffect(() => {
-    if (debouncedSearchQuery !== undefined) {
-      // TODO: Backend doesn't currently support text search parameter (no 'q'/'search' in PropertyFilterParams)
-      // When backend adds support, implement via setFilters({ search: debouncedSearchQuery || undefined })
-    }
-  }, [debouncedSearchQuery, setFilters]);
+    const q = debouncedSearchQuery ? debouncedSearchQuery.trim() : undefined;
+    if (filters.q === q) return; // already in sync, avoid redundant requests
+    setFilters({ q });
+  }, [debouncedSearchQuery, setFilters, filters.q]);
 
   // Reset all filters
   const handleResetAll = useCallback(() => {
@@ -247,6 +249,14 @@ export function SearchPage() {
           return `От ${formatArea(value as number)}`;
         case 'total_area_max':
           return `До ${formatArea(value as number)}`;
+        case 'living_area_min':
+          return `Жилая от ${formatArea(value as number)}`;
+        case 'living_area_max':
+          return `Жилая до ${formatArea(value as number)}`;
+        case 'kitchen_area_min':
+          return `Кухня от ${formatArea(value as number)}`;
+        case 'kitchen_area_max':
+          return `Кухня до ${formatArea(value as number)}`;
         case 'floor_min':
           return `Этаж от ${value}`;
         case 'floor_max':
@@ -259,6 +269,8 @@ export function SearchPage() {
           return `Год от ${value}`;
         case 'build_year_max':
           return `Год до ${value}`;
+        case 'q':
+          return `Поиск: «${value}»`;
         case 'renovation':
           return `Ремонт: ${value}`;
         case 'furniture':
@@ -269,6 +281,8 @@ export function SearchPage() {
           return 'Парковка';
         case 'elevator':
           return 'Лифт';
+        case 'is_direct_only':
+          return 'Без посредников';
         case 'metro_distance_max':
           return `Метро до ${value} м`;
         default:

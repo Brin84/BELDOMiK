@@ -247,6 +247,7 @@ class PropertyFilterParams(BaseSchema):
     street_id: int | None = None
     type_id: int | None = None
     operation_id: int | None = None
+    q: str | None = None  # free-text search (address/description/location)
     rooms_count: int | None = None
     floor_min: int | None = None
     floor_max: int | None = None
@@ -256,6 +257,10 @@ class PropertyFilterParams(BaseSchema):
     build_year_max: int | None = None
     total_area_min: float | None = None
     total_area_max: float | None = None
+    living_area_min: float | None = None
+    living_area_max: float | None = None
+    kitchen_area_min: float | None = None
+    kitchen_area_max: float | None = None
     price_byn_min: int | None = None
     price_byn_max: int | None = None
     renovation: str | None = None
@@ -270,6 +275,7 @@ class PropertyFilterParams(BaseSchema):
     lng_min: float | None = None
     lng_max: float | None = None
     bbox: str | None = None  # "lat_min,lng_min,lat_max,lng_max"
+    is_direct_only: bool = False  # без посредников (только собственники)
     sort_by: str = "created_at"
     sort_order: str = "desc"
     page: int = 1
