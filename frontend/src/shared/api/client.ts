@@ -43,8 +43,10 @@ interface RequestOptions extends RequestInit {
   signal?: AbortSignal;
 }
 
-function buildUrl(path: string, params?: RequestOptions['params']): string {
-  const url = new URL(path, API_BASE_URL);
+export function buildUrl(path: string, params?: RequestOptions['params']): string {
+  // Resolve relative paths against the current origin when no API base is set
+  // (new URL(path, '') throws, so never pass an empty base).
+  const url = new URL(path, API_BASE_URL || window.location.origin);
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
