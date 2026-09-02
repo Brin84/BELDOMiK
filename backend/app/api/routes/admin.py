@@ -11,6 +11,8 @@ from app.models.moderation import ModerationAction
 from app.models.property import Property, PropertyView, Report
 from app.models.user import User
 from app.schemas.user import UserRead
+from app.services.moderation_service import _publish_to_channel
+from app.services.notification_service import NotificationService
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -326,6 +328,10 @@ def update_property_status(
     db.add(action)
     db.commit()
 
+    # Автопубликация объявления в Telegram-канал при публикации
+    if data.status == "published" and old_status != "published":
+        _publish_to_channel(db, prop)
+
     return {
         "message": f"Property {property_id} status: {old_status} → {data.status}",
         "property_id": property_id,
@@ -444,3 +450,53 @@ def resolve_report(
     db.commit()
 
     return {"message": "Report resolved", "report_id": report_id}
+
+
+# ── Telegram Channel ─────────────────────────────────────────
+
+
+class ChannelWelcomeResponse(BaseModel):
+    success: bool
+    message: str
+
+
+@router.post("/telegram/channel-welcome", response_model=ChannelWelcomeResponse)
+async def send_channel_welcome(
+    _admin: User = Depends(get_admin_user),
+):
+    """Отправить приветственное сообщение в Telegram-канал вручную."""
+    success = await NotificationService.post_channel_welcome()
+    if success:
+        return ChannelWelcomeResponse(success=True, message="Приветствие отправлено в канал")
+    raise HTTPException(status_code=502, detail="Не удалось отправить приветствие в канал")
+
+
+@router.post("/telegram/post-listing/{property_id}", response_model=ChannelWelcomeResponse)
+async def post_listing_to_channel(
+    property_id: int,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(get_admin_user),
+):
+    """Вручную опубликовать объявление в Telegram-канал."""
+    prop = db.query(Property).filter(Property.id == property_id).first()
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    price = prop.prices[0] if prop.prices else None
+    photo_url = prop.photos[0].url if prop.photos else None
+    success = await NotificationService.post_property_to_channel(
+        property_id=prop.id,
+        type_name=prop.type.name if prop.type else "Недвижимость",
+        operation_name=prop.operation.name if prop.operation else "",
+        city_name=prop.city.name if prop.city else "",
+        district_name=prop.district.name if prop.district else "",
+        price_byn=price.price_byn if price else None,
+        price_usd=price.price_usd if price else None,
+        total_area=prop.total_area,
+        rooms_count=prop.rooms_count,
+        description=prop.description,
+        photo_url=photo_url,
+    )
+    if success:
+        return ChannelWelcomeResponse(success=True, message=f"Объявление {property_id} опубликовано в канале")
+    raise HTTPException(status_code=502, detail="Не удалось опубликовать объявление в канал")

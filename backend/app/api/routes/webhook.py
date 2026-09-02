@@ -49,6 +49,8 @@ async def process_telegram_update(db: Session, update: dict):
         await handle_message(db, update["message"])
     elif "callback_query" in update:
         await handle_callback_query(db, update["callback_query"])
+    elif "chat_member" in update:
+        await handle_chat_member_update(db, update["chat_member"])
     # Add more handlers as needed (inline_query, channel_post, etc.)
 
 
@@ -99,27 +101,43 @@ async def handle_start_command(db: Session, chat_id: int, user: dict, text: str)
         or settings.BACKEND_PUBLIC_URL
     ).rstrip("/") + "/"
 
+    # Кнопка «Наш канал» добавляется если CHANNEL_URL задан.
+    keyboard_rows = [[{"text": "🏠 Открыть BELDOMiK", "web_app": {"url": webapp_url}}]]
+    if settings.CHANNEL_URL:
+        keyboard_rows.append([{"text": "📣 Наш канал", "url": settings.CHANNEL_URL}])
+
     await NotificationService.send_telegram_message(
         chat_id=chat_id,
         text=welcome_text,
-        reply_markup={
-            "inline_keyboard": [
-                [{
-                    "text": "🏠 Открыть BELDOMiK",
-                    "web_app": {"url": webapp_url}
-                }]
-            ]
-        }
+        reply_markup={"inline_keyboard": keyboard_rows},
     )
-
-    # If deep link, could redirect to specific property
-    # This would be handled by the WebApp itself via startapp parameter
 
 
 async def handle_callback_query(db: Session, callback_query: dict):
     """Handle inline button callbacks."""
     # For future use (e.g., property actions from notifications)
     pass
+
+
+async def handle_chat_member_update(db: Session, chat_member_update: dict):
+    """Пригласили бота в канал → отправляем приветствие в канал."""
+    from app.services.notification_service import NotificationService
+
+    new_member = chat_member_update.get("new_chat_member", {})
+    user = new_member.get("user", {})
+    # Реагируем только если «участник» — это сам бот и статус стал admin/creator
+    if not user.get("is_bot"):
+        return
+    if new_member.get("status") not in ("administrator", "creator"):
+        return
+
+    # Проверяем, что канал совпадает с ожидаемым CHANNEL_URL
+    chat = chat_member_update.get("chat", {})
+    expected = NotificationService.channel_chat_id()
+    if expected and chat.get("username") and f"@{chat['username']}" != expected:
+        return
+
+    await NotificationService.post_channel_welcome()
 
 
 @router.get("/set")
@@ -137,7 +155,7 @@ async def set_webhook():
     payload = {
         "url": webhook_url,
         "secret_token": secret_token,
-        "allowed_updates": ["message", "callback_query"],
+        "allowed_updates": ["message", "callback_query", "chat_member", "channel_post"],
         "drop_pending_updates": True,
     }
 

@@ -1,4 +1,6 @@
 """Telegram notification service."""
+import asyncio
+import html
 import logging
 
 import httpx
@@ -16,7 +18,7 @@ class NotificationService:
 
     @staticmethod
     async def send_telegram_message(
-        chat_id: int,
+        chat_id: int | str,
         text: str,
         parse_mode: str = "HTML",
         reply_markup: dict | None = None,
@@ -46,6 +48,199 @@ class NotificationService:
                 extra={"error": str(e), "chat_id": chat_id},
             )
             return False
+
+    # ── Telegram channel (автопубликация объявлений) ─────────────
+
+    @staticmethod
+    def channel_chat_id() -> str | None:
+        """Channel @username derived from CHANNEL_URL.
+
+        Bot API принимает @username как chat_id. Возвращает None, если
+        CHANNEL_URL не задан или не похож на t.me/... — тогда постинг
+        тихо пропускается (канал — опциональная фича).
+        """
+        if not settings.CHANNEL_URL:
+            return None
+        path = settings.CHANNEL_URL.rstrip("/").rsplit("/", 1)[-1]
+        if not path or path.startswith("c/") or path.isdigit():
+            return None
+        return f"@{path}"
+
+    @staticmethod
+    async def send_photo(
+        chat_id: int | str,
+        photo_url: str,
+        caption: str,
+        reply_markup: dict | None = None,
+    ) -> dict:
+        """Send a photo by public URL to a chat (returns raw Bot API response)."""
+        if not settings.TELEGRAM_BOT_TOKEN:
+            return {"ok": False, "error_code": "no_token"}
+        url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendPhoto"
+        payload = {
+            "chat_id": chat_id,
+            "photo": photo_url,
+            "caption": caption,
+            "parse_mode": "HTML",
+        }
+        if reply_markup:
+            payload["reply_markup"] = reply_markup
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            resp = await client.post(url, json=payload)
+            return resp.json()
+
+    @staticmethod
+    def build_channel_caption(
+        *,
+        type_name: str,
+        operation_name: str,
+        city_name: str,
+        district_name: str,
+        price_byn: int | None,
+        price_usd: int | None,
+        total_area: float | None,
+        rooms_count: int | None,
+        description: str | None,
+    ) -> str:
+        """Карточка объявления для канала (HTML-подписи)."""
+        lines = [f"🏢 <b>{html.escape(type_name or 'Недвижимость')}</b>"]
+        if operation_name:
+            lines.append(f"🔄 {html.escape(operation_name)}")
+
+        loc = ", ".join(x for x in [city_name, district_name] if x)
+        if loc:
+            lines.append(f"📍 {html.escape(loc)}")
+
+        if price_byn:
+            price_text = f"{price_byn:,} BYN".replace(",", " ")
+            if price_usd:
+                price_text += f" ≈ ${price_usd:,}".replace(",", " ")
+            lines.append(f"💰 <b>{price_text}</b>")
+
+        if total_area:
+            area = f"{total_area:g} м²"
+            if rooms_count:
+                area += f", {rooms_count} комн."
+            lines.append(f"📐 {area}")
+
+        if description:
+            desc = html.escape(description)
+            if len(desc) > 180:
+                desc = desc[:180].rstrip() + "…"
+            lines.append(f"📝 {desc}")
+
+        return "\n".join(lines)
+
+    @staticmethod
+    async def post_property_to_channel(
+        *,
+        property_id: int,
+        type_name: str,
+        operation_name: str,
+        city_name: str,
+        district_name: str,
+        price_byn: int | None,
+        price_usd: int | None,
+        total_area: float | None,
+        rooms_count: int | None,
+        description: str | None,
+        photo_url: str | None,
+    ) -> bool:
+        """Карточка нового объявления в промо-канал (best-effort).
+
+        Дублирует публикацию на канал при одобрении модерации. Кнопка
+        открывает Mini App на конкретном объявлении через startapp-ссылку.
+        Намеренно НЕ web_app-кнопка: по спецификации Bot API web_app-кнопки
+        работают только в приватных чатах и отклоняются в каналах. При любой
+        ошибке (нет фото, 403, сеть) не бросаем исключение — автопостинг не
+        должен ломать модерацию. Резервно дублируем текстом без фото.
+        """
+        chat_id = NotificationService.channel_chat_id()
+        if not chat_id:
+            return False
+
+        caption = NotificationService.build_channel_caption(
+            type_name=type_name,
+            operation_name=operation_name,
+            city_name=city_name,
+            district_name=district_name,
+            price_byn=price_byn,
+            price_usd=price_usd,
+            total_area=total_area,
+            rooms_count=rooms_count,
+            description=description,
+        )
+        deep_link = (
+            f"https://t.me/{settings.TELEGRAM_BOT_USERNAME}/app"
+            f"?startapp=property_{property_id}"
+        )
+        keyboard = {
+            "inline_keyboard": [
+                [{"text": "👀 Открыть объявление", "url": deep_link}],
+            ]
+        }
+
+        try:
+            if photo_url:
+                try:
+                    result = await NotificationService.send_photo(
+                        chat_id, photo_url, caption, keyboard
+                    )
+                except Exception:
+                    logger.warning(
+                        "Канал: sendPhoto упал, дублируем текстом", exc_info=True
+                    )
+                    result = {"ok": False}
+                if result.get("ok"):
+                    return True
+                logger.warning(
+                    "Канал: sendPhoto не удался (%s), дублируем текстом",
+                    result.get("error_code"),
+                )
+            await NotificationService.send_telegram_message(
+                chat_id, caption, reply_markup=keyboard
+            )
+            return True
+        except Exception:
+            logger.exception("Автопостинг объявления в канал не удался")
+            return False
+
+    @staticmethod
+    def post_property_to_channel_sync(**kwargs) -> bool:
+        """Синхронная обёртка для вызова из sync-контекста (модерация)."""
+        try:
+            return asyncio.run(NotificationService.post_property_to_channel(**kwargs))
+        except Exception:
+            logger.exception("Автопостинг объявления в канал (sync) не удался")
+            return False
+
+    @staticmethod
+    async def post_channel_welcome() -> bool:
+        """Приветственное сообщение в промо-канал (best-effort)."""
+        chat_id = NotificationService.channel_chat_id()
+        if not chat_id:
+            logger.warning("Приветствие в канал: CHANNEL_URL не настроен")
+            return False
+
+        text = (
+            "🎉 <b>BELDOMiK</b> — недвижимость Беларуси 🇧🇾\n\n"
+            "В этом канале публикуются все новые объявления:\n"
+            "🏢 Квартиры и дома\n"
+            "🌍 Земельные участки\n"
+            "🏪 Коммерческая недвижимость\n\n"
+            "🔔 Включите уведомления, чтобы не пропустить свежие варианты!"
+        )
+        keyboard = {
+            "inline_keyboard": [
+                [{
+                    "text": "🏠 Открыть BELDOMiK",
+                    "url": f"https://t.me/{settings.TELEGRAM_BOT_USERNAME}/app",
+                }],
+            ]
+        }
+        return await NotificationService.send_telegram_message(
+            chat_id, text, reply_markup=keyboard
+        )
 
     @staticmethod
     def format_property_notification(

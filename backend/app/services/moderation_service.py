@@ -1,4 +1,5 @@
 """Moderation service for admin content review."""
+import logging
 from datetime import UTC, datetime
 from typing import Any
 
@@ -7,6 +8,37 @@ from sqlalchemy.orm import Session
 
 from app.models.moderation import ModerationAction
 from app.models.property import Property, Report
+
+logger = logging.getLogger(__name__)
+
+
+def _publish_to_channel(db: Session, property_obj: Property) -> None:
+    """Опубликовать карточку объявления в Telegram-канал (best-effort).
+
+    Снимок данных читается синхронно (сессия активна), а сетевой вызов
+    выполняется в отдельном event loop через sync-обёртку. Ошибки сети/
+    канала не должны ломать модерацию.
+    """
+    from app.services.notification_service import NotificationService
+
+    price = property_obj.prices[0] if property_obj.prices else None
+    photo_url = property_obj.photos[0].url if property_obj.photos else None
+    try:
+        NotificationService.post_property_to_channel_sync(
+            property_id=property_obj.id,
+            type_name=property_obj.type.name if property_obj.type else "Недвижимость",
+            operation_name=property_obj.operation.name if property_obj.operation else "",
+            city_name=property_obj.city.name if property_obj.city else "",
+            district_name=property_obj.district.name if property_obj.district else "",
+            price_byn=price.price_byn if price else None,
+            price_usd=price.price_usd if price else None,
+            total_area=property_obj.total_area,
+            rooms_count=property_obj.rooms_count,
+            description=property_obj.description,
+            photo_url=photo_url,
+        )
+    except Exception:
+        logger.exception("Не удалось опубликовать объявление в канал")
 
 
 class ModerationService:
@@ -96,6 +128,12 @@ class ModerationService:
         db.add(moderation_action)
         db.commit()
         db.refresh(property_obj)
+
+        # Автопубликация нового объявления в Telegram-канал (best-effort,
+        # не должно ломать модерацию при ошибке сети/канала).
+        if action == "approve" and old_status != property_obj.status:
+            _publish_to_channel(db, property_obj)
+
         return property_obj
 
     @staticmethod
