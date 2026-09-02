@@ -70,6 +70,9 @@ class Property(Base):
     floor = Column(Integer, nullable=True)
     total_floors = Column(Integer, nullable=True)
     build_year = Column(Integer, nullable=True)
+    # Новостройки: отдельный раздел (Krisha-style) — постройка, реализуемая
+    # застройщиком, а не вторичное жильё.
+    is_new_building = Column(Boolean, default=False, nullable=False)
     total_area = Column(Float, nullable=True)
     living_area = Column(Float, nullable=True)
     kitchen_area = Column(Float, nullable=True)

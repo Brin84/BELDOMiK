@@ -87,6 +87,7 @@ class PropertyBase(BaseSchema):
     balcony: bool = False
     parking: bool = False
     elevator: bool = False
+    is_new_building: bool = False
     description: str | None = None
 
 
@@ -117,6 +118,7 @@ class PropertyUpdate(BaseSchema):
     balcony: bool | None = None
     parking: bool | None = None
     elevator: bool | None = None
+    is_new_building: bool | None = None
     description: str | None = None
 
 
@@ -146,6 +148,7 @@ class PropertyShortRead(BaseSchema):
     balcony: bool = False
     parking: bool = False
     elevator: bool = False
+    is_new_building: bool = False
     description: str | None = None
     status: str
     views_count: int = 0
@@ -276,6 +279,7 @@ class PropertyFilterParams(BaseSchema):
     lng_max: float | None = None
     bbox: str | None = None  # "lat_min,lng_min,lat_max,lng_max"
     is_direct_only: bool = False  # без посредников (только собственники)
+    new_building_only: bool = False  # только новостройки (застройщики)
     sort_by: str = "created_at"
     sort_order: str = "desc"
     page: int = 1

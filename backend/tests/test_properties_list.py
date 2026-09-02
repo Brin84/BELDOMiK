@@ -37,15 +37,15 @@ def property_seed(db_session: Session, seed_test_data) -> dict:
     op_type = db_session.query(OperationType).filter(OperationType.name == "Продажа").first()
 
     rows = [
-        # (price, total_area, rooms, created_at, status, living_area, kitchen_area)
-        (250000, 65.0, 2, _utc(2026, 8, 20), PropertyStatus.PUBLISHED, 45.0, 9.0),  # A price 250k
-        (100000, 40.0, 1, _utc(2026, 8, 28), PropertyStatus.PUBLISHED, 28.0, 12.0),  # B price 100k
-        (150000, 90.0, 3, _utc(2026, 8, 25), PropertyStatus.PUBLISHED, 60.0, 8.0),  # C price 150k
-        (500000, 300.0, 5, _utc(2026, 8, 30), PropertyStatus.DRAFT, 200.0, 40.0),  # D hidden
+        # (price, total_area, rooms, created_at, status, living_area, kitchen_area, is_new_building)
+        (250000, 65.0, 2, _utc(2026, 8, 20), PropertyStatus.PUBLISHED, 45.0, 9.0, False),  # A price 250k
+        (100000, 40.0, 1, _utc(2026, 8, 28), PropertyStatus.PUBLISHED, 28.0, 12.0, False),  # B price 100k
+        (150000, 90.0, 3, _utc(2026, 8, 25), PropertyStatus.PUBLISHED, 60.0, 8.0, True),  # C price 150k (новостройка)
+        (500000, 300.0, 5, _utc(2026, 8, 30), PropertyStatus.DRAFT, 200.0, 40.0, False),  # D hidden
     ]
 
     created_ids = []
-    for price_byn, total_area, rooms_count, created_at, status, living_area, kitchen_area in rows:
+    for price_byn, total_area, rooms_count, created_at, status, living_area, kitchen_area, is_new_building in rows:
         prop = Property(
             owner_id=owner.id,
             type_id=prop_type.id,
@@ -59,6 +59,7 @@ def property_seed(db_session: Session, seed_test_data) -> dict:
             floor=3,
             total_floors=9,
             build_year=2018,
+            is_new_building=is_new_building,
             status=status,
             created_at=created_at,
             favorites_count=0,
@@ -217,6 +218,32 @@ class TestPropertiesList:
             property_seed["b"],
             property_seed["a"],
         ]
+
+    def test_new_building_only(self, client: TestClient, property_seed):
+        # Новостройки: только объявления с is_new_building=True (C).
+        resp = client.get("/api/v1/properties", params={"new_building_only": True})
+        assert resp.status_code == 200, resp.text
+        data = resp.json()
+        assert [p["id"] for p in data["items"]] == [property_seed["c"]]
+
+    def test_new_building_combined_with_type(self, client: TestClient, property_seed):
+        # Фильтр новостроек сочетается с типом/операцией и отдаёт поле is_new_building.
+        resp = client.get(
+            "/api/v1/properties", params={"new_building_only": True, "operation_id": 1}
+        )
+        assert resp.status_code == 200, resp.text
+        data = resp.json()
+        assert len(data["items"]) == 1
+        assert data["items"][0]["is_new_building"] is True
+
+    def test_all_properties_expose_is_new_building(self, client: TestClient, property_seed):
+        # Поле is_new_building присутствует в списке (batch-контракт для фронтенда).
+        resp = client.get("/api/v1/properties")
+        assert resp.status_code == 200, resp.text
+        data = resp.json()
+        assert all("is_new_building" in p for p in data["items"])
+        new_buildings = [p for p in data["items"] if p["is_new_building"]]
+        assert [p["id"] for p in new_buildings] == [property_seed["c"]]
 
     def test_living_area_range(self, client: TestClient, property_seed):
         # living: A=45, B=28, C=60

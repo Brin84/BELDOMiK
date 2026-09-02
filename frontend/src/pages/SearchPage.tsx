@@ -283,6 +283,8 @@ export function SearchPage() {
           return 'Лифт';
         case 'is_direct_only':
           return 'Без посредников';
+        case 'new_building_only':
+          return 'Новостройки';
         case 'metro_distance_max':
           return `Метро до ${value} м`;
         default:

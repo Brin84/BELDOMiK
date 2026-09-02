@@ -7,6 +7,28 @@ import { useGeographyStore } from '@/features/geography/geographyStore';
 import { useFavoritesStore } from '@/features/favorites';
 import { PropertyCard } from '@/entities/property';
 import { ListSkeleton, EmptyState, InlineError } from '@/shared/ui';
+import type { PropertyCategory } from '@/shared/api/types';
+
+// Krisha-style: текстовые ключи иконок в БД не являются эмодзи, поэтому
+// маппим категорию → эмодзи явно для плиток каталога.
+const CATEGORY_EMOJI: Record<PropertyCategory, string> = {
+  apartment: '🏢',
+  house: '🏡',
+  land: '🌳',
+  commercial: '🏬',
+  garage: '🚗',
+  dacha: '🏠',
+};
+
+// Категории, показываемые на главной (порядок Krisha-подобный).
+const HOME_CATEGORIES: PropertyCategory[] = [
+  'apartment',
+  'house',
+  'land',
+  'commercial',
+  'garage',
+  'dacha',
+];
 
 export function CatalogPage() {
   const { trigger } = useHaptics();
@@ -29,7 +51,14 @@ export function CatalogPage() {
     refresh,
     clearError,
   } = usePropertiesStore();
-  const { fetchRegions, fetchAllCities, cities, getCityById } = useGeographyStore();
+  const {
+    fetchRegions,
+    fetchAllCities,
+    fetchPropertyTypes,
+    cities,
+    propertyTypes,
+    getCityById,
+  } = useGeographyStore();
   const { toggleFavorite } = useFavoritesStore();
 
   // Initialize on mount
@@ -39,9 +68,39 @@ export function CatalogPage() {
 
     // Load geography data
     fetchRegions();
+    fetchPropertyTypes();
     // Load initial properties
     fetchProperties(true);
-  }, [fetchRegions, fetchProperties]);
+  }, [fetchRegions, fetchPropertyTypes, fetchProperties]);
+
+  // Переход на поиск с предзаполненными фильтрами (категория/новостройки).
+  // SearchPage применяет сохранённые фильтры через sessionStorage-механизм
+  // applySavedSearchFilters на монтировании.
+  const navigateWithFilters = useCallback(
+    (filters: Record<string, unknown>) => {
+      trigger('light');
+      sessionStorage.setItem('applySavedSearchFilters', JSON.stringify(filters));
+      navigate('/search');
+    },
+    [trigger, navigate]
+  );
+
+  const handleCategoryClick = useCallback(
+    (typeId: number) => {
+      navigateWithFilters({
+        type_id: typeId,
+        operation_id: filters.operation_id,
+      });
+    },
+    [navigateWithFilters, filters.operation_id]
+  );
+
+  const handleNewBuildingsClick = useCallback(() => {
+    navigateWithFilters({
+      new_building_only: true,
+      operation_id: filters.operation_id,
+    });
+  }, [navigateWithFilters, filters.operation_id]);
 
   // If a city filter is already active (e.g. returning from /search), make sure
   // the city name resolves and the selector can render it.
@@ -116,6 +175,67 @@ export function CatalogPage() {
           <span style={{ color: 'var(--tg-theme-hint-color)' }}>Что ищете?</span>
         </button>
       </div>
+
+      {/* Category Grid (Krisha-style home navigation) */}
+      {propertyTypes.length > 0 && (
+        <div className="grid grid-cols-2 gap-2" role="list" aria-label="Категории недвижимости">
+          {HOME_CATEGORIES.map((category) => {
+            const type = propertyTypes.find((t) => t.category === category);
+            if (!type) return null;
+            const isActive = filters.type_id === type.id;
+            return (
+              <button
+                key={type.id}
+                role="listitem"
+                onClick={() => handleCategoryClick(type.id)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors active:opacity-70"
+                style={{
+                  backgroundColor: isActive
+                    ? 'var(--tg-theme-button-color)'
+                    : 'var(--tg-theme-secondary-bg-color)',
+                  border: `1px solid ${isActive ? 'transparent' : 'var(--tg-theme-hint-color)'}`,
+                }}
+                aria-pressed={isActive}
+              >
+                <span className="text-2xl flex-shrink-0">{CATEGORY_EMOJI[category]}</span>
+                <span
+                  className="font-medium text-sm leading-tight"
+                  style={{
+                    color: isActive
+                      ? 'var(--tg-theme-button-text-color)'
+                      : 'var(--tg-theme-text-color)',
+                  }}
+                >
+                  {type.name_plural || type.name}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* New Buildings (новостройки) — отдельный раздел Krisha-style */}
+      <button
+        onClick={handleNewBuildingsClick}
+        className="w-full flex items-center gap-3 px-4 py-4 rounded-xl text-left transition-colors active:opacity-80 shadow-sm"
+        style={{
+          background: 'linear-gradient(135deg, var(--tg-theme-button-color), #2f6fed)',
+        }}
+        aria-label="Новостройки"
+      >
+        <span className="text-3xl">🏗️</span>
+        <span className="flex-1">
+          <span className="block font-bold" style={{ color: 'var(--tg-theme-button-text-color)' }}>
+            Новостройки
+          </span>
+          <span className="block text-sm" style={{ color: 'var(--tg-theme-button-text-color)', opacity: 0.85 }}>
+            Квартиры в новых домах от застройщиков
+          </span>
+        </span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} style={{ color: 'var(--tg-theme-button-text-color)' }}>
+          <polyline points="9 6 15 12 9 18" />
+        </svg>
+      </button>
 
       {/* Operation Toggle */}
       <div className="flex gap-2" role="group" aria-label="Тип сделки">

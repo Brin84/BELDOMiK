@@ -86,6 +86,7 @@ class PropertyService:
             balcony=data.balcony,
             parking=data.parking,
             elevator=data.elevator,
+            is_new_building=data.is_new_building,
             description=data.description,
             status=PropertyStatus.DRAFT,
         )
@@ -313,6 +314,8 @@ class PropertyService:
         if filters.is_direct_only:
             # «Без посредников» — только объявления собственников
             query = query.filter(Property.agency_id.is_(None))
+        if filters.new_building_only:
+            query = query.filter(Property.is_new_building.is_(True))
         if filters.metro_station_id:
             query = query.filter(Property.metro_station_id == filters.metro_station_id)
         if filters.metro_distance_max:
@@ -408,6 +411,7 @@ class PropertyService:
                 balcony=prop.balcony,
                 parking=prop.parking,
                 elevator=prop.elevator,
+                is_new_building=prop.is_new_building,
                 description=prop.description,
                 status=prop.status.value if hasattr(prop.status, 'value') else str(prop.status),
                 views_count=prop.views_count,

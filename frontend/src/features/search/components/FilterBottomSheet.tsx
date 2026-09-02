@@ -372,6 +372,27 @@ export function FilterBottomSheet({
             </button>
           </section>
 
+          {/* Новостройки */}
+          <section>
+            <button
+              onClick={() => handleBooleanFilterChange('new_building_only', filters.new_building_only ? undefined : true)}
+              className="w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-colors"
+              style={{
+                backgroundColor: filters.new_building_only
+                  ? 'var(--tg-theme-button-color)'
+                  : 'var(--tg-theme-secondary-bg-color)',
+                color: filters.new_building_only
+                  ? 'var(--tg-theme-button-text-color)'
+                  : 'var(--tg-theme-text-color)',
+                border: filters.new_building_only ? 'none' : '1px solid var(--tg-theme-hint-color)',
+              }}
+              aria-pressed={filters.new_building_only === true}
+            >
+              <span className="font-medium">🏗️ Новостройки</span>
+              <span className="text-sm" style={{ opacity: 0.7 }}>Квартиры от застройщиков</span>
+            </button>
+          </section>
+
           {/* Living Area */}
           <section>
             <h3 className="text-tg-text font-medium mb-3">Жилая площадь (м²)</h3>

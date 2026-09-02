@@ -57,6 +57,7 @@ def list_properties(
     with_photos_only: bool = Query(False),
     is_favorite_only: bool = Query(False),
     is_direct_only: bool = Query(False, description="only owner listings (без посредников)"),
+    new_building_only: bool = Query(False, description="only new-build listings (новостройки)"),
     sort_by: str = Query("created_at", description="property column to sort by"),
     sort_order: str = Query("desc", pattern="^(asc|desc)$"),
     current_user: User | None = Depends(get_optional_user),
@@ -96,6 +97,7 @@ def list_properties(
         with_photos_only=with_photos_only,
         is_favorite_only=is_favorite_only,
         is_direct_only=is_direct_only,
+        new_building_only=new_building_only,
         sort_by=sort_by,
         sort_order=sort_order,
     )

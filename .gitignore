@@ -59,8 +59,10 @@ frontend/.vite/
 .docker/
 
 # Alembic
-backend/alembic/versions/*.py
-!backend/alembic/versions/.gitkeep
+# Migration files MUST be tracked in git — they are copied into the container
+# (backend/Dockerfile COPY backend/alembic ./alembic) and applied on startup
+# via `alembic upgrade head`. Ignoring them would silently skip schema changes.
+backend/alembic/versions/*.pyc
 
 # Misc
 *.pem

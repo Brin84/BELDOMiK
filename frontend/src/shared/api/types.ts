@@ -102,6 +102,7 @@ export interface PropertyShort {
   balcony?: boolean;
   parking?: boolean;
   elevator?: boolean;
+  is_new_building?: boolean;
   description?: string;
   address?: string;
 }
@@ -229,6 +230,7 @@ export interface PropertyFilterParams {
   with_photos_only?: boolean;
   is_favorite_only?: boolean;
   is_direct_only?: boolean;
+  new_building_only?: boolean;
 }
 
 export interface PropertyCreate {
