@@ -144,7 +144,7 @@ class AuthService:
             db.add(profile)
             db.commit()
 
-            logger.info("New user created", user_id=user.id, tg_id=tg_id, role=user.role)
+            logger.info(f"New user created: user_id={user.id}, tg_id={tg_id}, role={user.role}")
             return user, True
 
         # Update existing user data (name can change)
