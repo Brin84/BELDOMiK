@@ -204,8 +204,9 @@ export function MyListingsPage() {
       mainButton.setParams({
         text: 'Выйти',
         is_visible: true,
-        color: 'var(--tg-theme-destructive-color, #ff3b30)',
-        text_color: 'var(--tg-theme-button-text-color, #ffffff)',
+        // Telegram MainButton accepts only hex color strings, not CSS var()
+        color: '#ff3b30',
+        text_color: '#ffffff',
       });
       const handleClick = () => {
         trigger('medium');
