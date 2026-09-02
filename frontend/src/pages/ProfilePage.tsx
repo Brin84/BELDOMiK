@@ -10,8 +10,8 @@ import type { UserRole } from '@/shared/api';
 import { useAdminStore } from '@/features/admin';
 
 export function ProfilePage() {
-  const { user, status, logout } = useAuthStore();
-  const { mainButton } = useTelegram();
+  const { user, status, logout, login } = useAuthStore();
+  const { mainButton, initData } = useTelegram();
   const { trigger } = useHaptics();
   const navigate = useNavigate();
   const isAuthenticated = status === 'authenticated' && user;
@@ -50,7 +50,10 @@ export function ProfilePage() {
           action={{
             label: 'Войти',
             onClick: () => {
-              // Auth is handled by TelegramProvider
+              if (initData) {
+                trigger('medium');
+                login(initData).catch(() => {});
+              }
             },
           }}
         />
