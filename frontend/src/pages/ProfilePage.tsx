@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { EmptyState } from '@/shared/ui';
 import { useAuthStore } from '@/features/auth';
-import { useHaptics } from '@/shared/lib/haptics';
+import { useHaptics, hapticMedium } from '@/shared/lib/haptics';
 import { useNavigate } from 'react-router-dom';
 import { SavedSearchList } from '@/features/saved-searches/components';
 import { useCollectionsStore } from '@/features/collections';
@@ -27,11 +27,15 @@ export function ProfilePage() {
 
   // Show main button with logout when authenticated.
   // Hidden on unmount so it doesn't linger on other pages (SPA navigation).
+  // Deps must stay stable (module-level hapticMedium, not the per-render
+  // `trigger` from useHaptics) — an unstable dep re-runs the effect on every
+  // render, so cleanup hide() races the show() and the button flickers/never
+  // stays visible.
   useEffect(() => {
     if (!mainButton || !isAuthenticated) return;
 
     const handleLogout = () => {
-      trigger('medium');
+      hapticMedium();
       logout();
     };
 
@@ -49,7 +53,7 @@ export function ProfilePage() {
       mainButton.offClick(handleLogout);
       mainButton.hide();
     };
-  }, [mainButton, isAuthenticated, trigger, logout]);
+  }, [mainButton, isAuthenticated, logout]);
 
   const handleApplySavedSearch = (filtersJson: string) => {
     trigger('selection');
