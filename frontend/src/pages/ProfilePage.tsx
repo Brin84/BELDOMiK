@@ -10,7 +10,7 @@ import type { UserRole } from '@/shared/api';
 import { useAdminStore } from '@/features/admin';
 
 export function ProfilePage() {
-  const { user, status, logout, login } = useAuthStore();
+  const { user, status, error, logout, login } = useAuthStore();
   const { mainButton, initData } = useTelegram();
   const { trigger } = useHaptics();
   const navigate = useNavigate();
@@ -42,21 +42,29 @@ export function ProfilePage() {
   };
 
   if (!isAuthenticated) {
+    const isAuthenticating = status === 'authenticating';
     return (
       <div className="p-4 space-y-6 pb-20">
         <EmptyState
           title="Войдите в профиль"
           description="Авторизуйтесь через Telegram, чтобы управлять объявлениями, избранным и настройками"
           action={{
-            label: 'Войти',
+            label: isAuthenticating ? 'Входим…' : 'Войти',
             onClick: () => {
-              if (initData) {
-                trigger('medium');
-                login(initData).catch(() => {});
-              }
+              if (!initData || isAuthenticating) return;
+              trigger('medium');
+              login(initData).catch(() => trigger('error'));
             },
           }}
         />
+        {status === 'error' && (
+          <p
+            className="text-center text-sm px-4"
+            style={{ color: 'var(--tg-theme-destructive-color, #ff3b30)' }}
+          >
+            Не удалось войти: {error || 'попробуйте ещё раз'}
+          </p>
+        )}
       </div>
     );
   }
