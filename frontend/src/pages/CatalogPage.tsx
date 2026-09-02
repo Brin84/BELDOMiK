@@ -237,6 +237,30 @@ export function CatalogPage() {
         </svg>
       </button>
 
+      {/* Mortgage Calculator — utility tile */}
+      <button
+        onClick={() => { trigger('light'); navigate('/mortgage'); }}
+        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors active:opacity-80"
+        style={{
+          backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+          border: '1px solid var(--tg-theme-hint-color)',
+        }}
+        aria-label="Ипотечный калькулятор"
+      >
+        <span className="text-2xl flex-shrink-0">🏦</span>
+        <span className="flex-1">
+          <span className="block font-medium text-sm" style={{ color: 'var(--tg-theme-text-color)' }}>
+            Ипотечный калькулятор
+          </span>
+          <span className="block text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            Рассчитайте платёж и переплату
+          </span>
+        </span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: 'var(--tg-theme-hint-color)' }}>
+          <polyline points="9 6 15 12 9 18" />
+        </svg>
+      </button>
+
       {/* Operation Toggle */}
       <div className="flex gap-2" role="group" aria-label="Тип сделки">
         <button

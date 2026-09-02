@@ -1,5 +1,6 @@
 """BELDOMiK database models."""
 
+from app.models.mortgage import MortgageCalculation
 from app.models.geography import (
     City,
     District,
@@ -56,6 +57,7 @@ __all__ = [
     "Favorite",
     "MetroLine",
     "MetroStation",
+    "MortgageCalculation",
     "ModerationAction",
     "ModerationActionType",
     "Neighborhood",

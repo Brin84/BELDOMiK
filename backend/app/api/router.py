@@ -9,6 +9,7 @@ from app.api.routes import (
     internal,
     moderation,
     monetization,
+    mortgage,
     properties,
     property_types,
     saved_searches,
@@ -28,5 +29,6 @@ api_router.include_router(search.router)
 api_router.include_router(moderation.router)
 api_router.include_router(monetization.router)
 api_router.include_router(analytics.router)
+api_router.include_router(mortgage.router)
 api_router.include_router(webhook.router)
 api_router.include_router(internal.router)
