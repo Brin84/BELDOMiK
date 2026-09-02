@@ -2,6 +2,7 @@ import { useEffect, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
+import { backHandlerBlocked } from '@/shared/lib/backButton';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useGeographyStore } from '@/features/geography/geographyStore';
 import { useFavoritesStore } from '@/features/favorites';
@@ -32,7 +33,7 @@ const HOME_CATEGORIES: PropertyCategory[] = [
 
 export function CatalogPage() {
   const { trigger } = useHaptics();
-  const { backButton, mainButton, hapticFeedback } = useTelegram();
+  const { mainButton, hapticFeedback } = useTelegram();
   const navigate = useNavigate();
   const [isCitySheetOpen, setIsCitySheetOpen] = useState(false);
   const {
@@ -63,7 +64,6 @@ export function CatalogPage() {
 
   // Initialize on mount
   useEffect(() => {
-    backButton.hide();
     mainButton.hide();
 
     // Load geography data
@@ -512,12 +512,14 @@ function CitySelectorSheet({ cities, currentCityId, onSelect, onClose }: CitySel
 
   useEffect(() => {
     if (backButton) {
+      backHandlerBlocked.current = true;
       backButton.show();
       const handleBack = () => onClose();
       backButton.onClick(handleBack);
       return () => {
         backButton.offClick(handleBack);
         backButton.hide();
+        backHandlerBlocked.current = false;
       };
     }
   }, [onClose, backButton]);

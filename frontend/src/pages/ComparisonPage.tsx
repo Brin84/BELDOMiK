@@ -120,7 +120,7 @@ const COMPARISON_ROWS: ComparisonRow[] = [
 
 export function ComparisonPage() {
   const { trigger } = useHaptics();
-  const { backButton, mainButton } = useTelegram();
+  const { mainButton } = useTelegram();
   const { user, status } = useAuthStore();
   const navigate = useNavigate();
   const {
@@ -147,22 +147,6 @@ export function ComparisonPage() {
     setDisplayProperties(properties);
   }, [properties]);
 
-  // Telegram BackButton
-  useEffect(() => {
-    if (backButton) {
-      backButton.show();
-      const handleBack = () => {
-        trigger('light');
-        clearComparison();
-        navigate(-1);
-      };
-      backButton.onClick(handleBack);
-      return () => {
-        backButton.hide();
-        backButton.offClick(handleBack);
-      };
-    }
-  }, [backButton, navigate, trigger, clearComparison]);
 
   // Telegram MainButton - clear all
   useEffect(() => {

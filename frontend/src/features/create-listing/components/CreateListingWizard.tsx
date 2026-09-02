@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useAuthStore } from '@/features/auth';
 import { useCreateListingStore } from '../createListingStore';
@@ -13,7 +12,6 @@ import { EmptyState } from '@/shared/ui';
 
 export function CreateListingWizard() {
   const { trigger } = useHaptics();
-  const { backButton } = useTelegram();
   const { user, status } = useAuthStore();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -54,33 +52,6 @@ export function CreateListingWizard() {
       navigate('/profile');
     }
   }, [isAuthenticated, navigate]);
-
-  // Handle back button globally
-  useEffect(() => {
-    if (backButton && currentStep > 1) {
-      backButton.show();
-      const handleBack = () => {
-        trigger('light');
-        prevStep();
-      };
-      backButton.onClick(handleBack);
-      return () => {
-        backButton.hide();
-        backButton.offClick(handleBack);
-      };
-    } else if (backButton && currentStep === 1) {
-      backButton.show();
-      const handleBack = () => {
-        trigger('light');
-        navigate('/profile');
-      };
-      backButton.onClick(handleBack);
-      return () => {
-        backButton.hide();
-        backButton.offClick(handleBack);
-      };
-    }
-  }, [backButton, currentStep, navigate, prevStep, trigger]);
 
   // Handle successful submission
   const handleSubmit = async () => {

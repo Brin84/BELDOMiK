@@ -23,7 +23,7 @@ export function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { trigger } = useHaptics();
-  const { backButton, mainButton } = useTelegram();
+  const { mainButton } = useTelegram();
   const { fetchPropertyDetail, propertyDetail, isLoadingDetail, errorDetail, clearPropertyDetail } = usePropertiesStore();
   const { toggleFavorite } = useFavoritesStore();
 
@@ -40,22 +40,6 @@ export function PropertyDetailPage() {
       clearPropertyDetail();
     };
   }, [propertyId, fetchPropertyDetail, clearPropertyDetail]);
-
-  // Telegram BackButton handling
-  useEffect(() => {
-    if (backButton) {
-      backButton.show();
-      const handleBack = () => {
-        trigger('light');
-        navigate(-1);
-      };
-      backButton.onClick(handleBack);
-      return () => {
-        backButton.offClick(handleBack);
-        backButton.hide();
-      };
-    }
-  }, [backButton, navigate, trigger]);
 
   // Telegram MainButton for primary action (contact/phone)
   useEffect(() => {

@@ -1,6 +1,4 @@
 import { useEffect } from 'react';
-import { useTelegram } from '@/app/providers/TelegramProvider';
-import { useHaptics } from '@/shared/lib/haptics';
 import { useAnalyticsStore } from '../analyticsStore';
 import type { CityStats, PopularProperty } from '../analyticsStore';
 
@@ -17,8 +15,6 @@ interface AnalyticsDashboardProps {
 }
 
 export function AnalyticsDashboard({ initialCityId }: AnalyticsDashboardProps) {
-  const { trigger } = useHaptics();
-  const { backButton } = useTelegram();
   const {
     marketOverview,
     cityStats,
@@ -48,21 +44,6 @@ export function AnalyticsDashboard({ initialCityId }: AnalyticsDashboardProps) {
     fetchTypeDistribution,
     initialCityId,
   ]);
-
-  useEffect(() => {
-    if (backButton) {
-      backButton.show();
-      const handleBack = () => {
-        trigger('light');
-        window.history.back();
-      };
-      backButton.onClick(handleBack);
-      return () => {
-        backButton.hide();
-        backButton.offClick(handleBack);
-      };
-    }
-  }, [backButton, trigger]);
 
   return (
     <div className="min-h-screen pb-24" style={{ backgroundColor: 'var(--tg-theme-bg-color)' }}>

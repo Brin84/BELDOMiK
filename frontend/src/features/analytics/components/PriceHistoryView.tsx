@@ -1,6 +1,4 @@
 import { useEffect } from 'react';
-import { useTelegram } from '@/app/providers/TelegramProvider';
-import { useHaptics } from '@/shared/lib/haptics';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useAnalyticsStore } from '../analyticsStore';
 import type { PropertyPrice } from '@/shared/api/types';
@@ -24,8 +22,6 @@ interface PriceHistoryViewProps {
 }
 
 export function PriceHistoryView({ propertyId }: PriceHistoryViewProps) {
-  const { trigger } = useHaptics();
-  const { backButton } = useTelegram();
   const { propertyDetail, fetchPropertyDetail } = usePropertiesStore();
   const { priceDistribution, fetchPriceDistribution } = useAnalyticsStore();
 
@@ -43,21 +39,6 @@ export function PriceHistoryView({ propertyId }: PriceHistoryViewProps) {
       }
     }
   }, [fetchPriceDistribution, propertyDetail?.city, propertyDetail?.property_type]);
-
-  useEffect(() => {
-    if (backButton) {
-      backButton.show();
-      const handleBack = () => {
-        trigger('light');
-        window.history.back();
-      };
-      backButton.onClick(handleBack);
-      return () => {
-        backButton.hide();
-        backButton.offClick(handleBack);
-      };
-    }
-  }, [backButton, trigger]);
 
   const priceHistory: PropertyPrice[] = propertyDetail?.price_history || [];
   const sortedHistory = [...priceHistory].sort((a, b) =>

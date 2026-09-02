@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
+import { backHandlerBlocked } from '@/shared/lib/backButton';
 import type { PropertyFilterParams } from '@/shared/api/types';
 
 interface FilterBottomSheetProps {
@@ -27,11 +28,12 @@ export function FilterBottomSheet({
   const { trigger } = useHaptics();
   const { backButton } = useTelegram();
 
-  // Handle back button in Telegram
+  // Handle back button in Telegram — modal takes over, blocks AppShell's handler
   useEffect(() => {
     if (!isOpen) return;
 
     if (backButton) {
+      backHandlerBlocked.current = true;
       backButton.show();
       const handleBack = () => {
         trigger('light');
@@ -41,6 +43,7 @@ export function FilterBottomSheet({
       return () => {
         backButton.offClick(handleBack);
         backButton.hide();
+        backHandlerBlocked.current = false;
       };
     }
   }, [isOpen, onClose, trigger, backButton]);

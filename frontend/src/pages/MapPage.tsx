@@ -23,7 +23,6 @@ const DEFAULT_ZOOM = 10;
 export function MapPage() {
   const { trigger } = useHaptics();
   const {
-    backButton,
     mainButton,
     hapticFeedback,
     viewportStableHeight,
@@ -81,7 +80,6 @@ export function MapPage() {
 
   // Load geography data on mount
   useEffect(() => {
-    backButton.hide();
     mainButton.hide();
     fetchRegions();
     fetchPropertyTypes();

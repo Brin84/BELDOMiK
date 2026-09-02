@@ -153,7 +153,7 @@ function LoadingCard() {
 
 export function MyListingsPage() {
   const { trigger } = useHaptics();
-  const { backButton, mainButton } = useTelegram();
+  const { mainButton } = useTelegram();
   const { user, status, logout } = useAuthStore();
   const navigate = useNavigate();
   const [state, setState] = useState<MyListingsState>({
@@ -182,21 +182,6 @@ export function MyListingsPage() {
     loadProperties();
   }, [isAuthenticated, user?.id]);
 
-  // Telegram BackButton
-  useEffect(() => {
-    if (backButton) {
-      backButton.show();
-      const handleBack = () => {
-        trigger('light');
-        navigate(-1);
-      };
-      backButton.onClick(handleBack);
-      return () => {
-        backButton.hide();
-        backButton.offClick(handleBack);
-      };
-    }
-  }, [backButton, navigate, trigger]);
 
   // Telegram MainButton - logout
   useEffect(() => {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
+import { backHandlerBlocked } from '@/shared/lib/backButton';
 import { useCollectionsStore } from '@/features/collections';
 import { useAuthStore } from '@/features/auth';
 
@@ -43,15 +44,17 @@ export function CollectionPickerModal({ propertyId, isOpen, onClose }: Collectio
     }
   }, [isOpen, collections]);
 
-  // Telegram BackButton
+  // Telegram BackButton — modal takes over while open, blocks AppShell's handler
   useEffect(() => {
     if (backButton && isOpen) {
+      backHandlerBlocked.current = true;
       backButton.show();
       const handleBack = () => onClose();
       backButton.onClick(handleBack);
       return () => {
         backButton.offClick(handleBack);
         backButton.hide();
+        backHandlerBlocked.current = false;
       };
     }
   }, [backButton, isOpen, onClose]);

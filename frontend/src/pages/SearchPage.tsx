@@ -19,7 +19,7 @@ const OPERATION_OPTIONS = [
 
 export function SearchPage() {
   const { trigger } = useHaptics();
-  const { backButton, mainButton, hapticFeedback /*, themeParams */ } = useTelegram();
+  const { mainButton, hapticFeedback /*, themeParams */ } = useTelegram();
   const {
     properties,
     isLoading,
@@ -99,7 +99,6 @@ export function SearchPage() {
 
   // Load geography data on mount
   useEffect(() => {
-    backButton.hide();
     mainButton.hide();
     fetchRegions();
     fetchPropertyTypes();

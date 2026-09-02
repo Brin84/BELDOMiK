@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
+import { backHandlerBlocked } from '@/shared/lib/backButton';
 import { useSavedSearchesStore } from '../savedSearchesStore';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import type { SavedSearch, SavedSearchCreate, SavedSearchUpdate } from '@/shared/api/types';
@@ -65,6 +66,7 @@ export function SavedSearchForm({ initialData, onClose, onSuccess }: SavedSearch
 
   useEffect(() => {
     if (backButton) {
+      backHandlerBlocked.current = true;
       backButton.show();
       const handleBack = () => {
         trigger('light');
@@ -74,6 +76,7 @@ export function SavedSearchForm({ initialData, onClose, onSuccess }: SavedSearch
       return () => {
         backButton.hide();
         backButton.offClick(handleBack);
+        backHandlerBlocked.current = false;
       };
     }
   }, [backButton, trigger, onClose]);
