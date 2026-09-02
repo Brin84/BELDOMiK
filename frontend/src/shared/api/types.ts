@@ -370,6 +370,58 @@ export interface SavedSearchUpdate {
   is_active?: boolean;
 }
 
+export interface Collection {
+  id: number;
+  user_id: number;
+  name: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+  property_count: number;
+}
+
+export interface CollectionDetail extends Collection {
+  items: PropertyShort[];
+}
+
+export interface CollectionCreate {
+  name: string;
+  description?: string;
+}
+
+export interface PropertyNote {
+  id: number;
+  user_id: number;
+  property_id: number;
+  text: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ViewingStatus = 'pending' | 'confirmed' | 'cancelled';
+
+export interface ViewingRequest {
+  id: number;
+  property_id: number;
+  user_id: number | null;
+  name: string;
+  phone: string;
+  preferred_date: string | null;
+  preferred_time: string | null;
+  comment: string | null;
+  status: ViewingStatus;
+  created_at: string;
+}
+
+export interface ViewingRequestCreate {
+  property_id: number;
+  name: string;
+  phone: string;
+  preferred_date?: string | null;
+  preferred_time?: string | null;
+  comment?: string | null;
+}
+
 export interface Promotion {
   id: number;
   name: string;

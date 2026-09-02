@@ -1,6 +1,9 @@
 """BELDOMiK database models."""
 
+from app.models.collection import Collection, CollectionItem
 from app.models.mortgage import MortgageCalculation
+from app.models.property_note import PropertyNote
+from app.models.viewing import ViewingRequest
 from app.models.geography import (
     City,
     District,
@@ -53,6 +56,8 @@ __all__ = [
     "Agency",
     "AgencyMember",
     "City",
+    "Collection",
+    "CollectionItem",
     "District",
     "Favorite",
     "MetroLine",
@@ -70,6 +75,7 @@ __all__ = [
     "Property",
     "PropertyContact",
     "PropertyFeature",
+    "PropertyNote",
     "PropertyPhoto",
     "PropertyPrice",
     "PropertyStatus",
@@ -86,4 +92,5 @@ __all__ = [
     "SubscriptionStatus",
     "User",
     "UserProfile",
+    "ViewingRequest",
 ]

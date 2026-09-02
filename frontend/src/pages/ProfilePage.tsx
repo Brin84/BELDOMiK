@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { EmptyState } from '@/shared/ui';
 import { useAuthStore } from '@/features/auth';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useNavigate } from 'react-router-dom';
 import { SavedSearchList } from '@/features/saved-searches/components';
+import { useCollectionsStore } from '@/features/collections';
 import type { UserRole } from '@/shared/api';
 
 export function ProfilePage() {
@@ -12,6 +14,14 @@ export function ProfilePage() {
   const { trigger } = useHaptics();
   const navigate = useNavigate();
   const isAuthenticated = status === 'authenticated' && user;
+
+  const { collections, fetchCollections } = useCollectionsStore();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchCollections();
+    }
+  }, [isAuthenticated, fetchCollections]);
 
   const handleApplySavedSearch = (filtersJson: string) => {
     trigger('selection');
@@ -188,6 +198,62 @@ export function ProfilePage() {
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
             <span style={{ color: 'var(--tg-theme-text-color)' }}>❤️ Избранное</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-tg-text text-lg font-semibold mb-3">📁 Подборки</h2>
+        <div className="space-y-3">
+          <button
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
+            style={{
+              backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+            }}
+            onClick={() => {
+              trigger('light');
+              navigate('/collections');
+            }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
+            <span style={{ color: 'var(--tg-theme-text-color)' }}>Все подборки</span>
+            {collections.length > 0 && (
+              <span className="ml-auto text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--tg-theme-button-color)', color: 'var(--tg-theme-button-text-color)' }}>
+                {collections.length}
+              </span>
+            )}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-tg-text text-lg font-semibold mb-3">📅 Записи на осмотр</h2>
+        <div className="space-y-3">
+          <button
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
+            style={{
+              backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+            }}
+            onClick={() => {
+              trigger('light');
+              navigate('/viewings');
+            }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <span style={{ color: 'var(--tg-theme-text-color)' }}>Входящие заявки</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>

@@ -12,6 +12,9 @@ import { CreateListingPage } from '@/features/create-listing/components/CreateLi
 import { AnalyticsPage } from '@/pages/AnalyticsPage';
 import { MyListingsPage } from '@/features/my-listings/MyListingsPage';
 import { ComparisonPage } from '@/pages/ComparisonPage';
+import { CollectionsPage } from '@/pages/CollectionsPage';
+import { CollectionDetailPage } from '@/pages/CollectionDetailPage';
+import { ViewingsPage } from '@/pages/ViewingsPage';
 import { ToastProvider } from '@/shared/ui/Toast';
 
 // Lazy load MapPage for code splitting
@@ -50,6 +53,9 @@ export function App() {
         <Route path="/create-listing" element={<CreateListingPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/my-listings" element={<MyListingsPage />} />
+        <Route path="/collections" element={<CollectionsPage />} />
+        <Route path="/collections/:id" element={<CollectionDetailPage />} />
+        <Route path="/viewings" element={<ViewingsPage />} />
         <Route path="/comparison" element={<ComparisonPage />} />
         <Route path="/mortgage" element={<MortgagePage />} />
         <Route path="*" element={<NotFoundPage />} />

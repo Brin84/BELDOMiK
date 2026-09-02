@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
@@ -15,6 +15,9 @@ import { PropertyOwner } from '@/entities/property/components/PropertyOwner';
 import { PropertyContacts } from '@/entities/property/components/PropertyContacts';
 import { PropertyActions } from '@/entities/property/components/PropertyActions';
 import { PriceHistoryView } from '@/features/analytics/components/PriceHistoryView';
+import { CollectionPickerModal } from '@/features/collections/CollectionPickerModal';
+import { PropertyNoteSection } from '@/features/notes/PropertyNoteSection';
+import { ViewingRequestForm } from '@/features/viewings/ViewingRequestForm';
 
 export function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +26,8 @@ export function PropertyDetailPage() {
   const { backButton, mainButton } = useTelegram();
   const { fetchPropertyDetail, propertyDetail, isLoadingDetail, errorDetail, clearPropertyDetail } = usePropertiesStore();
   const { toggleFavorite } = useFavoritesStore();
+
+  const [showCollectionPicker, setShowCollectionPicker] = useState(false);
 
   const propertyId = id ? parseInt(id, 10) : null;
 
@@ -164,6 +169,35 @@ export function PropertyDetailPage() {
             // Error already handled in store
           }
         }}
+      />
+
+      {/* Add to Collection */}
+      <button
+        onClick={() => { trigger('light'); setShowCollectionPicker(true); }}
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-medium"
+        style={{
+          backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+          border: '1px solid var(--tg-theme-hint-color)',
+          color: 'var(--tg-theme-button-color)',
+        }}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+        </svg>
+        📁 В подборку
+      </button>
+
+      {/* Note Section */}
+      <PropertyNoteSection propertyId={property.id} />
+
+      {/* Viewing Request */}
+      <ViewingRequestForm propertyId={property.id} />
+
+      {/* Collection Picker Modal */}
+      <CollectionPickerModal
+        propertyId={property.id}
+        isOpen={showCollectionPicker}
+        onClose={() => setShowCollectionPicker(false)}
       />
 
       {/* Price History */}

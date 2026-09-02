@@ -36,6 +36,25 @@ export const API_ENDPOINTS = {
     check: (id: number) => `/api/v1/favorites/check/${id}`,
     ids: '/api/v1/favorites/ids',
   },
+  collections: {
+    list: '/api/v1/collections',
+    create: '/api/v1/collections',
+    detail: (id: number) => `/api/v1/collections/${id}`,
+    update: (id: number) => `/api/v1/collections/${id}`,
+    delete: (id: number) => `/api/v1/collections/${id}`,
+    addItem: (id: number) => `/api/v1/collections/${id}/items`,
+    removeItem: (id: number, propertyId: number) => `/api/v1/collections/${id}/items/${propertyId}`,
+  },
+  notes: {
+    upsert: (propertyId: number) => `/api/v1/properties/${propertyId}/note`,
+    get: (propertyId: number) => `/api/v1/properties/${propertyId}/note`,
+    delete: (propertyId: number) => `/api/v1/properties/${propertyId}/note`,
+  },
+  viewings: {
+    create: '/api/v1/viewings',
+    list: '/api/v1/viewings',
+    updateStatus: (id: number) => `/api/v1/viewings/${id}`,
+  },
   savedSearches: {
     list: '/api/v1/saved-searches',
     create: '/api/v1/saved-searches',
