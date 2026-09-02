@@ -43,6 +43,14 @@ export function CatalogPage() {
     fetchProperties(true);
   }, [fetchRegions, fetchProperties]);
 
+  // If a city filter is already active (e.g. returning from /search), make sure
+  // the city name resolves and the selector can render it.
+  useEffect(() => {
+    if (filters.city_id) {
+      fetchAllCities();
+    }
+  }, [filters.city_id, fetchAllCities]);
+
   // Load all cities when the city selector opens
   useEffect(() => {
     if (isCitySheetOpen) {
