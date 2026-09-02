@@ -20,16 +20,11 @@ def get_property_types(db: Session = Depends(get_db)):
     )
 
 
-@router.get("/{type_id}", response_model=PropertyTypeResponse)
-def get_property_type(type_id: int, db: Session = Depends(get_db)):
-    """Get a specific property type."""
-    property_type = db.query(PropertyType).filter(PropertyType.id == type_id).first()
-    if not property_type:
-        raise HTTPException(status_code=404, detail="Property type not found")
-    return property_type
+# NOTE: literal routes (/operations, /operations/list, /operations/{id})
+# MUST be declared BEFORE /{type_id}, otherwise FastAPI matches "/operations"
+# against /{type_id} first and returns a 422 int-parse error.
 
-
-@router.get("/operations/list", response_model=list[OperationTypeResponse])
+@router.get("/operations", response_model=list[OperationTypeResponse])
 def get_operations(db: Session = Depends(get_db)):
     """Get all operation types."""
     return (
@@ -40,6 +35,12 @@ def get_operations(db: Session = Depends(get_db)):
     )
 
 
+@router.get("/operations/list", response_model=list[OperationTypeResponse])
+def get_operations_list(db: Session = Depends(get_db)):
+    """Alias of /operations (kept for backward compatibility)."""
+    return get_operations(db)
+
+
 @router.get("/operations/{operation_id}", response_model=OperationTypeResponse)
 def get_operation(operation_id: int, db: Session = Depends(get_db)):
     """Get a specific operation type."""
@@ -47,3 +48,12 @@ def get_operation(operation_id: int, db: Session = Depends(get_db)):
     if not operation:
         raise HTTPException(status_code=404, detail="Operation type not found")
     return operation
+
+
+@router.get("/{type_id}", response_model=PropertyTypeResponse)
+def get_property_type(type_id: int, db: Session = Depends(get_db)):
+    """Get a specific property type."""
+    property_type = db.query(PropertyType).filter(PropertyType.id == type_id).first()
+    if not property_type:
+        raise HTTPException(status_code=404, detail="Property type not found")
+    return property_type
