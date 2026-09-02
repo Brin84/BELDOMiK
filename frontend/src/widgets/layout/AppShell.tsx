@@ -17,9 +17,14 @@ export function AppShell({ children }: { children?: ReactNode }) {
 
     const hasTokens = !!accessToken;
     if (hasTokens) {
-      // Restoring session from persisted tokens
+      // Restoring session from persisted tokens; if the refresh token
+      // expired, fall back to a fresh login with Telegram initData.
       authAttempted.current = true;
-      refresh().catch(() => {});
+      refresh().then((ok) => {
+        if (!ok && initData) {
+          login(initData).catch(() => {});
+        }
+      });
     } else if (initData) {
       // No tokens but Telegram initData available — authenticate
       authAttempted.current = true;

@@ -232,10 +232,13 @@ describe('useAuthStore', () => {
         refresh_token: 'new-refresh-token',
       };
       (api.post as vi.Mock).mockResolvedValue(newTokenResponse);
+      // refresh() re-fetches the user via /auth/me
+      (api.get as vi.Mock).mockResolvedValue(mockUser);
 
       const result = await useAuthStore.getState().refresh();
 
       const s = useAuthStore.getState();
+      expect(api.get).toHaveBeenCalledWith(API_ENDPOINTS.auth.me);
       expect(result).toBe(true);
       expect(s.accessToken).toBe('new-access-token');
       expect(s.refreshToken).toBe('new-refresh-token');
@@ -273,13 +276,13 @@ describe('useAuthStore', () => {
       expect(useAuthStore.getState().user).toEqual(mockUser);
     });
 
-    it('sets user to null on fetch failure', async () => {
+    it('keeps current user on transient fetch failure', async () => {
       useAuthStore.setState({ user: mockUser });
-      (api.get as vi.Mock).mockRejectedValue(new Error('Unauthorized'));
+      (api.get as vi.Mock).mockRejectedValue(new Error('Network error'));
 
       await useAuthStore.getState().fetchUser();
 
-      expect(useAuthStore.getState().user).toBeNull();
+      expect(useAuthStore.getState().user).toEqual(mockUser);
     });
 
     it('does not throw on fetch failure', async () => {

@@ -67,9 +67,10 @@ export const useAuthStore = create<AuthState>()(
           set({
             accessToken: response.access_token,
             refreshToken: response.refresh_token,
-            user: response.user,
             status: 'authenticated',
           });
+          // /auth/refresh does not return user — fetch it separately
+          await get().fetchUser();
           return true;
         } catch {
           set({ accessToken: null, refreshToken: null, user: null, status: 'idle' });
@@ -82,8 +83,8 @@ export const useAuthStore = create<AuthState>()(
           const user = await api.get<User>(API_ENDPOINTS.auth.me);
           set({ user });
         } catch {
-          // If fetch fails, token might be invalid
-          set({ user: null });
+          // Keep previously known user on transient failures; the api
+          // client's 401 interceptor handles real session expiry.
         }
       },
 
