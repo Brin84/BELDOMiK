@@ -148,6 +148,12 @@ if FRONTEND_DIST:
         if index_path.is_file():
             return FileResponse(str(index_path), media_type="text/html")
         return JSONResponse({"detail": "Frontend not built"}, status_code=404)
+
+    # Root-level static files from the SPA build (favicon, manifest, etc.).
+    # Mounted LAST so "/" (explicit route above), /api/* and /assets/* keep
+    # their dedicated handlers; the SPA fallback still serves index.html for
+    # client-side routes (extension-less 404s from this mount).
+    app.mount("/", StaticFiles(directory=str(dist_path), html=False), name="spa_static")
 else:
 
     @app.get("/")
