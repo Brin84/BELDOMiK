@@ -185,7 +185,7 @@ export function PropertyDetailPage() {
       />
 
       {/* Price History */}
-      <PriceHistoryView propertyId={property.id} />
+      <PriceHistoryView />
     </div>
   );
 }

@@ -17,17 +17,13 @@ function formatDate(isoDate: string): string {
   return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-interface PriceHistoryViewProps {
-  propertyId: number;
-}
-
-export function PriceHistoryView({ propertyId }: PriceHistoryViewProps) {
-  const { propertyDetail, fetchPropertyDetail } = usePropertiesStore();
+export function PriceHistoryView() {
+  // propertyDetail comes from the store already loaded by the parent
+  // PropertyDetailPage. Do NOT re-fetch it here — that would toggle
+  // isLoadingDetail, bounce the page back to its skeleton, unmount this
+  // component, and re-fetch forever (an infinite request loop).
+  const { propertyDetail } = usePropertiesStore();
   const { priceDistribution, fetchPriceDistribution } = useAnalyticsStore();
-
-  useEffect(() => {
-    fetchPropertyDetail(propertyId);
-  }, [fetchPropertyDetail, propertyId]);
 
   useEffect(() => {
     if (propertyDetail?.city) {
