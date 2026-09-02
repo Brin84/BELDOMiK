@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useDebounce } from '@/shared/lib/hooks';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
@@ -19,16 +18,12 @@ const OPERATION_OPTIONS = [
 
 export function SearchPage() {
   const { trigger } = useHaptics();
-  const { mainButton, hapticFeedback /*, themeParams */ } = useTelegram();
   const {
     properties,
     isLoading,
-    isLoadingMore,
     error,
-    hasMore,
     total,
     filters,
-    loadMore,
     setFilters,
     resetFilters,
     setOperation,
@@ -99,7 +94,6 @@ export function SearchPage() {
 
   // Load geography data on mount
   useEffect(() => {
-    mainButton.hide();
     fetchRegions();
     fetchPropertyTypes();
     fetchOperationTypes();
@@ -329,46 +323,11 @@ export function SearchPage() {
     [trigger, toggleFavorite]
   );
 
-  // Handle load more
-  const handleLoadMore = useCallback(() => {
-    hapticFeedback?.impactOccurred('light');
-    loadMore();
-  }, [loadMore, hapticFeedback]);
-
   // Handle retry
   const handleRetry = useCallback(() => {
     clearError();
     refresh();
   }, [clearError, refresh]);
-
-  // Update main button when properties exist
-  useEffect(() => {
-    if (properties.length > 0) {
-      mainButton.setParams({
-        text: `Показать ещё ${Math.min(20, total - properties.length)} из ${total}`,
-        is_visible: true,
-        is_active: hasMore,
-      });
-      mainButton.show();
-    } else {
-      mainButton.hide();
-    }
-  }, [properties.length, total, hasMore, mainButton]);
-
-  // Main button click handler
-  const handleMainButtonClick = useCallback(() => {
-    hapticFeedback?.impactOccurred('light');
-    loadMore();
-  }, [loadMore, hapticFeedback]);
-
-  useEffect(() => {
-    if (mainButton) {
-      mainButton.onClick(handleMainButtonClick);
-      return () => {
-        mainButton.offClick(handleMainButtonClick);
-      };
-    }
-  }, [mainButton, handleMainButtonClick]);
 
   // Current location display
   const currentCity = filters.city_id ? getCityById(filters.city_id) : null;
@@ -597,35 +556,7 @@ export function SearchPage() {
             ))}
           </div>
 
-          {/* Load More / Pagination */}
-          {hasMore && (
-            <div className="pt-4">
-              <button
-                onClick={handleLoadMore}
-                disabled={isLoadingMore}
-                className="w-full py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
-                style={{
-                  backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                  border: '1px solid var(--tg-theme-hint-color)',
-                  color: 'var(--tg-theme-text-color)',
-                }}
-              >
-                {isLoadingMore ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Загрузка...
-                  </>
-                ) : (
-                  `Показать ещё ${Math.min(20, total - properties.length)} из ${total}`
-                )}
-              </button>
-            </div>
-          )}
-
-          {!hasMore && properties.length > 0 && (
+          {properties.length > 0 && (
             <p className="text-center text-tg-hint text-sm py-4" style={{ color: 'var(--tg-theme-hint-color)' }}>
               Все {total} объявлений загружены
             </p>

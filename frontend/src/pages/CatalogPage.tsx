@@ -33,20 +33,17 @@ const HOME_CATEGORIES: PropertyCategory[] = [
 
 export function CatalogPage() {
   const { trigger } = useHaptics();
-  const { mainButton, hapticFeedback } = useTelegram();
+  const { hapticFeedback } = useTelegram();
   const navigate = useNavigate();
   const [isCitySheetOpen, setIsCitySheetOpen] = useState(false);
   const {
     properties,
     hotProperties,
     isLoading,
-    isLoadingMore,
     error,
-    hasMore,
     total,
     filters,
     fetchProperties,
-    loadMore,
     setOperation,
     setCity,
     refresh,
@@ -64,8 +61,6 @@ export function CatalogPage() {
 
   // Initialize on mount
   useEffect(() => {
-    mainButton.hide();
-
     // Load geography data
     fetchRegions();
     fetchPropertyTypes();
@@ -116,29 +111,6 @@ export function CatalogPage() {
       fetchAllCities();
     }
   }, [isCitySheetOpen, fetchAllCities]);
-
-  // Show main button when there are properties
-  useEffect(() => {
-    if (properties.length > 0) {
-      mainButton.setParams({
-        text: `Показать еще ${properties.length} из ${total}`,
-        is_visible: true,
-        is_active: hasMore,
-      });
-      mainButton.show();
-    } else {
-      mainButton.hide();
-    }
-
-    return () => {
-      mainButton.hide();
-    };
-  }, [properties.length, total, hasMore]);
-
-  const handleMainButtonClick = useCallback(() => {
-    hapticFeedback?.impactOccurred('light');
-    loadMore();
-  }, [loadMore, hapticFeedback]);
 
   const handleOperationChange = useCallback((operationId: number) => {
     hapticFeedback?.impactOccurred('light');
@@ -455,35 +427,7 @@ export function CatalogPage() {
               ))}
             </div>
 
-            {/* Load More / Pagination */}
-            {hasMore && (
-              <div className="pt-4">
-                <button
-                  onClick={handleMainButtonClick}
-                  disabled={isLoadingMore}
-                  className="w-full py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
-                  style={{
-                    backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                    border: '1px solid var(--tg-theme-hint-color)',
-                    color: 'var(--tg-theme-text-color)',
-                  }}
-                >
-                  {isLoadingMore ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Загрузка...
-                    </>
-                  ) : (
-                    `Показать ещё ${Math.min(20, total - properties.length)} из ${total}`
-                  )}
-                </button>
-              </div>
-            )}
-
-            {!hasMore && properties.length > 0 && (
+            {properties.length > 0 && (
               <p className="text-center text-tg-hint text-sm py-4" style={{ color: 'var(--tg-theme-hint-color)' }}>
                 Все {total} объявлений загружены
               </p>

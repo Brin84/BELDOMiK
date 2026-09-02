@@ -1,5 +1,4 @@
 import { useEffect, useCallback } from 'react';
-import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useAuthStore } from '@/features/auth';
 import { useFavoritesStore } from '@/features/favorites';
@@ -10,18 +9,14 @@ import { ListSkeleton, EmptyState, InlineError } from '@/shared/ui';
 export function FavoritesPage() {
   const { trigger } = useHaptics();
   const { user, status } = useAuthStore();
-  const { mainButton } = useTelegram();
   const isAuthenticated = status === 'authenticated' && user;
 
   const {
     favorites,
     isLoading,
-    isLoadingMore,
     error,
-    hasMore,
     total,
     fetchFavorites,
-    loadMore,
     clearError,
   } = useFavoritesStore();
 
@@ -33,31 +28,6 @@ export function FavoritesPage() {
       fetchFavorites(true);
     }
   }, [isAuthenticated, fetchFavorites]);
-
-  // Show main button when there are favorites
-  useEffect(() => {
-    if (mainButton) {
-      if (favorites.length > 0) {
-        mainButton.setParams({
-          text: `Показать ещё ${Math.min(20, total - favorites.length)} из ${total}`,
-          is_visible: true,
-          is_active: hasMore,
-        });
-        mainButton.show();
-      } else {
-        mainButton.hide();
-      }
-
-      return () => {
-        mainButton.hide();
-      };
-    }
-  }, [favorites.length, total, hasMore, mainButton]);
-
-  const handleMainButtonClick = useCallback(() => {
-    trigger('light');
-    loadMore();
-  }, [loadMore, trigger]);
 
   const handleRetry = useCallback(() => {
     clearError();
@@ -129,35 +99,7 @@ export function FavoritesPage() {
             ))}
           </div>
 
-          {/* Load More / Pagination */}
-          {hasMore && (
-            <div className="pt-4">
-              <button
-                onClick={handleMainButtonClick}
-                disabled={isLoadingMore}
-                className="w-full py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
-                style={{
-                  backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                  border: '1px solid var(--tg-theme-hint-color)',
-                  color: 'var(--tg-theme-text-color)',
-                }}
-              >
-                {isLoadingMore ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Загрузка...
-                  </>
-                ) : (
-                  `Показать ещё ${Math.min(20, total - favorites.length)} из ${total}`
-                )}
-              </button>
-            </div>
-          )}
-
-          {!hasMore && favorites.length > 0 && (
+          {favorites.length > 0 && (
             <p className="text-center text-tg-hint text-sm py-4" style={{ color: 'var(--tg-theme-hint-color)' }}>
               Все {total} избранных загружены
             </p>

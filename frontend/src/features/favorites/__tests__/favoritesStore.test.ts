@@ -74,7 +74,7 @@ describe('useFavoritesStore', () => {
       favorites: [],
       favoriteIds: new Set(),
       page: 1,
-      pageSize: 20,
+      pageSize: 500,
       total: 0,
       totalPages: 0,
       hasMore: true,
@@ -103,7 +103,7 @@ describe('useFavoritesStore', () => {
 
       await useFavoritesStore.getState().fetchFavorites(true);
 
-      expect(api.get).toHaveBeenCalledWith('/api/v1/favorites', { page: 1, page_size: 20 });
+      expect(api.get).toHaveBeenCalledWith('/api/v1/favorites', { page: 1, page_size: 500 });
       const state = useFavoritesStore.getState();
       expect(state.favorites).toHaveLength(1);
       expect(state.favorites[0].id).toBe(1);

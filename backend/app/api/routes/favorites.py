@@ -49,7 +49,7 @@ def remove_favorite(
 @router.get("", response_model=FavoritesListResponse)
 def list_favorites(
     page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    page_size: int = Query(500, ge=1, le=500),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

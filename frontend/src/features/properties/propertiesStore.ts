@@ -49,7 +49,7 @@ export interface PropertiesState {
 
 const defaultFilters: PropertyFilterParams = {
   page: 1,
-  page_size: 20,
+  page_size: 500,
   sort_by: 'created_at_desc',
   sort_order: 'desc',
 };
@@ -102,7 +102,7 @@ export const usePropertiesStore = create<PropertiesState>((set, get) => ({
   propertyDetail: null,
 
   page: 1,
-  pageSize: 20,
+  pageSize: 500,
   total: 0,
   totalPages: 0,
 

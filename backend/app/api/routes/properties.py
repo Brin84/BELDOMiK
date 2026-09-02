@@ -23,7 +23,7 @@ router = APIRouter(prefix="/properties", tags=["Properties"])
 def list_properties(
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    page_size: int = Query(200, ge=1, le=500),
     type_id: int | None = Query(None, description="Property type ID (e.g. квартира, дом)"),
     operation_id: int | None = Query(None, description="Operation ID (buy/sell/rent)"),
     q: str | None = Query(None, description="Free-text search (address/description/location)"),

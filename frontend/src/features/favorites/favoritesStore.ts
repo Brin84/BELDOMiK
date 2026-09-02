@@ -33,7 +33,7 @@ export interface FavoritesState {
   clearError: () => void;
 }
 
-const defaultPageSize = 20;
+const defaultPageSize = 500;
 
 export const useFavoritesStore = create<FavoritesState>((set, get) => ({
   favorites: [],

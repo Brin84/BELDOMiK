@@ -17,7 +17,7 @@ vi.mock('@/shared/api', () => ({
 
 const defaultFilters = {
   page: 1,
-  page_size: 20,
+  page_size: 500,
   sort_by: 'created_at_desc',
   sort_order: 'desc',
 };
@@ -27,7 +27,7 @@ const initialState = {
   hotProperties: [] as any[],
   propertyDetail: null,
   page: 1,
-  pageSize: 20,
+  pageSize: 500,
   total: 0,
   totalPages: 0,
   filters: { ...defaultFilters },
@@ -81,7 +81,7 @@ describe('usePropertiesStore', () => {
       expect(s.hotProperties).toEqual([]);
       expect(s.propertyDetail).toBeNull();
       expect(s.page).toBe(1);
-      expect(s.pageSize).toBe(20);
+      expect(s.pageSize).toBe(500);
       expect(s.total).toBe(0);
       expect(s.totalPages).toBe(0);
       expect(s.filters).toEqual(defaultFilters);
@@ -466,7 +466,7 @@ describe('usePropertiesStore', () => {
       usePropertiesStore.getState().setFilters({ sort_by: 'total_area', sort_order: 'asc' });
       expect(api.get).toHaveBeenCalledWith(
         API_ENDPOINTS.properties.list,
-        expect.objectContaining({ sort_by: 'total_area', sort_order: 'asc', page: 1, page_size: 20 }),
+        expect.objectContaining({ sort_by: 'total_area', sort_order: 'asc', page: 1, page_size: 500 }),
         expect.anything()
       );
     });
