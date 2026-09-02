@@ -244,6 +244,28 @@ export function PropertyCard({
           </div>
         </div>
 
+        {/* Trust badges: новостройка / без посредников */}
+        {(property.is_direct || property.is_new_building) && (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {property.is_new_building && (
+              <span
+                className="px-2 py-0.5 rounded-full text-xs font-medium"
+                style={{ backgroundColor: 'rgba(47, 111, 237, 0.12)', color: '#2f6fed' }}
+              >
+                🏗️ Новостройка
+              </span>
+            )}
+            {property.is_direct && (
+              <span
+                className="px-2 py-0.5 rounded-full text-xs font-medium"
+                style={{ backgroundColor: 'rgba(52, 199, 89, 0.12)', color: '#34c759' }}
+              >
+                🤝 Без посредников
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Details row: Area, Floor */}
         <div className="flex items-center gap-3 flex-wrap text-tg-hint text-sm">
           {area && (

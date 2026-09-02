@@ -433,6 +433,7 @@ class PropertyService:
                 owner_id=prop.owner_id,
                 owner_name=prop.owner.first_name if prop.owner else None,
                 is_favorite=row[13] if user_id else False,
+                is_direct=prop.agency_id is None,
             )
             items.append(item)
 

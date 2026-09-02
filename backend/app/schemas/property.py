@@ -171,6 +171,7 @@ class PropertyShortRead(BaseSchema):
     owner_id: int
     owner_name: str | None = None
     is_favorite: bool = False
+    is_direct: bool = False  # «без посредников» (собственник, без агентства)
 
 
 class PropertyRead(PropertyShortRead):

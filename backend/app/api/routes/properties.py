@@ -117,6 +117,8 @@ def get_property(
     property_obj = PropertyService.get_property(db, property_id, user_id)
     if not property_obj:
         raise HTTPException(status_code=404, detail="Property not found")
+    # «Без посредников» — вычисляется из отсутствия агентства (нет поля на ORM).
+    property_obj.is_direct = property_obj.agency_id is None
     return PropertyResponse.model_validate(property_obj)
 
 

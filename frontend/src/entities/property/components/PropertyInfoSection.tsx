@@ -74,6 +74,22 @@ export function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
         }}>
           {property.type_name || property.property_type}
         </span>
+        {property.is_new_building && (
+          <span className="px-3 py-1.5 rounded-full text-sm font-medium" style={{
+            backgroundColor: 'rgba(47, 111, 237, 0.12)',
+            color: '#2f6fed',
+          }}>
+            🏗️ Новостройка
+          </span>
+        )}
+        {property.agency_id == null && (
+          <span className="px-3 py-1.5 rounded-full text-sm font-medium" style={{
+            backgroundColor: 'rgba(52, 199, 89, 0.12)',
+            color: '#34c759',
+          }}>
+            🤝 Без посредников
+          </span>
+        )}
       </div>
 
       {/* Key facts */}

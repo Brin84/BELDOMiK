@@ -103,6 +103,7 @@ export interface PropertyShort {
   parking?: boolean;
   elevator?: boolean;
   is_new_building?: boolean;
+  is_direct?: boolean;
   description?: string;
   address?: string;
 }

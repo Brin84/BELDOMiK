@@ -11,6 +11,14 @@ type Characteristic = {
   icon: React.ReactNode;
 };
 
+const RENOVATION_LABELS: Record<string, string> = {
+  none: 'Без ремонта',
+  needs_renovation: 'Требует ремонта',
+  cosmetic: 'Косметический',
+  euro: 'Евроремонт',
+  designer: 'Дизайнерский',
+};
+
 export function PropertyCharacteristics({ property }: PropertyCharacteristicsProps) {
   const characteristics: Characteristic[] = [];
 
@@ -115,7 +123,7 @@ export function PropertyCharacteristics({ property }: PropertyCharacteristicsPro
   if (property.renovation) {
     characteristics.push({
       label: 'Ремонт',
-      value: property.renovation,
+      value: RENOVATION_LABELS[property.renovation] || property.renovation,
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
           <polyline points="16 18 22 12 16 6" />

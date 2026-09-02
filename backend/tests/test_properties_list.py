@@ -245,6 +245,25 @@ class TestPropertiesList:
         new_buildings = [p for p in data["items"] if p["is_new_building"]]
         assert [p["id"] for p in new_buildings] == [property_seed["c"]]
 
+    def test_is_direct_in_list(self, client: TestClient, property_seed):
+        # Поле is_direct (без посредников) присутствует в списке и верно вычислено:
+        # A/B — собственники (agency_id None → True), C — агентство (False).
+        resp = client.get("/api/v1/properties")
+        assert resp.status_code == 200, resp.text
+        items = {p["id"]: p for p in resp.json()["items"]}
+        assert items[property_seed["a"]]["is_direct"] is True
+        assert items[property_seed["b"]]["is_direct"] is True
+        assert items[property_seed["c"]]["is_direct"] is False
+
+    def test_is_direct_in_detail(self, client: TestClient, property_seed):
+        # В деталях is_direct вычисляется из agency_id.
+        resp = client.get(f"/api/v1/properties/{property_seed['a']}")
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["is_direct"] is True
+        resp_c = client.get(f"/api/v1/properties/{property_seed['c']}")
+        assert resp_c.status_code == 200, resp.text
+        assert resp_c.json()["is_direct"] is False
+
     def test_living_area_range(self, client: TestClient, property_seed):
         # living: A=45, B=28, C=60
         resp = client.get("/api/v1/properties", params={"living_area_min": 40})
