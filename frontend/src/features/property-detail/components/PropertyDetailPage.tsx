@@ -126,6 +126,8 @@ export function PropertyDetailPage() {
         phone={property.phone}
         email={property.email}
         telegram={property.telegram}
+        ownerUsername={property.owner_username}
+        ownerPhone={property.owner_phone}
         onCallClick={(phone) => {
           trigger('success');
           window.location.href = `tel:${phone.replace(/[^\d+]/g, '')}`;

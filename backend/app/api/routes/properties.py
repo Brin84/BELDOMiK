@@ -119,7 +119,13 @@ def get_property(
         raise HTTPException(status_code=404, detail="Property not found")
     # «Без посредников» — вычисляется из отсутствия агентства (нет поля на ORM).
     property_obj.is_direct = property_obj.agency_id is None
-    return PropertyResponse.model_validate(property_obj)
+    result = PropertyResponse.model_validate(property_obj).model_dump()
+    # Expose the owner's contact channels so the client can offer a direct
+    # "Связаться с продавцом" action (Telegram DM / phone call).
+    owner = property_obj.owner
+    result["owner_username"] = owner.username if owner else None
+    result["owner_phone"] = owner.phone if owner else None
+    return result
 
 
 @router.post("", response_model=PropertyResponse, status_code=201)

@@ -155,6 +155,9 @@ export interface PropertyDetail extends PropertyShort {
   phone?: string | null;
   email?: string | null;
   telegram?: string | null;
+  // Owner contact channels, populated from the User relation in the detail route
+  owner_username?: string | null;
+  owner_phone?: string | null;
   // Owner info (may be populated from separate endpoint)
   owner?: PropertyOwner | null;
 }

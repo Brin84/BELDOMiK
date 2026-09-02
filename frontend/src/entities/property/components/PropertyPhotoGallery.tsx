@@ -14,7 +14,6 @@ export function PropertyPhotoGallery({ photos, className = '' }: PropertyPhotoGa
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   const touchStartX = useRef(0);
-  const mainImageRef = useRef<HTMLDivElement>(null);
 
   const sortedPhotos = [...photos].sort((a, b) => a.sort_order - b.sort_order);
 
@@ -98,16 +97,22 @@ export function PropertyPhotoGallery({ photos, className = '' }: PropertyPhotoGa
     <div className={className}>
       {/* Main Photo */}
       <div
-        ref={mainImageRef}
-        className="relative aspect-[4/3] bg-tg-secondary-bg rounded-2xl overflow-hidden"
+        className="relative aspect-[4/3] bg-tg-secondary-bg rounded-2xl overflow-hidden cursor-zoom-in"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        onClick={() => sortedPhotos.length > 1 && setIsFullscreen(true)}
+        onClick={() => {
+          trigger('light');
+          setIsFullscreen(true);
+        }}
         role="button"
         tabIndex={0}
-        aria-label={sortedPhotos.length > 1 ? `Фото ${currentIndex + 1} из ${sortedPhotos.length}. Нажмите для полноэкранного просмотра` : 'Фотография объекта'}
+        aria-label={
+          sortedPhotos.length > 1
+            ? `Фото ${currentIndex + 1} из ${sortedPhotos.length}. Нажмите для полноэкранного просмотра`
+            : 'Фотография объекта. Нажмите для полноэкранного просмотра'
+        }
         onKeyDown={(e) => {
-          if ((e.key === 'Enter' || e.key === ' ') && sortedPhotos.length > 1) {
+          if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             setIsFullscreen(true);
           }
@@ -153,11 +158,14 @@ export function PropertyPhotoGallery({ photos, className = '' }: PropertyPhotoGa
           </div>
         )}
 
-        {/* Navigation arrows for desktop */}
-        {sortedPhotos.length > 1 && !isFullscreen && (
+        {/* Desktop navigation arrows (inline view) */}
+        {sortedPhotos.length > 1 && (
           <>
             <button
-              onClick={goToPrev}
+              onClick={(e) => {
+                e.stopPropagation();
+                goToPrev();
+              }}
               className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 opacity-0 hover:opacity-100 focus:opacity-100"
               style={{
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -171,7 +179,10 @@ export function PropertyPhotoGallery({ photos, className = '' }: PropertyPhotoGa
               </svg>
             </button>
             <button
-              onClick={goToNext}
+              onClick={(e) => {
+                e.stopPropagation();
+                goToNext();
+              }}
               className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 opacity-0 hover:opacity-100 focus:opacity-100"
               style={{
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -185,59 +196,6 @@ export function PropertyPhotoGallery({ photos, className = '' }: PropertyPhotoGa
               </svg>
             </button>
           </>
-        )}
-
-        {/* Fullscreen navigation arrows */}
-        {isFullscreen && sortedPhotos.length > 1 && (
-          <>
-            <button
-              onClick={goToPrev}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center z-50"
-              style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                color: 'white',
-                backdropFilter: 'blur(8px)',
-              }}
-              aria-label="Предыдущее фото"
-            >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-            </button>
-            <button
-              onClick={goToNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center z-50"
-              style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                color: 'white',
-                backdropFilter: 'blur(8px)',
-              }}
-              aria-label="Следующее фото"
-            >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                <polyline points="9 6 15 12 9 18" />
-              </svg>
-            </button>
-          </>
-        )}
-
-        {/* Close button in fullscreen */}
-        {isFullscreen && (
-          <button
-            onClick={() => setIsFullscreen(false)}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center z-50"
-            style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.6)',
-              color: 'white',
-              backdropFilter: 'blur(8px)',
-            }}
-            aria-label="Закрыть полноэкранный режим"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
         )}
       </div>
 
@@ -274,6 +232,109 @@ export function PropertyPhotoGallery({ photos, className = '' }: PropertyPhotoGa
               />
             </button>
           ))}
+        </div>
+      )}
+
+      {/* Fullscreen overlay */}
+      {isFullscreen && (
+        <div
+          className="fixed inset-0 z-[100] bg-black"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onClick={() => setIsFullscreen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Полноэкранный просмотр фото"
+        >
+          {failedImages.has(currentIndex) ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2} className="text-white" style={{ opacity: 0.4 }}>
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <line x1="9" y1="9" x2="15" y2="15" />
+                <line x1="15" y1="9" x2="9" y2="15" />
+              </svg>
+            </div>
+          ) : (
+            <img
+              src={currentPhoto.url}
+              alt={`Фото ${currentIndex + 1} из ${sortedPhotos.length}`}
+              className={`w-full h-full object-contain transition-opacity duration-300 ${
+                loadedImages.has(currentIndex) ? 'opacity-100' : 'opacity-0'
+              }`}
+              onLoad={() => handleImageLoad(currentIndex)}
+              onError={() => handleImageError(currentIndex)}
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
+
+          {/* Close button */}
+          <button
+            onClick={() => setIsFullscreen(false)}
+            className="absolute top-4 right-4 w-11 h-11 rounded-full flex items-center justify-center"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              color: 'white',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255,255,255,0.25)',
+            }}
+            aria-label="Закрыть полноэкранный режим"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+
+          {/* Counter */}
+          {sortedPhotos.length > 1 && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full text-sm font-medium"
+              style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)', color: 'white' }}
+            >
+              {currentIndex + 1} / {sortedPhotos.length}
+            </div>
+          )}
+
+          {/* Navigation arrows */}
+          {sortedPhotos.length > 1 && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToPrev();
+                }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center"
+                style={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                  color: 'white',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                }}
+                aria-label="Предыдущее фото"
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToNext();
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center"
+                style={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                  color: 'white',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                }}
+                aria-label="Следующее фото"
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                  <polyline points="9 6 15 12 9 18" />
+                </svg>
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>

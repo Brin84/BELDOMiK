@@ -181,6 +181,11 @@ class PropertyRead(PropertyShortRead):
     features: list[PropertyFeatureRead] = []
     price_history: list[PropertyPriceRead] = []
     published_at: datetime | None = None
+    # Contact info of the owner, populated from the User relation in the detail
+    # route (not set on the ORM model). Used by the frontend to render a
+    # "Связаться с продавцом" action.
+    owner_username: str | None = None
+    owner_phone: str | None = None
 
 
 # Aliases for backward compatibility with routes
