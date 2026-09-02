@@ -25,6 +25,32 @@ export function ProfilePage() {
     }
   }, [isAuthenticated, fetchCollections]);
 
+  // Show main button with logout when authenticated.
+  // Hidden on unmount so it doesn't linger on other pages (SPA navigation).
+  useEffect(() => {
+    if (!mainButton || !isAuthenticated) return;
+
+    const handleLogout = () => {
+      trigger('medium');
+      logout();
+    };
+
+    mainButton.setParams({
+      text: 'Выйти',
+      is_visible: true,
+      // Telegram MainButton accepts only hex color strings, not CSS var()
+      color: '#ff3b30',
+      text_color: '#ffffff',
+    });
+    mainButton.onClick(handleLogout);
+    mainButton.show();
+
+    return () => {
+      mainButton.offClick(handleLogout);
+      mainButton.hide();
+    };
+  }, [mainButton, isAuthenticated, trigger, logout]);
+
   const handleApplySavedSearch = (filtersJson: string) => {
     trigger('selection');
     // Navigate to search page with filters applied
@@ -67,22 +93,6 @@ export function ProfilePage() {
         )}
       </div>
     );
-  }
-
-  // Show main button with logout when authenticated
-  if (mainButton) {
-    mainButton.setParams({
-      text: 'Выйти',
-      is_visible: true,
-      // Telegram MainButton accepts only hex color strings, not CSS var()
-      color: '#ff3b30',
-      text_color: '#ffffff',
-    });
-    mainButton.onClick(() => {
-      trigger('medium');
-      logout();
-    });
-    mainButton.show();
   }
 
   const initials = user.first_name
