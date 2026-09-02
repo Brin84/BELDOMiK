@@ -12,6 +12,7 @@ import { CreateListingPage } from '@/features/create-listing/components/CreateLi
 import { AnalyticsPage } from '@/pages/AnalyticsPage';
 import { MyListingsPage } from '@/features/my-listings/MyListingsPage';
 import { ComparisonPage } from '@/pages/ComparisonPage';
+import { AdminPage } from '@/pages/AdminPage';
 import { CollectionsPage } from '@/pages/CollectionsPage';
 import { CollectionDetailPage } from '@/pages/CollectionDetailPage';
 import { ViewingsPage } from '@/pages/ViewingsPage';
@@ -56,6 +57,7 @@ export function App() {
         <Route path="/collections" element={<CollectionsPage />} />
         <Route path="/collections/:id" element={<CollectionDetailPage />} />
         <Route path="/viewings" element={<ViewingsPage />} />
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="/comparison" element={<ComparisonPage />} />
         <Route path="/mortgage" element={<MortgagePage />} />
         <Route path="*" element={<NotFoundPage />} />

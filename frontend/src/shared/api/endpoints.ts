@@ -92,5 +92,17 @@ export const API_ENDPOINTS = {
     priceDistribution: '/api/v1/analytics/price-distribution',
     typeDistribution: '/api/v1/analytics/type-distribution',
   },
+  admin: {
+    dashboard: '/api/v1/admin/dashboard',
+    users: '/api/v1/admin/users',
+    userDetail: (id: number) => `/api/v1/admin/users/${id}`,
+    userRole: (id: number) => `/api/v1/admin/users/${id}/role`,
+    userBlock: (id: number) => `/api/v1/admin/users/${id}/block`,
+    properties: '/api/v1/admin/properties',
+    propertyDetail: (id: number) => `/api/v1/admin/properties/${id}`,
+    propertyStatus: (id: number) => `/api/v1/admin/properties/${id}/status`,
+    reports: '/api/v1/admin/reports',
+    resolveReport: (id: number) => `/api/v1/admin/reports/${id}/resolve`,
+  },
   health: '/health',
 } as const;

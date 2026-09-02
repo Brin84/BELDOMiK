@@ -69,7 +69,7 @@ class ModerationService:
     def moderate_property(
         db: Session,
         property_id: int,
-        moderator_id: int,
+        admin_id: int,
         action: str,  # "approve" | "reject" | "block"
         reason: str | None = None,
     ) -> Property | None:
@@ -88,12 +88,10 @@ class ModerationService:
             property_obj.status = "blocked"
 
         moderation_action = ModerationAction(
-            moderator_id=moderator_id,
+            admin_id=admin_id,
             property_id=property_id,
-            action_type=action,
+            action=action,
             reason=reason,
-            old_status=old_status,
-            new_status=property_obj.status,
         )
         db.add(moderation_action)
         db.commit()
@@ -104,7 +102,7 @@ class ModerationService:
     def resolve_report(
         db: Session,
         report_id: int,
-        moderator_id: int,
+        admin_id: int,
         resolution: str | None = None,
     ) -> Report | None:
         """Resolve a user report."""
@@ -113,9 +111,8 @@ class ModerationService:
             return None
 
         report.status = "resolved"
-        report.resolved_by = moderator_id
+        report.resolved_by = admin_id
         report.resolved_at = datetime.now(UTC)
-        report.resolution = resolution
 
         db.commit()
         db.refresh(report)

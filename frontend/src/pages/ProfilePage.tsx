@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { SavedSearchList } from '@/features/saved-searches/components';
 import { useCollectionsStore } from '@/features/collections';
 import type { UserRole } from '@/shared/api';
+import { useAdminStore } from '@/features/admin';
 
 export function ProfilePage() {
   const { user, status, logout } = useAuthStore();
@@ -16,6 +17,7 @@ export function ProfilePage() {
   const isAuthenticated = status === 'authenticated' && user;
 
   const { collections, fetchCollections } = useCollectionsStore();
+  const { fetchDashboard } = useAdminStore();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -136,6 +138,35 @@ export function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Admin Panel tile — only for admin/moderator */}
+      {(user.role === 'admin' || user.role === 'moderator') && (
+        <section>
+          <button
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,149,0,0.15) 0%, rgba(255,59,48,0.1) 100%)',
+              border: '1px solid rgba(255,149,0,0.3)',
+            }}
+            onClick={() => {
+              trigger('medium');
+              fetchDashboard();
+              navigate('/admin');
+            }}
+          >
+            <span className="text-2xl">👑</span>
+            <div className="flex-1">
+              <span className="font-semibold block" style={{ color: '#ff9500' }}>Админ-панель</span>
+              <span className="text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                Управление платформой, модерация, пользователи
+              </span>
+            </div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: '#ff9500' }}>
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </section>
+      )}
 
       {/* Menu Sections */}
       <section>

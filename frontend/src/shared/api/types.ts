@@ -467,3 +467,63 @@ export interface CityStats {
   avg_price: number;
   avg_price_per_sqm: number;
 }
+
+// ── Admin types ─────────────────────────────────────────────
+
+export interface AdminDashboard {
+  total_users: number;
+  total_properties: number;
+  published_properties: number;
+  pending_properties: number;
+  blocked_properties: number;
+  total_views: number;
+  total_favorites: number;
+  open_reports: number;
+  properties_today: number;
+  users_today: number;
+}
+
+export interface AdminUserListItem {
+  id: number;
+  tg_id: number;
+  username: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  role: UserRole;
+  is_active: boolean;
+  is_blocked: boolean;
+  properties_count: number;
+  created_at: string;
+}
+
+export interface AdminPropertyListItem {
+  id: number;
+  title: string | null;
+  type_name: string | null;
+  operation_name: string | null;
+  city_name: string | null;
+  status: PropertyStatus;
+  owner_id: number;
+  owner_name: string | null;
+  price_byn: number | null;
+  views_count: number;
+  created_at: string;
+}
+
+export interface AdminReport {
+  id: number;
+  reporter_id: number;
+  property_id: number;
+  reason: string;
+  description: string | null;
+  status: string;
+  created_at: string;
+  resolved_at: string | null;
+}
+
+export interface AdminReportResponse {
+  items: AdminReport[];
+  total: number;
+  page: number;
+  page_size: number;
+}
