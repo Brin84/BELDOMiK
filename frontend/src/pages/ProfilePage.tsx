@@ -239,6 +239,44 @@ export function ProfilePage() {
       </section>
 
       <section>
+        <h2 className="text-tg-text text-lg font-semibold mb-3">🏢 Агентство</h2>
+        <div className="space-y-3">
+          <button
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
+            style={{
+              backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+            }}
+            onClick={() => {
+              trigger('medium');
+              navigate('/agencies/me');
+            }}
+          >
+            <span className="text-2xl flex-shrink-0">🏢</span>
+            <span style={{ color: 'var(--tg-theme-text-color)' }}>Моё агентство</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+          <button
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
+            style={{
+              backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+            }}
+            onClick={() => {
+              trigger('medium');
+              navigate('/subscription');
+            }}
+          >
+            <span className="text-2xl flex-shrink-0">💎</span>
+            <span style={{ color: 'var(--tg-theme-text-color)' }}>Подписка</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <section>
         <h2 className="text-tg-text text-lg font-semibold mb-3">Избранное и поиск</h2>
         <div className="space-y-3">
           <button

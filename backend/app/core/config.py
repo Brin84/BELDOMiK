@@ -105,6 +105,10 @@ class Settings(BaseSettings):
     # Scheduler (Cloud Scheduler keep-alive)
     SCHEDULER_SECRET: str = Field(default="", validation_alias="SCHEDULER_SECRET")
 
+    # Payments
+    # Payment provider: "mock" (dev, auto-confirm) or "telegram_stars" (future).
+    PAYMENT_PROVIDER: str = Field(default="mock", validation_alias="PAYMENT_PROVIDER")
+
 
 @lru_cache
 def get_settings() -> Settings:

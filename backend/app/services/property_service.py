@@ -23,6 +23,7 @@ from app.schemas.property import (
     PropertyUpdate,
 )
 from app.services.currency_service import CurrencyService
+from app.services.monetization_service import MonetizationService
 
 logger = logging.getLogger(__name__)
 
@@ -434,8 +435,19 @@ class PropertyService:
                 owner_name=prop.owner.first_name if prop.owner else None,
                 is_favorite=row[13] if user_id else False,
                 is_direct=prop.agency_id is None,
+                agency_id=prop.agency_id,
             )
             items.append(item)
+
+        # Annotate promoted properties (one query across the page).
+        promoted = MonetizationService.active_promotion_types(
+            db, [item.id for item in items]
+        )
+        for item in items:
+            ptype = promoted.get(item.id)
+            if ptype:
+                item.is_promoted = True
+                item.promotion_type = ptype
 
         pages = (total + page_size - 1) // page_size
         return PropertyListResponse(

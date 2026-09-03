@@ -1,67 +1,96 @@
-"""Monetization schemas."""
+"""Monetization schemas: catalog, promotions, subscriptions, payments."""
 from datetime import datetime
 
-from pydantic import BaseModel
+from app.schemas.common import BaseSchema
 
 
-class PromotionCreate(BaseModel):
-    """Create promotion."""
-    name: str
-    description: str | None = None
+# ── Promotion catalog ────────────────────────────────────────────
+class PromotionCatalogItem(BaseSchema):
+    """Static promotion product from the catalog."""
+    type: str
+    label: str
     price_byn: int
     duration_days: int
-    features: list[str] = []
-    sort_order: int = 0
+    priority: int
+    badge_color: str
+    features: list[str]
 
 
-class PromotionResponse(BaseModel):
-    """Promotion response."""
+class PromotionRead(BaseSchema):
+    """Applied promotion record (DB row)."""
     id: int
-    name: str
-    description: str | None = None
+    property_id: int
+    type: str
+    status: str
+    started_at: datetime | None = None
+    expires_at: datetime
     price_byn: int
-    duration_days: int
-    features: list[str] = []
-    sort_order: int
-    is_active: bool
-    start_date: datetime
-    end_date: datetime
-    created_at: datetime
-
-    model_config = {"from_attributes": True}
 
 
-class SubscriptionCreate(BaseModel):
-    """Create subscription."""
-    promotion_id: int
-    auto_renew: bool = True
+class PromoteRequest(BaseSchema):
+    """Request to promote a property."""
+    promotion_type: str
 
 
-class SubscriptionResponse(BaseModel):
-    """Subscription response."""
+# ── Payments ─────────────────────────────────────────────────────
+class PaymentCheckoutResponse(BaseSchema):
+    """Response after initiating a payment: checkout info."""
+    payment_id: int
+    amount_byn: int
+    currency: str = "BYN"
+    provider: str
+    confirmation: dict
+
+
+class PaymentRead(BaseSchema):
+    """Payment record."""
     id: int
-    user_id: int
-    promotion_id: int
-    start_date: datetime
-    end_date: datetime
-    is_active: bool
-    auto_renew: bool
-
-    model_config = {"from_attributes": True}
-
-
-class PaymentResponse(BaseModel):
-    """Payment response."""
-    id: int
-    user_id: int
+    user_id: int | None = None
+    agency_id: int | None = None
     property_id: int | None = None
     promotion_id: int | None = None
     subscription_id: int | None = None
     amount_byn: int
-    currency: str
+    currency: str = "BYN"
     status: str
-    external_id: str | None = None
+    provider: str | None = None
+    payment_link: str | None = None
+    description: str | None = None
     created_at: datetime
     completed_at: datetime | None = None
 
-    model_config = {"from_attributes": True}
+
+# ── Subscriptions ────────────────────────────────────────────────
+class SubscriptionCreate(BaseSchema):
+    """Create/upgrade a subscription plan."""
+    plan: str  # SubscriptionPlan value: free / pro / enterprise
+    agency_id: int
+
+
+class SubscriptionRead(BaseSchema):
+    """Subscription record."""
+    id: int
+    agency_id: int
+    plan: str
+    status: str
+    started_at: datetime | None = None
+    expires_at: datetime
+    max_properties: int
+    max_promotions: int
+    has_analytics: bool
+    has_team: bool
+    team_size: int
+
+
+class SubscriptionPlanInfo(BaseSchema):
+    """Public info about a subscription plan."""
+    plan: str
+    label: str
+    price_byn: int
+    duration_days: int
+    max_properties: int
+    max_promotions: int
+    has_analytics: bool
+    has_team: bool
+    team_size: int
+    features: list[str]

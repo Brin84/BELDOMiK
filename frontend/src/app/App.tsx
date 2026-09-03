@@ -16,6 +16,10 @@ import { AdminPage } from '@/pages/AdminPage';
 import { CollectionsPage } from '@/pages/CollectionsPage';
 import { CollectionDetailPage } from '@/pages/CollectionDetailPage';
 import { ViewingsPage } from '@/pages/ViewingsPage';
+import { AgencyCatalogPage } from '@/pages/AgencyCatalogPage';
+import { AgencyDetailPage } from '@/pages/AgencyDetailPage';
+import { MyAgencyPage } from '@/pages/MyAgencyPage';
+import { SubscriptionPage } from '@/pages/SubscriptionPage';
 import { ToastProvider } from '@/shared/ui/Toast';
 
 // Lazy load MapPage for code splitting
@@ -57,6 +61,10 @@ export function App() {
         <Route path="/collections" element={<CollectionsPage />} />
         <Route path="/collections/:id" element={<CollectionDetailPage />} />
         <Route path="/viewings" element={<ViewingsPage />} />
+        <Route path="/agencies" element={<AgencyCatalogPage />} />
+        <Route path="/agencies/me" element={<MyAgencyPage />} />
+        <Route path="/agencies/:id" element={<AgencyDetailPage />} />
+        <Route path="/subscription" element={<SubscriptionPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/comparison" element={<ComparisonPage />} />
         <Route path="/mortgage" element={<MortgagePage />} />

@@ -7,6 +7,7 @@ import { api, API_ENDPOINTS } from '@/shared/api';
 import type { PropertyShort } from '@/shared/api/types';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { EmptyState } from '@/shared/ui/EmptyState';
+import { PromoteListingModal } from '@/features/monetization/components/PromoteListingModal';
 
 interface MyListingsState {
   properties: PropertyShort[];
@@ -55,11 +56,12 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function PropertyCard({ property, onClick, onEdit, onDelete }: {
+function PropertyCard({ property, onClick, onEdit, onDelete, onPromote }: {
   property: PropertyShort;
   onClick: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onPromote: () => void;
 }) {
   const { trigger } = useHaptics();
   const mainPhoto = property.photo_url;
@@ -120,6 +122,17 @@ function PropertyCard({ property, onClick, onEdit, onDelete }: {
           Редактировать
         </button>
         <button
+          onClick={(e) => { e.stopPropagation(); trigger('light'); onPromote(); }}
+          className="px-3 py-1.5 rounded-lg text-xs font-medium flex-shrink-0"
+          style={{
+            backgroundColor: 'rgba(255, 149, 0, 0.12)',
+            color: '#ff9500',
+            border: '1px solid rgba(255, 149, 0, 0.35)',
+          }}
+        >
+          ⭐ Продвинуть
+        </button>
+        <button
           onClick={(e) => { e.stopPropagation(); trigger('error'); onDelete(); }}
           className="px-3 py-1.5 rounded-lg text-xs font-medium flex-shrink-0"
           style={{
@@ -161,6 +174,7 @@ export function MyListingsPage() {
     isLoading: true,
     error: null,
   });
+  const [promoteTarget, setPromoteTarget] = useState<number | null>(null);
 
   const isAuthenticated = status === 'authenticated' && user;
 
@@ -300,10 +314,17 @@ export function MyListingsPage() {
               onClick={() => handleView(property.id)}
               onEdit={() => handleEdit(property.id)}
               onDelete={() => handleDelete(property.id)}
+              onPromote={() => setPromoteTarget(property.id)}
             />
           ))}
         </div>
       )}
+
+      <PromoteListingModal
+        propertyId={promoteTarget ?? 0}
+        isOpen={promoteTarget !== null}
+        onClose={() => setPromoteTarget(null)}
+      />
     </div>
   );
 }

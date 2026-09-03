@@ -172,12 +172,26 @@ class PropertyShortRead(BaseSchema):
     owner_name: str | None = None
     is_favorite: bool = False
     is_direct: bool = False  # «без посредников» (собственник, без агентства)
+    agency_id: int | None = None
+    is_promoted: bool = False
+    promotion_type: str | None = None
 
 
 class PropertyRead(PropertyShortRead):
     """Full property data."""
-    agency_id: int | None = None
     photos: list[PropertyPhotoRead] = []
+    features: list[PropertyFeatureRead] = []
+    price_history: list[PropertyPriceRead] = []
+    published_at: datetime | None = None
+    # Contact info of the owner, populated from the User relation in the detail
+    # route (not set on the ORM model). Used by the frontend to render a
+    # "Связаться с продавцом" action.
+    owner_username: str | None = None
+    owner_phone: str | None = None
+    # Agency info (joined) for the detail view.
+    agency_name: str | None = None
+    agency_logo_url: str | None = None
+    is_verified: bool = False
     features: list[PropertyFeatureRead] = []
     price_history: list[PropertyPriceRead] = []
     published_at: datetime | None = None

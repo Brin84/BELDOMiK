@@ -106,6 +106,9 @@ export interface PropertyShort {
   is_direct?: boolean;
   description?: string;
   address?: string;
+  agency_id?: number | null;
+  is_promoted?: boolean;
+  promotion_type?: string;
 }
 
 export interface PropertyPhoto {
@@ -144,7 +147,6 @@ export interface PropertyPrice {
 }
 
 export interface PropertyDetail extends PropertyShort {
-  agency_id: number | null;
   photos: PropertyPhoto[];
   features: PropertyFeature[];
   price_history: PropertyPrice[];
@@ -160,6 +162,10 @@ export interface PropertyDetail extends PropertyShort {
   owner_phone?: string | null;
   // Owner info (may be populated from separate endpoint)
   owner?: PropertyOwner | null;
+  // Agency info (joined) for the detail view.
+  agency_name?: string | null;
+  agency_logo_url?: string | null;
+  is_verified?: boolean;
 }
 
 export interface PropertyOwner {
@@ -425,35 +431,124 @@ export interface ViewingRequestCreate {
   comment?: string | null;
 }
 
+// ── Monetization & agencies ───────────────────────────────────
+
+export type PromotionTypeName =
+  | 'top'
+  | 'vip'
+  | 'bump_up'
+  | 'highlight'
+  | 'pin';
+
+/** Static promotion product from the catalog. */
 export interface Promotion {
-  id: number;
-  name: string;
-  name_en: string;
-  description?: string;
+  type: PromotionTypeName;
+  label: string;
   price_byn: number;
   duration_days: number;
+  priority: number;
+  badge_color: string;
   features: string[];
-  is_active: boolean;
 }
 
-export interface PropertyPromotion {
+/** Applied promotion record on a property. */
+export interface PromotionApplied {
   id: number;
   property_id: number;
-  promotion_id: number;
-  started_at: string;
+  type: string;
+  status: string;
+  started_at: string | null;
   expires_at: string;
-  is_active: boolean;
-  promotion: Promotion;
+  price_byn: number;
 }
+
+export interface PaymentCheckout {
+  payment_id: number;
+  amount_byn: number;
+  currency: string;
+  provider: string;
+  confirmation: Record<string, unknown>;
+}
+
+export type PaymentStatus = 'pending' | 'succeeded' | 'failed' | 'refunded';
 
 export interface Payment {
   id: number;
-  user_id: number;
+  user_id: number | null;
+  agency_id: number | null;
+  property_id: number | null;
+  promotion_id: number | null;
+  subscription_id: number | null;
   amount_byn: number;
-  currency: 'BYN';
-  status: 'pending' | 'completed' | 'failed' | 'refunded';
-  description?: string;
+  currency: string;
+  status: PaymentStatus;
+  provider: string | null;
+  payment_link: string | null;
+  description: string | null;
   created_at: string;
+  completed_at: string | null;
+}
+
+export type SubscriptionPlanName = 'free' | 'pro' | 'enterprise';
+
+export interface SubscriptionPlanInfo {
+  plan: SubscriptionPlanName;
+  label: string;
+  price_byn: number;
+  duration_days: number;
+  max_properties: number;
+  max_promotions: number;
+  has_analytics: boolean;
+  has_team: boolean;
+  team_size: number;
+  features: string[];
+}
+
+export interface Subscription {
+  id: number;
+  agency_id: number;
+  plan: SubscriptionPlanName;
+  status: string;
+  started_at: string | null;
+  expires_at: string;
+  max_properties: number;
+  max_promotions: number;
+  has_analytics: boolean;
+  has_team: boolean;
+  team_size: number;
+}
+
+export interface Agency {
+  id: number;
+  name: string;
+  logo_url?: string | null;
+  description?: string | null;
+  contact_phone?: string | null;
+  contact_email?: string | null;
+  website?: string | null;
+  verified: boolean;
+  is_active?: boolean;
+  property_count: number;
+  member_count?: number;
+  created_at?: string | null;
+}
+
+export interface AgencyCreate {
+  name: string;
+  logo_url?: string | null;
+  description?: string | null;
+  contact_phone?: string | null;
+  contact_email?: string | null;
+  website?: string | null;
+}
+
+export interface AgencyUpdate extends Partial<AgencyCreate> {}
+
+export interface AgencyMember {
+  user_id: number;
+  name: string;
+  role: string;
+  joined_at: string | null;
 }
 
 export interface AnalyticsOverview {

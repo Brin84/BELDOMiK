@@ -13,6 +13,7 @@ from app.schemas.property import (
     PropertyResponse,
     PropertyUpdate,
 )
+from app.services.monetization_service import MonetizationService
 from app.services.property_service import PropertyListResponse, PropertyService
 from app.services.upload_service import upload_service
 
@@ -135,6 +136,8 @@ def create_property(
     current_user: User = Depends(get_current_user),
 ):
     """Create a new property."""
+    # Enforce the agency subscription listing cap (no-op for private owners).
+    MonetizationService.enforce_property_quota(db, current_user)
     property_obj = PropertyService.create_property(db, current_user.id, data)
     return PropertyResponse.model_validate(property_obj)
 

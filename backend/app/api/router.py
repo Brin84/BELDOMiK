@@ -3,6 +3,7 @@ from fastapi import APIRouter
 
 from app.api.routes import (
     admin,
+    agencies,
     analytics,
     auth,
     collections,
@@ -34,6 +35,7 @@ api_router.include_router(viewings.router)
 api_router.include_router(saved_searches.router)
 api_router.include_router(search.router)
 api_router.include_router(moderation.router)
+api_router.include_router(agencies.router)
 api_router.include_router(admin.router)
 api_router.include_router(monetization.router)
 api_router.include_router(analytics.router)

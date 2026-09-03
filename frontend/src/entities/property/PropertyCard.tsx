@@ -4,6 +4,7 @@ import { formatPriceByn, formatPricePerSqm, formatArea, formatRooms, formatFloor
 import type { PropertyShort } from '@/shared/api/types';
 import { useComparisonStore } from '@/features/comparison/comparisonStore';
 import { useToast } from '@/shared/ui/Toast';
+import { PromotionBadge } from './components/PromotionBadge';
 
 interface PropertyCardProps {
   property: PropertyShort;
@@ -244,9 +245,10 @@ export function PropertyCard({
           </div>
         </div>
 
-        {/* Trust badges: новостройка / без посредников */}
-        {(property.is_direct || property.is_new_building) && (
+        {/* Trust badges: продвижение / новостройка / без посредников */}
+        {(property.is_promoted || property.is_direct || property.is_new_building) && (
           <div className="flex items-center gap-1.5 flex-wrap">
+            {property.is_promoted && <PromotionBadge type={property.promotion_type} />}
             {property.is_new_building && (
               <span
                 className="px-2 py-0.5 rounded-full text-xs font-medium"
