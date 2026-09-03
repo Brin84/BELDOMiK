@@ -1,27 +1,25 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import React from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { useHaptics } from '@/shared/lib/haptics';
 
-const navItems = [
+const navItems: ReadonlyArray<{
+  path: string;
+  label: string;
+  icon: ({ active }: { active: boolean }) => React.JSX.Element;
+  isCreate?: boolean;
+}> = [
   { path: '/catalog', label: 'Каталог', icon: HomeIcon },
-  { path: '/search', label: 'Поиск', icon: SearchIcon },
   { path: '/map', label: 'Карта', icon: MapIcon },
+  { path: '/create-listing', label: 'Добавить', icon: PlusIcon, isCreate: true },
   { path: '/favorites', label: 'Избранное', icon: HeartIcon },
   { path: '/profile', label: 'Профиль', icon: UserIcon },
-] as const;
+];
 
 function HomeIcon({ active }: { active: boolean }) {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.5 : 2} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
       <polyline points="9 22 9 12 15 12 15 22" />
-    </svg>
-  );
-}
-
-function SearchIcon({ active }: { active: boolean }) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.5 : 2} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-      <circle cx="11" cy="11" r="8" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
     </svg>
   );
 }
@@ -33,6 +31,15 @@ function MapIcon({ active }: { active: boolean }) {
       <line x1="9" y1="3" x2="9" y2="18" />
       <line x1="15" y1="6" x2="15" y2="21" />
       <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
   );
 }
@@ -56,6 +63,8 @@ function UserIcon({ active }: { active: boolean }) {
 
 export function BottomNav() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { trigger } = useHaptics();
 
   return (
     <nav
@@ -68,7 +77,25 @@ export function BottomNav() {
       aria-label="Основная навигация"
     >
       {navItems.map((item) => {
-        const isActive = location.pathname === item.path;
+        const isActive = item.isCreate
+          ? location.pathname === item.path
+          : location.pathname === item.path || (item.path === '/catalog' && location.pathname.startsWith('/catalog'));
+        const isCreate = 'isCreate' in item && item.isCreate;
+
+        if (isCreate) {
+          return (
+            <button
+              key={item.path}
+              onClick={() => { trigger('light'); navigate(item.path); }}
+              className="flex flex-col items-center justify-center gap-1 px-3 py-1.5 transition-colors duration-150 text-tg-button"
+              aria-label="Добавить объявление"
+            >
+              <PlusIcon />
+              <span className="text-[10px] font-medium">{item.label}</span>
+            </button>
+          );
+        }
+
         return (
           <NavLink
             key={item.path}
