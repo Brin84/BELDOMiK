@@ -3,7 +3,7 @@ import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
 import { backHandlerBlocked } from '@/shared/lib/backButton';
 import { useGeographyStore } from '@/features/geography/geographyStore';
-import type { City } from '@/shared/api/types';
+import type { City, Region } from '@/shared/api/types';
 
 export interface CitySelectorSheetProps {
   cities: City[];
@@ -15,10 +15,19 @@ export interface CitySelectorSheetProps {
 export function CitySelectorSheet({ cities, currentCityId, onSelect, onClose }: CitySelectorSheetProps) {
   const { backButton } = useTelegram();
   const { trigger } = useHaptics();
+  const regions = useGeographyStore((s) => s.regions);
+  const fetchRegions = useGeographyStore((s) => s.fetchRegions);
   const addCity = useGeographyStore((s) => s.addCity);
 
+  // Selected region for drill-down; null means the region list is shown.
+  const [region, setRegion] = useState<Region | null>(null);
   const [query, setQuery] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+
+  // Make sure regions are loaded (pages load them on mount, but be safe).
+  useEffect(() => {
+    if (regions.length === 0) fetchRegions();
+  }, [regions.length, fetchRegions]);
 
   useEffect(() => {
     if (backButton) {
@@ -38,29 +47,77 @@ export function CitySelectorSheet({ cities, currentCityId, onSelect, onClose }: 
     if (e.target === e.currentTarget) onClose();
   };
 
-  const trimmedQuery = query.trim();
-  const filtered = useMemo(() => {
-    if (!trimmedQuery) return cities;
-    const q = trimmedQuery.toLowerCase();
-    return cities.filter((c) => c.name.toLowerCase().includes(q));
+  const trimmedQuery = query.trim().toLowerCase();
+
+  // ── Region level ───────────────────────────────────────────────
+  const filteredRegions = useMemo(() => {
+    if (!trimmedQuery) return regions;
+    return regions.filter((r) => r.name.toLowerCase().includes(trimmedQuery));
+  }, [regions, trimmedQuery]);
+
+  // Cities matching the query across ALL regions (shown while at region level).
+  const fullCityMatches = useMemo(() => {
+    if (!trimmedQuery) return [];
+    return cities.filter((c) => c.name.toLowerCase().includes(trimmedQuery));
   }, [cities, trimmedQuery]);
 
-  const noMatches = trimmedQuery.length > 0 && filtered.length === 0;
+  // Settlements added by users without a region — kept reachable.
+  const orphanCities = useMemo(() => cities.filter((c) => c.region_id == null), [cities]);
+
+  const regionCityCount = useMemo(() => {
+    const counts = new Map<number, number>();
+    for (const c of cities) {
+      if (c.region_id != null) counts.set(c.region_id, (counts.get(c.region_id) ?? 0) + 1);
+    }
+    return counts;
+  }, [cities]);
+
+  const regionNameById = useMemo(() => {
+    const m = new Map<number, string>();
+    for (const r of regions) m.set(r.id, r.name);
+    return m;
+  }, [regions]);
+
+  const nothingMatchesQuery = trimmedQuery.length > 0 && filteredRegions.length === 0 && fullCityMatches.length === 0;
+
+  // ── City level (drill-down) ────────────────────────────────────
+  const regionCities = useMemo(
+    () => (region ? cities.filter((c) => c.region_id === region.id) : []),
+    [cities, region],
+  );
+
+  const filteredCities = useMemo(() => {
+    if (!region) return [];
+    if (!trimmedQuery) return regionCities;
+    return regionCities.filter((c) => c.name.toLowerCase().includes(trimmedQuery));
+  }, [region, regionCities, trimmedQuery]);
+
+  const cityNoMatches = region !== null && trimmedQuery.length > 0 && filteredCities.length === 0;
 
   const handleAddCustom = async () => {
-    if (noMatches && trimmedQuery) {
-      setIsAdding(true);
-      trigger('selection');
-      const city = await addCity(trimmedQuery);
-      setIsAdding(false);
-      if (city) {
-        trigger('success');
-        onSelect(city.id);
-      } else {
-        trigger('error');
-      }
+    if (!trimmedQuery) return;
+    setIsAdding(true);
+    trigger('selection');
+    // In the region drill-down the new settlement belongs to that region.
+    const city = region ? await addCity(trimmedQuery, region.id) : await addCity(trimmedQuery);
+    setIsAdding(false);
+    if (city) {
+      trigger('success');
+      onSelect(city.id);
+    } else {
+      trigger('error');
     }
   };
+
+  const selectCity = (id: number) => {
+    trigger('selection');
+    onSelect(id);
+  };
+
+  const active = (selected: boolean): React.CSSProperties => ({
+    backgroundColor: selected ? 'var(--tg-theme-button-color)' : 'transparent',
+    color: selected ? 'var(--tg-theme-button-text-color)' : 'var(--tg-theme-text-color)',
+  });
 
   return (
     <div
@@ -68,7 +125,7 @@ export function CitySelectorSheet({ cities, currentCityId, onSelect, onClose }: 
       onClick={handleOverlayClick}
       role="dialog"
       aria-modal="true"
-      aria-label="Выбор города"
+      aria-label={region ? 'Выбор города' : 'Выбор области'}
     >
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/50 transition-opacity" style={{ opacity: 1 }} aria-hidden="true" />
@@ -93,12 +150,33 @@ export function CitySelectorSheet({ cities, currentCityId, onSelect, onClose }: 
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 pb-3 border-b" style={{ borderColor: 'var(--tg-theme-hint-color)', borderWidth: '0.5px' }}>
-          <h2 className="text-tg-text text-xl font-semibold">Город</h2>
+          <div className="flex items-center gap-1">
+            {region && (
+              <button
+                onClick={() => {
+                  trigger('light');
+                  setRegion(null);
+                  setQuery('');
+                }}
+                className="p-1 -ml-2 rounded-xl transition-colors"
+                style={{ color: 'var(--tg-theme-hint-color)' }}
+                aria-label="Назад к списку областей"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+            )}
+            <h2 className="text-tg-text text-xl font-semibold">{region ? `Город` : 'Область'}</h2>
+            {region && (
+              <span className="text-tg-hint text-sm font-normal truncate max-w-[40vw]">— {region.name}</span>
+            )}
+          </div>
           <button
             onClick={onClose}
             className="p-2 rounded-xl transition-colors"
             style={{ color: 'var(--tg-theme-hint-color)' }}
-            aria-label="Закрыть выбор города"
+            aria-label="Закрыть выбор"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -128,7 +206,7 @@ export function CitySelectorSheet({ cities, currentCityId, onSelect, onClose }: 
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Поиск города или деревни"
+              placeholder={region ? 'Поиск города или деревни' : 'Поиск области или города'}
               className="w-full pl-11 pr-10 py-3 rounded-xl text-tg-text text-base"
               style={{
                 backgroundColor: 'var(--tg-theme-secondary-bg-color)',
@@ -158,86 +236,210 @@ export function CitySelectorSheet({ cities, currentCityId, onSelect, onClose }: 
           </div>
         </div>
 
-        {/* City list */}
+        {/* List body */}
         <div className="p-2 pb-6 overflow-y-auto" style={{ maxHeight: 'calc(85vh - 150px)' }}>
-          <button
-            onClick={() => onSelect(undefined)}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors active:opacity-70"
-            style={{
-              backgroundColor: currentCityId === undefined
-                ? 'var(--tg-theme-button-color)'
-                : 'transparent',
-              color: currentCityId === undefined
-                ? 'var(--tg-theme-button-text-color)'
-                : 'var(--tg-theme-text-color)',
-            }}
-            aria-pressed={currentCityId === undefined}
-          >
-            <span className="font-medium">📍 Вся Беларусь</span>
-            {currentCityId === undefined && (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            )}
-          </button>
-
-          {cities.length === 0 && !noMatches ? (
-            <p className="px-4 py-4 text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
-              Загрузка городов...
-            </p>
-          ) : noMatches ? (
-            <div className="px-2 py-2 text-center">
-              <p className="px-4 py-2 text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
-                «{trimmedQuery}» нет в списке
-              </p>
+          {region === null ? (
+            <>
+              {/* All-Belarus shortcut (region level only) */}
               <button
-                onClick={handleAddCustom}
-                disabled={isAdding}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-medium transition-colors active:opacity-80 disabled:opacity-60"
-                style={{
-                  backgroundColor: 'var(--tg-theme-button-color)',
-                  color: 'var(--tg-theme-button-text-color)',
-                }}
+                onClick={() => onSelect(undefined)}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors active:opacity-70`}
+                style={active(currentCityId === undefined)}
+                aria-pressed={currentCityId === undefined}
               >
-                {isAdding ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    Добавляем...
-                  </>
-                ) : (
-                  <>➕ Добавить «{trimmedQuery}»</>
+                <span className="font-medium">📍 Вся Беларусь</span>
+                {currentCityId === undefined && (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
                 )}
               </button>
-              <p className="px-4 pt-2 text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
-                Деревня или город добавится в список
-              </p>
-            </div>
+
+              {/* Matching regions */}
+              {filteredRegions.map((r) => {
+                const count = regionCityCount.get(r.id) ?? 0;
+                const isSelected = currentCityId !== undefined && cities.find((c) => c.id === currentCityId)?.region_id === r.id;
+                return (
+                  <button
+                    key={r.id}
+                    onClick={() => {
+                      trigger('selection');
+                      setRegion(r);
+                      setQuery('');
+                    }}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors active:opacity-70"
+                    style={active(isSelected)}
+                    aria-pressed={isSelected}
+                  >
+                    <span className="font-medium">{r.name}</span>
+                    <span className="flex items-center gap-2">
+                      {count > 0 && (
+                        <span className="text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>{count}</span>
+                      )}
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} style={{ color: 'var(--tg-theme-hint-color)' }}>
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </span>
+                  </button>
+                );
+              })}
+
+              {/* Cross-region city matches when searching at region level */}
+              {fullCityMatches.length > 0 && (
+                <>
+                  <div className="px-4 pt-3 pb-1 text-xs uppercase tracking-wide" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                    Города
+                  </div>
+                  {fullCityMatches.map((city) => {
+                    const isSelected = currentCityId === city.id;
+                    const regionName = city.region_id != null ? regionNameById.get(city.region_id) : undefined;
+                    return (
+                      <button
+                        key={city.id}
+                        onClick={() => selectCity(city.id)}
+                        className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors active:opacity-70"
+                        style={active(isSelected)}
+                        aria-pressed={isSelected}
+                      >
+                        <span className="font-medium">
+                          {city.name}
+                          {regionName && (
+                            <span className="block text-xs font-normal" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                              {regionName}
+                            </span>
+                          )}
+                        </span>
+                        {isSelected && (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
+                </>
+              )}
+
+              {/* Orphan settlements (user-added, no region) */}
+              {!trimmedQuery && orphanCities.length > 0 && (
+                <>
+                  <div className="px-4 pt-3 pb-1 text-xs uppercase tracking-wide" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                    Свои населённые пункты
+                  </div>
+                  {orphanCities.map((city) => {
+                    const isSelected = currentCityId === city.id;
+                    return (
+                      <button
+                        key={city.id}
+                        onClick={() => selectCity(city.id)}
+                        className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors active:opacity-70"
+                        style={active(isSelected)}
+                        aria-pressed={isSelected}
+                      >
+                        <span className="font-medium">{city.name}</span>
+                        {isSelected && (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
+                </>
+              )}
+
+              {/* Add when nothing at all matches the query */}
+              {nothingMatchesQuery && (
+                <div className="px-2 py-2 text-center">
+                  <p className="px-4 py-2 text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                    «{trimmedQuery}» нет в списке
+                  </p>
+                  <button
+                    onClick={handleAddCustom}
+                    disabled={isAdding}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-medium transition-colors active:opacity-80 disabled:opacity-60"
+                    style={{
+                      backgroundColor: 'var(--tg-theme-button-color)',
+                      color: 'var(--tg-theme-button-text-color)',
+                    }}
+                  >
+                    {isAdding ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Добавляем...
+                      </>
+                    ) : (
+                      <>➕ Добавить «{trimmedQuery}»</>
+                    )}
+                  </button>
+                  <p className="px-4 pt-2 text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                    Деревня или город добавится в список
+                  </p>
+                </div>
+              )}
+            </>
           ) : (
-            filtered.map((city) => {
-              const isSelected = currentCityId === city.id;
-              return (
-                <button
-                  key={city.id}
-                  onClick={() => onSelect(city.id)}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors active:opacity-70"
-                  style={{
-                    backgroundColor: isSelected ? 'var(--tg-theme-button-color)' : 'transparent',
-                    color: isSelected ? 'var(--tg-theme-button-text-color)' : 'var(--tg-theme-text-color)',
-                  }}
-                  aria-pressed={isSelected}
-                >
-                  <span className="font-medium">{city.name}</span>
-                  {isSelected && (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  )}
-                </button>
-              );
-            })
+            <>
+              {/* Cities of the drilled-down region */}
+              {cityNoMatches ? (
+                <div className="px-2 py-2 text-center">
+                  <p className="px-4 py-2 text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                    «{trimmedQuery}» нет в области «{region.name}»
+                  </p>
+                  <button
+                    onClick={handleAddCustom}
+                    disabled={isAdding}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-medium transition-colors active:opacity-80 disabled:opacity-60"
+                    style={{
+                      backgroundColor: 'var(--tg-theme-button-color)',
+                      color: 'var(--tg-theme-button-text-color)',
+                    }}
+                  >
+                    {isAdding ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Добавляем...
+                      </>
+                    ) : (
+                      <>➕ Добавить «{trimmedQuery}»</>
+                    )}
+                  </button>
+                  <p className="px-4 pt-2 text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                    Деревня добавится в область «{region.name}»
+                  </p>
+                </div>
+              ) : regionCities.length === 0 ? (
+                <p className="px-4 py-4 text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                  Загрузка городов...
+                </p>
+              ) : (
+                filteredCities.map((city) => {
+                  const isSelected = currentCityId === city.id;
+                  return (
+                    <button
+                      key={city.id}
+                      onClick={() => selectCity(city.id)}
+                      className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors active:opacity-70"
+                      style={active(isSelected)}
+                      aria-pressed={isSelected}
+                    >
+                      <span className="font-medium">{city.name}</span>
+                      {isSelected && (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </button>
+                  );
+                })
+              )}
+            </>
           )}
         </div>
       </div>
