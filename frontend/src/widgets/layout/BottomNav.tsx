@@ -71,7 +71,7 @@ export function BottomNav() {
       className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around h-16 safe-bottom"
       style={{
         backgroundColor: 'var(--tg-theme-bg-color)',
-        borderTop: '1px solid var(--tg-theme-hint-color)',
+        boxShadow: '0 -2px 12px rgba(10, 25, 60, 0.07)',
       }}
       role="navigation"
       aria-label="Основная навигация"
@@ -87,11 +87,20 @@ export function BottomNav() {
             <button
               key={item.path}
               onClick={() => { trigger('light'); navigate(item.path); }}
-              className="flex flex-col items-center justify-center gap-1 px-3 py-1.5 transition-colors duration-150 text-tg-button"
+              className="flex flex-col items-center justify-center gap-1 px-3 py-1.5 transition-colors duration-150"
               aria-label="Добавить объявление"
             >
-              <PlusIcon />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <span
+                className="flex items-center justify-center w-11 h-11 rounded-full text-tg-button-text"
+                style={{
+                  backgroundColor: 'var(--tg-theme-button-color)',
+                  backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 45%, rgba(10,25,60,0.12))',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(10,25,60,0.18), 0 3px 8px rgba(47,111,237,0.35), 0 8px 18px rgba(47,111,237,0.22)',
+                }}
+              >
+                <PlusIcon />
+              </span>
+              <span className="text-[10px] font-medium text-tg-button">{item.label}</span>
             </button>
           );
         }

@@ -7,6 +7,37 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
+
+  /* ------------------------------------------------------------------
+   * Принудительно светлая тема.
+   * Telegram (ThemeProvider) пишет --tg-theme-* inline на <html>, поэтому
+   * перекрыть его inline-стиль можно только !important. Значения выбраны
+   * в одном стиле с brand-синим #2f6fed, который уже используется в
+   * бейджах карточек (PropertyCard), чтобы весь интерфейс был цельным
+   * независимо от темы клиента Telegram.
+   * ---------------------------------------------------------------- */
+  --tg-theme-bg-color: #ffffff !important;
+  --tg-theme-secondary-bg-color: #f4f6f9 !important;
+  --tg-theme-tertiary-bg-color: #e9ecf1 !important;
+  --tg-theme-section-bg-color: #ffffff !important;
+  --tg-theme-card-bg-color: #ffffff !important;
+  --tg-theme-header-bg-color: #ffffff !important;
+  --tg-theme-bottom-bar-bg-color: #ffffff !important;
+  --tg-theme-text-color: #14171c !important;
+  --tg-theme-hint-color: #7d8595 !important;
+  --tg-theme-section-header-text-color: #7d8595 !important;
+  --tg-theme-subtitle-text-color: #7d8595 !important;
+  --tg-theme-link-color: #2f6fed !important;
+  --tg-theme-accent-text-color: #2f6fed !important;
+  --tg-theme-button-color: #2f6fed !important;
+  --tg-theme-button-text-color: #ffffff !important;
+  --tg-theme-destructive-color: #e53935 !important;
+  --tg-theme-destructive-text-color: #d93025 !important;
+}
+
+/* Нативные контролы (скроллбары, дата-инпуты) — тоже светлые. */
+html {
+  color-scheme: light;
 }
 
 html {
@@ -54,4 +85,33 @@ input:-webkit-autofill:focus {
     padding-left: var(--safe-left);
     padding-right: var(--safe-right);
   }
+}
+
+/* ------------------------------------------------------------------
+ * Выпуклые основные кнопки.
+ * Все CTA/primary-кнопки в приложении задают фон inline через
+ * `var(--tg-theme-button-color)`. Ловим их одним правилом и делаем
+ * «объёмными»: градиент выпуклости + внутренний свет сверху и тень
+ * снизу + мягкая внешняя тень. При нажатии кнопка «вжимается».
+ * ---------------------------------------------------------------- */
+button[style*="var(--tg-theme-button-color)"] {
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.18) 0%,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(10, 25, 60, 0.1) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(10, 25, 60, 0.16),
+    0 2px 4px rgba(10, 25, 60, 0.1),
+    0 8px 20px rgba(10, 25, 60, 0.16);
+  transition: transform 80ms ease, box-shadow 130ms ease;
+}
+
+button[style*="var(--tg-theme-button-color)"]:active {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 1px 2px rgba(10, 25, 60, 0.18),
+    0 1px 2px rgba(10, 25, 60, 0.14);
 }
