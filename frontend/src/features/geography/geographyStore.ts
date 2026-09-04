@@ -26,6 +26,7 @@ export interface GeographyState {
   fetchRegions: () => Promise<void>;
   fetchCities: (regionId: number) => Promise<void>;
   fetchAllCities: () => Promise<void>;
+  addCity: (name: string, regionId?: number | null) => Promise<City | null>;
   fetchDistricts: (cityId: number) => Promise<void>;
   fetchNeighborhoods: (cityId: number) => Promise<void>;
   fetchStreets: (cityId: number) => Promise<void>;
@@ -86,17 +87,33 @@ export const useGeographyStore = create<GeographyState>((set, get) => ({
 
   fetchAllCities: async () => {
     if (get().loadedAllCities) return;
-    await get().fetchRegions();
-    const all: City[] = [];
-    for (const region of get().regions) {
-      try {
-        const data = await api.get<City[]>(API_ENDPOINTS.geography.cities, { region_id: region.id });
-        all.push(...data);
-      } catch (error) {
-        console.error('Failed to fetch cities:', error);
-      }
+    try {
+      // Один запрос всех городов (включая пользовательские без региона) —
+      // раньше грузили по каждому региону, и города с region_id=null терялись.
+      const all = await api.get<City[]>(API_ENDPOINTS.geography.cities);
+      set({ cities: all, loadedCities: true, loadedAllCities: true });
+    } catch (error) {
+      console.error('Failed to fetch all cities:', error);
     }
-    set({ cities: all, loadedCities: true, loadedAllCities: true });
+  },
+
+  addCity: async (name, regionId = null) => {
+    try {
+      // POST идемпотентен: если такой город уже есть, вернётся существующий.
+      const city = await api.post<City>(API_ENDPOINTS.geography.createCity, {
+        name,
+        region_id: regionId ?? undefined,
+      });
+      if (!city) return null;
+      const exists = get().cities.some((c) => c.id === city.id);
+      if (!exists) {
+        set({ cities: [...get().cities, city] });
+      }
+      return city;
+    } catch (error) {
+      console.error('Failed to add city:', error);
+      return null;
+    }
   },
 
   fetchDistricts: async (cityId: number) => {

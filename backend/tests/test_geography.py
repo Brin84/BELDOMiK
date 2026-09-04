@@ -1,6 +1,12 @@
 """Geography API tests."""
+from datetime import timedelta
+
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+
+from app.core.security import create_access_token
+from app.models.user import User
 
 
 @pytest.mark.usefixtures("seed_test_data")
@@ -89,3 +95,103 @@ def test_get_streets(client: TestClient):
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
+
+
+@pytest.fixture
+def user(db_session: Session) -> User:
+    """Create a test user for authenticated endpoints."""
+    user = User(
+        tg_id=300000001,
+        username="geo_test",
+        first_name="Geo",
+        last_name="Tester",
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    return user
+
+
+@pytest.fixture
+def auth_headers(user: User) -> dict:
+    token = create_access_token(
+        data={"sub": str(user.id)},
+        expires_delta=timedelta(hours=1),
+    )
+    return {"Authorization": f"Bearer {token}"}
+
+
+def test_create_city_requires_auth(client: TestClient):
+    """Unauthenticated request is rejected."""
+    response = client.post(
+        "/api/v1/geography/cities",
+        json={"name": "Купаловцы"},
+    )
+    assert response.status_code == 401
+
+
+def test_create_city_and_get_in_list(client: TestClient, auth_headers: dict):
+    """Adding a custom settlement marks it visible in the full city list."""
+    response = client.post(
+        "/api/v1/geography/cities",
+        json={"name": "Купаловцы"},
+        headers=auth_headers,
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert data["name"] == "Купаловцы"
+    assert data["region_id"] is None
+    assert data["is_major"] is False
+
+    cities = client.get("/api/v1/geography/cities").json()
+    names = [c["name"] for c in cities]
+    assert "Купаловцы" in names
+
+
+def test_create_city_is_idempotent(client: TestClient, auth_headers: dict):
+    """Same name (case-insensitive) does not create duplicates."""
+    first = client.post(
+        "/api/v1/geography/cities",
+        json={"name": "Заречье"},
+        headers=auth_headers,
+    ).json()
+    second = client.post(
+        "/api/v1/geography/cities",
+        json={"name": "заречье"},
+        headers=auth_headers,
+    ).json()
+    assert first["id"] == second["id"]
+
+
+def test_create_city_attached_to_region(client: TestClient, auth_headers: dict, db_session: Session):
+    """A settlement created with a valid region is saved under it."""
+    from app.models.geography import Region
+
+    region = db_session.query(Region).first()
+    response = client.post(
+        "/api/v1/geography/cities",
+        json={"name": "Новосёлки", "region_id": region.id},
+        headers=auth_headers,
+    )
+    assert response.status_code == 201
+    assert response.json()["region_id"] == region.id
+
+
+def test_create_city_invalid_region(client: TestClient, auth_headers: dict):
+    """Unknown region returns 422."""
+    response = client.post(
+        "/api/v1/geography/cities",
+        json={"name": "Борятино", "region_id": 999},
+        headers=auth_headers,
+    )
+    assert response.status_code == 422
+
+
+def test_create_city_empty_name(client: TestClient, auth_headers: dict):
+    """Blank/whitespace-only name is rejected."""
+    response = client.post(
+        "/api/v1/geography/cities",
+        json={"name": "   "},
+        headers=auth_headers,
+    )
+    assert response.status_code == 422

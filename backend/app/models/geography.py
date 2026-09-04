@@ -24,7 +24,8 @@ class City(Base):
     __tablename__ = "cities"
 
     id = Column(Integer, primary_key=True, index=True)
-    region_id = Column(Integer, ForeignKey("regions.id"), nullable=False, index=True)
+    # Nullable: пользователь может добавить свой населённый пункт (деревню) без области.
+    region_id = Column(Integer, ForeignKey("regions.id"), nullable=True, index=True)
     name = Column(String(100), nullable=False, index=True)
     name_en = Column(String(100), nullable=True)
     is_major = Column(Boolean, default=False, nullable=False)

@@ -283,7 +283,8 @@ export interface City {
   id: number;
   name: string;
   name_en: string;
-  region_id: number;
+  /** null — свой населённый пункт, добавленный пользователем. */
+  region_id: number | null;
   is_major: boolean;
   sort_order: number;
 }

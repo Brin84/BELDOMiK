@@ -21,7 +21,7 @@ RegionResponse = RegionRead
 
 
 class CityBase(BaseSchema):
-    region_id: int
+    region_id: int | None = None
     name: str
     name_en: str | None = None
     is_major: bool = False
@@ -31,7 +31,7 @@ class CityBase(BaseSchema):
 
 
 class CityCreate(CityBase):
-    pass
+    """Create a settlement. region_id optional — for user-added villages."""
 
 
 class CityRead(CityBase):

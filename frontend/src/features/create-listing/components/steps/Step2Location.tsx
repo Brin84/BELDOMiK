@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useCreateListingStore } from '../../createListingStore';
@@ -15,6 +15,9 @@ export function Step2Location({ onNext, onPrev, canProceed }: Step2LocationProps
   const { trigger } = useHaptics();
   const { mainButton, backButton } = useTelegram();
   const { updateFormData, formData, currentStep } = useCreateListingStore();
+  const [citySearchQuery, setCitySearchQuery] = useState('');
+  const [isAddingCity, setIsAddingCity] = useState(false);
+
   const {
     regions,
     cities,
@@ -29,6 +32,7 @@ export function Step2Location({ onNext, onPrev, canProceed }: Step2LocationProps
     getRegionById,
     getCityById,
     getDistrictById,
+    addCity,
   } = useGeographyStore();
 
   // Load regions on mount
@@ -40,6 +44,7 @@ export function Step2Location({ onNext, onPrev, canProceed }: Step2LocationProps
   useEffect(() => {
     if (formData.region_id) {
       fetchCities(formData.region_id);
+      setCitySearchQuery('');
       updateFormData({ city_id: 0, district_id: undefined, neighborhood_id: undefined, street_id: undefined });
     }
   }, [formData.region_id, fetchCities, updateFormData]);
@@ -108,6 +113,29 @@ export function Step2Location({ onNext, onPrev, canProceed }: Step2LocationProps
   const handleCityChange = (city: City) => {
     trigger('selection');
     updateFormData({ city_id: city.id });
+  };
+
+  const trimmedCityQuery = citySearchQuery.trim();
+  const filteredCities = useMemo(() => {
+    if (!trimmedCityQuery) return cities;
+    const q = trimmedCityQuery.toLowerCase();
+    return cities.filter((c) => c.name.toLowerCase().includes(q));
+  }, [cities, trimmedCityQuery]);
+
+  const cityNoMatches = trimmedCityQuery.length > 0 && filteredCities.length === 0;
+
+  const handleAddCity = async () => {
+    if (!cityNoMatches || !trimmedCityQuery || !formData.region_id) return;
+    setIsAddingCity(true);
+    trigger('selection');
+    const city = await addCity(trimmedCityQuery, formData.region_id);
+    setIsAddingCity(false);
+    if (city) {
+      trigger('success');
+      updateFormData({ city_id: city.id, district_id: undefined, neighborhood_id: undefined, street_id: undefined });
+    } else {
+      trigger('error');
+    }
   };
 
   const handleDistrictChange = (district: District | undefined) => {
@@ -194,9 +222,89 @@ export function Step2Location({ onNext, onPrev, canProceed }: Step2LocationProps
         {formData.region_id && (
           <section>
             <h2 className="text-tg-text text-xl font-bold mb-4">Город <span className="text-tg-hint font-normal">*</span></h2>
-            {cities.length > 0 ? (
+
+            {/* City search */}
+            <div className="relative mb-3">
+              <svg
+                className="absolute left-4 top-1/2 -translate-y-1/2 flex-shrink-0"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                style={{ color: 'var(--tg-theme-hint-color)' }}
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                value={citySearchQuery}
+                onChange={(e) => setCitySearchQuery(e.target.value)}
+                placeholder="Поиск города или деревни"
+                className="w-full pl-11 pr-10 py-3 rounded-xl text-tg-text text-base"
+                style={{
+                  backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+                  border: '1px solid var(--tg-theme-hint-color)',
+                  color: 'var(--tg-theme-text-color)',
+                }}
+                autoComplete="off"
+                maxLength={100}
+                aria-label="Поиск города или деревни"
+              />
+              {citySearchQuery && (
+                <button
+                  onClick={() => {
+                    trigger('light');
+                    setCitySearchQuery('');
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full"
+                  style={{ color: 'var(--tg-theme-hint-color)' }}
+                  aria-label="Очистить поиск"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              )}
+            </div>
+
+            {cityNoMatches ? (
+              <div className="text-center">
+                <p className="py-2 text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                  «{trimmedCityQuery}» нет в списке
+                </p>
+                <button
+                  onClick={handleAddCity}
+                  disabled={isAddingCity}
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium transition-colors active:opacity-80 disabled:opacity-60"
+                  style={{
+                    backgroundColor: 'var(--tg-theme-button-color)',
+                    color: 'var(--tg-theme-button-text-color)',
+                  }}
+                >
+                  {isAddingCity ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Добавляем...
+                    </>
+                  ) : (
+                    <>➕ Добавить «{trimmedCityQuery}»</>
+                  )}
+                </button>
+                <p className="pt-2 text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                  Деревня добавится в список области
+                </p>
+              </div>
+            ) : cities.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto">
-                {cities.map((city) => (
+                {filteredCities.map((city) => (
                   <button
                     key={city.id}
                     onClick={() => handleCityChange(city)}

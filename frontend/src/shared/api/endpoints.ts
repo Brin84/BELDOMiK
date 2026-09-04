@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
   geography: {
     regions: '/api/v1/geography/regions',
     cities: '/api/v1/geography/cities',
+    createCity: '/api/v1/geography/cities',
     districts: '/api/v1/geography/districts',
     neighborhoods: '/api/v1/geography/neighborhoods',
     streets: '/api/v1/geography/streets',
