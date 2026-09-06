@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState, type FormEvent } from 'react';
-import { ChevronDown, ChevronRight, House, MapPin, Search, SlidersHorizontal } from 'lucide-react';
+import { ChevronDown, ChevronRight, MapPin, Search, SlidersHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
@@ -10,6 +10,8 @@ import { useFavoritesStore } from '@/features/favorites';
 import { HotPropertyCard } from '@/entities/property';
 import { ListSkeleton, EmptyState, InlineError } from '@/shared/ui';
 import { CATEGORIES, CategoryCard, MortgageCard } from '@/widgets/catalog/CategoryCard';
+
+import beldomikAvatar from '@/assets/beldomik-avatar.webp';
 
 import './CatalogPage/CatalogPage.css';
 
@@ -130,7 +132,12 @@ export function CatalogPage() {
         <header className="catalog-header">
           <div className="catalog-header__brand">
             <div className="catalog-header__logo">
-              <House size={21} />
+              <img
+                src={beldomikAvatar}
+                alt="BELDOMiK"
+                className="catalog-header__avatar"
+                draggable={false}
+              />
             </div>
             <div>
               <h1 className="catalog-header__title">BELDOMiK</h1>

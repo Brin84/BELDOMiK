@@ -39,10 +39,19 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 12px;
-  color: #fff;
-  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
-  box-shadow: 0 6px 16px rgba(33, 113, 238, 0.3);
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(33, 113, 238, 0.2);
+}
+
+.catalog-header__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
 }
 
 .catalog-header__title {
@@ -505,7 +514,7 @@
 .hot-card__specs {
   margin-top: 4px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 400;
   color: #64748b;
   white-space: nowrap;
   overflow: hidden;
@@ -550,7 +559,7 @@
   margin-top: auto;
   padding-top: 6px;
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 400;
   color: #0f172a;
   letter-spacing: -0.3px;
 }
@@ -558,7 +567,7 @@
 .hot-card__time {
   margin-left: 8px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 400;
   color: #94a3b8;
 }
 
