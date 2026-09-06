@@ -1,4 +1,5 @@
 export * from './PropertyCard';
+export * from './HotPropertyCard';
 export * from './components/PropertyPhotoGallery';
 export * from './components/PropertyInfoSection';
 export * from './components/PropertyDescription';

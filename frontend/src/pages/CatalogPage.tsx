@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState, type FormEvent } from 'react';
-import { ChevronDown, ChevronRight, House, MapPin, Search } from 'lucide-react';
+import { ChevronDown, ChevronRight, House, MapPin, Search, SlidersHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
@@ -7,9 +7,11 @@ import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useGeographyStore } from '@/features/geography/geographyStore';
 import { CitySelectorSheet } from '@/features/geography/components/CitySelectorSheet';
 import { useFavoritesStore } from '@/features/favorites';
-import { PropertyCard } from '@/entities/property';
+import { HotPropertyCard } from '@/entities/property';
 import { ListSkeleton, EmptyState, InlineError } from '@/shared/ui';
 import { CATEGORIES, CategoryCard, MortgageCard } from '@/widgets/catalog/CategoryCard';
+
+import './CatalogPage/CatalogPage.css';
 
 export function CatalogPage() {
   const { trigger } = useHaptics();
@@ -122,18 +124,18 @@ export function CatalogPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#f7f9fc] text-slate-900">
-      <main className="mx-auto w-full max-w-[600px] px-5 pt-5">
+    <div className="catalog-page">
+      <main className="catalog-page__inner">
         {/* HEADER */}
-        <header className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <div className="flex h-11 w-11 items-center justify-center rounded-[15px] bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-lg">
-                <House size={25} />
-              </div>
-              <h1 className="text-[28px] font-extrabold tracking-tight">BELDOMiK</h1>
+        <header className="catalog-header">
+          <div className="catalog-header__brand">
+            <div className="catalog-header__logo">
+              <House size={25} />
             </div>
-            <p className="ml-1 mt-1 text-[15px] text-slate-400">Мини-приложение</p>
+            <div>
+              <h1 className="catalog-header__title">BELDOMiK</h1>
+              <p className="catalog-header__subtitle">Мини-приложение</p>
+            </div>
           </div>
 
           <button
@@ -143,43 +145,44 @@ export function CatalogPage() {
               navigate('/profile');
             }}
             aria-label="Меню"
-            className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm"
+            className="catalog-header__menu"
           >
-            <span className="tracking-[0.15em] text-[18px] leading-none">•••</span>
+            •••
           </button>
         </header>
 
-        {/* SEARCH — настоящее поле ввода */}
-        <form onSubmit={handleSearchSubmit} className="mt-6">
-          <div
-            className="flex h-[62px] items-center gap-4 rounded-[24px] border border-slate-200 bg-white px-5 shadow-[0_8px_25px_rgba(0,0,0,.05)]"
-          >
-            <Search size={27} className="shrink-0 text-slate-400" />
+        {/* SEARCH — настоящее поле ввода с кнопкой фильтров */}
+        <form onSubmit={handleSearchSubmit} className="catalog-search">
+          <div className="catalog-search__box">
+            <Search size={27} className="catalog-search__icon" />
             <input
               type="text"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               placeholder="Что ищете?"
               enterKeyHint="search"
-              className="w-full bg-transparent text-[18px] outline-none placeholder:text-slate-400"
+              className="catalog-search__input"
             />
+            <div className="catalog-search__divider" />
+            <button
+              type="button"
+              onClick={() => navigateWithFilters({})}
+              aria-label="Фильтры"
+              className="catalog-search__filter"
+            >
+              <SlidersHorizontal size={22} />
+            </button>
           </div>
         </form>
 
         {/* OPERATION + LOCATION */}
-        <div className="mt-6 flex items-center gap-3">
-          <div
-            className="flex flex-1 min-w-0 rounded-[24px] border border-slate-200 bg-white p-1.5 shadow-[0_8px_25px_rgba(0,0,0,.05)]"
-            role="group"
-            aria-label="Тип сделки"
-          >
+        <div className="catalog-location">
+          <div className="catalog-operation" role="group" aria-label="Тип сделки">
             <button
               type="button"
               onClick={() => handleOperationChange(1)}
-              className={`flex-1 rounded-[18px] px-4 py-2.5 text-[15px] font-semibold transition-all ${
-                currentOperationId === 1
-                  ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md'
-                  : 'text-slate-500'
+              className={`catalog-operation__btn ${
+                currentOperationId === 1 ? 'catalog-operation__btn--active' : ''
               }`}
               aria-pressed={currentOperationId === 1}
             >
@@ -188,10 +191,8 @@ export function CatalogPage() {
             <button
               type="button"
               onClick={() => handleOperationChange(2)}
-              className={`flex-1 rounded-[18px] px-4 py-2.5 text-[15px] font-semibold transition-all ${
-                currentOperationId === 2
-                  ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md'
-                  : 'text-slate-500'
+              className={`catalog-operation__btn ${
+                currentOperationId === 2 ? 'catalog-operation__btn--active' : ''
               }`}
               aria-pressed={currentOperationId === 2}
             >
@@ -205,12 +206,12 @@ export function CatalogPage() {
               hapticFeedback?.impactOccurred('light');
               setIsCitySheetOpen(true);
             }}
-            className="flex max-w-[40%] min-w-0 items-center gap-1.5 rounded-[24px] border border-slate-200 bg-white px-4 py-3.5 text-[14px] font-medium text-slate-700 shadow-[0_8px_25px_rgba(0,0,0,.05)]"
+            className="catalog-city"
             aria-label="Выбрать город"
           >
-            <MapPin size={18} className="shrink-0 text-blue-500" />
-            <span className="truncate">{currentCity?.name || 'Все Беларусь'}</span>
-            <ChevronDown size={16} className="shrink-0 text-slate-400" />
+            <MapPin size={18} className="catalog-city__icon" />
+            <span className="catalog-city__name">{currentCity?.name || 'Все Беларусь'}</span>
+            <ChevronDown size={16} className="catalog-city__chevron" />
           </button>
         </div>
 
@@ -235,25 +236,21 @@ export function CatalogPage() {
         {error && <InlineError message={error} onDismiss={clearError} />}
 
         {/* CATEGORIES */}
-        <section className="mt-5">
-          <div className="grid grid-cols-2 gap-4" role="list" aria-label="Категории недвижимости">
-            {CATEGORIES.map((category) => {
-              const type = propertyTypes.find((t) => t.category === category.key);
-              return (
-                <CategoryCard
-                  key={category.key}
-                  title={category.title}
-                  subtitle={operationLabel}
-                  gradient={category.gradient}
-                  icon={category.icon}
-                  image={category.image}
-                  onClick={() => {
-                    if (type) handleCategoryClick(type.id);
-                  }}
-                />
-              );
-            })}
-          </div>
+        <section className="catalog-categories" role="list" aria-label="Категории недвижимости">
+          {CATEGORIES.map((category) => {
+            const type = propertyTypes.find((t) => t.category === category.key);
+            return (
+              <CategoryCard
+                key={category.key}
+                title={category.title}
+                image={category.image}
+                onClick={() => {
+                  if (type) handleCategoryClick(type.id);
+                  else trigger('light');
+                }}
+              />
+            );
+          })}
         </section>
 
         {/* MORTGAGE */}
@@ -266,28 +263,29 @@ export function CatalogPage() {
 
         {/* HOT OFFERS */}
         {hotProperties.length > 0 && (
-          <section className="mt-8">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[23px] font-bold">Горячие предложения</h2>
+          <section className="catalog-section">
+            <div className="catalog-section__head">
+              <h2 className="catalog-section__title">Горячие предложения</h2>
               <button
                 type="button"
                 onClick={() => {
                   trigger('light');
                   navigateWithFilters({});
                 }}
-                className="flex items-center gap-1 text-blue-500"
+                className="catalog-section__link"
               >
                 Все
                 <ChevronRight size={20} />
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="catalog-section__list">
               {hotProperties.map((property) => (
-                <PropertyCard
+                <HotPropertyCard
                   key={property.id}
                   property={property}
                   onFavoriteToggle={handleFavoriteToggle}
+                  showTime
                 />
               ))}
             </div>
@@ -295,13 +293,13 @@ export function CatalogPage() {
         )}
 
         {/* MAIN LISTINGS */}
-        <section className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-[23px] font-bold">
+        <section className="catalog-section">
+          <div className="catalog-section__head">
+            <h2 className="catalog-section__title">
               {currentOperationId === 1 ? 'Квартиры и дома на продажу' : 'Квартиры и дома в аренду'}
             </h2>
             {total > 0 && (
-              <span className="text-[15px] text-slate-400">{total} объявлений</span>
+              <span className="catalog-section__count">{total} объявлений</span>
             )}
           </div>
 
@@ -330,9 +328,9 @@ export function CatalogPage() {
             />
           ) : (
             <>
-              <div className="space-y-4">
+              <div className="catalog-section__list">
                 {properties.map((property) => (
-                  <PropertyCard
+                  <HotPropertyCard
                     key={property.id}
                     property={property}
                     onFavoriteToggle={handleFavoriteToggle}
@@ -350,7 +348,7 @@ export function CatalogPage() {
         </section>
 
         {/* Footer info */}
-        <p className="pt-8 text-center text-sm text-slate-400">
+        <p className="catalog-footer">
           BELDOMiK 🇧🇾 — недвижимость Беларуси
         </p>
       </main>
