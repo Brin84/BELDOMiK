@@ -9,30 +9,33 @@
   --safe-right: env(safe-area-inset-right, 0px);
 
   /* ------------------------------------------------------------------
-   * Принудительно светлая тема.
+   * Принудительно светлая тема + палитра дизайна BELDOMiK.
    * Telegram (ThemeProvider) пишет --tg-theme-* inline на <html>, поэтому
-   * перекрыть его inline-стиль можно только !important. Значения выбраны
-   * в одном стиле с brand-синим #2f6fed, который уже используется в
-   * бейджах карточек (PropertyCard), чтобы весь интерфейс был цельным
-   * независимо от темы клиента Telegram.
+   * перекрыть его inline-стиль можно только !important.
+   *
+   * Палитра:
+   *   страница — светло-голубой #f7f9fc;
+   *   карточки — белые, крупное скругление, мягкая тень;
+   *   акцент — синий градиент blue-500 → blue-600 (#3b82f6 → #2563eb);
+   *   текст — slate-900, вторичный — slate-500.
    * ---------------------------------------------------------------- */
-  --tg-theme-bg-color: #ffffff !important;
-  --tg-theme-secondary-bg-color: #f4f6f9 !important;
-  --tg-theme-tertiary-bg-color: #e9ecf1 !important;
+  --tg-theme-bg-color: #f7f9fc !important;
+  --tg-theme-secondary-bg-color: #eef1f6 !important;
+  --tg-theme-tertiary-bg-color: #e6eaf1 !important;
   --tg-theme-section-bg-color: #ffffff !important;
   --tg-theme-card-bg-color: #ffffff !important;
   --tg-theme-header-bg-color: #ffffff !important;
-  --tg-theme-bottom-bar-bg-color: #ffffff !important;
-  --tg-theme-text-color: #14171c !important;
-  --tg-theme-hint-color: #7d8595 !important;
-  --tg-theme-section-header-text-color: #7d8595 !important;
-  --tg-theme-subtitle-text-color: #7d8595 !important;
-  --tg-theme-link-color: #2f6fed !important;
-  --tg-theme-accent-text-color: #2f6fed !important;
-  --tg-theme-button-color: #2f6fed !important;
+  --tg-theme-bottom-bar-bg-color: #f7f9fc !important;
+  --tg-theme-text-color: #0f172a !important;
+  --tg-theme-hint-color: #64748b !important;
+  --tg-theme-section-header-text-color: #64748b !important;
+  --tg-theme-subtitle-text-color: #64748b !important;
+  --tg-theme-link-color: #3b82f6 !important;
+  --tg-theme-accent-text-color: #3b82f6 !important;
+  --tg-theme-button-color: #3b82f6 !important;
   --tg-theme-button-text-color: #ffffff !important;
-  --tg-theme-destructive-color: #e53935 !important;
-  --tg-theme-destructive-text-color: #d93025 !important;
+  --tg-theme-destructive-color: #ef4444 !important;
+  --tg-theme-destructive-text-color: #dc2626 !important;
 }
 
 /* Нативные контролы (скроллбары, дата-инпуты) — тоже светлые. */
@@ -45,8 +48,10 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Страница — светло-голубой фон, белые карточки поверх. */
 body {
-  @apply bg-tg-bg text-tg-text font-sans antialiased;
+  background-color: #f7f9fc;
+  @apply text-tg-text font-sans antialiased;
   margin: 0;
   min-height: 100vh;
   min-height: 100dvh;
@@ -88,30 +93,14 @@ input:-webkit-autofill:focus {
 }
 
 /* ------------------------------------------------------------------
- * Выпуклые основные кнопки.
- * Все CTA/primary-кнопки в приложении задают фон inline через
- * `var(--tg-theme-button-color)`. Ловим их одним правилом и делаем
- * «объёмными»: градиент выпуклости + внутренний свет сверху и тень
- * снизу + мягкая внешняя тень. При нажатии кнопка «вжимается».
+ * Базовая белая карточка дизайна BELDOMiK: крупное скругление 26px,
+ * мягкая растекающаяся тень. Используется карточками объявлений,
+ * категориями и секциями на белом.
  * ---------------------------------------------------------------- */
-button[style*="var(--tg-theme-button-color)"] {
-  background-image: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.18) 0%,
-    rgba(255, 255, 255, 0) 42%,
-    rgba(10, 25, 60, 0.1) 100%
-  );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -1px 0 rgba(10, 25, 60, 0.16),
-    0 2px 4px rgba(10, 25, 60, 0.1),
-    0 8px 20px rgba(10, 25, 60, 0.16);
-  transition: transform 80ms ease, box-shadow 130ms ease;
-}
-
-button[style*="var(--tg-theme-button-color)"]:active {
-  transform: translateY(1px);
-  box-shadow:
-    inset 0 1px 2px rgba(10, 25, 60, 0.18),
-    0 1px 2px rgba(10, 25, 60, 0.14);
+@layer utilities {
+  .beldomik-card {
+    background-color: #ffffff;
+    border-radius: 26px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  }
 }
