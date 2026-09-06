@@ -81,7 +81,7 @@ export function MortgageCard({ onClick }: MortgageCardProps) {
           <span className="mortgage-card__calc-home">🏠</span>
         </div>
         <div className="mortgage-card__calc-display">
-          892 <BynSymbol size="0.85em" />
+          892 <BynSymbol className="w-[0.85em] h-[0.85em]" />
           <small>в месяц</small>
         </div>
         <div className="mortgage-card__calc-keypad">
