@@ -146,15 +146,9 @@ export interface PropertyDetail extends PropertyShort {
   features: PropertyFeature[];
   price_history: PropertyPrice[];
   published_at: string | null;
-  // Contact info (from backend)
-  phone?: string | null;
-  email?: string | null;
-  telegram?: string | null;
   // Owner contact channels, populated from the User relation in the detail route
   owner_username?: string | null;
   owner_phone?: string | null;
-  // Owner info (may be populated from separate endpoint)
-  owner?: PropertyOwner | null;
   // Agency info (joined) for the detail view.
   agency_name?: string | null;
   agency_logo_url?: string | null;

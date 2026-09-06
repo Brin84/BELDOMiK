@@ -44,8 +44,6 @@ export function PropertyActions({
       if (onFavoriteToggle) {
         await onFavoriteToggle(propertyId, localIsFavorite);
       }
-      // TODO: Call actual API endpoint when implemented
-      // await api.favorites.toggle(propertyId);
     } catch (error) {
       // Revert on error
       setLocalIsFavorite(localIsFavorite);

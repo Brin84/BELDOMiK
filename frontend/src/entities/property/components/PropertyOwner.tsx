@@ -8,14 +8,16 @@ interface PropertyOwnerProps {
 
 export function PropertyOwner({ owner, property }: PropertyOwnerProps) {
   // If we don't have detailed owner info, fall back to property owner fields
-  const displayName = owner?.name || property.owner_name || 'Неизвестный';
+  const displayName = owner?.name || property.owner_name || 'Частное лицо';
   const displayUsername = owner?.username;
-  const displayIsAgency = owner?.is_agency ?? false;
-  const displayAgencyName = owner?.agency_name;
-  const displayListingsCount = owner?.listings_count ?? 1;
+  const displayIsAgency = owner?.is_agency ?? (property.agency_id != null);
+  const displayAgencyName = owner?.agency_name || property.agency_name;
+  const displayListingsCount = owner?.listings_count ?? null;
   const displayMemberSince = owner?.member_since || property.created_at;
   const displayPhoneVerified = owner?.phone_verified ?? false;
   const displayTelegramVerified = owner?.telegram_verified ?? false;
+  // Backend has no public owner-profile endpoint yet, so only the initial
+  // from owner_name is available for the avatar (no separate owner.id).
 
   return (
     <section className="bg-tg-bg rounded-2xl p-4">
@@ -26,13 +28,11 @@ export function PropertyOwner({ owner, property }: PropertyOwnerProps) {
           <div className="w-16 h-16 rounded-full bg-tg-secondary-bg flex items-center justify-center overflow-hidden"
             style={{ border: '1px solid var(--tg-theme-hint-color)', borderWidth: '0.5px' }}
           >
-            {owner?.id && (
-              <div className="w-full h-full flex items-center justify-center text-2xl font-bold"
-                style={{ color: 'var(--tg-theme-button-color)' }}
-              >
-                {displayName.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <div className="w-full h-full flex items-center justify-center text-2xl font-bold"
+              style={{ color: 'var(--tg-theme-button-color)' }}
+            >
+              {displayName.charAt(0).toUpperCase()}
+            </div>
           </div>
           {/* Verification badges */}
           {(displayPhoneVerified || displayTelegramVerified) && (
@@ -86,14 +86,16 @@ export function PropertyOwner({ owner, property }: PropertyOwnerProps) {
             )}
           </div>
 
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-1" style={{ color: 'var(--tg-theme-hint-color)' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-              </svg>
-              <span>{displayListingsCount} объявл.</span>
-            </div>
+          <div className="flex items-center gap-4 text-sm flex-wrap">
+            {displayListingsCount != null && (
+              <div className="flex items-center gap-1" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                </svg>
+                <span>{displayListingsCount} объявл.</span>
+              </div>
+            )}
             <div className="flex items-center gap-1" style={{ color: 'var(--tg-theme-hint-color)' }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />

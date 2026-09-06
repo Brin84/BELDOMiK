@@ -41,14 +41,17 @@ export function PropertyDetailPage() {
     };
   }, [propertyId, fetchPropertyDetail, clearPropertyDetail]);
 
-  // Telegram MainButton for primary action (contact/phone)
+  // Telegram MainButton for primary action (contact/phone).
+  // Backend exposes owner contact channels on the detail route:
+  // owner_phone / owner_username (there are no property-level phone/email).
+  const ownerPhone = propertyDetail?.owner_phone ?? null;
   useEffect(() => {
-    if (mainButton && propertyDetail && propertyDetail.phone) {
+    if (mainButton && propertyDetail && ownerPhone) {
       mainButton.setText(`Позвонить`);
       mainButton.show();
       const handleMainClick = () => {
         trigger('success');
-        window.location.href = `tel:${propertyDetail.phone!.replace(/[^\d+]/g, '')}`;
+        window.location.href = `tel:${ownerPhone.replace(/[^\d+]/g, '')}`;
       };
       mainButton.onClick(handleMainClick);
       return () => {
@@ -58,7 +61,7 @@ export function PropertyDetailPage() {
     } else if (mainButton) {
       mainButton.hide();
     }
-  }, [mainButton, propertyDetail, trigger]);
+  }, [mainButton, propertyDetail, ownerPhone, trigger]);
 
   // Handle loading state
   if (isLoadingDetail) {
@@ -126,17 +129,14 @@ export function PropertyDetailPage() {
 
       {/* Owner */}
       <PropertyOwner
-        owner={property.owner || null}
+        owner={null}
         property={property}
       />
 
       {/* Contacts */}
       <PropertyContacts
-        phone={property.phone}
-        email={property.email}
-        telegram={property.telegram}
-        ownerUsername={property.owner_username}
         ownerPhone={property.owner_phone}
+        ownerUsername={property.owner_username}
         onCallClick={(phone) => {
           trigger('success');
           window.location.href = `tel:${phone.replace(/[^\d+]/g, '')}`;
