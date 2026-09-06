@@ -33,6 +33,7 @@ export function FilterBottomSheet({
     if (!isOpen) return;
 
     if (backButton) {
+      const wasVisible = backButton.isVisible;
       backHandlerBlocked.current = true;
       backButton.show();
       const handleBack = () => {
@@ -42,7 +43,8 @@ export function FilterBottomSheet({
       backButton.onClick(handleBack);
       return () => {
         backButton.offClick(handleBack);
-        backButton.hide();
+        if (wasVisible) backButton.show();
+        else backButton.hide();
         backHandlerBlocked.current = false;
       };
     }

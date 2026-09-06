@@ -66,6 +66,7 @@ export function SavedSearchForm({ initialData, onClose, onSuccess }: SavedSearch
 
   useEffect(() => {
     if (backButton) {
+      const wasVisible = backButton.isVisible;
       backHandlerBlocked.current = true;
       backButton.show();
       const handleBack = () => {
@@ -74,8 +75,9 @@ export function SavedSearchForm({ initialData, onClose, onSuccess }: SavedSearch
       };
       backButton.onClick(handleBack);
       return () => {
-        backButton.hide();
         backButton.offClick(handleBack);
+        if (wasVisible) backButton.show();
+        else backButton.hide();
         backHandlerBlocked.current = false;
       };
     }

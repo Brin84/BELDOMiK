@@ -37,13 +37,18 @@ export function CitySelectorSheet({ cities, currentCityId, onSelect, onClose }: 
 
   useEffect(() => {
     if (backButton) {
+      // Запоминаем видимость ДО открытия модалки: cleanup должен вернуть
+      // кнопку в состояние страницы под модалкой (на /catalog она скрыта,
+      // на /search — видна), иначе безусловный hide() прячет её навсегда.
+      const wasVisible = backButton.isVisible;
       backHandlerBlocked.current = true;
       backButton.show();
       const handleBack = () => onClose();
       backButton.onClick(handleBack);
       return () => {
         backButton.offClick(handleBack);
-        backButton.hide();
+        if (wasVisible) backButton.show();
+        else backButton.hide();
         backHandlerBlocked.current = false;
       };
     }

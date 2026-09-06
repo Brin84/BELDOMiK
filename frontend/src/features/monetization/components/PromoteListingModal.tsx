@@ -34,13 +34,15 @@ export function PromoteListingModal({ propertyId, isOpen, onClose, onPromoted }:
   // Telegram BackButton — modal takes over while open
   useEffect(() => {
     if (backButton && isOpen) {
+      const wasVisible = backButton.isVisible;
       backHandlerBlocked.current = true;
       backButton.show();
       const handleBack = () => onClose();
       backButton.onClick(handleBack);
       return () => {
         backButton.offClick(handleBack);
-        backButton.hide();
+        if (wasVisible) backButton.show();
+        else backButton.hide();
         backHandlerBlocked.current = false;
       };
     }

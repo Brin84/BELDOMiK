@@ -47,13 +47,15 @@ export function CollectionPickerModal({ propertyId, isOpen, onClose }: Collectio
   // Telegram BackButton — modal takes over while open, blocks AppShell's handler
   useEffect(() => {
     if (backButton && isOpen) {
+      const wasVisible = backButton.isVisible;
       backHandlerBlocked.current = true;
       backButton.show();
       const handleBack = () => onClose();
       backButton.onClick(handleBack);
       return () => {
         backButton.offClick(handleBack);
-        backButton.hide();
+        if (wasVisible) backButton.show();
+        else backButton.hide();
         backHandlerBlocked.current = false;
       };
     }
