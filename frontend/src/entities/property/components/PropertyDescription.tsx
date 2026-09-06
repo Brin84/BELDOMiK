@@ -10,11 +10,11 @@ export function PropertyDescription({ description }: PropertyDescriptionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isTruncated, setIsTruncated] = useState(false);
   const textRef = useRef<HTMLParagraphElement>(null);
-  const lineClamp = 5;
+  const lineClamp = 6;
 
   useEffect(() => {
     if (textRef.current) {
-      const lineHeight = parseInt(getComputedStyle(textRef.current).lineHeight, 10) || 24;
+      const lineHeight = parseInt(getComputedStyle(textRef.current).lineHeight, 10) || 22;
       const maxHeight = lineHeight * lineClamp;
       setIsTruncated(textRef.current.scrollHeight > maxHeight);
     }
@@ -25,13 +25,12 @@ export function PropertyDescription({ description }: PropertyDescriptionProps) {
   }
 
   return (
-    <section className="bg-tg-bg rounded-2xl p-4">
-      <h2 className="text-tg-text text-lg font-semibold mb-2">Описание</h2>
+    <section className="property-section">
+      <h2 className="property-section__title">Описание</h2>
       <p
         ref={textRef}
-        className="text-tg-text text-sm leading-relaxed"
+        className="property-description__text"
         style={{
-          color: 'var(--tg-theme-text-color)',
           WebkitLineClamp: isExpanded ? 'unset' : lineClamp,
           display: isExpanded ? 'block' : '-webkit-box',
           WebkitBoxOrient: isExpanded ? 'unset' : 'vertical',
@@ -42,14 +41,14 @@ export function PropertyDescription({ description }: PropertyDescriptionProps) {
       </p>
       {isTruncated && (
         <button
+          type="button"
           onClick={() => {
             trigger('light');
             setIsExpanded(!isExpanded);
           }}
-          className="mt-3 text-sm font-medium transition-colors"
-          style={{ color: 'var(--tg-theme-button-color)' }}
+          className="property-description__toggle"
         >
-          {isExpanded ? 'Скрыть' : 'Показать полностью'}
+          {isExpanded ? 'Скрыть' : 'Показать всё'}
         </button>
       )}
     </section>

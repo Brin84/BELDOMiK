@@ -11,6 +11,9 @@ export function AppShell({ children }: { children?: ReactNode }) {
   const authAttempted = useRef(false);
   const location = useLocation();
   const navigate = useNavigate();
+  // На детальной странице объявления нижнюю навигацию заменяет свой липкий
+  // контактный бар «Написать / Позвонить» (стиль Krisha) — см. PropertyDetailPage.
+  const isPropertyDetail = /^\/property\/\d+/.test(location.pathname);
 
   // Bootstrap authentication on mount. TelegramProvider fills initData
   // asynchronously, so re-run until it's available. Runs at most once a page
@@ -68,12 +71,15 @@ export function AppShell({ children }: { children?: ReactNode }) {
   return (
     <div className="flex flex-col min-h-[100vh] min-h-[100dvh] safe-top safe-bottom">
       {/* Main content area */}
-      <main className="flex-1 overflow-y-auto pb-36" style={{ maxHeight: 'calc(var(--tg-viewport-stable-height, 100vh) - 56px)' }}>
+      <main
+        className={`flex-1 overflow-y-auto ${isPropertyDetail ? 'pb-0' : 'pb-36'}`}
+        style={{ maxHeight: 'calc(var(--tg-viewport-stable-height, 100vh) - 56px)' }}
+      >
         {children ?? <Outlet />}
       </main>
 
-      {/* Bottom Navigation */}
-      <BottomNav />
+      {/* Bottom Navigation — скрыта на странице деталей объявления */}
+      {!isPropertyDetail && <BottomNav />}
     </div>
   );
 }

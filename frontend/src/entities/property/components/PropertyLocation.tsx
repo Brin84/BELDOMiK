@@ -1,76 +1,47 @@
+import { MapPin } from 'lucide-react';
 import type { PropertyDetail } from '@/shared/api/types';
 
 interface PropertyLocationProps {
   property: PropertyDetail;
 }
 
+/** Полноценная карта (Yandex Map Widget) + адрес объекта. */
 export function PropertyLocation({ property }: PropertyLocationProps) {
-  // Build location chain: Belarus → region → city → district → neighborhood → street
-  const locationParts: { label: string; value: string }[] = [];
+  const { lat, lng } = property;
+  const address = [property.city_name, property.district_name, property.street_name, property.address]
+    .filter(Boolean)
+    .join(', ');
 
-  // Country (Belarus)
-  locationParts.push({ label: 'Страна', value: 'Беларусь' });
+  const hasCoords = lat != null && lng != null;
+  const mapSrc = hasCoords
+    ? `https://yandex.ru/map-widget/v1/?ll=${lng}%2C${lat}&z=16&pt=${lng}%2C${lat}%2Cpm2blm&lang=ru_RU`
+    : null;
 
-  // Region - from property.region_id (we need to map it somehow, for now use city_name if available)
-  // Since backend doesn't return region directly in PropertyDetail, we'll show what's available
-  if (property.city_name) {
-    locationParts.push({ label: 'Город', value: property.city_name });
-  }
-
-  if (property.district_name) {
-    locationParts.push({ label: 'Район', value: property.district_name });
-  }
-
-  if (property.neighborhood_name) {
-    locationParts.push({ label: 'Микрорайон', value: property.neighborhood_name });
-  }
-
-  if (property.street_name) {
-    locationParts.push({ label: 'Улица', value: property.street_name });
-  }
-
-  // Metro
-  if (property.metro_station_name) {
-    const distance = property.metro_distance ? ` (${property.metro_distance} м)` : '';
-    locationParts.push({ label: 'Метро', value: `${property.metro_station_name}${distance}` });
-  }
-
-  if (locationParts.length <= 1) {
+  if (!hasCoords && !address) {
     return null;
   }
 
   return (
-    <section className="bg-tg-bg rounded-2xl p-4">
-      <h2 className="text-tg-text text-lg font-semibold mb-3">Расположение</h2>
-      <div className="space-y-3">
-        {locationParts.map((part, index) => (
-          <div key={part.label} className="flex items-center gap-3">
-            {index > 0 && (
-              <div className="flex-shrink-0 w-1 h-4 rounded-full" style={{ backgroundColor: 'var(--tg-theme-hint-color)', opacity: 0.3 }} />
-            )}
-            <div className="flex-1 min-w-0">
-              <div className="text-tg-hint text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
-                {part.label}
-              </div>
-              <div className="text-tg-text text-sm font-medium truncate">{part.value}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-      {/* Map placeholder */}
-      {(property.lat && property.lng) && (
-        <div className="mt-4 aspect-[4/3] bg-tg-secondary-bg rounded-xl overflow-hidden flex items-center justify-center"
-          style={{ border: '1px solid var(--tg-theme-hint-color)', borderWidth: '0.5px' }}
-        >
-          <div className="text-center px-4">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="mx-auto mb-2 text-tg-hint" style={{ opacity: 0.5 }}>
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
-            <div className="text-tg-hint text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
-              Карта (координаты: {property.lat.toFixed(6)}, {property.lng.toFixed(6)})
-            </div>
-          </div>
+    <section className="property-section">
+      <h2 className="property-section__title">Расположение</h2>
+
+      {mapSrc && (
+        <div className="property-location__map-wrap">
+          <iframe
+            src={mapSrc}
+            title="Карта расположения"
+            className="property-location__map"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen
+          />
+        </div>
+      )}
+
+      {address && (
+        <div className="property-location__address">
+          <MapPin size={16} className="property-location__address-icon" />
+          <span className="property-location__address-text">{address}</span>
         </div>
       )}
     </section>

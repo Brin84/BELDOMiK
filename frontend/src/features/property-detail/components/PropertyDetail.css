@@ -1,0 +1,524 @@
+/* ============================================================
+   PropertyDetail — дизайн по эталону Krisha.kz.
+   Plain CSS + BEM. Только светлая тема (как каталог).
+   Структура: полноширинная галерея → цена/действия → тип·площадь
+   → расположение (карта) → параметры → дополнительно → описание
+   → карточка продавца → липкий нижний бар «Написать / Позвонить».
+   ============================================================ */
+
+.property-page {
+  min-height: 100vh;
+  background: #f7f9fc;
+  color: #1e293b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  padding-bottom: 92px; /* место под липкий нижний бар */
+}
+
+/* ============================================================
+   Галерея (полноширинная, без внутренних отступов)
+   ============================================================ */
+
+.property-gallery {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #eef1f5;
+  overflow: hidden;
+}
+
+.property-gallery__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.property-gallery__placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+}
+
+.property-gallery__counter {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.property-gallery__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.property-gallery:hover .property-gallery__arrow {
+  opacity: 1;
+}
+
+.property-gallery__arrow--prev {
+  left: 12px;
+}
+
+.property-gallery__arrow--next {
+  right: 12px;
+}
+
+/* Полноэкранный просмотр */
+.property-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #000;
+}
+
+.property-fullscreen__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.property-fullscreen__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.property-fullscreen__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.property-fullscreen__arrow--prev {
+  left: 16px;
+}
+
+.property-fullscreen__arrow--next {
+  right: 16px;
+}
+
+/* Контейнер контента под галереей (единый боковой отступ) */
+.property-page__content {
+  padding: 18px 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Универсальная белая карточка-секция */
+.property-section {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+}
+
+.property-section__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+/* ============================================================
+   Цена + действия
+   ============================================================ */
+
+.property-info {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.property-info__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.property-info__price {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+
+.property-info__price-sqm {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.property-info__subtitle {
+  margin-top: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.property-info__subtitle-dot {
+  color: #cbd5e1;
+}
+
+.property-info__actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.property-info__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  background: #fff;
+  color: #64748b;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.property-info__action:active {
+  transform: scale(0.92);
+}
+
+.property-info__action--favorite {
+  color: #64748b;
+}
+
+.property-info__action--favorite-active {
+  color: #e0245e;
+  border-color: #fecdd3;
+  background: #fff1f2;
+}
+
+/* Бейджи статуса/типа (в subtitle) */
+.property-badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #eef4ff;
+  color: #2171ee;
+}
+
+.property-badge--green {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.property-badge--dark {
+  background: rgba(15, 23, 42, 0.75);
+  color: #fff;
+}
+
+/* ============================================================
+   Расположение
+   ============================================================ */
+
+.property-location__map {
+  width: 100%;
+  height: 180px;
+  border: none;
+  border-radius: 14px;
+  display: block;
+  background: #eef1f5;
+}
+
+.property-location__map-wrap {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.property-location__address {
+  margin-top: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  color: #334155;
+}
+
+.property-location__address-icon {
+  color: #2171ee;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.property-location__address-text {
+  line-height: 1.35;
+}
+
+/* ============================================================
+   Параметры / Дополнительно (строки ключ → значение)
+   ============================================================ */
+
+.property-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.property-rows__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.property-rows__row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.property-rows__row:first-child {
+  padding-top: 0;
+}
+
+.property-rows__label {
+  font-size: 14px;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.property-rows__value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  text-align: right;
+  word-break: break-word;
+}
+
+.property-rows__value--muted {
+  color: #64748b;
+}
+
+/* ============================================================
+   Описание
+   ============================================================ */
+
+.property-description__text {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: #334155;
+  white-space: pre-wrap;
+}
+
+.property-description__toggle {
+  margin-top: 12px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #2171ee;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ============================================================
+   Карточка продавца
+   ============================================================ */
+
+.agent-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.agent-card__avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 800;
+  overflow: hidden;
+}
+
+.agent-card__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.agent-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.agent-card__name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  overflow: hidden;
+}
+
+.agent-card__name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-card__verified {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2171ee;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.agent-card__type {
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.agent-card__company {
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.agent-card__chevron {
+  color: #cbd5e1;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   Липкий нижний бар «Написать / Позвонить»
+   ============================================================ */
+
+.property-bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid #eef1f5;
+  box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.property-bottom-bar__btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 50px;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.property-bottom-bar__btn:active {
+  transform: scale(0.97);
+}
+
+.property-bottom-bar__btn--telegram {
+  background: #229ed9;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(34, 158, 217, 0.35);
+}
+
+.property-bottom-bar__btn--call {
+  background: #34c759;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(52, 199, 89, 0.35);
+}

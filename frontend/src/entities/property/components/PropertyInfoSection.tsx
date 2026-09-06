@@ -1,164 +1,192 @@
+import { useState } from 'react';
+import { useHaptics } from '@/shared/lib/haptics';
+import { useShare } from '@/shared/lib/share';
+import { useComparisonStore } from '@/features/comparison/comparisonStore';
+import { useToast } from '@/shared/ui/Toast';
 import type { PropertyDetail, PropertyStatus } from '@/shared/api/types';
 import {
   formatPriceByn,
   formatPricePerSqm,
   formatArea,
-  formatRooms,
-  formatFloor,
-  formatDate,
 } from '@/shared/lib/format';
 
-const STATUS_LABELS: Record<PropertyStatus, { label: string; color: string; bg: string }> = {
-  draft: { label: 'Черновик', color: '#ff9500', bg: 'rgba(255, 149, 0, 0.1)' },
-  pending_moderation: { label: 'На модерации', color: '#007aff', bg: 'rgba(0, 122, 255, 0.1)' },
-  published: { label: 'Опубликовано', color: '#34c759', bg: 'rgba(52, 199, 89, 0.1)' },
-  rejected: { label: 'Отклонено', color: '#ff3b30', bg: 'rgba(255, 59, 48, 0.1)' },
-  blocked: { label: 'Заблокировано', color: '#ff3b30', bg: 'rgba(255, 59, 48, 0.1)' },
-  archived: { label: 'В архиве', color: '#8e8e93', bg: 'rgba(142, 142, 147, 0.1)' },
-  sold: { label: 'Продано', color: '#5856d6', bg: 'rgba(88, 86, 214, 0.1)' },
-  rented: { label: 'Сдано', color: '#5856d6', bg: 'rgba(88, 86, 214, 0.1)' },
+const STATUS_LABELS: Record<PropertyStatus, string> = {
+  draft: 'Черновик',
+  pending_moderation: 'На модерации',
+  published: 'Опубликовано',
+  rejected: 'Отклонено',
+  blocked: 'Заблокировано',
+  archived: 'В архиве',
+  sold: 'Продано',
+  rented: 'Сдано',
 };
-
-function StatusBadge({ status }: { status: PropertyStatus }) {
-  const config = STATUS_LABELS[status] || { label: status, color: '#8e8e93', bg: 'rgba(142, 142, 147, 0.1)' };
-  return (
-    <span
-      className="px-2 py-1 rounded-full text-xs font-medium"
-      style={{ backgroundColor: config.bg, color: config.color }}
-    >
-      {config.label}
-    </span>
-  );
-}
 
 interface PropertyInfoSectionProps {
   property: PropertyDetail;
+  propertyTitle?: string;
+  propertyUrl?: string;
+  onFavoriteToggle?: (propertyId: number, isCurrentlyFavorite: boolean) => Promise<void>;
 }
 
-export function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
+export function PropertyInfoSection({
+  property,
+  propertyTitle = 'Объявление',
+  propertyUrl,
+  onFavoriteToggle,
+}: PropertyInfoSectionProps) {
+  const { trigger } = useHaptics();
+  const { share } = useShare();
+  const { isInComparison, removeFromComparison, addToComparison } = useComparisonStore();
+  const { showToast } = useToast();
+
   const price = property.price_byn ?? 0;
   const pricePerSqm = property.price_per_m2_byn ?? null;
-  const rooms = property.rooms_count;
-  const area = property.total_area;
-  const floor = property.floor;
-  const floorsTotal = property.total_floors;
+
+  const inComparison = isInComparison(property.id);
+  const [isFavorite, setIsFavorite] = useState(property.is_favorite);
+  const [isToggling, setIsToggling] = useState(false);
+
+  // Строка «Тип · Площадь» (и прочие ключевые факты в одну строку)
+  const subtitleParts: string[] = [];
+  if (property.type_name) subtitleParts.push(property.type_name);
+  if (property.total_area) subtitleParts.push(formatArea(property.total_area));
+  if (property.rooms_count) subtitleParts.push(`${property.rooms_count}-комн.`);
+
+  const statusLabel =
+    property.status !== 'published' && property.status !== 'draft'
+      ? STATUS_LABELS[property.status]
+      : null;
+
+  const handleFavoriteClick = async () => {
+    if (isToggling) return;
+    trigger('light');
+    setIsToggling(true);
+    const newState = !isFavorite;
+    setIsFavorite(newState);
+    try {
+      if (onFavoriteToggle) {
+        await onFavoriteToggle(property.id, isFavorite);
+      }
+    } catch {
+      setIsFavorite(isFavorite);
+      trigger('error');
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
+  const handleShareClick = async () => {
+    trigger('light');
+    const url = propertyUrl || (typeof window !== 'undefined' ? window.location.href : '');
+    const text = `${propertyTitle} на BELDOMiK`;
+    try {
+      await share({ title: propertyTitle, text, url });
+    } catch {
+      // Share API может быть недоступен или пользователь отменил
+    }
+  };
+
+  const handleComparisonClick = () => {
+    trigger('light');
+    if (inComparison) {
+      removeFromComparison(property.id);
+      showToast('Убрано из сравнения', 'info');
+    } else {
+      const { selectedIds } = useComparisonStore.getState();
+      if (selectedIds.includes(property.id)) return;
+      if (selectedIds.length >= 4) {
+        showToast('Максимум 4 объявления для сравнения', 'warning');
+        return;
+      }
+      addToComparison({ id: property.id });
+      showToast('Добавлено к сравнению', 'success');
+    }
+  };
 
   return (
-    <section className="bg-tg-bg rounded-2xl p-4 space-y-4">
-      {/* Price and Status */}
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1">
-          <div className="text-tg-text font-bold text-3xl leading-none">
-            {formatPriceByn(price, { compact: true })}
-          </div>
-          {pricePerSqm && (
-            <div className="text-tg-hint text-sm mt-1" style={{ color: 'var(--tg-theme-hint-color)' }}>
-              {formatPricePerSqm(pricePerSqm)}
-            </div>
-          )}
+    <section className="property-section property-info">
+      <div className="property-info__main">
+        <div className="property-info__price">
+          {formatPriceByn(price, { showCurrency: true })}
         </div>
-        <StatusBadge status={property.status} />
-      </div>
-
-      {/* Operation and Type */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="px-3 py-1.5 rounded-full text-sm font-medium" style={{
-          backgroundColor: 'var(--tg-theme-button-color)',
-          color: 'var(--tg-theme-button-text-color)',
-        }}>
-          {property.operation_name || 'Продажа'}
-        </span>
-        <span className="px-3 py-1.5 rounded-full text-sm font-medium" style={{
-          backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-          color: 'var(--tg-theme-text-color)',
-        }}>
-          {property.type_name || 'Квартира'}
-        </span>
-        {property.is_new_building && (
-          <span className="px-3 py-1.5 rounded-full text-sm font-medium" style={{
-            backgroundColor: 'rgba(47, 111, 237, 0.12)',
-            color: '#2f6fed',
-          }}>
-            🏗️ Новостройка
-          </span>
-        )}
-        {property.agency_id == null && (
-          <span className="px-3 py-1.5 rounded-full text-sm font-medium" style={{
-            backgroundColor: 'rgba(52, 199, 89, 0.12)',
-            color: '#34c759',
-          }}>
-            🤝 Без посредников
-          </span>
-        )}
-      </div>
-
-      {/* Key facts */}
-      <div className="grid grid-cols-2 gap-3">
-        {rooms && (
-          <div className="flex items-center gap-2">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ opacity: 0.7, color: 'var(--tg-theme-hint-color)' }}>
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-            <div>
-              <div className="text-tg-text font-medium">{formatRooms(rooms)}</div>
-              <div className="text-tg-hint text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>Комнаты</div>
-            </div>
-          </div>
+        {pricePerSqm && (
+          <div className="property-info__price-sqm">{formatPricePerSqm(pricePerSqm)}</div>
         )}
 
-        {area && (
-          <div className="flex items-center gap-2">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ opacity: 0.7, color: 'var(--tg-theme-hint-color)' }}>
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-            </svg>
-            <div>
-              <div className="text-tg-text font-medium">{formatArea(area)}</div>
-              <div className="text-tg-hint text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>Площадь</div>
-            </div>
-          </div>
-        )}
-
-        {floor && floorsTotal && (
-          <div className="flex items-center gap-2">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ opacity: 0.7, color: 'var(--tg-theme-hint-color)' }}>
-              <line x1="2" y1="12" x2="22" y2="12" />
-              <line x1="2" y1="6" x2="22" y2="6" />
-              <line x1="2" y1="18" x2="22" y2="18" />
-            </svg>
-            <div>
-              <div className="text-tg-text font-medium">{formatFloor(floor, floorsTotal)}</div>
-              <div className="text-tg-hint text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>Этаж</div>
-            </div>
-          </div>
-        )}
-
-        {property.build_year && (
-          <div className="flex items-center gap-2">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ opacity: 0.7, color: 'var(--tg-theme-hint-color)' }}>
-              <rect x="4" y="2" width="16" height="20" rx="2" />
-              <line x1="12" y1="6" x2="12" y2="6" />
-              <line x1="12" y1="10" x2="12" y2="10" />
-              <line x1="12" y1="14" x2="12" y2="14" />
-            </svg>
-            <div>
-              <div className="text-tg-text font-medium">{property.build_year} г.</div>
-              <div className="text-tg-hint text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>Год постройки</div>
-            </div>
+        {subtitleParts.length > 0 && (
+          <div className="property-info__subtitle">
+            {subtitleParts.map((part, i) => (
+              <span key={part} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                {i > 0 && <span className="property-info__subtitle-dot">·</span>}
+                {part}
+              </span>
+            ))}
+            {property.is_new_building && <span className="property-badge">Новостройка</span>}
+            {property.agency_id == null && (
+              <span className="property-badge property-badge--green">Без посредников</span>
+            )}
+            {statusLabel && <span className="property-badge property-badge--dark">{statusLabel}</span>}
           </div>
         )}
       </div>
 
-      {/* Publish date */}
-      {property.published_at && (
-        <div className="text-tg-hint text-sm pt-1 border-t border-tg-hint" style={{
-          color: 'var(--tg-theme-hint-color)',
-          borderTopColor: 'var(--tg-theme-hint-color)',
-          opacity: 0.5,
-        }}>
-          Опубликовано: {formatDate(property.published_at)}
-        </div>
-      )}
+      <div className="property-info__actions">
+        {/* Избранное */}
+        <button
+          type="button"
+          onClick={handleFavoriteClick}
+          disabled={isToggling}
+          className={`property-info__action ${
+            isFavorite ? 'property-info__action--favorite-active' : 'property-info__action--favorite'
+          }`}
+          aria-label={isFavorite ? 'Убрать из избранного' : 'В избранное'}
+          aria-pressed={isFavorite}
+          style={{ opacity: isToggling ? 0.6 : 1 }}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill={isFavorite ? 'currentColor' : 'none'}
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+        </button>
+
+        {/* Сравнить */}
+        <button
+          type="button"
+          onClick={handleComparisonClick}
+          className="property-info__action"
+          style={inComparison ? { color: '#2171ee', borderColor: '#bfdbfe', background: '#eff6ff' } : undefined}
+          aria-label={inComparison ? 'Убрать из сравнения' : 'Добавить к сравнению'}
+          aria-pressed={inComparison}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <polyline points="4 14 10 20 20 4" />
+            <line x1="14" y1="4" x2="14" y2="20" />
+            <line x1="4" y1="10" x2="4" y2="20" />
+          </svg>
+        </button>
+
+        {/* Поделиться */}
+        <button
+          type="button"
+          onClick={handleShareClick}
+          className="property-info__action"
+          aria-label="Поделиться"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <circle cx="18" cy="5" r="3" />
+            <circle cx="6" cy="12" r="3" />
+            <circle cx="18" cy="19" r="3" />
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+          </svg>
+        </button>
+      </div>
     </section>
   );
 }
