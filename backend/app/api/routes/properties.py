@@ -119,11 +119,9 @@ def get_property(
     if not property_obj:
         raise HTTPException(status_code=404, detail="Property not found")
     result = PropertyResponse.model_validate(property_obj).model_dump()
-    # Expose the owner's contact channels so the client can offer a direct
-    # "Связаться с продавцом" action (Telegram DM / phone call).
-    owner = property_obj.owner
-    result["owner_username"] = owner.username if owner else None
-    result["owner_phone"] = owner.phone if owner else None
+    # Overlay the joined/derived fields (price, type/city names, owner, photos
+    # summary) so the detail response matches the list contract.
+    result.update(PropertyService.property_read_dict(property_obj))
     return result
 
 

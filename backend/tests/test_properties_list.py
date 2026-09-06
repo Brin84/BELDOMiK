@@ -265,6 +265,33 @@ class TestPropertiesList:
         assert resp_c.status_code == 200, resp.text
         assert resp_c.json()["is_direct"] is False
 
+    def test_detail_contract_joined_fields(self, client: TestClient, property_seed):
+        # Детальный маршрут обязан возвращать те же производные поля, что и
+        # список (цена, название типа, город, владелец) — иначе карточка
+        # деталей пустая. Контракт фронт↔бэк (PropertyShortRead 1:1).
+        pid = property_seed["a"]  # price 250000, Квартира, Минск, Sample
+        resp = client.get(f"/api/v1/properties/{pid}")
+        assert resp.status_code == 200, resp.text
+        data = resp.json()
+        assert data["price_byn"] == 250000
+        assert data["price_per_m2_byn"] == int(250000 / 65.0)
+        assert data["type_name"] == "Квартира"
+        assert data["city_name"] == "Минск"
+        assert data["operation_name"] == "Продажа"
+        assert data["owner_name"] == "Sample"
+        assert data["photo_count"] == 1
+        assert data["photo_url"] == "https://example.com/a.jpg"
+        assert data["is_direct"] is True
+
+    def test_detail_contract_full_detail_route_returns_owner_channels(
+        self, client: TestClient, property_seed
+    ):
+        # owner_username/owner_phone приходят из профиля владельца.
+        resp = client.get(f"/api/v1/properties/{property_seed['a']}")
+        assert resp.status_code == 200, resp.text
+        data = resp.json()
+        assert data["owner_username"] == "sample_owner"
+
     def test_living_area_range(self, client: TestClient, property_seed):
         # living: A=45, B=28, C=60
         resp = client.get("/api/v1/properties", params={"living_area_min": 40})

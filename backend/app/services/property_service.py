@@ -135,6 +135,60 @@ class PropertyService:
         return property_obj
 
     @staticmethod
+    def property_read_dict(property_obj: Property) -> dict:
+        """Populate the joined/derived fields of a single property for the detail
+        route. The list endpoint builds these via an aggregate query; here we
+        read them off the already-joinedloaded ORM relations so the detail
+        response carries the same contract (price, type/city names, owner, …)."""
+        current_price = next(
+            (p for p in property_obj.prices if p.is_current), None
+        )
+        photos = sorted(property_obj.photos, key=lambda p: p.sort_order)
+        first = photos[0] if photos else None
+        return {
+            "price_byn": current_price.price_byn if current_price else None,
+            "price_usd": current_price.price_usd if current_price else None,
+            "price_per_m2_byn": (
+                current_price.price_per_m2_byn if current_price else None
+            ),
+            "price_per_m2_usd": (
+                current_price.price_per_m2_usd if current_price else None
+            ),
+            "exchange_rate": current_price.exchange_rate if current_price else None,
+            "photo_count": len(photos),
+            "photo_url": first.url if first else None,
+            "city_name": property_obj.city.name if property_obj.city else None,
+            "district_name": (
+                property_obj.district.name if property_obj.district else None
+            ),
+            "neighborhood_name": (
+                property_obj.neighborhood.name if property_obj.neighborhood else None
+            ),
+            "street_name": property_obj.street.name if property_obj.street else None,
+            "metro_station_name": (
+                property_obj.metro_station.name if property_obj.metro_station else None
+            ),
+            "type_name": property_obj.type.name if property_obj.type else None,
+            "operation_name": (
+                property_obj.operation.name if property_obj.operation else None
+            ),
+            "owner_name": property_obj.owner.first_name if property_obj.owner else None,
+            "is_favorite": getattr(property_obj, "is_favorite", False),
+            "is_direct": property_obj.agency_id is None,
+            "agency_name": property_obj.agency.name if property_obj.agency else None,
+            "agency_logo_url": (
+                property_obj.agency.logo_url if property_obj.agency else None
+            ),
+            "is_verified": bool(
+                getattr(property_obj.owner, "is_verified", False)
+            ) if property_obj.owner else False,
+            "owner_username": (
+                property_obj.owner.username if property_obj.owner else None
+            ),
+            "owner_phone": property_obj.owner.phone if property_obj.owner else None,
+        }
+
+    @staticmethod
     def get_property(
         db: Session,
         property_id: int,
