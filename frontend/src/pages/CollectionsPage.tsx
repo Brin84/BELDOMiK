@@ -65,8 +65,8 @@ export function CollectionsPage() {
       {/* Create form */}
       {showCreate && (
         <div
-          className="p-4 rounded-xl space-y-3"
-          style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}
+          className="beldomik-card p-4 space-y-3"
+          style={{ border: '1px solid #e2e8f0' }}
         >
           <input
             value={newName}

@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useMortgageStore } from '../mortgageStore';
 import { MortgageResult as MortgageResultDisplay } from './MortgageResult';
 import { AmortizationSchedule } from './AmortizationSchedule';
@@ -83,7 +83,7 @@ export function MortgageCalculator() {
         value={input.propertyPrice}
         onChange={(v) => setInput({ propertyPrice: v })}
         min={1000}
-        max={10000000}
+        max={5000000}
         step={1000}
         prefix={<BynSymbol />}
       />
@@ -225,23 +225,52 @@ function InputSection({
   step: number;
   prefix?: ReactNode;
 }) {
+  // Локальное строковое значение: позволяет полностью стереть поле
+  // («») и вводить число свободно; в стор попадает только валидное число.
+  const [text, setText] = useState(String(value));
+
+  // Синхронизация с внешними изменениями (слайдер, пресеты, история) —
+  // только когда value изменился извне и отличается от текущего поля,
+  // чтобы не затирать пользовательский ввод (в т.ч. пустую строку).
+  const prevValueRef = useRef(value);
+  useEffect(() => {
+    if (value !== prevValueRef.current) {
+      const fieldNum = text === '' ? 0 : Number(text);
+      if (fieldNum !== value) {
+        setText(String(value));
+      }
+      prevValueRef.current = value;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  const handleTextChange = (raw: string) => {
+    // Разрешаем пустое поле и промежуточные состояния (точка, минус и т.п.)
+    setText(raw);
+    if (raw === '') return; // пустое поле — пока просто пусто, store не трогаем
+    const v = Number(raw);
+    if (Number.isNaN(v)) return;
+    if (v < min || v > max) {
+      // Не выходим за границы — но текстовое поле оставляем как есть,
+      // чтобы пользователь мог продолжить ввод.
+      return;
+    }
+    onChange(v);
+  };
+
   return (
     <section className="bg-tg-bg rounded-2xl p-4 space-y-3">
       <div className="flex items-center justify-between">
         <label className="text-tg-text text-sm font-medium">{label}</label>
         <div className="flex items-center gap-1">
           <input
-            type="number"
-            value={value}
-            onChange={(e) => {
-              const v = Number(e.target.value);
-              if (v >= min && v <= max) onChange(v);
-            }}
-            className="w-24 text-right text-sm font-semibold bg-transparent border-b outline-none text-tg-text"
+            type="text"
+            inputMode="numeric"
+            value={text}
+            onChange={(e) => handleTextChange(e.target.value)}
+            placeholder="0"
+            className="w-28 text-right text-sm font-semibold bg-transparent border-b outline-none text-tg-text"
             style={{ borderColor: 'var(--tg-theme-hint-color)' }}
-            min={min}
-            max={max}
-            step={step}
           />
           {prefix && (
             <span className="text-xs font-medium" style={{ color: 'var(--tg-theme-hint-color)' }}>{prefix}</span>
@@ -253,7 +282,7 @@ function InputSection({
         min={min}
         max={max}
         step={step}
-        value={value}
+        value={Math.min(Math.max(value, min), max)}
         onChange={(e) => onChange(Number(e.target.value))}
         className="w-full"
         style={{ accentColor: 'var(--tg-theme-button-color)' }}

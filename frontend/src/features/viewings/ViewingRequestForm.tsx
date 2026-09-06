@@ -80,8 +80,8 @@ export function ViewingRequestForm({ propertyId }: ViewingRequestFormProps) {
 
   return (
     <div
-      className="p-4 rounded-xl space-y-3"
-      style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}
+      className="p-4 rounded-[18px] space-y-3 beldomik-card"
+      style={{ border: '1px solid #e2e8f0' }}
     >
       <h3 className="text-sm font-semibold text-tg-text">📅 Запись на осмотр</h3>
 

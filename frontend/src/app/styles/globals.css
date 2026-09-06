@@ -70,7 +70,50 @@ body {
 }
 
 :focus-visible {
-  @apply outline-none ring-2 ring-tg-link ring-offset-2 ring-offset-tg-bg;
+  outline: none;
+  /* Нейтральная (не синяя) подсветка фокуса — единый стиль без
+     синего обрамления при вводе. */
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.25);
+  border-radius: 14px;
+}
+
+:focus {
+  outline: none;
+}
+
+/* ------------------------------------------------------------------
+ * Единый стиль полей ввода — как на главной (каталог): белый фон,
+ * светлая рамка #e2e8f0, скругление 14px, без синего обрамления
+ * при фокусе. Перекрывает инлайн-стили компонентов (tg-темы),
+ * чтобы дизайн был одинаковым по всему проекту.
+ * ---------------------------------------------------------------- */
+input:not([type='range']):not([type='checkbox']):not([type='radio']),
+select,
+textarea {
+  border-radius: 14px !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #1e293b !important;
+  box-shadow: none !important;
+}
+
+input:not([type='range']):not([type='checkbox']):not([type='radio']):focus,
+select:focus,
+textarea:focus {
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.25) !important;
+}
+
+input:not([type='range']):not([type='checkbox']):not([type='radio'])::placeholder,
+select::placeholder,
+textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+input[type='range'] {
+  background: transparent;
+  border: none;
+  padding: 0;
 }
 
 input:-webkit-autofill,
