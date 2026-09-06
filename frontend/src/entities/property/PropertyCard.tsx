@@ -75,15 +75,17 @@ export function PropertyCard({
       : null;
   const badgeLabel = statusLabel ?? (property.is_new_building ? 'Новостройка' : null);
 
-  // Строка характеристик: «2-комн. · 56 м² · 180 000 [знак BYN]».
+  // Строка характеристик: «2-комн. · 56 м²»; цена выносится отдельным
+  // элементом (18px, жирность как у знака BYN — 800).
   // Видимая версия — ReactNode (цена с SVG-символом); для aria — чистая строка.
   const specParts: React.ReactNode[] = [];
   if (rooms) specParts.push(formatRooms(rooms));
   if (area) specParts.push(formatArea(area));
-  specParts.push(priceLabel);
-  const specLabel = specParts.map((part, i) => (
-    <React.Fragment key={i}>{i > 0 ? ' · ' : null}{part}</React.Fragment>
-  ));
+  const specLabel = specParts.length > 0
+    ? specParts.map((part, i) => (
+      <React.Fragment key={i}>{i > 0 ? ' · ' : null}{part}</React.Fragment>
+    ))
+    : null;
   const specPartsAria: string[] = [];
   if (rooms) specPartsAria.push(formatRooms(rooms));
   if (area) specPartsAria.push(formatArea(area));
@@ -153,7 +155,12 @@ export function PropertyCard({
         <h3 className="text-[20px] font-bold text-slate-900 leading-snug line-clamp-2">
           {title}
         </h3>
-        <p className="mt-2 text-[16px] text-slate-500">{specLabel}</p>
+        {specLabel && (
+          <p className="mt-2 text-[16px] text-slate-500">{specLabel}</p>
+        )}
+        <p className="mt-2 text-[18px] font-extrabold text-slate-900 leading-tight">
+          {priceLabel}
+        </p>
       </div>
     </article>
   );
