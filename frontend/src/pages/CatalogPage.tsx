@@ -279,7 +279,7 @@ export function CatalogPage() {
               </button>
             </div>
 
-            <div className="catalog-section__list catalog-section__list--hot">
+            <div className="catalog-section__list">
               {hotProperties.map((property) => (
                 <HotPropertyCard
                   key={property.id}
