@@ -130,7 +130,7 @@ export function CatalogPage() {
         <header className="catalog-header">
           <div className="catalog-header__brand">
             <div className="catalog-header__logo">
-              <House size={25} />
+              <House size={21} />
             </div>
             <div>
               <h1 className="catalog-header__title">BELDOMiK</h1>
@@ -154,7 +154,7 @@ export function CatalogPage() {
         {/* SEARCH — настоящее поле ввода с кнопкой фильтров */}
         <form onSubmit={handleSearchSubmit} className="catalog-search">
           <div className="catalog-search__box">
-            <Search size={27} className="catalog-search__icon" />
+            <Search size={22} className="catalog-search__icon" />
             <input
               type="text"
               value={searchValue}
@@ -170,7 +170,7 @@ export function CatalogPage() {
               aria-label="Фильтры"
               className="catalog-search__filter"
             >
-              <SlidersHorizontal size={22} />
+              <SlidersHorizontal size={19} />
             </button>
           </div>
         </form>
@@ -209,9 +209,9 @@ export function CatalogPage() {
             className="catalog-city"
             aria-label="Выбрать город"
           >
-            <MapPin size={18} className="catalog-city__icon" />
+            <MapPin size={16} className="catalog-city__icon" />
             <span className="catalog-city__name">{currentCity?.name || 'Все Беларусь'}</span>
-            <ChevronDown size={16} className="catalog-city__chevron" />
+            <ChevronDown size={14} className="catalog-city__chevron" />
           </button>
         </div>
 
@@ -275,7 +275,7 @@ export function CatalogPage() {
                 className="catalog-section__link"
               >
                 Все
-                <ChevronRight size={20} />
+                <ChevronRight size={18} />
               </button>
             </div>
 

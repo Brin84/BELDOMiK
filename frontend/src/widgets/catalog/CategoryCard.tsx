@@ -63,7 +63,7 @@ export function MortgageCard({ onClick }: MortgageCardProps) {
       className="mortgage-card"
     >
       <div className="mortgage-card__icon">
-        <Percent size={26} />
+        <Percent size={22} />
       </div>
 
       <div className="mortgage-card__content">

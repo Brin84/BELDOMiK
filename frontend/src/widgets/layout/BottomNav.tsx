@@ -41,7 +41,7 @@ export function BottomNav() {
         style={{ color: active ? '#2171ee' : '#64748b' }}
         aria-current={active ? 'page' : undefined}
       >
-        <Icon size={24} strokeWidth={active ? 2.3 : 1.8} />
+        <Icon size={20} strokeWidth={active ? 2.3 : 1.8} />
         <span>{item.label}</span>
       </NavLink>
     );
@@ -68,7 +68,7 @@ export function BottomNav() {
             aria-label={item.label}
             className="bottom-nav__item"
           >
-            <Plus size={26} strokeWidth={2.3} className="text-[#2171ee]" />
+            <Plus size={22} strokeWidth={2.3} className="text-[#2171ee]" />
             <span className="text-[#2171ee]">{item.label}</span>
           </button>
         ) : (

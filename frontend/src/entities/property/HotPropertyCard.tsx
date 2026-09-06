@@ -86,7 +86,7 @@ export function HotPropertyCard({ property, onFavoriteToggle, showTime = false }
       <div className="hot-card__photo">
         {!hasPhoto && (
           <div className="hot-card__photo-placeholder">
-            <ImageOff size={28} strokeWidth={1.5} />
+            <ImageOff size={24} strokeWidth={1.5} />
           </div>
         )}
         {hasPhoto ? (
@@ -114,7 +114,7 @@ export function HotPropertyCard({ property, onFavoriteToggle, showTime = false }
           aria-pressed={property.is_favorite}
         >
           <Heart
-            size={17}
+            size={15}
             className={property.is_favorite ? 'fill-rose-500 text-rose-500' : 'text-slate-600'}
           />
         </button>
@@ -127,7 +127,7 @@ export function HotPropertyCard({ property, onFavoriteToggle, showTime = false }
 
         {location && (
           <div className="hot-card__location">
-            <MapPin size={13} className="hot-card__location-icon" />
+            <MapPin size={12} className="hot-card__location-icon" />
             <span className="hot-card__location-text">{location}</span>
           </div>
         )}
