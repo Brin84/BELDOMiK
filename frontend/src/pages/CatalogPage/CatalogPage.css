@@ -412,6 +412,12 @@
   gap: 10px;
 }
 
+/* В «Горячих предложениях» фото крупнее — это витрина. */
+.catalog-section__list--hot .hot-card__photo {
+  width: 136px;
+  height: 128px;
+}
+
 .catalog-footer {
   padding-top: 24px;
   padding-bottom: 16px;
