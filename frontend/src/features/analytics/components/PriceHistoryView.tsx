@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useAnalyticsStore } from '../analyticsStore';
 import type { PropertyPrice } from '@/shared/api/types';
+import { formatPriceByn } from '@/shared/lib/format';
 
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('ru-RU').format(price) + ' BYN';
+function formatPrice(price: number): ReactNode {
+  return formatPriceByn(price);
 }
 
 function formatPercent(value: number): string {

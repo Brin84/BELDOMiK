@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/authStore';
 import { api, API_ENDPOINTS } from '@/shared/api';
 import type { PropertyShort } from '@/shared/api/types';
+import { formatPriceByn } from '@/shared/lib/format';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { PromoteListingModal } from '@/features/monetization/components/PromoteListingModal';
@@ -31,8 +32,8 @@ const OPERATION_LABELS: Record<string, string> = {
   rent: 'Аренда',
 };
 
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('ru-RU').format(price) + ' BYN';
+function formatPrice(price: number): ReactNode {
+  return formatPriceByn(price);
 }
 
 function formatDate(isoDate: string): string {

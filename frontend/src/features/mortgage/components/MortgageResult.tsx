@@ -1,4 +1,6 @@
+import type { ReactNode } from 'react';
 import type { MortgageInput } from '../mortgageStore';
+import { BynSymbol } from '@/shared/ui';
 
 interface MortgageResultProps {
   monthlyPayment: number;
@@ -8,8 +10,12 @@ interface MortgageResultProps {
   input: MortgageInput;
 }
 
-function formatByn(amount: number): string {
-  return amount.toLocaleString('ru-BY', { style: 'currency', currency: 'BYN', maximumFractionDigits: 0 });
+function formatByn(amount: number): ReactNode {
+  return (
+    <>
+      {amount.toLocaleString('ru-RU')} <BynSymbol />
+    </>
+  );
 }
 
 export function MortgageResult({ monthlyPayment, totalPayment, overpayment, loanAmount, input }: MortgageResultProps) {
@@ -58,7 +64,7 @@ export function MortgageResult({ monthlyPayment, totalPayment, overpayment, loan
   );
 }
 
-function SummaryCell({ label, value, color }: { label: string; value: string; color?: string }) {
+function SummaryCell({ label, value, color }: { label: string; value: ReactNode; color?: string }) {
   return (
     <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}>
       <div className="text-tg-hint text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>{label}</div>

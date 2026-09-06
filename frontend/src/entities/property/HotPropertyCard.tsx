@@ -44,6 +44,9 @@ export function HotPropertyCard({ property, onFavoriteToggle, showTime = false }
   const hasPhoto = property.photo_url && property.photo_url.length > 0;
   const hasPrice = property.price_byn != null && property.price_byn > 0;
   const priceLabel = hasPrice ? formatPriceByn(property.price_byn!, { showCurrency: true }) : 'Договорная';
+  const priceAria: string = hasPrice
+    ? (formatPriceByn(property.price_byn!, { showCurrency: false }) as string)
+    : 'Договорная';
 
   const title =
     property.address ||
@@ -80,7 +83,7 @@ export function HotPropertyCard({ property, onFavoriteToggle, showTime = false }
           handlePress();
         }
       }}
-      aria-label={`${title}, ${specLabel}, ${priceLabel}`}
+      aria-label={`${title}, ${specLabel}, ${priceAria}`}
     >
       {/* Фото слева */}
       <div className="hot-card__photo">

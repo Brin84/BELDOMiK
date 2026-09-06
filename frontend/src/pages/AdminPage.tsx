@@ -5,6 +5,7 @@ import { useHaptics } from '@/shared/lib/haptics';
 import { useNavigate } from 'react-router-dom';
 import { useAdminStore } from '@/features/admin';
 import type { UserRole, PropertyStatus } from '@/shared/api';
+import { BynSymbol } from '@/shared/ui';
 
 type AdminTab = 'dashboard' | 'users' | 'properties' | 'reports';
 
@@ -481,7 +482,7 @@ export function AdminPage() {
                     <div className="flex items-center gap-3 mt-1">
                       {p.price_byn != null && (
                         <span className="text-xs font-medium" style={{ color: '#34c759' }}>
-                          {formatNumber(p.price_byn)} BYN
+                          {formatNumber(p.price_byn)} <BynSymbol />
                         </span>
                       )}
                       <span className="text-[10px]" style={{ color: 'var(--tg-theme-hint-color)' }}>

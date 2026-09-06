@@ -1,10 +1,11 @@
+import type { ReactNode } from 'react';
 import { useHaptics } from '@/shared/lib/haptics';
 import type { PropertyFilterParams } from '@/shared/api/types';
 
 interface ActiveFilterChipsProps {
   filters: PropertyFilterParams;
   onRemoveFilter: (key: keyof PropertyFilterParams) => void;
-  getFilterLabel: (key: keyof PropertyFilterParams, value: unknown) => string | null;
+  getFilterLabel: (key: keyof PropertyFilterParams, value: unknown) => ReactNode | null;
 }
 
 export function ActiveFilterChips({
@@ -15,7 +16,7 @@ export function ActiveFilterChips({
   const { trigger } = useHaptics();
 
   // Build array of active filters
-  const activeFilters: Array<{ key: keyof PropertyFilterParams; label: string }> = [];
+  const activeFilters: Array<{ key: keyof PropertyFilterParams; label: ReactNode }> = [];
 
   Object.entries(filters).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
@@ -47,7 +48,6 @@ export function ActiveFilterChips({
             backgroundColor: 'var(--tg-theme-button-color)',
             color: 'var(--tg-theme-button-text-color)',
           }}
-          aria-label={`Удалить фильтр: ${label}`}
         >
           <span>{label}</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="flex-shrink-0">

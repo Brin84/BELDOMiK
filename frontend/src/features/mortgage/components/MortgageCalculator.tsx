@@ -1,11 +1,16 @@
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { useMortgageStore } from '../mortgageStore';
 import { MortgageResult as MortgageResultDisplay } from './MortgageResult';
 import { AmortizationSchedule } from './AmortizationSchedule';
 import { useTelegram } from '@/app/providers/TelegramProvider';
+import { BynSymbol } from '@/shared/ui';
 
-function formatByn(amount: number): string {
-  return amount.toLocaleString('ru-BY', { style: 'currency', currency: 'BYN', maximumFractionDigits: 0 });
+function formatByn(amount: number): ReactNode {
+  return (
+    <>
+      {amount.toLocaleString('ru-RU')} <BynSymbol />
+    </>
+  );
 }
 
 const TERM_PRESETS = [
@@ -80,7 +85,7 @@ export function MortgageCalculator() {
         min={1000}
         max={10000000}
         step={1000}
-        prefix="BYN"
+        prefix={<BynSymbol />}
       />
 
       {/* Input: Down Payment */}
@@ -218,7 +223,7 @@ function InputSection({
   min: number;
   max: number;
   step: number;
-  prefix?: string;
+  prefix?: ReactNode;
 }) {
   return (
     <section className="bg-tg-bg rounded-2xl p-4 space-y-3">

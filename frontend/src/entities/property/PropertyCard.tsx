@@ -1,3 +1,4 @@
+import React from 'react';
 import { Heart, ImageOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
@@ -48,6 +49,10 @@ export function PropertyCard({
 
   const hasPrice = property.price_byn != null && property.price_byn > 0;
   const priceLabel = hasPrice ? formatPriceByn(property.price_byn!, { showCurrency: true }) : 'Договорная';
+  // Чистая строка цены (без SVG-символа) для aria-label.
+  const priceAria: string = hasPrice
+    ? (formatPriceByn(property.price_byn!, { showCurrency: false }) as string)
+    : 'Договорная';
 
   const typeLabel = property.type_name || 'Объявление';
   const rooms = property.rooms_count;
@@ -70,12 +75,20 @@ export function PropertyCard({
       : null;
   const badgeLabel = statusLabel ?? (property.is_new_building ? 'Новостройка' : null);
 
-  // Строка характеристик: «2-комн. · 56 м² · 180 000 BYN».
-  const specParts: string[] = [];
+  // Строка характеристик: «2-комн. · 56 м² · 180 000 [знак BYN]».
+  // Видимая версия — ReactNode (цена с SVG-символом); для aria — чистая строка.
+  const specParts: React.ReactNode[] = [];
   if (rooms) specParts.push(formatRooms(rooms));
   if (area) specParts.push(formatArea(area));
   specParts.push(priceLabel);
-  const specLabel = specParts.join(' · ');
+  const specLabel = specParts.map((part, i) => (
+    <React.Fragment key={i}>{i > 0 ? ' · ' : null}{part}</React.Fragment>
+  ));
+  const specPartsAria: string[] = [];
+  if (rooms) specPartsAria.push(formatRooms(rooms));
+  if (area) specPartsAria.push(formatArea(area));
+  specPartsAria.push(priceAria);
+  const specLabelAria = specPartsAria.join(' · ');
 
   return (
     <article
@@ -89,7 +102,7 @@ export function PropertyCard({
           handlePress();
         }
       }}
-      aria-label={`${title}, ${specLabel}`}
+      aria-label={`${title}, ${specLabelAria}`}
     >
       {/* Фото-зона с бейджем и избранным */}
       <div className="relative h-[180px]">

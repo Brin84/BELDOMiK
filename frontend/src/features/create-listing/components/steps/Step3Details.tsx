@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useCreateListingStore } from '../../createListingStore';
+import { BynSymbol } from '@/shared/ui';
 
 interface Step3DetailsProps {
   onNext: () => void;
@@ -198,7 +199,7 @@ export function Step3Details({ onNext, onPrev, canProceed }: Step3DetailsProps) 
           <h2 className="text-tg-text text-xl font-bold mb-4">Цена <span className="text-tg-hint font-normal">*</span></h2>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex-1">
-              <label className="block text-tg-hint text-sm mb-1">Цена в BYN *</label>
+              <label className="block text-tg-hint text-sm mb-1">Цена в <BynSymbol /> *</label>
               <input
                 type="number"
                 value={formData.price_byn || ''}

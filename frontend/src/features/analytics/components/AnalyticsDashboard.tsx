@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { useAnalyticsStore } from '../analyticsStore';
 import type { CityStats, PopularProperty } from '../analyticsStore';
+import { formatPriceByn } from '@/shared/lib/format';
 
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('ru-RU').format(price) + ' BYN';
+function formatPrice(price: number): ReactNode {
+  return formatPriceByn(price);
 }
 
 function formatNumber(num: number): string {
@@ -164,7 +165,7 @@ export function AnalyticsDashboard({ initialCityId }: AnalyticsDashboardProps) {
   );
 }
 
-function StatCard({ title, value, icon }: { title: string; value: string; icon: string }) {
+function StatCard({ title, value, icon }: { title: string; value: ReactNode; icon: string }) {
   return (
     <div className="p-4 rounded-2xl text-center" style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)', border: '1px solid var(--tg-theme-hint-color)' }}>
       <div className="text-2xl mb-1">{icon}</div>

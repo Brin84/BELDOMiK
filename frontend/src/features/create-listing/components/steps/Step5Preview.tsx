@@ -3,6 +3,7 @@ import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useCreateListingStore } from '../../createListingStore';
 import { useGeographyStore } from '@/features/geography/geographyStore';
+import { formatPriceByn } from '@/shared/lib/format';
 
 interface Step5PreviewProps {
   onSubmit: () => void;
@@ -10,8 +11,8 @@ interface Step5PreviewProps {
   isSubmitting: boolean;
 }
 
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('ru-RU').format(price) + ' BYN';
+function formatPrice(price: number): React.ReactNode {
+  return formatPriceByn(price);
 }
 
 export function Step5Preview({ onSubmit, onPrev, isSubmitting }: Step5PreviewProps) {

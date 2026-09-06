@@ -7,6 +7,10 @@ import { useComparisonStore } from '@/features/comparison/comparisonStore';
 import type { PropertyDetail } from '@/shared/api/types';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { EmptyState } from '@/shared/ui/EmptyState';
+import {
+  formatPriceByn,
+  formatPricePerSqm as formatPricePerSqmLib,
+} from '@/shared/lib/format';
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
   DRAFT: { label: 'Черновик', color: '#ff9500', bg: 'rgba(255, 149, 0, 0.1)' },
@@ -27,14 +31,14 @@ const RENOVATION_LABELS: Record<string, string> = {
   needs_renovation: 'Требует ремонта',
 };
 
-function formatPrice(price: number | null | undefined): string {
+function formatPrice(price: number | null | undefined): React.ReactNode {
   if (price === null || price === undefined) return '—';
-  return new Intl.NumberFormat('ru-RU').format(price) + ' BYN';
+  return formatPriceByn(price);
 }
 
-function formatPricePerSqm(price: number | null | undefined): string {
+function formatPricePerSqm(price: number | null | undefined): React.ReactNode {
   if (price === null || price === undefined) return '—';
-  return new Intl.NumberFormat('ru-RU').format(price) + ' BYN/м²';
+  return formatPricePerSqmLib(price);
 }
 
 function formatArea(area: number | null | undefined): string {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useDebounce } from '@/shared/lib/hooks';
@@ -172,7 +172,7 @@ export function MapPage() {
 
   // Get active filter labels for chips
   const getFilterLabel = useCallback(
-    (key: keyof PropertyFilterParams, value: unknown): string | null => {
+    (key: keyof PropertyFilterParams, value: unknown): ReactNode | null => {
       if (value === undefined || value === null || value === '') return null;
 
       switch (key) {
@@ -211,9 +211,9 @@ export function MapPage() {
         case 'rooms_count':
           return value === 5 ? '5+ комнат' : `${value} комн.`;
         case 'price_byn_min':
-          return `От ${formatPriceByn(value as number, { compact: true })}`;
+          return <>От {formatPriceByn(value as number, { compact: true })}</>;
         case 'price_byn_max':
-          return `До ${formatPriceByn(value as number, { compact: true })}`;
+          return <>До {formatPriceByn(value as number, { compact: true })}</>;
         case 'total_area_min':
           return `От ${formatArea(value as number)}`;
         case 'total_area_max':

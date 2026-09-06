@@ -1,5 +1,6 @@
 import { Percent } from 'lucide-react';
 import type { PropertyCategory } from '@/shared/api/types';
+import { BynSymbol } from '@/shared/ui';
 
 import apartmentsImg from '@/assets/categories/apartments.webp';
 import housesImg from '@/assets/categories/houses.webp';
@@ -80,7 +81,7 @@ export function MortgageCard({ onClick }: MortgageCardProps) {
           <span className="mortgage-card__calc-home">🏠</span>
         </div>
         <div className="mortgage-card__calc-display">
-          892 BYN
+          892 <BynSymbol size="0.85em" />
           <small>в месяц</small>
         </div>
         <div className="mortgage-card__calc-keypad">
