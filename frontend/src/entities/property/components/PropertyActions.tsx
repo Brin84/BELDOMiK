@@ -77,9 +77,8 @@ export function PropertyActions({
       removeFromComparison(propertyId);
       showToast('Убрано из сравнения', 'info');
     } else {
-      // Need to create a minimal PropertyShort for the comparison store
-      // Since we don't have full PropertyShort here, we'll just add by ID
-      // The comparison store expects a PropertyShort, so we'll use a workaround
+      // addToComparison stores only the id; full details are loaded later
+      // by compareStore.loadComparisonDetails() -> fetchPropertyDetail.
       const { selectedIds } = useComparisonStore.getState();
       if (selectedIds.includes(propertyId)) return;
 
@@ -88,28 +87,7 @@ export function PropertyActions({
         return;
       }
 
-      useComparisonStore.getState().addToComparison({
-        id: propertyId,
-        title: propertyTitle,
-        price_byn: 0,
-        price_usd: null,
-        price_per_m2_byn: null,
-        currency: 'BYN',
-        operation: 'sale',
-        operation_name: 'Продажа',
-        property_type: 'apartment',
-        type_name: 'Квартира',
-        city: '',
-        city_name: '',
-        photo_count: 0,
-        status: 'published',
-        is_favorite: false,
-        favorites_count: 0,
-        views_count: 0,
-        created_at: '',
-        updated_at: '',
-        owner_id: 0,
-      });
+      useComparisonStore.getState().addToComparison({ id: propertyId });
       showToast('Добавлено к сравнению', 'success');
     }
   };

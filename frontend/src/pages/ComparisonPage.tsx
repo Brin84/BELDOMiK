@@ -19,27 +19,12 @@ const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }
   BLOCKED: { label: 'Заблокировано', color: '#ff3b30', bg: 'rgba(255, 59, 48, 0.1)' },
 };
 
-const OPERATION_LABELS: Record<string, string> = {
-  sale: 'Продажа',
-  rent: 'Аренда',
-  daily_rent: 'Посуточно',
-  exchange: 'Обмен',
-};
-
-const PROPERTY_TYPE_LABELS: Record<string, string> = {
-  apartment: 'Квартира',
-  house: 'Дом',
-  land: 'Земля',
-  commercial: 'Коммерческая',
-  garage: 'Гараж',
-  dacha: 'Дача',
-};
-
 const RENOVATION_LABELS: Record<string, string> = {
   none: 'Без ремонта',
   cosmetic: 'Косметический',
   euro: 'Евроремонт',
   designer: 'Дизайнерский',
+  needs_renovation: 'Требует ремонта',
 };
 
 function formatPrice(price: number | null | undefined): string {
@@ -70,8 +55,8 @@ interface ComparisonRow {
 
 const COMPARISON_ROWS: ComparisonRow[] = [
   // Basic info
-  { label: 'Тип недвижимости', key: 'property_type', category: 'basic', render: (p) => PROPERTY_TYPE_LABELS[p.property_type] || p.property_type || '—' },
-  { label: 'Тип сделки', key: 'operation', category: 'basic', render: (p) => OPERATION_LABELS[p.operation] || p.operation || '—' },
+  { label: 'Тип недвижимости', key: 'type_name', category: 'basic', render: (p) => p.type_name || '—' },
+  { label: 'Тип сделки', key: 'operation_name', category: 'basic', render: (p) => p.operation_name || '—' },
   { label: 'Статус', key: 'status', category: 'basic', render: (p) => {
     const config = getStatusConfig(p.status || '');
     return (
@@ -80,9 +65,9 @@ const COMPARISON_ROWS: ComparisonRow[] = [
       </span>
     );
   }},
-  { label: 'Город', key: 'city', category: 'basic', render: (p) => p.city || '—' },
-  { label: 'Район', key: 'district', category: 'basic', render: (p) => p.district || '—' },
-  { label: 'Микрорайон', key: 'neighborhood', category: 'basic', render: (p) => p.neighborhood || '—' },
+  { label: 'Город', key: 'city_name', category: 'basic', render: (p) => p.city_name || '—' },
+  { label: 'Район', key: 'district_name', category: 'basic', render: (p) => p.district_name || '—' },
+  { label: 'Микрорайон', key: 'neighborhood_name', category: 'basic', render: (p) => p.neighborhood_name || '—' },
 
   // Price
   { label: 'Цена', key: 'price_byn', category: 'price', render: (p) => <strong>{formatPrice(p.price_byn)}</strong> },

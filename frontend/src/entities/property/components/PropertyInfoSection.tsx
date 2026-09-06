@@ -38,10 +38,10 @@ interface PropertyInfoSectionProps {
 export function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
   const price = property.price_byn ?? 0;
   const pricePerSqm = property.price_per_m2_byn ?? null;
-  const rooms = property.rooms_count ?? property.rooms;
-  const area = property.total_area ?? property.area;
+  const rooms = property.rooms_count;
+  const area = property.total_area;
   const floor = property.floor;
-  const floorsTotal = property.total_floors ?? property.floors_total;
+  const floorsTotal = property.total_floors;
 
   return (
     <section className="bg-tg-bg rounded-2xl p-4 space-y-4">
@@ -66,13 +66,13 @@ export function PropertyInfoSection({ property }: PropertyInfoSectionProps) {
           backgroundColor: 'var(--tg-theme-button-color)',
           color: 'var(--tg-theme-button-text-color)',
         }}>
-          {property.operation_name || (property.operation === 'sale' ? 'Продажа' : property.operation === 'rent' ? 'Аренда' : property.operation)}
+          {property.operation_name || 'Продажа'}
         </span>
         <span className="px-3 py-1.5 rounded-full text-sm font-medium" style={{
           backgroundColor: 'var(--tg-theme-secondary-bg-color)',
           color: 'var(--tg-theme-text-color)',
         }}>
-          {property.type_name || property.property_type}
+          {property.type_name || 'Квартира'}
         </span>
         {property.is_new_building && (
           <span className="px-3 py-1.5 rounded-full text-sm font-medium" style={{

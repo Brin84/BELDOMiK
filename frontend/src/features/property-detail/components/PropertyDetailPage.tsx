@@ -98,6 +98,15 @@ export function PropertyDetailPage() {
 
   const property = propertyDetail;
 
+  // Krisha-style headline for share/copy; backend has no title on Property.
+  const titleParts = [
+    property.type_name,
+    property.rooms_count ? `${property.rooms_count}-комн.` : null,
+    property.total_area ? `${property.total_area} м²` : null,
+    property.address || property.city_name,
+  ].filter(Boolean);
+  const propertyTitle = titleParts.join(', ') || `Объявление #${property.id}`;
+
   return (
     <div className="p-4 pb-28 space-y-4" style={{ paddingBottom: 'max(28px, env(safe-area-inset-bottom, 0px))' }}>
       {/* Photo Gallery */}
@@ -143,7 +152,7 @@ export function PropertyDetailPage() {
         propertyId={property.id}
         isFavorite={property.is_favorite}
         favoritesCount={property.favorites_count}
-        propertyTitle={property.title || `Объявление #${property.id}`}
+        propertyTitle={propertyTitle}
         propertyUrl={typeof window !== 'undefined' ? window.location.href : undefined}
         onFavoriteToggle={async (propertyId, _currentState) => {
           trigger('light');

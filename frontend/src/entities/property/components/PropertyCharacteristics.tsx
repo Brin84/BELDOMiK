@@ -23,7 +23,7 @@ export function PropertyCharacteristics({ property }: PropertyCharacteristicsPro
   const characteristics: Characteristic[] = [];
 
   // Rooms
-  const rooms = property.rooms_count ?? property.rooms;
+  const rooms = property.rooms_count;
   if (rooms) {
     characteristics.push({
       label: 'Комнаты',
@@ -38,7 +38,7 @@ export function PropertyCharacteristics({ property }: PropertyCharacteristicsPro
   }
 
   // Total area
-  const area = property.total_area ?? property.area;
+  const area = property.total_area;
   if (area) {
     characteristics.push({
       label: 'Общая площадь',

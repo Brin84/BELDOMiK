@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { PropertyShort, PropertyDetail } from '@/shared/api/types';
+import type { PropertyDetail } from '@/shared/api/types';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 
 export interface ComparisonState {
@@ -14,7 +14,7 @@ export interface ComparisonState {
   error: string | null;
 
   // Actions
-  addToComparison: (property: PropertyShort) => boolean;
+  addToComparison: (property: { id: number }) => boolean;
   removeFromComparison: (propertyId: number) => void;
   clearComparison: () => void;
   loadComparisonDetails: () => Promise<void>;
@@ -31,7 +31,7 @@ export const useComparisonStore = create<ComparisonState>((set, get) => ({
   isLoading: false,
   error: null,
 
-  addToComparison: (property: PropertyShort) => {
+  addToComparison: (property: { id: number }) => {
     const { selectedIds } = get();
 
     if (selectedIds.includes(property.id)) {

@@ -3,12 +3,13 @@
 Batch 1 of the Krisha.kz roadmap: rich filters + correct sorting.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.security import create_access_token
 from app.models.geography import City
 from app.models.property import Property, PropertyPhoto, PropertyPrice, PropertyStatus
 from app.models.property_types import OperationType, PropertyType
@@ -283,3 +284,93 @@ class TestPropertiesList:
             property_seed["c"],
             property_seed["a"],
         ]
+
+
+class TestPropertyOwnerLifecycle:
+    """Owner CRUD for own listings: auth, edit (PUT), is_direct on create/my."""
+
+    @pytest.fixture
+    def owner(self, db_session: Session) -> User:
+        user = User(
+            tg_id=900000001,
+            username="route_owner",
+            first_name="Route",
+            last_name="Owner",
+        )
+        db_session.add(user)
+        db_session.commit()
+        db_session.refresh(user)
+        return user
+
+    @pytest.fixture
+    def owner_auth(self, owner: User) -> dict:
+        token = create_access_token(
+            data={"sub": str(owner.id)},
+            expires_delta=timedelta(hours=1),
+        )
+        return {"Authorization": f"Bearer {token}"}
+
+    def _payload(self, db_session: Session) -> dict:
+        city = db_session.query(City).filter(City.name == "Минск").first()
+        prop_type = db_session.query(PropertyType).filter(PropertyType.name == "Квартира").first()
+        op_type = db_session.query(OperationType).filter(OperationType.name == "Продажа").first()
+        return {
+            "type_id": prop_type.id,
+            "operation_id": op_type.id,
+            "city_id": city.id,
+            "address": "ул. Тестовая, 1",
+            "lat": 53.9,
+            "lng": 27.56,
+            "total_area": 55.0,
+            "rooms_count": 2,
+            "description": "Тестовая квартира",
+            "price_byn": 120000,
+            "price_usd": 40000,
+        }
+
+    def test_create_returns_is_direct_true(self, client: TestClient, db_session: Session, owner_auth):
+        # Созданное собственником объявление всегда «без посредников» (agency_id None).
+        resp = client.post("/api/v1/properties", json=self._payload(db_session), headers=owner_auth)
+        assert resp.status_code == 201, resp.text
+        data = resp.json()
+        assert data["is_direct"] is True
+        assert data["status"] == "draft"
+
+    def test_update_owned_property(self, client: TestClient, db_session: Session, owner_auth):
+        # Правка PUT (ранее падала: аргументы в service передавались перепутанными).
+        created = client.post(
+            "/api/v1/properties", json=self._payload(db_session), headers=owner_auth
+        ).json()
+        pid = created["id"]
+
+        resp = client.put(
+            f"/api/v1/properties/{pid}",
+            json={"description": "Обновлённое описание", "rooms_count": 3},
+            headers=owner_auth,
+        )
+        assert resp.status_code == 200, resp.text
+        data = resp.json()
+        assert data["id"] == pid
+        assert data["description"] == "Обновлённое описание"
+        assert data["rooms_count"] == 3
+        assert data["is_direct"] is True
+
+    def test_update_not_owner_returns_404(self, client: TestClient, db_session: Session, property_seed, owner_auth):
+        # Чужое объявление не редактируется.
+        resp = client.put(
+            f"/api/v1/properties/{property_seed['a']}",
+            json={"description": "взлом"},
+            headers=owner_auth,
+        )
+        assert resp.status_code == 404
+
+    def test_my_properties_is_direct_true(self, client: TestClient, db_session: Session, owner_auth):
+        # «Мои объявления» тоже сообщают is_direct (ранее жёсткий дефолт False).
+        created = client.post(
+            "/api/v1/properties", json=self._payload(db_session), headers=owner_auth
+        ).json()
+        resp = client.get("/api/v1/properties/user/my", headers=owner_auth)
+        assert resp.status_code == 200, resp.text
+        mine = [p for p in resp.json() if p["id"] == created["id"]]
+        assert len(mine) == 1
+        assert mine[0]["is_direct"] is True

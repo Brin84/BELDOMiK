@@ -118,8 +118,6 @@ def get_property(
     property_obj = PropertyService.get_property(db, property_id, user_id)
     if not property_obj:
         raise HTTPException(status_code=404, detail="Property not found")
-    # «Без посредников» — вычисляется из отсутствия агентства (нет поля на ORM).
-    property_obj.is_direct = property_obj.agency_id is None
     result = PropertyResponse.model_validate(property_obj).model_dump()
     # Expose the owner's contact channels so the client can offer a direct
     # "Связаться с продавцом" action (Telegram DM / phone call).
@@ -150,7 +148,7 @@ def update_property(
     current_user: User = Depends(get_current_user),
 ):
     """Update a property."""
-    property_obj = PropertyService.update_property(db, property_id, current_user.id, data)
+    property_obj = PropertyService.update_property(db, property_id, data, current_user.id)
     if not property_obj:
         raise HTTPException(status_code=404, detail="Property not found or not owned")
     return PropertyResponse.model_validate(property_obj)

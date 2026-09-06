@@ -94,13 +94,13 @@ function PropertyCard({ property, onClick, onEdit, onDelete, onPromote }: {
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-tg-text font-medium truncate">{property.title}</h3>
+          <h3 className="text-tg-text font-medium truncate">{property.type_name || `Объявление #${property.id}`}</h3>
           <StatusBadge status={property.status} />
         </div>
         <div className="flex items-center gap-2 text-tg-hint text-xs mt-1">
-          <span>{OPERATION_LABELS[property.operation] || property.operation}</span>
+          <span>{property.operation_name || OPERATION_LABELS[property.operation_name || ''] || property.operation_name}</span>
           <span>·</span>
-          <span>{property.property_type}</span>
+          <span>{property.type_name}</span>
           {property.city_name && <>· {property.city_name}</>}
         </div>
         <div className="text-tg-text font-bold mt-1">{formatPrice(property.price_byn ?? 0)}</div>

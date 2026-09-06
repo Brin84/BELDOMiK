@@ -56,37 +56,17 @@ export function PropertyCard({
   const hasPhoto = property.photo_url && property.photo_url.length > 0;
   const photoCount = property.photo_count || 0;
 
-  // Get display values with fallbacks for different field names
+  // Display values from backend (type_name/operation_name already localised)
   const price = property.price_byn ?? 0;
   const pricePerSqm = property.price_per_m2_byn ?? null;
-  const rooms = property.rooms_count ?? property.rooms;
-  const area = property.total_area ?? property.area;
+  const rooms = property.rooms_count;
+  const area = property.total_area;
   const floor = property.floor;
-  const floorsTotal = property.total_floors ?? property.floors_total;
-
-  // Determine property type label in Russian
-  const getPropertyTypeLabel = (type: string): string => {
-    const types: Record<string, string> = {
-      apartment: 'Квартира',
-      house: 'Дом',
-      land: 'Земля',
-      commercial: 'Коммерческая',
-      garage: 'Гараж',
-      dacha: 'Дача',
-    };
-    return types[type] || type;
-  };
-
-  // Determine operation label
-  const getOperationLabel = (operation: string): string => {
-    const ops: Record<string, string> = {
-      sale: 'Продажа',
-      rent: 'Аренда',
-      daily_rent: 'Посуточно',
-      exchange: 'Обмен',
-    };
-    return ops[operation] || operation;
-  };
+  const floorsTotal = property.total_floors;
+  const typeLabel = property.type_name || 'Объявление';
+  const operationLabel = property.operation_name || 'Продажа';
+  const cityLabel = property.city_name || '';
+  const districtLabel = property.district_name || '';
 
   return (
     <article
@@ -99,7 +79,7 @@ export function PropertyCard({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handlePress(); } }}
-      aria-label={`${getPropertyTypeLabel(property.property_type)}, ${formatPriceByn(price)}, ${property.city}${property.district ? `, ${property.district}` : ''}`}
+      aria-label={`${typeLabel}, ${formatPriceByn(price)}, ${cityLabel}${districtLabel ? `, ${districtLabel}` : ''}`}
     >
       {/* Photo section */}
       <div className="relative aspect-[4/3] overflow-hidden bg-tg-secondary-bg">
@@ -107,7 +87,7 @@ export function PropertyCard({
           <>
             <img
               src={property.photo_url!}
-              alt={`${getPropertyTypeLabel(property.property_type)} в ${property.city}`}
+              alt={`${typeLabel} в ${cityLabel}`}
               loading="lazy"
               className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
               onError={(e) => {
@@ -221,8 +201,8 @@ export function PropertyCard({
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <h3 className="text-tg-text font-semibold text-base leading-tight truncate">
-              {getPropertyTypeLabel(property.property_type)}
-              {rooms && property.property_type === 'apartment' && (
+              {typeLabel}
+              {rooms && (
                 <>
                   {' '}
                   <span className="font-normal text-tg-hint">{formatRooms(rooms)}</span>
@@ -230,7 +210,7 @@ export function PropertyCard({
               )}
             </h3>
             <p className="text-tg-hint text-sm mt-0.5 truncate">
-              {getOperationLabel(property.operation)}
+              {operationLabel}
             </p>
           </div>
           <div className="flex flex-col items-end gap-1 flex-shrink-0">
@@ -300,8 +280,8 @@ export function PropertyCard({
             <circle cx="12" cy="10" r="3" />
           </svg>
           <span className="truncate">
-            {property.city}
-            {property.district && `, ${property.district}`}
+            {cityLabel}
+            {districtLabel && `, ${districtLabel}`}
             {property.neighborhood_name && `, ${property.neighborhood_name}`}
             {property.street_name && `, ${property.street_name}`}
           </span>

@@ -103,6 +103,11 @@ class Property(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
+    @property
+    def is_direct(self) -> bool:
+        """«Без посредников» — объявление собственника (без агентства)."""
+        return self.agency_id is None
+
     # Relationships
     owner = relationship("User", back_populates="properties", foreign_keys="Property.owner_id")
     agency = relationship("Agency", back_populates="properties")

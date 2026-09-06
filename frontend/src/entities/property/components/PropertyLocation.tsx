@@ -58,7 +58,7 @@ export function PropertyLocation({ property }: PropertyLocationProps) {
         ))}
       </div>
       {/* Map placeholder */}
-      {(property.latitude && property.longitude) && (
+      {(property.lat && property.lng) && (
         <div className="mt-4 aspect-[4/3] bg-tg-secondary-bg rounded-xl overflow-hidden flex items-center justify-center"
           style={{ border: '1px solid var(--tg-theme-hint-color)', borderWidth: '0.5px' }}
         >
@@ -68,7 +68,7 @@ export function PropertyLocation({ property }: PropertyLocationProps) {
               <circle cx="12" cy="10" r="3" />
             </svg>
             <div className="text-tg-hint text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
-              Карта (координаты: {property.latitude.toFixed(6)}, {property.longitude.toFixed(6)})
+              Карта (координаты: {property.lat.toFixed(6)}, {property.lng.toFixed(6)})
             </div>
           </div>
         </div>

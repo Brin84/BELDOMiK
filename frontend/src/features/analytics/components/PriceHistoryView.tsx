@@ -26,20 +26,16 @@ export function PriceHistoryView() {
   const { priceDistribution, fetchPriceDistribution } = useAnalyticsStore();
 
   useEffect(() => {
-    if (propertyDetail?.city) {
-      // city is a string ID in PropertyDetail, parse it
-      const cityId = parseInt(propertyDetail.city, 10);
-      const typeId = propertyDetail.property_type ? parseInt(propertyDetail.property_type, 10) : undefined;
-      if (!isNaN(cityId)) {
-        fetchPriceDistribution(cityId, typeId);
-      }
+    if (propertyDetail?.city_id) {
+      fetchPriceDistribution(propertyDetail.city_id, propertyDetail.type_id ?? undefined);
     }
-  }, [fetchPriceDistribution, propertyDetail?.city, propertyDetail?.property_type]);
+  }, [fetchPriceDistribution, propertyDetail?.city_id, propertyDetail?.type_id]);
 
   const priceHistory: PropertyPrice[] = propertyDetail?.price_history || [];
   const sortedHistory = [...priceHistory].sort((a, b) =>
     new Date(b.changed_at).getTime() - new Date(a.changed_at).getTime()
   );
+  const caption = [propertyDetail?.type_name, propertyDetail?.city_name].filter(Boolean).join(', ');
 
   const calculateChangePercent = (current: number, previous: number): number => {
     if (previous === 0) return 0;
@@ -51,8 +47,8 @@ export function PriceHistoryView() {
       {/* Header */}
       <div className="sticky top-0 z-10 p-4 border-b" style={{ backgroundColor: 'var(--tg-theme-bg-color)', borderColor: 'var(--tg-theme-hint-color)', borderWidth: '0.5px' }}>
         <h1 className="text-tg-text text-xl font-bold">История цен</h1>
-        {propertyDetail?.title && (
-          <p className="text-tg-hint text-sm mt-1">{propertyDetail.title}</p>
+        {caption && (
+          <p className="text-tg-hint text-sm mt-1">{caption}</p>
         )}
       </div>
 

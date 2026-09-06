@@ -44,12 +44,12 @@ export function MapView({
     const index = new Supercluster(MAP_CONFIG.superclusterOptions);
 
     const points = properties
-      .filter((p) => p.latitude !== undefined && p.longitude !== undefined)
+      .filter((p) => p.lat != null && p.lng != null)
       .map((p) => ({
         type: 'Feature' as const,
         geometry: {
           type: 'Point' as const,
-          coordinates: [p.longitude!, p.latitude!] as [number, number],
+          coordinates: [p.lng!, p.lat!] as [number, number],
         },
         properties: {
           property: p,
@@ -253,12 +253,12 @@ export function MapView({
 
       // Generate price marker icons for each property
       const features = properties
-        .filter((p) => p.latitude !== undefined && p.longitude !== undefined)
+        .filter((p) => p.lat != null && p.lng != null)
         .map((p) => ({
           type: 'Feature' as const,
           geometry: {
             type: 'Point' as const,
-            coordinates: [p.longitude!, p.latitude!] as [number, number],
+            coordinates: [p.lng!, p.lat!] as [number, number],
           },
           properties: {
             property: p,

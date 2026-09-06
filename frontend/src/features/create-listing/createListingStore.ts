@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { api, API_ENDPOINTS } from '@/shared/api';
 import type { PropertyCreate, PropertyShort, OperationType } from '@/shared/api/types';
+import { useGeographyStore } from '@/features/geography/geographyStore';
 
 export type CreateListingStep = 1 | 2 | 3 | 4 | 5;
 
@@ -269,8 +270,8 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
       let response: PropertyShort;
 
       if (draftId) {
-        // Update existing property
-        response = await api.patch<PropertyShort>(API_ENDPOINTS.properties.update(draftId), backendData);
+        // Update existing property (backend exposes PUT, not PATCH)
+        response = await api.put<PropertyShort>(API_ENDPOINTS.properties.update(draftId), backendData);
       } else {
         // Create new property
         response = await api.post<PropertyShort>(API_ENDPOINTS.properties.create, backendData);
@@ -339,7 +340,7 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
         features: [],
       };
 
-      await api.patch<PropertyShort>(API_ENDPOINTS.properties.update(draftId), backendData);
+      await api.put<PropertyShort>(API_ENDPOINTS.properties.update(draftId), backendData);
 
       // Then submit for moderation
       const response = await api.post<PropertyShort>(`/api/v1/properties/${draftId}/submit`, {});
@@ -400,7 +401,7 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
       };
 
       if (draftId) {
-        await api.patch(API_ENDPOINTS.properties.update(draftId), backendData);
+        await api.put(API_ENDPOINTS.properties.update(draftId), backendData);
       } else {
         const response = await api.post<PropertyShort>(API_ENDPOINTS.properties.create, {
           ...backendData,
@@ -418,28 +419,44 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await api.get<PropertyShort>(API_ENDPOINTS.properties.detail(id));
-      // Convert PropertyShort to PropertyCreate
-      // Note: backend PropertyShort uses string fields for IDs (e.g., city, region, district)
+      // Convert PropertyShort (backend contract) back to the wizard's PropertyCreate.
+      // The backend has no title/region on the listing — synthesize a Krisha-style
+      // headline and resolve the city's region through the geography store.
+      const geo = useGeographyStore.getState();
+      if (!geo.loadedAllCities) {
+        await geo.fetchAllCities();
+      }
+      const cityRegionId = geo.getCityById(response.city_id)?.region_id ?? undefined;
+      const operationSlug = geo.getOperationTypeById(response.operation_id)?.name_en as OperationType | undefined;
+
+      const titleParts = [
+        response.type_name,
+        response.rooms_count ? `${response.rooms_count}-комн.` : null,
+        response.total_area ? `${response.total_area} м²` : null,
+        response.city_name,
+      ].filter(Boolean);
+      const draftTitle = titleParts.join(', ') || `Объявление ${response.id}`;
+
       const draftData: PropertyCreate = {
-        title: response.title || '',
+        title: draftTitle,
         description: response.description || '',
-        operation: response.operation as OperationType,
-        property_type_id: Number(response.property_type) || 0,
-        region_id: Number(response.region) || 1,
-        city_id: Number(response.city) || 1,
-        district_id: response.district ? Number(response.district) : undefined,
-        neighborhood_id: response.neighborhood ? Number(response.neighborhood) : undefined,
-        street_id: response.street ? Number(response.street) : undefined,
+        operation: operationSlug || 'sale',
+        property_type_id: response.type_id,
+        region_id: cityRegionId ?? 1,
+        city_id: response.city_id,
+        district_id: response.district_id ?? undefined,
+        neighborhood_id: response.neighborhood_id ?? undefined,
+        street_id: response.street_id ?? undefined,
         address: response.address || '',
-        latitude: response.latitude,
-        longitude: response.longitude,
+        latitude: response.lat ?? undefined,
+        longitude: response.lng ?? undefined,
         price_byn: response.price_byn ?? 0,
         price_usd: response.price_usd ?? undefined,
-        area: response.area,
-        rooms: response.rooms,
-        floor: response.floor,
-        floors_total: response.floors_total,
-        build_year: response.build_year,
+        area: response.total_area ?? undefined,
+        rooms: response.rooms_count ?? undefined,
+        floor: response.floor ?? undefined,
+        floors_total: response.total_floors ?? undefined,
+        build_year: response.build_year ?? undefined,
         repair_type: response.renovation || '',
         has_balcony: response.balcony || false,
         has_furniture: response.furniture || false,

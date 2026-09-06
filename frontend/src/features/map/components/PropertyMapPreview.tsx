@@ -9,28 +9,6 @@ interface PropertyMapPreviewProps {
   onClose: () => void;
 }
 
-const getPropertyTypeLabel = (type: string): string => {
-  const types: Record<string, string> = {
-    apartment: 'Квартира',
-    house: 'Дом',
-    land: 'Земля',
-    commercial: 'Коммерческая',
-    garage: 'Гараж',
-    dacha: 'Дача',
-  };
-  return types[type] || type;
-};
-
-const getOperationLabel = (operation: string): string => {
-  const ops: Record<string, string> = {
-    sale: 'Продажа',
-    rent: 'Аренда',
-    daily_rent: 'Посуточно',
-    exchange: 'Обмен',
-  };
-  return ops[operation] || operation;
-};
-
 export function PropertyMapPreview({ property, onClose }: PropertyMapPreviewProps) {
   const { trigger } = useHaptics();
   const navigate = useNavigate();
@@ -58,8 +36,10 @@ export function PropertyMapPreview({ property, onClose }: PropertyMapPreviewProp
   if (!property) return null;
 
   const price = property.price_byn ?? 0;
-  const rooms = property.rooms_count ?? property.rooms;
-  const area = property.total_area ?? property.area;
+  const rooms = property.rooms_count;
+  const area = property.total_area;
+  const typeLabel = property.type_name || 'Объявление';
+  const operationLabel = property.operation_name || 'Продажа';
 
   const handleOpenDetail = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -109,7 +89,7 @@ export function PropertyMapPreview({ property, onClose }: PropertyMapPreviewProp
               {property.photo_url ? (
                 <img
                   src={property.photo_url}
-                  alt={property.title || getPropertyTypeLabel(property.property_type)}
+                  alt={typeLabel}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -131,15 +111,15 @@ export function PropertyMapPreview({ property, onClose }: PropertyMapPreviewProp
             {/* Type, Operation, Location */}
             <div className="flex-1 min-w-0">
               <h3 className="text-tg-text font-semibold text-base leading-tight truncate">
-                {getPropertyTypeLabel(property.property_type)}
-                {rooms && property.property_type === 'apartment' && (
+                {typeLabel}
+                {rooms && (
                   <span className="font-normal text-tg-hint ml-1">{formatRooms(rooms)}</span>
                 )}
               </h3>
-              <p className="text-tg-hint text-sm mt-0.5">{getOperationLabel(property.operation)}</p>
+              <p className="text-tg-hint text-sm mt-0.5">{operationLabel}</p>
               <p className="text-tg-hint text-sm truncate mt-1">
-                {property.city}
-                {property.district && `, ${property.district}`}
+                {property.city_name}
+                {property.district_name && `, ${property.district_name}`}
                 {property.neighborhood_name && `, ${property.neighborhood_name}`}
               </p>
             </div>
