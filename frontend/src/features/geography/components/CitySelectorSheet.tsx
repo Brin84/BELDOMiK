@@ -17,6 +17,7 @@ export function CitySelectorSheet({ cities, currentCityId, onSelect, onClose }: 
   const { trigger } = useHaptics();
   const regions = useGeographyStore((s) => s.regions);
   const fetchRegions = useGeographyStore((s) => s.fetchRegions);
+  const fetchAllCities = useGeographyStore((s) => s.fetchAllCities);
   const addCity = useGeographyStore((s) => s.addCity);
 
   // Selected region for drill-down; null means the region list is shown.
@@ -28,6 +29,11 @@ export function CitySelectorSheet({ cities, currentCityId, onSelect, onClose }: 
   useEffect(() => {
     if (regions.length === 0) fetchRegions();
   }, [regions.length, fetchRegions]);
+
+  // Make sure ALL cities are loaded (not just for current region).
+  useEffect(() => {
+    fetchAllCities();
+  }, [fetchAllCities]);
 
   useEffect(() => {
     if (backButton) {

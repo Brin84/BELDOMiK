@@ -321,6 +321,7 @@ class PropertyService:
                 District.name.ilike(term, escape="\\"),
                 Neighborhood.name.ilike(term, escape="\\"),
                 Street.name.ilike(term, escape="\\"),
+                PropertyType.name.ilike(term, escape="\\"),
             ))
         if filters.type_id:
             query = query.filter(Property.type_id == filters.type_id)
