@@ -158,7 +158,7 @@ export function PropertyCard({
         {specLabel && (
           <p className="mt-2 text-[16px] text-slate-500">{specLabel}</p>
         )}
-        <p className="mt-2 text-[18px] font-extrabold text-slate-900 leading-tight">
+        <p className="mt-2 text-[20px] font-extrabold text-slate-900 leading-tight">
           {priceLabel}
         </p>
       </div>
