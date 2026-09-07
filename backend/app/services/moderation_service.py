@@ -91,7 +91,7 @@ class ModerationService:
             query = query.filter(Report.status == status)
         else:
             query = query.filter(Report.status.in_(["open", "investigating"]))
-        query = query.order_by(Report.created_at.desc())
+        query = query.order_by(Report.id.desc())
         total = query.count()
         offset = (page - 1) * page_size
         items = query.offset(offset).limit(page_size).all()

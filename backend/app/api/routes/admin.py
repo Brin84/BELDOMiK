@@ -250,7 +250,7 @@ def list_properties(
         q = q.filter(Property.city_id == city_id)
     if search:
         pattern = f"%{search}%"
-        q = q.filter(Property.title.ilike(pattern) | Property.address.ilike(pattern))
+        q = q.filter(Property.address.ilike(pattern))
 
     q = q.order_by(Property.created_at.desc())
     properties = q.offset((page - 1) * page_size).limit(page_size).all()
@@ -410,7 +410,7 @@ def list_reports(
         q = q.filter(Report.status.in_(["pending", "open"]))
 
     total = q.count()
-    reports = q.order_by(Report.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    reports = q.order_by(Report.id.desc()).offset((page - 1) * page_size).limit(page_size).all()
 
     return {
         "items": [
@@ -421,7 +421,6 @@ def list_reports(
                 "reason": r.reason,
                 "description": r.description,
                 "status": r.status,
-                "created_at": r.created_at,
                 "resolved_at": r.resolved_at,
             }
             for r in reports

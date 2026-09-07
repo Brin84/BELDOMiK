@@ -92,15 +92,26 @@ class AnalyticsService:
         results = (
             db.query(
                 Property.id,
-                Property.title,
+                Property.rooms_count,
+                Property.total_area,
+                PropertyType.name.label("type_name"),
+                City.name.label("city_name"),
                 func.count(PropertyView.id).label("view_count"),
             )
             .join(PropertyView, PropertyView.property_id == Property.id)
+            .outerjoin(PropertyType, PropertyType.id == Property.type_id)
+            .outerjoin(City, City.id == Property.city_id)
             .filter(
                 Property.status == "published",
                 PropertyView.viewed_at >= cutoff,
             )
-            .group_by(Property.id, Property.title)
+            .group_by(
+                Property.id,
+                Property.rooms_count,
+                Property.total_area,
+                PropertyType.name,
+                City.name,
+            )
             .order_by(func.count(PropertyView.id).desc())
             .limit(limit)
             .all()
@@ -109,11 +120,24 @@ class AnalyticsService:
         return [
             {
                 "property_id": r.id,
-                "title": r.title,
+                "title": self._build_title(r),
                 "view_count": r.view_count,
             }
             for r in results
         ]
+
+    @staticmethod
+    def _build_title(r) -> str:
+        parts = []
+        if r.type_name:
+            parts.append(r.type_name)
+        if r.rooms_count:
+            parts.append(f"{r.rooms_count}-комн.")
+        if r.total_area:
+            parts.append(f"{r.total_area} м²")
+        if r.city_name:
+            parts.append(r.city_name)
+        return ", ".join(parts) or f"Объявление {r.id}"
 
     @staticmethod
     def get_price_distribution(

@@ -108,6 +108,20 @@ class Property(Base):
         """«Без посредников» — объявление собственника (без агентства)."""
         return self.agency_id is None
 
+    @property
+    def title(self) -> str:
+        """Синтезированный заголовок (в БД нет колонки title)."""
+        parts = []
+        if self.type and self.type.name:
+            parts.append(self.type.name)
+        if self.rooms_count:
+            parts.append(f"{self.rooms_count}-комн.")
+        if self.total_area:
+            parts.append(f"{self.total_area} м²")
+        if self.city and self.city.name:
+            parts.append(self.city.name)
+        return ", ".join(parts) or f"Объявление {self.id}"
+
     # Relationships
     owner = relationship("User", back_populates="properties", foreign_keys="Property.owner_id")
     agency = relationship("Agency", back_populates="properties")
