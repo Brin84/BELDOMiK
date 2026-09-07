@@ -120,6 +120,23 @@
   color: #a0aec0;
 }
 
+/* Глобальный input: !important фон/рамка/скругление рисует внутри
+   pill-бокса внутреннюю рамку. Переопределяем прозрачным инпутом
+   (селектор выше специфичностью глобального input:not(...)...). */
+.catalog-search__box input:not([type='range']):not([type='checkbox']):not([type='radio']) {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.catalog-search__box input:not([type='range']):not([type='checkbox']):not([type='radio']):focus {
+  border: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
 .catalog-search__divider {
   width: 1px;
   height: 26px;

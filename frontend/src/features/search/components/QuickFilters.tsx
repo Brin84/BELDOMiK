@@ -1,5 +1,6 @@
 import { useHaptics } from '@/shared/lib/haptics';
 import type { PropertyFilterParams } from '@/shared/api/types';
+import './search-form.css';
 
 interface QuickFiltersProps {
   filters: PropertyFilterParams;
@@ -67,18 +68,12 @@ export function QuickFilters({
   };
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2" role="group" aria-label="Быстрые фильтры">
+    <div className="qf" role="group" aria-label="Быстрые фильтры">
       {/* Rooms */}
       <select
         value={filters.rooms_count ?? ''}
         onChange={handleRoomsChange}
-        className="px-4 py-2 rounded-xl font-medium whitespace-nowrap flex-shrink-0 transition-colors"
-        style={{
-          backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-          color: 'var(--tg-theme-text-color)',
-          border: '1px solid var(--tg-theme-hint-color)',
-          appearance: 'none',
-        }}
+        className="qf__select"
         aria-label="Комнаты"
       >
         {ROOMS_OPTIONS.map((opt) => (
@@ -89,81 +84,53 @@ export function QuickFilters({
       </select>
 
       {/* Price */}
-      <div className="flex gap-1 whitespace-nowrap flex-shrink-0">
+      <div className="qf__field">
         <input
           type="number"
           placeholder="От"
           value={filters.price_byn_min ?? ''}
           onChange={handlePriceMinChange}
-          className="w-24 px-3 py-2 rounded-xl text-tg-text text-sm"
-          style={{
-            backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-            border: '1px solid var(--tg-theme-hint-color)',
-            color: 'var(--tg-theme-text-color)',
-          }}
+          className="qf__input qf__input--wide"
           inputMode="numeric"
           aria-label="Цена от"
         />
-        <span style={{ color: 'var(--tg-theme-hint-color)', alignSelf: 'center' }}>—</span>
+        <span className="qf__field-dash">—</span>
         <input
           type="number"
           placeholder="До"
           value={filters.price_byn_max ?? ''}
           onChange={handlePriceMaxChange}
-          className="w-24 px-3 py-2 rounded-xl text-tg-text text-sm"
-          style={{
-            backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-            border: '1px solid var(--tg-theme-hint-color)',
-            color: 'var(--tg-theme-text-color)',
-          }}
+          className="qf__input qf__input--wide"
           inputMode="numeric"
           aria-label="Цена до"
         />
       </div>
 
       {/* Area */}
-      <div className="flex gap-1 whitespace-nowrap flex-shrink-0">
+      <div className="qf__field">
         <input
           type="number"
           placeholder="От"
           value={filters.total_area_min ?? ''}
           onChange={handleAreaMinChange}
-          className="w-20 px-3 py-2 rounded-xl text-tg-text text-sm"
-          style={{
-            backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-            border: '1px solid var(--tg-theme-hint-color)',
-            color: 'var(--tg-theme-text-color)',
-          }}
+          className="qf__input"
           inputMode="numeric"
           aria-label="Площадь от"
         />
-        <span style={{ color: 'var(--tg-theme-hint-color)', alignSelf: 'center' }}>—</span>
+        <span className="qf__field-dash">—</span>
         <input
           type="number"
           placeholder="До"
           value={filters.total_area_max ?? ''}
           onChange={handleAreaMaxChange}
-          className="w-20 px-3 py-2 rounded-xl text-tg-text text-sm"
-          style={{
-            backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-            border: '1px solid var(--tg-theme-hint-color)',
-            color: 'var(--tg-theme-text-color)',
-          }}
+          className="qf__input"
           inputMode="numeric"
           aria-label="Площадь до"
         />
       </div>
 
       {/* More Filters Button */}
-      <button
-        onClick={handleMoreFiltersClick}
-        className="px-4 py-2 rounded-xl font-medium whitespace-nowrap flex-shrink-0 transition-colors"
-        style={{
-          backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-          color: 'var(--tg-theme-text-color)',
-          border: '1px solid var(--tg-theme-hint-color)',
-        }}
-      >
+      <button onClick={handleMoreFiltersClick} className="qf__more">
         Ещё фильтры
       </button>
     </div>

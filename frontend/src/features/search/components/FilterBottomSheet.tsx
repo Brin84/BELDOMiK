@@ -3,6 +3,7 @@ import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
 import { backHandlerBlocked } from '@/shared/lib/backButton';
 import type { PropertyFilterParams } from '@/shared/api/types';
+import './search-form.css';
 
 interface FilterBottomSheetProps {
   isOpen: boolean;
@@ -113,6 +114,8 @@ export function FilterBottomSheet({
     onFiltersChange({ renovation });
   };
 
+  const sectionTitle = (text: string) => <h3 className="fbs__title-sm">{text}</h3>;
+
   return (
     <div
       className="fixed inset-0 z-50"
@@ -122,33 +125,16 @@ export function FilterBottomSheet({
       aria-labelledby="filter-bottom-sheet-title"
     >
       {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/50 transition-opacity"
-        style={{ opacity: 1 }}
-        aria-hidden="true"
-      />
+      <div className="absolute inset-0 bg-black/50 transition-opacity" style={{ opacity: 1 }} aria-hidden="true" />
 
       {/* Bottom Sheet */}
-      <div
-        className="absolute bottom-0 left-0 right-0 rounded-t-3xl shadow-2xl transition-transform duration-300"
-        style={{
-          backgroundColor: 'var(--tg-theme-bg-color)',
-          transform: 'translateY(0)',
-          maxHeight: '85vh',
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-        }}
-      >
+      <div className="fbs">
         {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div
-            className="w-10 h-1 rounded-full"
-            style={{ backgroundColor: 'var(--tg-theme-hint-color)', opacity: 0.4 }}
-          />
-        </div>
+        <div className="fbs__grabber" />
 
         {/* Header */}
-        <div className="flex items-center justify-between px-4 pb-3 border-b" style={{ borderColor: 'var(--tg-theme-hint-color)', borderWidth: '0.5px' }}>
-          <h2 id="filter-bottom-sheet-title" className="text-tg-text text-xl font-semibold">
+        <div className="fbs__head">
+          <h2 id="filter-bottom-sheet-title" className="fbs__title">
             Все фильтры
           </h2>
           <button
@@ -156,11 +142,10 @@ export function FilterBottomSheet({
               trigger('light');
               onClose();
             }}
-            className="p-2 rounded-xl transition-colors"
-            style={{ color: 'var(--tg-theme-hint-color)' }}
+            className="fbs__close"
             aria-label="Закрыть фильтры"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -168,28 +153,15 @@ export function FilterBottomSheet({
         </div>
 
         {/* Content */}
-        <div className="p-4 pb-8 space-y-6 overflow-y-auto" style={{ maxHeight: 'calc(85vh - 120px)' }}>
+        <div className="fbs__body">
           {/* Property Type */}
           {propertyTypes.length > 0 && (
-            <section>
-              <h3 className="text-tg-text font-medium mb-3">Тип недвижимости</h3>
-              <div className="flex flex-wrap gap-2">
+            <section className="fbs__section fbs__section--first">
+              {sectionTitle('Тип недвижимости')}
+              <div className="fbs__chips">
                 <button
                   onClick={() => handleTypeChange(undefined)}
-                  className={`px-4 py-2 rounded-xl font-medium transition-colors ${
-                    filters.type_id === undefined
-                      ? 'shadow-sm'
-                      : ''
-                  }`}
-                  style={{
-                    backgroundColor: filters.type_id === undefined
-                      ? 'var(--tg-theme-button-color)'
-                      : 'var(--tg-theme-secondary-bg-color)',
-                    color: filters.type_id === undefined
-                      ? 'var(--tg-theme-button-text-color)'
-                      : 'var(--tg-theme-text-color)',
-                    border: filters.type_id !== undefined ? '1px solid var(--tg-theme-hint-color)' : 'none',
-                  }}
+                  className={`fbs__chip ${filters.type_id === undefined ? 'fbs__chip--active' : ''}`}
                   aria-pressed={filters.type_id === undefined}
                 >
                   Любой
@@ -198,20 +170,7 @@ export function FilterBottomSheet({
                   <button
                     key={type.id}
                     onClick={() => handleTypeChange(type.id)}
-                    className={`px-4 py-2 rounded-xl font-medium transition-colors whitespace-nowrap ${
-                      filters.type_id === type.id
-                        ? 'shadow-sm'
-                        : ''
-                    }`}
-                    style={{
-                      backgroundColor: filters.type_id === type.id
-                        ? 'var(--tg-theme-button-color)'
-                        : 'var(--tg-theme-secondary-bg-color)',
-                      color: filters.type_id === type.id
-                        ? 'var(--tg-theme-button-text-color)'
-                        : 'var(--tg-theme-text-color)',
-                      border: filters.type_id !== type.id ? '1px solid var(--tg-theme-hint-color)' : 'none',
-                    }}
+                    className={`fbs__chip ${filters.type_id === type.id ? 'fbs__chip--active' : ''}`}
                     aria-pressed={filters.type_id === type.id}
                   >
                     {type.name}
@@ -222,293 +181,242 @@ export function FilterBottomSheet({
           )}
 
           {/* Floor */}
-          <section>
-            <h3 className="text-tg-text font-medium mb-3">Этаж</h3>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <label htmlFor="floor-min" className="block text-tg-hint text-sm mb-1">От</label>
-                <input
-                  id="floor-min"
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={filters.floor_min ?? ''}
-                  onChange={(e) => handleFloorChange('floor_min', e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
-                  style={{
-                    backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                    border: '1px solid var(--tg-theme-hint-color)',
-                    color: 'var(--tg-theme-text-color)',
-                  }}
-                  placeholder="1"
-                  inputMode="numeric"
-                />
+          <section className="fbs__section">
+            {sectionTitle('Этаж')}
+            <div className="fbs__pair">
+              <div className="fbs__unit">
+                <label htmlFor="floor-min" className="fbs__label">
+                  От
+                </label>
+                <div className="fbs__field">
+                  <input
+                    id="floor-min"
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={filters.floor_min ?? ''}
+                    onChange={(e) => handleFloorChange('floor_min', e.target.value)}
+                    placeholder="1"
+                    inputMode="numeric"
+                  />
+                </div>
               </div>
-              <div className="flex-1">
-                <label htmlFor="floor-max" className="block text-tg-hint text-sm mb-1">До</label>
-                <input
-                  id="floor-max"
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={filters.floor_max ?? ''}
-                  onChange={(e) => handleFloorChange('floor_max', e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
-                  style={{
-                    backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                    border: '1px solid var(--tg-theme-hint-color)',
-                    color: 'var(--tg-theme-text-color)',
-                  }}
-                  placeholder="100"
-                  inputMode="numeric"
-                />
+              <div className="fbs__unit">
+                <label htmlFor="floor-max" className="fbs__label">
+                  До
+                </label>
+                <div className="fbs__field">
+                  <input
+                    id="floor-max"
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={filters.floor_max ?? ''}
+                    onChange={(e) => handleFloorChange('floor_max', e.target.value)}
+                    placeholder="100"
+                    inputMode="numeric"
+                  />
+                </div>
               </div>
             </div>
           </section>
 
           {/* Total Floors */}
-          <section>
-            <h3 className="text-tg-text font-medium mb-3">Этажность</h3>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <label htmlFor="floors-total-min" className="block text-tg-hint text-sm mb-1">От</label>
-                <input
-                  id="floors-total-min"
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={filters.total_floors_min ?? ''}
-                  onChange={(e) => handleFloorsTotalChange('total_floors_min', e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
-                  style={{
-                    backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                    border: '1px solid var(--tg-theme-hint-color)',
-                    color: 'var(--tg-theme-text-color)',
-                  }}
-                  placeholder="1"
-                  inputMode="numeric"
-                />
+          <section className="fbs__section">
+            {sectionTitle('Этажность')}
+            <div className="fbs__pair">
+              <div className="fbs__unit">
+                <label htmlFor="floors-total-min" className="fbs__label">
+                  От
+                </label>
+                <div className="fbs__field">
+                  <input
+                    id="floors-total-min"
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={filters.total_floors_min ?? ''}
+                    onChange={(e) => handleFloorsTotalChange('total_floors_min', e.target.value)}
+                    placeholder="1"
+                    inputMode="numeric"
+                  />
+                </div>
               </div>
-              <div className="flex-1">
-                <label htmlFor="floors-total-max" className="block text-tg-hint text-sm mb-1">До</label>
-                <input
-                  id="floors-total-max"
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={filters.total_floors_max ?? ''}
-                  onChange={(e) => handleFloorsTotalChange('total_floors_max', e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
-                  style={{
-                    backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                    border: '1px solid var(--tg-theme-hint-color)',
-                    color: 'var(--tg-theme-text-color)',
-                  }}
-                  placeholder="100"
-                  inputMode="numeric"
-                />
+              <div className="fbs__unit">
+                <label htmlFor="floors-total-max" className="fbs__label">
+                  До
+                </label>
+                <div className="fbs__field">
+                  <input
+                    id="floors-total-max"
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={filters.total_floors_max ?? ''}
+                    onChange={(e) => handleFloorsTotalChange('total_floors_max', e.target.value)}
+                    placeholder="100"
+                    inputMode="numeric"
+                  />
+                </div>
               </div>
             </div>
           </section>
 
           {/* Build Year */}
-          <section>
-            <h3 className="text-tg-text font-medium mb-3">Год постройки</h3>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <label htmlFor="build-year-min" className="block text-tg-hint text-sm mb-1">От</label>
-                <input
-                  id="build-year-min"
-                  type="number"
-                  min="1800"
-                  max={new Date().getFullYear() + 5}
-                  value={filters.build_year_min ?? ''}
-                  onChange={(e) => handleBuildYearChange('build_year_min', e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
-                  style={{
-                    backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                    border: '1px solid var(--tg-theme-hint-color)',
-                    color: 'var(--tg-theme-text-color)',
-                  }}
-                  placeholder="1990"
-                  inputMode="numeric"
-                />
+          <section className="fbs__section">
+            {sectionTitle('Год постройки')}
+            <div className="fbs__pair">
+              <div className="fbs__unit">
+                <label htmlFor="build-year-min" className="fbs__label">
+                  От
+                </label>
+                <div className="fbs__field">
+                  <input
+                    id="build-year-min"
+                    type="number"
+                    min="1800"
+                    max={new Date().getFullYear() + 5}
+                    value={filters.build_year_min ?? ''}
+                    onChange={(e) => handleBuildYearChange('build_year_min', e.target.value)}
+                    placeholder="1990"
+                    inputMode="numeric"
+                  />
+                </div>
               </div>
-              <div className="flex-1">
-                <label htmlFor="build-year-max" className="block text-tg-hint text-sm mb-1">До</label>
-                <input
-                  id="build-year-max"
-                  type="number"
-                  min="1800"
-                  max={new Date().getFullYear() + 5}
-                  value={filters.build_year_max ?? ''}
-                  onChange={(e) => handleBuildYearChange('build_year_max', e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
-                  style={{
-                    backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                    border: '1px solid var(--tg-theme-hint-color)',
-                    color: 'var(--tg-theme-text-color)',
-                  }}
-                  placeholder={String(new Date().getFullYear())}
-                  inputMode="numeric"
-                />
+              <div className="fbs__unit">
+                <label htmlFor="build-year-max" className="fbs__label">
+                  До
+                </label>
+                <div className="fbs__field">
+                  <input
+                    id="build-year-max"
+                    type="number"
+                    min="1800"
+                    max={new Date().getFullYear() + 5}
+                    value={filters.build_year_max ?? ''}
+                    onChange={(e) => handleBuildYearChange('build_year_max', e.target.value)}
+                    placeholder={String(new Date().getFullYear())}
+                    inputMode="numeric"
+                  />
+                </div>
               </div>
             </div>
           </section>
 
           {/* Без посредников */}
-          <section>
+          <section className="fbs__section">
             <button
               onClick={() => handleBooleanFilterChange('is_direct_only', filters.is_direct_only ? undefined : true)}
-              className="w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-colors"
-              style={{
-                backgroundColor: filters.is_direct_only
-                  ? 'var(--tg-theme-button-color)'
-                  : 'var(--tg-theme-secondary-bg-color)',
-                color: filters.is_direct_only
-                  ? 'var(--tg-theme-button-text-color)'
-                  : 'var(--tg-theme-text-color)',
-                border: filters.is_direct_only ? 'none' : '1px solid var(--tg-theme-hint-color)',
-              }}
+              className={`fbs__row ${filters.is_direct_only ? 'fbs__row--active' : ''}`}
               aria-pressed={filters.is_direct_only === true}
             >
-              <span className="font-medium">🤝 Без посредников</span>
-              <span className="text-sm" style={{ opacity: 0.7 }}>Только собственники</span>
+              <span className="fbs__row-main">🤝 Без посредников</span>
+              <span className="fbs__row-sub">Только собственники</span>
             </button>
           </section>
 
           {/* Новостройки */}
-          <section>
+          <section className="fbs__section">
             <button
               onClick={() => handleBooleanFilterChange('new_building_only', filters.new_building_only ? undefined : true)}
-              className="w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-colors"
-              style={{
-                backgroundColor: filters.new_building_only
-                  ? 'var(--tg-theme-button-color)'
-                  : 'var(--tg-theme-secondary-bg-color)',
-                color: filters.new_building_only
-                  ? 'var(--tg-theme-button-text-color)'
-                  : 'var(--tg-theme-text-color)',
-                border: filters.new_building_only ? 'none' : '1px solid var(--tg-theme-hint-color)',
-              }}
+              className={`fbs__row ${filters.new_building_only ? 'fbs__row--active' : ''}`}
               aria-pressed={filters.new_building_only === true}
             >
-              <span className="font-medium">🏗️ Новостройки</span>
-              <span className="text-sm" style={{ opacity: 0.7 }}>Квартиры от застройщиков</span>
+              <span className="fbs__row-main">🏗️ Новостройки</span>
+              <span className="fbs__row-sub">Квартиры от застройщиков</span>
             </button>
           </section>
 
           {/* Living Area */}
-          <section>
-            <h3 className="text-tg-text font-medium mb-3">Жилая площадь (м²)</h3>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <label htmlFor="living-area-min" className="block text-tg-hint text-sm mb-1">От</label>
-                <input
-                  id="living-area-min"
-                  type="number"
-                  min="0"
-                  max="5000"
-                  value={filters.living_area_min ?? ''}
-                  onChange={(e) => handleAreaInputChange('living_area_min', e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
-                  style={{
-                    backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                    border: '1px solid var(--tg-theme-hint-color)',
-                    color: 'var(--tg-theme-text-color)',
-                  }}
-                  placeholder="0"
-                  inputMode="decimal"
-                />
+          <section className="fbs__section">
+            {sectionTitle('Жилая площадь (м²)')}
+            <div className="fbs__pair">
+              <div className="fbs__unit">
+                <label htmlFor="living-area-min" className="fbs__label">
+                  От
+                </label>
+                <div className="fbs__field">
+                  <input
+                    id="living-area-min"
+                    type="number"
+                    min="0"
+                    max="5000"
+                    value={filters.living_area_min ?? ''}
+                    onChange={(e) => handleAreaInputChange('living_area_min', e.target.value)}
+                    placeholder="0"
+                    inputMode="decimal"
+                  />
+                </div>
               </div>
-              <div className="flex-1">
-                <label htmlFor="living-area-max" className="block text-tg-hint text-sm mb-1">До</label>
-                <input
-                  id="living-area-max"
-                  type="number"
-                  min="0"
-                  max="5000"
-                  value={filters.living_area_max ?? ''}
-                  onChange={(e) => handleAreaInputChange('living_area_max', e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
-                  style={{
-                    backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                    border: '1px solid var(--tg-theme-hint-color)',
-                    color: 'var(--tg-theme-text-color)',
-                  }}
-                  placeholder="100"
-                  inputMode="decimal"
-                />
+              <div className="fbs__unit">
+                <label htmlFor="living-area-max" className="fbs__label">
+                  До
+                </label>
+                <div className="fbs__field">
+                  <input
+                    id="living-area-max"
+                    type="number"
+                    min="0"
+                    max="5000"
+                    value={filters.living_area_max ?? ''}
+                    onChange={(e) => handleAreaInputChange('living_area_max', e.target.value)}
+                    placeholder="100"
+                    inputMode="decimal"
+                  />
+                </div>
               </div>
             </div>
           </section>
 
           {/* Kitchen Area */}
-          <section>
-            <h3 className="text-tg-text font-medium mb-3">Площадь кухни (м²)</h3>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <label htmlFor="kitchen-area-min" className="block text-tg-hint text-sm mb-1">От</label>
-                <input
-                  id="kitchen-area-min"
-                  type="number"
-                  min="0"
-                  max="5000"
-                  value={filters.kitchen_area_min ?? ''}
-                  onChange={(e) => handleAreaInputChange('kitchen_area_min', e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
-                  style={{
-                    backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                    border: '1px solid var(--tg-theme-hint-color)',
-                    color: 'var(--tg-theme-text-color)',
-                  }}
-                  placeholder="0"
-                  inputMode="decimal"
-                />
+          <section className="fbs__section">
+            {sectionTitle('Площадь кухни (м²)')}
+            <div className="fbs__pair">
+              <div className="fbs__unit">
+                <label htmlFor="kitchen-area-min" className="fbs__label">
+                  От
+                </label>
+                <div className="fbs__field">
+                  <input
+                    id="kitchen-area-min"
+                    type="number"
+                    min="0"
+                    max="5000"
+                    value={filters.kitchen_area_min ?? ''}
+                    onChange={(e) => handleAreaInputChange('kitchen_area_min', e.target.value)}
+                    placeholder="0"
+                    inputMode="decimal"
+                  />
+                </div>
               </div>
-              <div className="flex-1">
-                <label htmlFor="kitchen-area-max" className="block text-tg-hint text-sm mb-1">До</label>
-                <input
-                  id="kitchen-area-max"
-                  type="number"
-                  min="0"
-                  max="5000"
-                  value={filters.kitchen_area_max ?? ''}
-                  onChange={(e) => handleAreaInputChange('kitchen_area_max', e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
-                  style={{
-                    backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                    border: '1px solid var(--tg-theme-hint-color)',
-                    color: 'var(--tg-theme-text-color)',
-                  }}
-                  placeholder="20"
-                  inputMode="decimal"
-                />
+              <div className="fbs__unit">
+                <label htmlFor="kitchen-area-max" className="fbs__label">
+                  До
+                </label>
+                <div className="fbs__field">
+                  <input
+                    id="kitchen-area-max"
+                    type="number"
+                    min="0"
+                    max="5000"
+                    value={filters.kitchen_area_max ?? ''}
+                    onChange={(e) => handleAreaInputChange('kitchen_area_max', e.target.value)}
+                    placeholder="20"
+                    inputMode="decimal"
+                  />
+                </div>
               </div>
             </div>
           </section>
 
           {/* Renovation */}
           {renovationTypes.length > 0 && (
-            <section>
-              <h3 className="text-tg-text font-medium mb-3">Ремонт</h3>
-              <div className="flex flex-wrap gap-2">
+            <section className="fbs__section">
+              {sectionTitle('Ремонт')}
+              <div className="fbs__chips">
                 <button
                   onClick={() => handleRenovationChange(undefined)}
-                  className={`px-4 py-2 rounded-xl font-medium transition-colors ${
-                    filters.renovation === undefined
-                      ? 'shadow-sm'
-                      : ''
-                  }`}
-                  style={{
-                    backgroundColor: filters.renovation === undefined
-                      ? 'var(--tg-theme-button-color)'
-                      : 'var(--tg-theme-secondary-bg-color)',
-                    color: filters.renovation === undefined
-                      ? 'var(--tg-theme-button-text-color)'
-                      : 'var(--tg-theme-text-color)',
-                    border: filters.renovation !== undefined ? '1px solid var(--tg-theme-hint-color)' : 'none',
-                  }}
+                  className={`fbs__chip ${filters.renovation === undefined ? 'fbs__chip--active' : ''}`}
                   aria-pressed={filters.renovation === undefined}
                 >
                   Любой
@@ -517,20 +425,7 @@ export function FilterBottomSheet({
                   <button
                     key={renovation}
                     onClick={() => handleRenovationChange(renovation)}
-                    className={`px-4 py-2 rounded-xl font-medium transition-colors whitespace-nowrap ${
-                      filters.renovation === renovation
-                        ? 'shadow-sm'
-                        : ''
-                    }`}
-                    style={{
-                      backgroundColor: filters.renovation === renovation
-                        ? 'var(--tg-theme-button-color)'
-                        : 'var(--tg-theme-secondary-bg-color)',
-                      color: filters.renovation === renovation
-                        ? 'var(--tg-theme-button-text-color)'
-                        : 'var(--tg-theme-text-color)',
-                      border: filters.renovation !== renovation ? '1px solid var(--tg-theme-hint-color)' : 'none',
-                    }}
+                    className={`fbs__chip ${filters.renovation === renovation ? 'fbs__chip--active' : ''}`}
                     aria-pressed={filters.renovation === renovation}
                   >
                     {renovation}
@@ -541,9 +436,9 @@ export function FilterBottomSheet({
           )}
 
           {/* Boolean features */}
-          <section>
-            <h3 className="text-tg-text font-medium mb-3">Дополнительно</h3>
-            <div className="grid grid-cols-2 gap-3">
+          <section className="fbs__section">
+            {sectionTitle('Дополнительно')}
+            <div className="fbs__grid">
               {[
                 { key: 'furniture' as const, label: 'Мебель', icon: '🛋️' },
                 { key: 'balcony' as const, label: 'Балкон', icon: '🏠' },
@@ -553,70 +448,45 @@ export function FilterBottomSheet({
                 <button
                   key={key}
                   onClick={() => handleBooleanFilterChange(key, filters[key] ? undefined : true)}
-                  className={`flex flex-col items-center gap-2 px-4 py-4 rounded-2xl transition-colors ${
-                    filters[key]
-                      ? 'shadow-sm'
-                      : ''
-                  }`}
-                  style={{
-                    backgroundColor: filters[key]
-                      ? 'var(--tg-theme-button-color)'
-                      : 'var(--tg-theme-secondary-bg-color)',
-                    color: filters[key]
-                      ? 'var(--tg-theme-button-text-color)'
-                      : 'var(--tg-theme-text-color)',
-                    border: filters[key] ? 'none' : '1px solid var(--tg-theme-hint-color)',
-                    borderWidth: '0.5px',
-                  }}
+                  className={`fbs__cell ${filters[key] ? 'fbs__cell--active' : ''}`}
                   aria-pressed={filters[key] === true}
                 >
-                  <span style={{ fontSize: '24px' }}>{icon}</span>
-                  <span className="font-medium">{label}</span>
+                  <span className="fbs__cell-icon">{icon}</span>
+                  <span>{label}</span>
                 </button>
               ))}
             </div>
           </section>
 
           {/* Metro Distance */}
-          <section>
-            <h3 className="text-tg-text font-medium mb-3">Расстояние до метро (м)</h3>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <label htmlFor="metro-distance" className="block text-tg-hint text-sm mb-1">Макс.</label>
-                <input
-                  id="metro-distance"
-                  type="number"
-                  min="0"
-                  max="5000"
-                  value={filters.metro_distance_max ?? ''}
-                  onChange={(e) => handleMetroDistanceChange(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
-                  style={{
-                    backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                    border: '1px solid var(--tg-theme-hint-color)',
-                    color: 'var(--tg-theme-text-color)',
-                  }}
-                  placeholder="1000"
-                  inputMode="numeric"
-                />
-              </div>
+          <section className="fbs__section">
+            {sectionTitle('Расстояние до метро (м)')}
+            <label htmlFor="metro-distance" className="fbs__label">
+              Макс.
+            </label>
+            <div className="fbs__field">
+              <input
+                id="metro-distance"
+                type="number"
+                min="0"
+                max="5000"
+                value={filters.metro_distance_max ?? ''}
+                onChange={(e) => handleMetroDistanceChange(e.target.value)}
+                placeholder="1000"
+                inputMode="numeric"
+              />
             </div>
           </section>
 
           {/* Reset & Apply */}
-          <div className="flex gap-3 pt-4 border-t" style={{ borderColor: 'var(--tg-theme-hint-color)', borderWidth: '0.5px' }}>
+          <div className="fbs__footer">
             {hasActiveFilters && (
               <button
                 onClick={() => {
                   trigger('medium');
                   onReset();
                 }}
-                className="flex-1 py-3.5 rounded-xl font-medium transition-colors"
-                style={{
-                  backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                  color: 'var(--tg-theme-text-color)',
-                  border: '1px solid var(--tg-theme-hint-color)',
-                }}
+                className="fbs__btn fbs__btn--reset"
               >
                 Сбросить все
               </button>
@@ -626,11 +496,7 @@ export function FilterBottomSheet({
                 trigger('success');
                 onClose();
               }}
-              className="flex-1 py-3.5 rounded-xl font-medium transition-colors"
-              style={{
-                backgroundColor: 'var(--tg-theme-button-color)',
-                color: 'var(--tg-theme-button-text-color)',
-              }}
+              className="fbs__btn fbs__btn--apply"
             >
               Применить
             </button>

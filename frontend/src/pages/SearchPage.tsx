@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Building2, MapPin, Search } from 'lucide-react';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useDebounce } from '@/shared/lib/hooks';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
@@ -11,6 +12,7 @@ import { FilterBottomSheet, ActiveFilterChips, SortSelector, QuickFilters } from
 import { SavedSearchForm } from '@/features/saved-searches/components';
 import { formatPriceByn, formatArea } from '@/shared/lib/format';
 import type { PropertyFilterParams } from '@/shared/api/types';
+import '@/features/search/components/search-form.css';
 
 const OPERATION_OPTIONS = [
   { id: 1, label: 'Купить' },
@@ -336,35 +338,18 @@ export function SearchPage() {
   const currentRegion = filters.region_id ? regions.find((r) => r.id === filters.region_id) : null;
 
   return (
-    <div className="p-4 space-y-4 pb-24" style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom, 0px))' }}>
+    <div className="search-page">
+      <main className="search-page__inner">
       {/* Search Bar */}
-      <div className="sticky top-4 z-10">
-        <div className="relative">
-          <svg
-            className="absolute left-4 top-1/2 -translate-y-1/2 flex-shrink-0"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            style={{ color: 'var(--tg-theme-hint-color)' }}
-            aria-hidden="true"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
+      <div className="search-sticky">
+        <div className="search-field">
+          <Search size={20} className="search-field__icon" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Что ищете?"
-            className="w-full pl-12 pr-4 py-3 rounded-xl text-tg-text text-base"
-            style={{
-              backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-              border: '1px solid var(--tg-theme-hint-color)',
-              color: 'var(--tg-theme-text-color)',
-            }}
+            className="search-field__input"
             inputMode="search"
             autoComplete="off"
             aria-label="Поиск недвижимости"
@@ -375,11 +360,10 @@ export function SearchPage() {
                 trigger('light');
                 setSearchQuery('');
               }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full flex-shrink-0"
-              style={{ color: 'var(--tg-theme-hint-color)' }}
+              className="search-field__clear"
               aria-label="Очистить поиск"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
@@ -389,23 +373,14 @@ export function SearchPage() {
       </div>
 
       {/* Operation Toggle */}
-      <div className="flex gap-2" role="group" aria-label="Тип сделки">
+      <div className="search-operation" role="group" aria-label="Тип сделки">
         {OPERATION_OPTIONS.map((op) => (
           <button
             key={op.id}
             onClick={() => handleOperationChange(op.id)}
-            className={`flex-1 py-3 rounded-xl font-medium transition-colors ${
-              filters.operation_id === op.id ? 'shadow-sm' : ''
+            className={`search-operation__btn ${
+              filters.operation_id === op.id ? 'search-operation__btn--active' : ''
             }`}
-            style={{
-              backgroundColor: filters.operation_id === op.id
-                ? 'var(--tg-theme-button-color)'
-                : 'var(--tg-theme-secondary-bg-color)',
-              color: filters.operation_id === op.id
-                ? 'var(--tg-theme-button-text-color)'
-                : 'var(--tg-theme-text-color)',
-              border: filters.operation_id !== op.id ? '1px solid var(--tg-theme-hint-color)' : 'none',
-            }}
             aria-pressed={filters.operation_id === op.id}
           >
             {op.label}
@@ -419,17 +394,14 @@ export function SearchPage() {
           trigger('light');
           navigate('/regions');
         }}
-        className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-colors"
-        style={{
-          backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-          border: '1px solid var(--tg-theme-hint-color)',
-        }}
+        className="search-row"
         aria-label="Выбрать область и город"
       >
-        <span style={{ color: 'var(--tg-theme-text-color)' }}>
-          📍 {currentCity?.name || currentRegion?.name || 'Все Беларусь'}
+        <span className="search-row__label">
+          <MapPin size={18} className="search-row__icon" />
+          {currentCity?.name || currentRegion?.name || 'Все Беларусь'}
         </span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: 'var(--tg-theme-hint-color)' }}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="search-row__chevron">
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </button>
@@ -441,18 +413,15 @@ export function SearchPage() {
             trigger('light');
             setFilterBottomSheetOpen(true);
           }}
-          className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-colors"
-          style={{
-            backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-            border: '1px solid var(--tg-theme-hint-color)',
-          }}
+          className="search-row"
           aria-haspopup="dialog"
           aria-label="Выбрать тип недвижимости"
         >
-          <span style={{ color: 'var(--tg-theme-text-color)' }}>
-            🏠 {filters.type_id ? getPropertyTypeById(filters.type_id)?.name || 'Тип недвижимости' : 'Тип недвижимости'}
+          <span className={`search-row__label ${filters.type_id ? '' : 'search-row__label--muted'}`}>
+            <Building2 size={18} className="search-row__icon" />
+            {filters.type_id ? getPropertyTypeById(filters.type_id)?.name || 'Тип недвижимости' : 'Тип недвижимости'}
           </span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: 'var(--tg-theme-hint-color)' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="search-row__chevron">
             <polyline points="6 9 12 15 18 9" />
           </svg>
         </button>
@@ -478,34 +447,27 @@ export function SearchPage() {
       />
 
       {/* Save Search Button */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => {
-            trigger('light');
-            setSaveSearchModalOpen(true);
-          }}
-          className="w-full py-3 px-4 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-            border: '1px solid var(--tg-theme-hint-color)',
-            color: 'var(--tg-theme-text-color)',
-          }}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-            <polyline points="17 21 17 13 7 13 7 21" />
-            <polyline points="7 3 7 8 15 8" />
-          </svg>
-          Сохранить текущий поиск
-        </button>
-      </div>
+      <button
+        onClick={() => {
+          trigger('light');
+          setSaveSearchModalOpen(true);
+        }}
+        className="search-save"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+          <polyline points="17 21 17 13 7 13 7 21" />
+          <polyline points="7 3 7 8 15 8" />
+        </svg>
+        Сохранить текущий поиск
+      </button>
 
       {/* Error State */}
       {error && <InlineError message={error} onDismiss={clearError} />}
 
       {/* Sort Selector & Result Count */}
-      <div className="flex items-center justify-between">
-        <span className="text-tg-text text-lg font-semibold">
+      <div className="search-meta">
+        <span className="search-meta__count">
           {total > 0 ? `Найдено: ${total}` : 'Результаты поиска'}
         </span>
         <SortSelector currentSort={filters.sort_by || 'created_at_desc'} onChange={handleSortChange} />
@@ -586,9 +548,10 @@ export function SearchPage() {
       )}
 
       {/* Footer info */}
-      <p className="text-center text-tg-hint text-sm pt-8" style={{ color: 'var(--tg-theme-hint-color)' }}>
+      <p className="search-footer">
         BELDOMiK 🇧🇾 — недвижимость Беларуси
       </p>
+      </main>
     </div>
   );
 }

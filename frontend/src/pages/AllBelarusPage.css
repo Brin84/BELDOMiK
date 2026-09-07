@@ -65,19 +65,24 @@
   color: #1e293b;
 }
 
-/* Глобальный input: !important бордер/фон. Внутри pill-бокса
-   делаем input прозрачным, чтобы белый фон pill-контейнера
-   оставался единственным фоном и не было видно стыков. */
-.belarus-page .belarus-search__input,
-.belarus-page .belarus-search__input:focus,
-.belarus-page .belarus-search__input::placeholder {
+/* Глобальный input: !important бордер/фон рисует внутри pill-бокса
+   внутреннюю рамку. Переопределяем прозрачным инпутом (селектор выше
+   специфичностью глобального input:not(...)...). */
+.belarus-search input:not([type='range']):not([type='checkbox']):not([type='radio']) {
   background: transparent !important;
   border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
 }
 
-.belarus-search__input::placeholder {
+.belarus-search input:not([type='range']):not([type='checkbox']):not([type='radio']):focus {
+  border: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.belarus-search input:not([type='range']):not([type='checkbox']):not([type='radio'])::placeholder {
   color: #a0aec0;
 }
 

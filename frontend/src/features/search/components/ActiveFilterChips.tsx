@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useHaptics } from '@/shared/lib/haptics';
 import type { PropertyFilterParams } from '@/shared/api/types';
+import './search-form.css';
 
 interface ActiveFilterChipsProps {
   filters: PropertyFilterParams;
@@ -35,7 +36,7 @@ export function ActiveFilterChips({
   if (activeFilters.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-2 mt-3" role="group" aria-label="Активные фильтры">
+    <div className="acf" role="group" aria-label="Активные фильтры">
       {activeFilters.map(({ key, label }) => (
         <button
           key={key}
@@ -43,11 +44,7 @@ export function ActiveFilterChips({
             trigger('light');
             onRemoveFilter(key);
           }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
-          style={{
-            backgroundColor: 'var(--tg-theme-button-color)',
-            color: 'var(--tg-theme-button-text-color)',
-          }}
+          className="acf__chip"
         >
           <span>{label}</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="flex-shrink-0">
