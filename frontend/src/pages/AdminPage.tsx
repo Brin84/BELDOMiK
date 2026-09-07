@@ -135,7 +135,7 @@ export function AdminPage() {
             <div className="text-2xl font-bold" style={{ color: '#34c759' }}>
               +{dashboard.properties_today}
             </div>
-            <div className="text-xs mt-1" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <div className="text-xs mt-1" style={{ color: '#94a3b8' }}>
               Объявлений сегодня
             </div>
           </div>
@@ -146,7 +146,7 @@ export function AdminPage() {
             <div className="text-2xl font-bold" style={{ color: '#007aff' }}>
               +{dashboard.users_today}
             </div>
-            <div className="text-xs mt-1" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <div className="text-xs mt-1" style={{ color: '#94a3b8' }}>
               Пользователей сегодня
             </div>
           </div>
@@ -162,7 +162,7 @@ export function AdminPage() {
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-lg">{stat.icon}</span>
-                <span className="text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                <span className="text-xs" style={{ color: '#94a3b8' }}>
                   {stat.label}
                 </span>
               </div>
@@ -192,7 +192,7 @@ export function AdminPage() {
                 {dashboard.pending_properties}
               </span>
             )}
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: '#94a3b8' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
@@ -213,7 +213,7 @@ export function AdminPage() {
                 {dashboard.open_reports}
               </span>
             )}
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: '#94a3b8' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
@@ -323,9 +323,9 @@ export function AdminPage() {
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     {u.username && (
-                      <span className="text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>@{u.username}</span>
+                      <span className="text-xs" style={{ color: '#94a3b8' }}>@{u.username}</span>
                     )}
-                    <span className="text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>ID: {u.tg_id}</span>
+                    <span className="text-xs" style={{ color: '#94a3b8' }}>ID: {u.tg_id}</span>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
                     <span
@@ -337,7 +337,7 @@ export function AdminPage() {
                     >
                       {ROLE_LABELS[u.role]}
                     </span>
-                    <span className="text-[10px]" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                    <span className="text-[10px]" style={{ color: '#94a3b8' }}>
                       {u.properties_count} обявл.
                     </span>
                   </div>
@@ -476,7 +476,7 @@ export function AdminPage() {
                         {STATUS_LABELS[p.status]}
                       </span>
                     </div>
-                    <div className="text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                    <div className="text-xs" style={{ color: '#94a3b8' }}>
                       {p.type_name} · {p.operation_name} · {p.city_name || '—'}
                     </div>
                     <div className="flex items-center gap-3 mt-1">
@@ -485,10 +485,10 @@ export function AdminPage() {
                           {formatNumber(p.price_byn)} <BynSymbol />
                         </span>
                       )}
-                      <span className="text-[10px]" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                      <span className="text-[10px]" style={{ color: '#94a3b8' }}>
                         👁 {p.views_count}
                       </span>
-                      <span className="text-[10px]" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                      <span className="text-[10px]" style={{ color: '#94a3b8' }}>
                         {formatDate(p.created_at)}
                       </span>
                     </div>
@@ -606,7 +606,7 @@ export function AdminPage() {
                     >
                       {r.status === 'resolved' ? '✅ Решено' : '⏳ ' + r.status}
                     </span>
-                    <span className="text-[10px]" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                    <span className="text-[10px]" style={{ color: '#94a3b8' }}>
                       #{r.id}
                     </span>
                   </div>
@@ -614,18 +614,18 @@ export function AdminPage() {
                     {r.reason}
                   </div>
                   {r.description && (
-                    <div className="text-xs mt-1" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                    <div className="text-xs mt-1" style={{ color: '#94a3b8' }}>
                       {r.description}
                     </div>
                   )}
                   <div className="flex items-center gap-3 mt-1">
-                    <span className="text-[10px]" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                    <span className="text-[10px]" style={{ color: '#94a3b8' }}>
                       Объявление #{r.property_id}
                     </span>
-                    <span className="text-[10px]" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                    <span className="text-[10px]" style={{ color: '#94a3b8' }}>
                       Автор: #{r.reporter_id}
                     </span>
-                    <span className="text-[10px]" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                    <span className="text-[10px]" style={{ color: '#94a3b8' }}>
                       {formatDate(r.created_at)}
                     </span>
                   </div>
@@ -676,7 +676,7 @@ export function AdminPage() {
             <h1 className="text-lg font-bold" style={{ color: 'var(--tg-theme-text-color)' }}>
               👑 Админ-панель
             </h1>
-            <p className="text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <p className="text-xs" style={{ color: '#94a3b8' }}>
               Управление платформой
             </p>
           </div>

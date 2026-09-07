@@ -17,7 +17,7 @@ export function NotFoundPage() {
 
         <h1 className="text-tg-text text-3xl font-bold">404</h1>
         <p className="text-tg-text text-lg">Страница не найдена</p>
-        <p className="text-tg-hint text-base" style={{ color: 'var(--tg-theme-hint-color)' }}>
+        <p className="text-tg-hint text-base" style={{ color: '#94a3b8' }}>
           К сожалению, такой страницы не существует или она была перемещена.
         </p>
 
@@ -37,7 +37,7 @@ export function NotFoundPage() {
           Перейти в каталог
         </NavLink>
 
-        <p className="pt-8 text-tg-hint text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
+        <p className="pt-8 text-tg-hint text-sm" style={{ color: '#94a3b8' }}>
           BELDOMiK 🇧🇾 — недвижимость Беларуси
         </p>
       </div>

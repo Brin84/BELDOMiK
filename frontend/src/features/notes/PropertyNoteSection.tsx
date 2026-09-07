@@ -60,7 +60,7 @@ export function PropertyNoteSection({ propertyId }: PropertyNoteSectionProps) {
             <button
               onClick={() => { trigger('light'); setIsEditing(true); setText(note.text); }}
               className="p-1.5 rounded-lg"
-              style={{ color: 'var(--tg-theme-hint-color)' }}
+              style={{ color: '#94a3b8' }}
               aria-label="Редактировать заметку"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -130,7 +130,7 @@ export function PropertyNoteSection({ propertyId }: PropertyNoteSectionProps) {
         <button
           onClick={() => { trigger('light'); setIsEditing(true); setText(''); }}
           className="w-full text-left text-sm py-1"
-          style={{ color: 'var(--tg-theme-hint-color)' }}
+          style={{ color: '#94a3b8' }}
         >
           + Добавить заметку
         </button>

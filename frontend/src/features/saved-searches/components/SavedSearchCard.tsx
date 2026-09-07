@@ -124,7 +124,7 @@ export function SavedSearchCard({ savedSearch, onApply, onEdit }: SavedSearchCar
             <h3 className="text-tg-text font-semibold text-base truncate">
               {savedSearch.name || 'Без имени'}
             </h3>
-            <p className="text-tg-hint text-xs mt-1 truncate" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <p className="text-tg-hint text-xs mt-1 truncate" style={{ color: '#94a3b8' }}>
               {formatFilters(savedSearch.filters_json)}
             </p>
           </div>
@@ -144,7 +144,7 @@ export function SavedSearchCard({ savedSearch, onApply, onEdit }: SavedSearchCar
             {FREQUENCY_LABELS[frequency]}
           </span>
           {isActive && frequency !== 'disabled' && (
-            <span className="text-tg-hint text-xs flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <span className="text-tg-hint text-xs flex-shrink-0" style={{ color: '#94a3b8' }}>
               {savedSearch.last_notified_at
                 ? `Последнее уведомление: ${new Date(savedSearch.last_notified_at).toLocaleDateString('ru-RU')}`
                 : 'Уведомлений пока не было'}

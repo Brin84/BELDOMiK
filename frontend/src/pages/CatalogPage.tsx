@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState, type FormEvent } from 'react';
-import { ChevronDown, ChevronRight, MapPin, Search, SlidersHorizontal } from 'lucide-react';
+import { ChevronRight, Globe, Search, SlidersHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
@@ -205,9 +205,7 @@ export function CatalogPage() {
             className="catalog-city"
             aria-label="Выбрать область и город"
           >
-            <MapPin size={16} className="catalog-city__icon" />
-            <span className="catalog-city__name">{currentCity?.name || 'Все Беларусь'}</span>
-            <ChevronDown size={14} className="catalog-city__chevron" />
+            <Globe size={20} className="catalog-city__icon" />
           </button>
         </div>
 

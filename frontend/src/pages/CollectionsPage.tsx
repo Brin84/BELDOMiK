@@ -55,7 +55,7 @@ export function CollectionsPage() {
     <div className="p-4 space-y-6 pb-24">
       <div className="flex items-center justify-between">
         <h1 className="text-tg-text text-2xl font-bold">📁 Подборки</h1>
-        <span className="text-tg-hint text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
+        <span className="text-tg-hint text-sm" style={{ color: '#94a3b8' }}>
           {collections.length} шт.
         </span>
       </div>
@@ -162,15 +162,15 @@ export function CollectionsPage() {
                     {collection.name}
                   </span>
                   {collection.description && (
-                    <span className="block text-xs truncate" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                    <span className="block text-xs truncate" style={{ color: '#94a3b8' }}>
                       {collection.description}
                     </span>
                   )}
                 </span>
-                <span className="text-xs flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                <span className="text-xs flex-shrink-0" style={{ color: '#94a3b8' }}>
                   {collection.property_count}
                 </span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: '#94a3b8' }}>
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               </button>

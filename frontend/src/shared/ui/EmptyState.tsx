@@ -26,7 +26,7 @@ export function EmptyState({ icon, title, description, action, className = '' }:
           strokeLinecap="round"
           strokeLinejoin="round"
           className="mb-4"
-          style={{ color: 'var(--tg-theme-hint-color)', opacity: 0.5 }}
+          style={{ color: '#94a3b8', opacity: 0.5 }}
         >
           <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
           <line x1="9" y1="9" x2="15" y2="15" />
@@ -35,7 +35,7 @@ export function EmptyState({ icon, title, description, action, className = '' }:
       )}
       <h3 className="text-tg-text text-lg font-semibold mb-1">{title}</h3>
       {description && (
-        <p className="text-tg-hint text-sm mb-6 max-w-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+        <p className="text-tg-hint text-sm mb-6 max-w-xs" style={{ color: '#94a3b8' }}>
           {description}
         </p>
       )}

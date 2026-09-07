@@ -49,7 +49,7 @@ export function ViewingRequestForm({ propertyId }: ViewingRequestFormProps) {
         <p className="text-sm font-medium mt-1" style={{ color: '#34c759' }}>
           Заявка отправлена!
         </p>
-        <p className="text-xs mt-1" style={{ color: 'var(--tg-theme-hint-color)' }}>
+        <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>
           Владелец свяжется с вами для подтверждения
         </p>
       </div>
@@ -153,7 +153,7 @@ export function ViewingRequestForm({ propertyId }: ViewingRequestFormProps) {
       />
 
       {!isAuthenticated && (
-        <p className="text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+        <p className="text-xs" style={{ color: '#94a3b8' }}>
           Войдите, чтобы заявка была привязана к вашему аккаунту
         </p>
       )}

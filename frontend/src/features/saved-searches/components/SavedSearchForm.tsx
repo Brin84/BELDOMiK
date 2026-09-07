@@ -156,7 +156,7 @@ export function SavedSearchForm({ initialData, onClose, onSuccess }: SavedSearch
           maxLength={100}
           autoFocus
         />
-        <p className="text-tg-hint text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+        <p className="text-tg-hint text-xs" style={{ color: '#94a3b8' }}>
           {name.length}/100
         </p>
       </div>
@@ -219,7 +219,7 @@ export function SavedSearchForm({ initialData, onClose, onSuccess }: SavedSearch
             {filtersJson}
           </pre>
         </div>
-        <p className="text-tg-hint text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+        <p className="text-tg-hint text-xs" style={{ color: '#94a3b8' }}>
           Фильтры берутся из текущих настроек каталога. Измените их на странице поиска перед сохранением.
         </p>
       </div>

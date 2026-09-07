@@ -140,7 +140,7 @@ export function PropertyPhotoGallery({ photos, className = '' }: PropertyPhotoGa
             />
             {!loadedImages.has(currentIndex) && (
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-8 h-8 border-2 border-tg-hint border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--tg-theme-hint-color)' }} />
+                <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#94a3b8' }} />
               </div>
             )}
           </>

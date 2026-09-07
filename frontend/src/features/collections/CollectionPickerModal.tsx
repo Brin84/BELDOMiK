@@ -127,7 +127,7 @@ export function CollectionPickerModal({ propertyId, isOpen, onClose }: Collectio
           <button
             onClick={onClose}
             className="p-2 rounded-xl"
-            style={{ color: 'var(--tg-theme-hint-color)' }}
+            style={{ color: '#94a3b8' }}
             aria-label="Закрыть"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
@@ -194,11 +194,11 @@ export function CollectionPickerModal({ propertyId, isOpen, onClose }: Collectio
           )}
 
           {!isAuthenticated ? (
-            <p className="text-center py-4 text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <p className="text-center py-4 text-sm" style={{ color: '#94a3b8' }}>
               Войдите, чтобы добавлять в подборки
             </p>
           ) : collections.length === 0 && !showCreate ? (
-            <p className="text-center py-4 text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <p className="text-center py-4 text-sm" style={{ color: '#94a3b8' }}>
               У вас пока нет подборок
             </p>
           ) : (
@@ -220,7 +220,7 @@ export function CollectionPickerModal({ propertyId, isOpen, onClose }: Collectio
                     <span className="block font-medium text-sm truncate" style={{ color: 'var(--tg-theme-text-color)' }}>
                       {collection.name}
                     </span>
-                    <span className="block text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                    <span className="block text-xs" style={{ color: '#94a3b8' }}>
                       {collection.property_count} объектов
                     </span>
                   </span>

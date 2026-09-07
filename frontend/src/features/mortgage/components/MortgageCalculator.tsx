@@ -104,7 +104,7 @@ export function MortgageCalculator() {
           className="w-full accent-blue-500"
           style={{ accentColor: 'var(--tg-theme-button-color)' }}
         />
-        <div className="flex justify-between text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+        <div className="flex justify-between text-xs" style={{ color: '#94a3b8' }}>
           <span>0%</span>
           <span className="font-medium text-tg-text">
             {formatByn(input.propertyPrice * input.downPaymentPercent / 100)}
@@ -273,7 +273,7 @@ function InputSection({
             style={{ borderColor: 'var(--tg-theme-hint-color)' }}
           />
           {prefix && (
-            <span className="text-xs font-medium" style={{ color: 'var(--tg-theme-hint-color)' }}>{prefix}</span>
+            <span className="text-xs font-medium" style={{ color: '#94a3b8' }}>{prefix}</span>
           )}
         </div>
       </div>
@@ -287,7 +287,7 @@ function InputSection({
         className="w-full"
         style={{ accentColor: 'var(--tg-theme-button-color)' }}
       />
-      <div className="flex justify-between text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+      <div className="flex justify-between text-xs" style={{ color: '#94a3b8' }}>
         <span>{min.toLocaleString('ru-BY')}</span>
         <span>{max.toLocaleString('ru-BY')}</span>
       </div>

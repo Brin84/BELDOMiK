@@ -16,23 +16,24 @@
    * Палитра:
    *   страница — светло-голубой #f7f9fc;
    *   карточки — белые, крупное скругление, мягкая тень;
-   *   акцент — синий градиент blue-500 → blue-600 (#3b82f6 → #2563eb);
-   *   текст — slate-900, вторичный — slate-500.
+   *   акцент — синий #2171ee (конец градиента дизайна);
+   *   текст — slate-900; вторичный текст — #94a3b8 (класс .text-tg-hint);
+   *   рамки/разделители — #e2e8f0 (без «тёмных обрамлений» hint-color).
    * ---------------------------------------------------------------- */
   --tg-theme-bg-color: #f7f9fc !important;
-  --tg-theme-secondary-bg-color: #eef1f6 !important;
-  --tg-theme-tertiary-bg-color: #e6eaf1 !important;
+  --tg-theme-secondary-bg-color: #ffffff !important;
+  --tg-theme-tertiary-bg-color: #eef1f6 !important;
   --tg-theme-section-bg-color: #ffffff !important;
   --tg-theme-card-bg-color: #ffffff !important;
   --tg-theme-header-bg-color: #ffffff !important;
   --tg-theme-bottom-bar-bg-color: #f7f9fc !important;
   --tg-theme-text-color: #0f172a !important;
-  --tg-theme-hint-color: #64748b !important;
-  --tg-theme-section-header-text-color: #64748b !important;
-  --tg-theme-subtitle-text-color: #64748b !important;
-  --tg-theme-link-color: #3b82f6 !important;
-  --tg-theme-accent-text-color: #3b82f6 !important;
-  --tg-theme-button-color: #3b82f6 !important;
+  --tg-theme-hint-color: #e2e8f0 !important;
+  --tg-theme-section-header-text-color: #94a3b8 !important;
+  --tg-theme-subtitle-text-color: #94a3b8 !important;
+  --tg-theme-link-color: #2171ee !important;
+  --tg-theme-accent-text-color: #2171ee !important;
+  --tg-theme-button-color: #2171ee !important;
   --tg-theme-button-text-color: #ffffff !important;
   --tg-theme-destructive-color: #ef4444 !important;
   --tg-theme-destructive-text-color: #dc2626 !important;
@@ -145,5 +146,22 @@ input:-webkit-autofill:focus {
     background-color: #ffffff;
     border-radius: 26px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* ------------------------------------------------------------------
+ * Текстовый class text-tg-hint генерируется tailwind из
+ * var(--tg-theme-hint-color), а hint глобально переопределён на
+ * светло-серый #e2e8f0 (для рамок). Чтобы вторичный текст/иконки
+ * остались читаемыми — фиксируем их на muted-цвет дизайна #94a3b8.
+ * Инлайн style={{ color: 'var(--tg-theme-hint-color)' }} для текста
+ * заменён на явный '#94a3b8' по проекту (скриптом/вручную).
+ * ---------------------------------------------------------------- */
+@layer utilities {
+  .text-tg-hint {
+    color: #94a3b8 !important;
+  }
+  .border-tg-hint {
+    border-color: #cbd5e1 !important;
   }
 }

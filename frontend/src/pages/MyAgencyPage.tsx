@@ -287,7 +287,7 @@ export function MyAgencyPage() {
                 const roleLabel = m.role === 'admin' ? 'Админ' : m.role === 'manager' ? 'Менеджер' : 'Агент';
                 return (
                   <div key={m.user_id} className="p-3 rounded-xl flex items-center gap-3" style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)', border: '0.5px solid var(--tg-theme-hint-color)' }}>
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: 'var(--tg-theme-tertiary-bg-color)', color: 'var(--tg-theme-hint-color)' }}>
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium" style={{ backgroundColor: 'var(--tg-theme-tertiary-bg-color)', color: '#94a3b8' }}>
                       {m.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">

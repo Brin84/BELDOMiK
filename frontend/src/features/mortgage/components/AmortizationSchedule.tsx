@@ -44,11 +44,11 @@ export function AmortizationSchedule({ rows }: AmortizationScheduleProps) {
       {/* Totals */}
       <div className="grid grid-cols-2 gap-3">
         <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}>
-          <div className="text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>Основной долг</div>
+          <div className="text-xs" style={{ color: '#94a3b8' }}>Основной долг</div>
           <div className="text-tg-text text-sm font-semibold">{formatByn(totalPrincipal)}</div>
         </div>
         <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}>
-          <div className="text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>Проценты</div>
+          <div className="text-xs" style={{ color: '#94a3b8' }}>Проценты</div>
           <div className="text-sm font-semibold" style={{ color: '#ff3b30' }}>{formatByn(totalInterest)}</div>
         </div>
       </div>
@@ -58,11 +58,11 @@ export function AmortizationSchedule({ rows }: AmortizationScheduleProps) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b" style={{ borderColor: 'var(--tg-theme-hint-color)' }}>
-              <th className="text-left py-2 pr-3 font-medium" style={{ color: 'var(--tg-theme-hint-color)' }}>Месяц</th>
-              <th className="text-right py-2 px-3 font-medium" style={{ color: 'var(--tg-theme-hint-color)' }}>Платёж</th>
-              <th className="text-right py-2 px-3 font-medium" style={{ color: 'var(--tg-theme-hint-color)' }}>Долг</th>
-              <th className="text-right py-2 px-3 font-medium" style={{ color: 'var(--tg-theme-hint-color)' }}>Проценты</th>
-              <th className="text-right py-2 pl-3 font-medium" style={{ color: 'var(--tg-theme-hint-color)' }}>Остаток</th>
+              <th className="text-left py-2 pr-3 font-medium" style={{ color: '#94a3b8' }}>Месяц</th>
+              <th className="text-right py-2 px-3 font-medium" style={{ color: '#94a3b8' }}>Платёж</th>
+              <th className="text-right py-2 px-3 font-medium" style={{ color: '#94a3b8' }}>Долг</th>
+              <th className="text-right py-2 px-3 font-medium" style={{ color: '#94a3b8' }}>Проценты</th>
+              <th className="text-right py-2 pl-3 font-medium" style={{ color: '#94a3b8' }}>Остаток</th>
             </tr>
           </thead>
           <tbody>
@@ -80,7 +80,7 @@ export function AmortizationSchedule({ rows }: AmortizationScheduleProps) {
       </div>
 
       {!expanded && rows.length > 12 && (
-        <p className="text-center text-xs py-2" style={{ color: 'var(--tg-theme-hint-color)' }}>
+        <p className="text-center text-xs py-2" style={{ color: '#94a3b8' }}>
           Показаны первые 12 из {rows.length} месяцев
         </p>
       )}

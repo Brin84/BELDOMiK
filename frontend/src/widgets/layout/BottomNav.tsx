@@ -1,8 +1,8 @@
-import { Building2, Globe, Heart, Map, Plus, User } from 'lucide-react';
+import { Building2, Heart, Map, Plus, User } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
 
-// Плавающая панель с grid-раскладкой: Каталог · Карта · Беларусь · «+» · Избранное · Профиль.
+// Плавающая панель с grid-раскладкой: Каталог · Карта · «+» · Избранное · Профиль.
 // Активная вкладка подсвечивается синей плашкой — стиль Baraholka.
 interface NavItem {
   path: string;
@@ -13,7 +13,6 @@ interface NavItem {
 const navItems: readonly NavItem[] = [
   { path: '/catalog', label: 'Каталог', icon: Building2 },
   { path: '/map', label: 'Карта', icon: Map },
-  { path: '/regions', label: 'Беларусь', icon: Globe },
   { path: '/create-listing', label: 'Подать', icon: Plus },
   { path: '/favorites', label: 'Избранное', icon: Heart },
   { path: '/profile', label: 'Профиль', icon: User },

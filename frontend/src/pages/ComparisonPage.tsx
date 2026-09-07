@@ -384,7 +384,7 @@ export function ComparisonPage() {
       )}
 
       {displayProperties.length > 0 && (
-        <p className="text-center text-tg-hint text-sm pt-4" style={{ color: 'var(--tg-theme-hint-color)' }}>
+        <p className="text-center text-tg-hint text-sm pt-4" style={{ color: '#94a3b8' }}>
           Свайп влево/вправо для просмотра всех колонок
         </p>
       )}

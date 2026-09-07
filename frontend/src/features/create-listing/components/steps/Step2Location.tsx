@@ -233,7 +233,7 @@ export function Step2Location({ onNext, onPrev, canProceed }: Step2LocationProps
                 fill="none"
                 stroke="currentColor"
                 strokeWidth={2}
-                style={{ color: 'var(--tg-theme-hint-color)' }}
+                style={{ color: '#94a3b8' }}
                 aria-hidden="true"
               >
                 <circle cx="11" cy="11" r="8" />
@@ -261,7 +261,7 @@ export function Step2Location({ onNext, onPrev, canProceed }: Step2LocationProps
                     setCitySearchQuery('');
                   }}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full"
-                  style={{ color: 'var(--tg-theme-hint-color)' }}
+                  style={{ color: '#94a3b8' }}
                   aria-label="Очистить поиск"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
@@ -274,7 +274,7 @@ export function Step2Location({ onNext, onPrev, canProceed }: Step2LocationProps
 
             {cityNoMatches ? (
               <div className="text-center">
-                <p className="py-2 text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                <p className="py-2 text-sm" style={{ color: '#94a3b8' }}>
                   «{trimmedCityQuery}» нет в списке
                 </p>
                 <button
@@ -298,7 +298,7 @@ export function Step2Location({ onNext, onPrev, canProceed }: Step2LocationProps
                     <>➕ Добавить «{trimmedCityQuery}»</>
                   )}
                 </button>
-                <p className="pt-2 text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                <p className="pt-2 text-xs" style={{ color: '#94a3b8' }}>
                   Деревня добавится в список области
                 </p>
               </div>

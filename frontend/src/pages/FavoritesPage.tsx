@@ -56,7 +56,7 @@ export function FavoritesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-tg-text text-2xl font-bold">❤️ Избранное</h1>
         {total > 0 && (
-          <span className="text-tg-hint text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
+          <span className="text-tg-hint text-sm" style={{ color: '#94a3b8' }}>
             {total} объектов
           </span>
         )}
@@ -100,7 +100,7 @@ export function FavoritesPage() {
           </div>
 
           {favorites.length > 0 && (
-            <p className="text-center text-tg-hint text-sm py-4" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <p className="text-center text-tg-hint text-sm py-4" style={{ color: '#94a3b8' }}>
               Все {total} избранных загружены
             </p>
           )}
@@ -108,7 +108,7 @@ export function FavoritesPage() {
       )}
 
       {/* Footer info */}
-      <p className="text-center text-tg-hint text-sm pt-8" style={{ color: 'var(--tg-theme-hint-color)' }}>
+      <p className="text-center text-tg-hint text-sm pt-8" style={{ color: '#94a3b8' }}>
         BELDOMiK 🇧🇾 — недвижимость Беларуси
       </p>
     </div>

@@ -183,7 +183,7 @@ export function ProfilePage() {
             <span className="text-2xl">👑</span>
             <div className="flex-1">
               <span className="font-semibold block" style={{ color: '#ff9500' }}>Админ-панель</span>
-              <span className="text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+              <span className="text-xs" style={{ color: '#94a3b8' }}>
                 Управление платформой, модерация, пользователи
               </span>
             </div>
@@ -208,13 +208,13 @@ export function ProfilePage() {
               navigate('/my-listings');
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: '#94a3b8' }}>
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
               <path d="M3 9h18" />
               <path d="M9 21V9" />
             </svg>
             <span style={{ color: 'var(--tg-theme-text-color)' }}>Все мои объявления</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: '#94a3b8' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
@@ -253,7 +253,7 @@ export function ProfilePage() {
           >
             <span className="text-2xl flex-shrink-0">🏢</span>
             <span style={{ color: 'var(--tg-theme-text-color)' }}>Моё агентство</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: '#94a3b8' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
@@ -269,7 +269,7 @@ export function ProfilePage() {
           >
             <span className="text-2xl flex-shrink-0">💎</span>
             <span style={{ color: 'var(--tg-theme-text-color)' }}>Подписка</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: '#94a3b8' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
@@ -289,11 +289,11 @@ export function ProfilePage() {
               navigate('/favorites');
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: '#94a3b8' }}>
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
             <span style={{ color: 'var(--tg-theme-text-color)' }}>❤️ Избранное</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: '#94a3b8' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
@@ -313,7 +313,7 @@ export function ProfilePage() {
               navigate('/collections');
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: '#94a3b8' }}>
               <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
             </svg>
             <span className="flex-1" style={{ color: 'var(--tg-theme-text-color)' }}>Все подборки</span>
@@ -322,7 +322,7 @@ export function ProfilePage() {
                 {collections.length}
               </span>
             )}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: '#94a3b8' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
@@ -342,14 +342,14 @@ export function ProfilePage() {
               navigate('/viewings');
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: '#94a3b8' }}>
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
               <line x1="16" y1="2" x2="16" y2="6" />
               <line x1="8" y1="2" x2="8" y2="6" />
               <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
             <span style={{ color: 'var(--tg-theme-text-color)' }}>Входящие заявки</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: '#94a3b8' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
@@ -377,13 +377,13 @@ export function ProfilePage() {
               navigate('/comparison');
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: '#94a3b8' }}>
               <polyline points="4 14 10 20 20 4" />
               <line x1="14" y1="4" x2="14" y2="20" />
               <line x1="4" y1="10" x2="4" y2="20" />
             </svg>
             <span style={{ color: 'var(--tg-theme-text-color)' }}>Сравнение объявлений</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: '#94a3b8' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
@@ -397,13 +397,13 @@ export function ProfilePage() {
               navigate('/mortgage');
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: '#94a3b8' }}>
               <line x1="19" y1="5" x2="5" y2="19" />
               <circle cx="6.5" cy="6.5" r="2.5" />
               <circle cx="17.5" cy="17.5" r="2.5" />
             </svg>
             <span style={{ color: 'var(--tg-theme-text-color)' }}>Ипотечный калькулятор</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: '#94a3b8' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
@@ -417,13 +417,13 @@ export function ProfilePage() {
               navigate('/analytics');
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: '#94a3b8' }}>
               <line x1="18" y1="20" x2="18" y2="10" />
               <line x1="12" y1="20" x2="12" y2="4" />
               <line x1="6" y1="20" x2="6" y2="14" />
             </svg>
             <span style={{ color: 'var(--tg-theme-text-color)' }}>Аналитика рынка</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: '#94a3b8' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
@@ -444,18 +444,18 @@ export function ProfilePage() {
               window.open('https://t.me/beldomik_bot', '_blank', 'noopener,noreferrer');
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: '#94a3b8' }}>
               <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
             </svg>
             <span style={{ color: 'var(--tg-theme-text-color)' }}>Написать в поддержку</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: '#94a3b8' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
         </div>
       </section>
 
-      <div className="pt-8 text-center text-tg-hint text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
+      <div className="pt-8 text-center text-tg-hint text-sm" style={{ color: '#94a3b8' }}>
         BELDOMiK 🇧🇾 — недвижимость Беларуси<br />
         v0.1.0
       </div>

@@ -37,7 +37,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="flex flex-col items-center justify-center min-h-[100vh] px-6 text-center">
           <div className="text-4xl mb-4">⚠️</div>
           <h1 className="text-tg-text text-lg font-semibold mb-2">Что-то пошло не так</h1>
-          <p className="text-tg-hint text-sm mb-6 max-w-xs break-words" style={{ color: 'var(--tg-theme-hint-color)' }}>
+          <p className="text-tg-hint text-sm mb-6 max-w-xs break-words" style={{ color: '#94a3b8' }}>
             {this.state.message || 'Произошла непредвиденная ошибка.'}
           </p>
           <button

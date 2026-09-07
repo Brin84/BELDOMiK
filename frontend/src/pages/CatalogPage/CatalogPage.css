@@ -201,33 +201,25 @@
 .catalog-city {
   display: flex;
   align-items: center;
-  gap: 5px;
-  max-width: 40%;
-  min-width: 0;
-  padding: 10px 12px;
+  justify-content: center;
+  flex-shrink: 0;
+  align-self: stretch;
+  width: 48px;
+  padding: 0;
   border: 1px solid #e2e8f0;
   border-radius: 18px;
   background: #fff;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
-  font-size: 13px;
-  font-weight: 500;
-  color: #334155;
   cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.catalog-city:active {
+  transform: scale(0.96);
 }
 
 .catalog-city__icon {
   color: #4c91ff;
-  flex-shrink: 0;
-}
-
-.catalog-city__name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.catalog-city__chevron {
-  color: #a0aec0;
   flex-shrink: 0;
 }
 
@@ -599,7 +591,7 @@
   width: calc(100% - 24px);
   max-width: 560px;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   padding: 6px;
   border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 22px;

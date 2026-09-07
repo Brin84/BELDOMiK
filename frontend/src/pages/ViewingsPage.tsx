@@ -81,12 +81,12 @@ export function ViewingsPage() {
                 <div className="flex items-center gap-2 text-tg-text text-base">
                   <span className="font-medium">👤 {viewing.name}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                <div className="flex items-center gap-2 text-sm" style={{ color: '#94a3b8' }}>
                   <span>📞 {viewing.phone}</span>
                 </div>
 
                 {(viewing.preferred_date || viewing.preferred_time) && (
-                  <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--tg-theme-hint-color)' }}>
+                  <div className="flex items-center gap-2 text-sm" style={{ color: '#94a3b8' }}>
                     <span>
                       🗓 {viewing.preferred_date ? formatDateShort(viewing.preferred_date) : '—'}
                       {viewing.preferred_time ? ` в ${viewing.preferred_time}` : ''}
@@ -98,7 +98,7 @@ export function ViewingsPage() {
                   <p className="text-sm text-tg-text" style={{ opacity: 0.85 }}>💬 {viewing.comment}</p>
                 )}
 
-                <p className="text-xs" style={{ color: 'var(--tg-theme-hint-color)', opacity: 0.7 }}>
+                <p className="text-xs" style={{ color: '#94a3b8', opacity: 0.7 }}>
                   Создано: {formatDateShort(viewing.created_at)}
                 </p>
 

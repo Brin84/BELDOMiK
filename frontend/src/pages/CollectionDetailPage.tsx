@@ -96,11 +96,11 @@ export function CollectionDetailPage() {
             <h1 className="text-tg-text text-2xl font-bold">📁 {current.name}</h1>
           )}
           {current.description && !editing && (
-            <p className="text-tg-hint text-sm mt-1" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <p className="text-tg-hint text-sm mt-1" style={{ color: '#94a3b8' }}>
               {current.description}
             </p>
           )}
-          <p className="text-tg-hint text-xs mt-1" style={{ color: 'var(--tg-theme-hint-color)' }}>
+          <p className="text-tg-hint text-xs mt-1" style={{ color: '#94a3b8' }}>
             {current.items.length} объектов
           </p>
         </div>
@@ -113,7 +113,7 @@ export function CollectionDetailPage() {
               style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}
               aria-label="Переименовать"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: 'var(--tg-theme-hint-color)' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: '#94a3b8' }}>
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
               </svg>

@@ -125,7 +125,7 @@ export function PropertyContacts({
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-tg-hint text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>
+              <div className="text-tg-hint text-xs" style={{ color: '#94a3b8' }}>
                 Email
               </div>
               <div className="text-tg-text text-sm font-medium truncate">{email}</div>

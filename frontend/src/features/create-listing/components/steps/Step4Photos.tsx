@@ -173,7 +173,7 @@ export function Step4Photos({ onNext, onPrev }: Step4PhotosProps) {
                 onChange={(e) => e.target.files && handleFileSelect(e.target.files)}
                 className="hidden"
               />
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} style={{ color: 'var(--tg-theme-hint-color)' }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} style={{ color: '#94a3b8' }}>
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
@@ -237,7 +237,7 @@ export function Step4Photos({ onNext, onPrev }: Step4PhotosProps) {
             </svg>
             Рекомендации для лучших результатов:
           </h3>
-          <ul className="text-tg-hint text-sm space-y-1" style={{ color: 'var(--tg-theme-hint-color)' }}>
+          <ul className="text-tg-hint text-sm space-y-1" style={{ color: '#94a3b8' }}>
             <li>• Первое фото — обложка, выбирайте самое привлекательное</li>
             <li>• Фото интерьера: salón, кухня, спальни, санузел</li>
             <li>• Фото внешнего вида: фасад, двор, вид из окна</li>

@@ -28,7 +28,7 @@ export function MortgageResult({ monthlyPayment, totalPayment, overpayment, loan
 
       {/* Monthly payment — hero number */}
       <div className="text-center p-4 rounded-xl" style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}>
-        <div className="text-tg-hint text-sm mb-1" style={{ color: 'var(--tg-theme-hint-color)' }}>
+        <div className="text-tg-hint text-sm mb-1" style={{ color: '#94a3b8' }}>
           Ежемесячный платёж
         </div>
         <div className="text-tg-text font-bold text-3xl">
@@ -67,7 +67,7 @@ export function MortgageResult({ monthlyPayment, totalPayment, overpayment, loan
 function SummaryCell({ label, value, color }: { label: string; value: ReactNode; color?: string }) {
   return (
     <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}>
-      <div className="text-tg-hint text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>{label}</div>
+      <div className="text-tg-hint text-xs" style={{ color: '#94a3b8' }}>{label}</div>
       <div className="text-tg-text text-sm font-semibold mt-0.5" style={color ? { color } : undefined}>
         {value}
       </div>
