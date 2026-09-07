@@ -17,10 +17,14 @@ const OPERATION_META: Record<OperationKey, { icon: string; subtitle: string }> =
 // Маппинг из БД-имён (русские / name_en) → ключи формы.
 // Бэкенд хранит name = "Продажа", "Аренда", "Посуточная аренда", "Обмен".
 const NAME_TO_KEY: Record<string, OperationKey> = {
-  sale: 'sale', 'Продажа': 'sale', Продажа: 'sale',
-  rent: 'rent', 'Аренда': 'rent', Аренда: 'rent',
-  daily_rent: 'daily_rent', 'Посуточная аренда': 'daily_rent', Посуточная: 'daily_rent',
-  exchange: 'exchange', 'Обмен': 'exchange', Обмен: 'exchange',
+  sale: 'sale',
+  'Продажа': 'sale',
+  rent: 'rent',
+  'Аренда': 'rent',
+  daily_rent: 'daily_rent',
+  'Посуточная аренда': 'daily_rent',
+  exchange: 'exchange',
+  'Обмен': 'exchange',
 };
 
 function toOperationKey(name: string): OperationKey | null {
