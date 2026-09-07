@@ -32,7 +32,7 @@ class TelegramAuthService:
         try:
             parsed = dict(parse_qsl(init_data, keep_blank_values=True))
         except Exception as e:
-            logger.warning("Failed to parse init_data", error=str(e))
+            logger.warning(f"Failed to parse init_data: {e}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid init_data format",
@@ -90,7 +90,7 @@ class TelegramAuthService:
         try:
             user_data = json.loads(unquote(parsed["user"]))
         except (json.JSONDecodeError, ValueError) as e:
-            logger.warning("Failed to parse user JSON", error=str(e))
+            logger.warning(f"Failed to parse user JSON: {e}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid user data",

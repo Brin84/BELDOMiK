@@ -42,10 +42,10 @@ class CurrencyService:
                 rate = float(data.get("Cur_OfficialRate", 0))
                 if rate > 0:
                     cls._cache["usd_byn"] = (now, rate)
-                    logger.debug("Updated USD/BYN rate", rate=rate)
+                    logger.debug(f"Updated USD/BYN rate: {rate}")
                     return rate
         except Exception as e:
-            logger.warning("Failed to fetch exchange rate", error=str(e))
+            logger.warning(f"Failed to fetch exchange rate: {e}")
 
         # Fallback to cached or default
         if "usd_byn" in cls._cache:
