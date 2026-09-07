@@ -24,12 +24,10 @@ export function CreateListingWizard() {
     prevStep,
     validateStep,
     validateAll,
-    submit,
     submitForModeration,
     reset,
     loadDraft,
     isSubmitting,
-    draftId,
     error,
   } = useCreateListingStore();
 
@@ -92,9 +90,11 @@ export function CreateListingWizard() {
       return;
     }
 
-    // If editing existing draft, update it; otherwise create new
-    // Then submit for moderation
-    const result = draftId ? await submitForModeration() : await submit();
+    // Всегда отправляем на модерацию: для свежей подачи submitForModeration
+    // сам создаёт объявление (DRAFT) и переводит его в PENDING_MODERATION,
+    // для черновика — обновляет его и отправляет. Старый фолбэк на submit()
+    // создавал DRAFT, который никогда не уходил на модерацию.
+    const result = await submitForModeration();
 
     if (result) {
       trigger('success');

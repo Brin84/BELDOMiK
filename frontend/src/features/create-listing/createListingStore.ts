@@ -41,7 +41,6 @@ export interface CreateListingState {
   setError: (field: string, error: string) => void;
   clearError: (field: string) => void;
   clearAllErrors: () => void;
-  submit: () => Promise<PropertyShort | null>;
   submitForModeration: () => Promise<PropertyShort | null>;
   saveDraft: () => Promise<void>;
   loadDraft: (id: number) => Promise<void>;
@@ -209,81 +208,8 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
 
   clearAllErrors: () => set({ errors: {} }),
 
-  submit: async () => {
-    const { formData, photos, draftId, validateAll } = get();
-
-    if (!validateAll()) {
-      set({ error: 'Пожалуйста, исправьте ошибки в форме' });
-      return null;
-    }
-
-    set({ isSubmitting: true, error: null });
-
-    try {
-      // Step 1: Create or update the property - map frontend fields to backend schema
-      const backendData = {
-        type_id: formData.property_type_id,
-        operation_id: formData.operation === 'sale' ? 1 : formData.operation === 'rent' ? 2 : formData.operation === 'daily_rent' ? 3 : 4,
-        city_id: formData.city_id,
-        district_id: formData.district_id,
-        neighborhood_id: formData.neighborhood_id,
-        street_id: formData.street_id,
-        metro_station_id: undefined,
-        metro_distance: undefined,
-        address: formData.address,
-        lat: formData.latitude,
-        lng: formData.longitude,
-        floor: formData.floor,
-        total_floors: formData.floors_total,
-        build_year: formData.build_year,
-        total_area: formData.area,
-        living_area: undefined,
-        kitchen_area: undefined,
-        rooms_count: formData.rooms,
-        renovation: formData.repair_type,
-        furniture: formData.has_furniture,
-        balcony: formData.has_balcony,
-        parking: formData.has_parking,
-        elevator: formData.has_elevator,
-        description: formData.description,
-        price_byn: formData.price_byn,
-        price_usd: formData.price_usd,
-        photos: [], // Photos uploaded separately
-        features: [],
-      };
-
-      let response: PropertyShort;
-
-      if (draftId) {
-        // Update existing property (backend exposes PUT, not PATCH)
-        response = await api.put<PropertyShort>(API_ENDPOINTS.properties.update(draftId), backendData);
-      } else {
-        // Create new property
-        response = await api.post<PropertyShort>(API_ENDPOINTS.properties.create, backendData);
-      }
-
-      // Step 2: Upload photos if any
-      if (photos.length > 0) {
-        const formDataUpload = new FormData();
-        photos.forEach((photo) => {
-          formDataUpload.append('files', photo);
-        });
-
-        await api.postFormData(API_ENDPOINTS.properties.photosUpload(response.id), formDataUpload);
-      }
-
-      set({ isSubmitting: false, draftId: null, photos: [] });
-      return response;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Ошибка при создании объявления';
-      set({ isSubmitting: false, error: message });
-      return null;
-    }
-  },
-
   submitForModeration: async () => {
     const { draftId, formData, photos, validateAll } = get();
-    if (!draftId) return null;
 
     if (!validateAll()) {
       set({ error: 'Пожалуйста, исправьте ошибки в форме' });
@@ -325,10 +251,19 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
         features: [],
       };
 
-      await api.put<PropertyShort>(API_ENDPOINTS.properties.update(draftId), backendData);
+      // Свежая подача из визарда (без черновика): сначала создаём объявление
+      // (бэкенд создаёт его со статусом DRAFT), затем отправляем на модерацию.
+      // Если редактируем существующий черновик — обновляем его.
+      let propertyId = draftId;
+      if (!propertyId) {
+        const created = await api.post<PropertyShort>(API_ENDPOINTS.properties.create, backendData);
+        propertyId = created.id;
+      } else {
+        await api.put<PropertyShort>(API_ENDPOINTS.properties.update(propertyId), backendData);
+      }
 
-      // Then submit for moderation
-      const response = await api.post<PropertyShort>(`/api/v1/properties/${draftId}/submit`, {});
+      // Then submit for moderation (DRAFT → PENDING_MODERATION)
+      const response = await api.post<PropertyShort>(`/api/v1/properties/${propertyId}/submit`, {});
 
       // Upload photos if any
       if (photos.length > 0) {
@@ -337,7 +272,7 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
           formDataUpload.append('files', photo);
         });
 
-        await api.postFormData(API_ENDPOINTS.properties.photosUpload(draftId), formDataUpload);
+        await api.postFormData(API_ENDPOINTS.properties.photosUpload(propertyId), formDataUpload);
       }
 
       set({ isSubmitting: false, draftId: null, photos: [] });
