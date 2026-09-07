@@ -620,3 +620,28 @@
 .bottom-nav__item--active {
   background: #eef4ff;
 }
+
+/* ---------- Кнопка «+» (подать объявление) ---------- */
+
+.bottom-nav__create {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  align-self: center;
+  width: 52px;
+  height: 52px;
+  margin-top: -20px;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  color: #ffffff;
+  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
+  box-shadow: 0 6px 18px rgba(33, 113, 238, 0.4);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav__create:active {
+  transform: scale(0.94);
+}

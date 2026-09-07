@@ -66,10 +66,9 @@ export function BottomNav() {
             type="button"
             onClick={handleCreate}
             aria-label={item.label}
-            className="bottom-nav__item"
+            className="bottom-nav__create"
           >
-            <Plus size={22} strokeWidth={2.3} className="text-[#2171ee]" />
-            <span className="text-[#2171ee]">{item.label}</span>
+            <Plus size={26} strokeWidth={2.5} />
           </button>
         ) : (
           renderItem(item)
