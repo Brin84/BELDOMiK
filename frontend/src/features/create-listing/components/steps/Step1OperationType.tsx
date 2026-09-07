@@ -3,33 +3,9 @@ import { useHaptics } from '@/shared/lib/haptics';
 import { useCreateListingStore } from '../../createListingStore';
 import { useGeographyStore } from '@/features/geography/geographyStore';
 import { ExpandablePicker, type ExpandableOption } from '../ExpandablePicker';
+import { propertyTypeIcon } from '@/shared/lib/propertyTypeIcon';
+import { OPERATION_META, toOperationKey, type OperationKey } from '@/shared/lib/operationKey';
 import type { OperationTypeData } from '@/shared/api/types';
-
-type OperationKey = 'sale' | 'rent' | 'daily_rent' | 'exchange';
-
-const OPERATION_META: Record<OperationKey, { icon: string; subtitle: string }> = {
-  sale: { icon: '💰', subtitle: 'Продажа недвижимости' },
-  rent: { icon: '🏠', subtitle: 'Долгосрочная аренда' },
-  daily_rent: { icon: '🏨', subtitle: 'Посуточная аренда' },
-  exchange: { icon: '🔄', subtitle: 'Обмен недвижимости' },
-};
-
-// Маппинг из БД-имён (русские / name_en) → ключи формы.
-// Бэкенд хранит name = "Продажа", "Аренда", "Посуточная аренда", "Обмен".
-const NAME_TO_KEY: Record<string, OperationKey> = {
-  sale: 'sale',
-  'Продажа': 'sale',
-  rent: 'rent',
-  'Аренда': 'rent',
-  daily_rent: 'daily_rent',
-  'Посуточная аренда': 'daily_rent',
-  exchange: 'exchange',
-  'Обмен': 'exchange',
-};
-
-function toOperationKey(name: string): OperationKey | null {
-  return NAME_TO_KEY[name] ?? null;
-}
 
 type PickerName = 'operation' | 'property';
 
@@ -57,7 +33,7 @@ export function Step1OperationType() {
 
   const propertyOptions: ExpandableOption<number>[] = propertyTypes.map((type) => ({
     value: type.id,
-    icon: type.icon || '🏠',
+    icon: propertyTypeIcon(type.icon),
     title: type.name,
   }));
 

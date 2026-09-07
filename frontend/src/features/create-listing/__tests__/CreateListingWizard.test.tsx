@@ -66,9 +66,12 @@ const mockOperationTypes: OperationTypeData[] = [
   { id: 2, name: 'rent', name_en: 'rent', name_plural: 'Аренда', sort_order: 2, is_active: true },
 ];
 
+// Иконки — как в проде: БД отдаёт АНГЛИЙСКИЕ слаги (apartment, house, …),
+// фронтенд маппит их в эмодзи. Раньше слаги выводились как есть — в
+// интерфейсе появлялись английские слова.
 const mockPropertyTypes: PropertyType[] = [
-  { id: 1, name: 'Квартира', name_en: 'apartment', name_plural: 'Квартиры', category: 'apartment', icon: '🏠', sort_order: 1, is_active: true },
-  { id: 2, name: 'Дом', name_en: 'house', name_plural: 'Дома', category: 'house', icon: '🏡', sort_order: 2, is_active: true },
+  { id: 1, name: 'Квартира', name_en: 'apartment', name_plural: 'Квартиры', category: 'apartment', icon: 'apartment', sort_order: 1, is_active: true },
+  { id: 2, name: 'Дом', name_en: 'house', name_plural: 'Дома', category: 'house', icon: 'house', sort_order: 2, is_active: true },
 ];
 
 const mockRegion: Region = {
@@ -195,5 +198,20 @@ describe('CreateListingWizard — кнопка «Далее»', () => {
 
     await pickPropertyType(user, 'Квартира');
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '20');
+  });
+
+  it('типы недвижимости: английские слаги из БД выводятся как эмодзи, без английских слов', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+
+    // Раскрываем плитку «Тип недвижимости».
+    await user.click(screen.getByText('Тип недвижимости'));
+
+    // В списке не должно быть английских слагов (apartment/house/…).
+    expect(screen.queryByText(/apartment|house|land|commercial|garage|dacha/i)).toBeNull();
+
+    // Варианты отображаются русскими названиями.
+    expect(screen.getByText('Квартира')).toBeInTheDocument();
+    expect(screen.getByText('Дом')).toBeInTheDocument();
   });
 });

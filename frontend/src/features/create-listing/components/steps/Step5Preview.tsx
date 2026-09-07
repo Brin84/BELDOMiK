@@ -2,6 +2,8 @@ import React from 'react';
 import { useCreateListingStore } from '../../createListingStore';
 import { useGeographyStore } from '@/features/geography/geographyStore';
 import { formatPriceByn } from '@/shared/lib/format';
+import { findOperationType } from '@/shared/lib/operationKey';
+import { propertyTypeIcon } from '@/shared/lib/propertyTypeIcon';
 
 function formatPrice(price: number): React.ReactNode {
   return formatPriceByn(price);
@@ -13,7 +15,7 @@ export function Step5Preview() {
 
   // Find display names
   const propertyType = propertyTypes.find((t) => t.id === formData.property_type_id);
-  const operationType = operationTypes.find((o) => o.name === formData.operation);
+  const operationType = findOperationType(operationTypes, formData.operation);
   const region = formData.region_id ? getRegionById(formData.region_id) : null;
   const city = formData.city_id ? getCityById(formData.city_id) : null;
   const district = formData.district_id ? getDistrictById(formData.district_id) : null;
@@ -35,7 +37,7 @@ export function Step5Preview() {
           {/* Preview Header */}
           <div className="p-4 border-b" style={{ borderColor: 'var(--tg-theme-hint-color)', borderWidth: '0.5px' }}>
             <div className="flex items-center gap-3">
-              <span className="text-3xl">{propertyType?.icon || '🏠'}</span>
+              <span className="text-3xl">{propertyType ? propertyTypeIcon(propertyType.icon) : '🏠'}</span>
               <div>
                 <h3 className="text-tg-text font-semibold">{formData.title || 'Без названия'}</h3>
                 <p className="text-tg-hint text-sm">
