@@ -21,6 +21,7 @@ import { AgencyDetailPage } from '@/pages/AgencyDetailPage';
 import { MyAgencyPage } from '@/pages/MyAgencyPage';
 import { SubscriptionPage } from '@/pages/SubscriptionPage';
 import { ToastProvider } from '@/shared/ui/Toast';
+import { AllBelarusPage } from '@/pages/AllBelarusPage';
 
 // Lazy load MapPage for code splitting
 const MapPage = lazy(() => import('@/pages/MapPage').then(module => ({ default: module.MapPage })));
@@ -53,6 +54,7 @@ export function App() {
             <MapPage />
           </Suspense>
         } />
+        <Route path="/regions" element={<AllBelarusPage />} />
         <Route path="/favorites" element={<FavoritesPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/create-listing" element={<CreateListingPage />} />

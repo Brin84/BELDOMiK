@@ -1,0 +1,270 @@
+/* ============================================================
+   Все Беларусь — страница выбора области и города.
+   Стиль: BEM-каталог (Baraholka/Криша), светлый фон, белые
+   карточки, синий градиент для активных элементов.
+   ============================================================ */
+
+.belarus-page {
+  min-height: 100vh;
+  background: #f7f9fc;
+  color: #1e293b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+}
+
+.belarus-page__inner {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 14px 16px 0;
+}
+
+/* ---------- Шапка ---------- */
+
+.belarus-header {
+  display: flex;
+  flex-direction: column;
+}
+
+.belarus-header__title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #0f172a;
+}
+
+.belarus-header__subtitle {
+  margin: 2px 0 0 2px;
+  font-size: 13px;
+  color: #9aa7b8;
+}
+
+/* ---------- Поиск ---------- */
+
+.belarus-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 50px;
+  margin-top: 14px;
+  padding: 0 14px 0 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+}
+
+.belarus-search__icon {
+  color: #a0aec0;
+  flex-shrink: 0;
+}
+
+.belarus-search__input {
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
+  color: #1e293b;
+}
+
+/* Глобальный input: !important бордер/фон. Внутри pill-бокса
+   делаем input прозрачным, чтобы белый фон pill-контейнера
+   оставался единственным фоном и не было видно стыков. */
+.belarus-page .belarus-search__input,
+.belarus-page .belarus-search__input:focus,
+.belarus-page .belarus-search__input::placeholder {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.belarus-search__input::placeholder {
+  color: #a0aec0;
+}
+
+.belarus-search__clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #94a3b8;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.belarus-search__clear:active {
+  background: #e2e8f0;
+}
+
+/* ---------- Дрилл-даун: шапка ---------- */
+
+.belarus-drill-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.belarus-drill-head__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  background: #fff;
+  color: #64748b;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.belarus-drill-head__back:active {
+  background: #f1f5f9;
+}
+
+.belarus-drill-head__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Секция ---------- */
+
+.belarus-section__title {
+  margin-top: 20px;
+  margin-bottom: 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* ---------- Строка-карточка ---------- */
+
+.belarus-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  margin-top: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  text-align: left;
+  font-size: 15px;
+  font-weight: 600;
+  color: #334155;
+  transition: box-shadow 0.15s ease;
+  font-family: inherit;
+}
+
+.belarus-row:active {
+  transform: scale(0.985);
+}
+
+.belarus-row--active {
+  color: #fff;
+  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
+  border-color: transparent;
+  box-shadow: 0 6px 18px rgba(33, 113, 238, 0.25);
+}
+
+.belarus-row--active:active {
+  box-shadow: 0 4px 12px rgba(33, 113, 238, 0.3);
+}
+
+.belarus-row__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.belarus-row__pin {
+  color: #4c91ff;
+  flex-shrink: 0;
+}
+
+.belarus-row--active .belarus-row__pin {
+  color: #fff;
+}
+
+.belarus-row__sub {
+  display: inline;
+  font-size: 13px;
+  font-weight: 500;
+  color: #9aa7b8;
+  margin-left: 6px;
+}
+
+.belarus-row--active .belarus-row__sub {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.belarus-row__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.belarus-row__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.belarus-row--active .belarus-row__count {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.belarus-row__chevron {
+  color: #a0aec0;
+  flex-shrink: 0;
+}
+
+.belarus-row--active .belarus-row__chevron {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ---------- Пустой результат ---------- */
+
+.belarus-empty {
+  margin-top: 10px;
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  color: #94a3b8;
+  text-align: center;
+}
