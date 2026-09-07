@@ -31,11 +31,22 @@ export function CreateListingWizard() {
     isSubmitting,
     draftId,
     error,
-    canProceed,
-    completionPercentage,
   } = useCreateListingStore();
 
   const isAuthenticated = status === 'authenticated' && user;
+
+  // canProceed/completionPercentage НЕ берём из store: в Zustand v5 геттер
+  // в состоянии после первого set() замораживается в обычное значение
+  // (снапшот), и прогресс/активность кнопки «Далее» намертво застревают.
+  // Считаем их «живо»: validateStep() читает свежий formData на каждом
+  // рендере, а визард подписан на весь store целиком и пере-рендерится
+  // на любое изменение.
+  const canProceed = validateStep(currentStep);
+  const completionPercentage = Math.round(
+    ([1, 2, 3, 4, 5]
+      .filter((s) => s <= currentStep && validateStep(s as 1 | 2 | 3 | 4 | 5))
+      .length / 5) * 100,
+  );
 
   // Load draft from URL parameter on mount
   useEffect(() => {
@@ -222,6 +233,11 @@ export function CreateListingWizard() {
         {/* Progress bar */}
         <div className="mt-3 h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}>
           <div
+            role="progressbar"
+            aria-valuenow={completionPercentage}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Прогресс заполнения"
             className="h-full rounded-full transition-all duration-300"
             style={{
               backgroundColor: 'var(--tg-theme-button-color)',

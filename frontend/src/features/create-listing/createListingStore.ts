@@ -27,10 +27,6 @@ export interface CreateListingState {
   // Draft
   draftId: number | null;
 
-  // Computed
-  canProceed: boolean;
-  completionPercentage: number;
-
   // Actions
   setStep: (step: CreateListingStep) => void;
   nextStep: () => void;
@@ -112,17 +108,6 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
   isLoading: false,
   error: null,
   draftId: null,
-
-  get canProceed() {
-    return get().validateStep(get().currentStep);
-  },
-
-  get completionPercentage() {
-    const completedSteps = Array.from({ length: get().totalSteps }, (_, i) => i + 1)
-      .filter(step => step <= get().currentStep && get().validateStep(step as CreateListingStep))
-      .length;
-    return Math.round((completedSteps / get().totalSteps) * 100);
-  },
 
   setStep: (step: CreateListingStep) => {
     if (step < 1 || step > 5) return;

@@ -2,6 +2,9 @@ import { vi } from 'vitest';
 import React from 'react';
 import { act as reactAct } from 'react';
 
+// Расширяет expect матчерами jest-dom (toBeDisabled, toBeInTheDocument, toHaveAttribute, ...)
+import '@testing-library/jest-dom/vitest';
+
 // Set NODE_ENV to development for React act() support
 process.env.NODE_ENV = 'development';
 
