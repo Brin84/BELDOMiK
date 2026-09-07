@@ -5,6 +5,20 @@ import { useGeographyStore } from '@/features/geography/geographyStore';
 
 export type CreateListingStep = 1 | 2 | 3 | 4 | 5;
 
+// Маппинг enum-значений ремонта из ответа API → русская метка для пикера.
+const RENOV_ENUM_TO_LABEL: Record<string, string> = {
+  none: 'Без ремонта',
+  cosmetic: 'Косметический',
+  euro: 'Евроремонт',
+  designer: 'Дизайнерский',
+  needs_renovation: 'Требует ремонта',
+};
+
+function renovEnumToLabel(value: string | null | undefined): string {
+  if (!value) return '';
+  return RENOV_ENUM_TO_LABEL[value] ?? value;
+}
+
 export interface CreateListingState {
   // Wizard state
   currentStep: CreateListingStep;
@@ -377,7 +391,7 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
         floor: response.floor ?? undefined,
         floors_total: response.total_floors ?? undefined,
         build_year: response.build_year ?? undefined,
-        repair_type: response.renovation || '',
+        repair_type: renovEnumToLabel(response.renovation),
         has_balcony: response.balcony || false,
         has_furniture: response.furniture || false,
         has_elevator: response.elevator || false,

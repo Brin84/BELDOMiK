@@ -1,7 +1,36 @@
 """Property schemas."""
 from datetime import datetime
 
+from pydantic import field_validator
+
+from app.models.property import RenovationType
 from app.schemas.common import BaseSchema
+
+
+# Маппинг русских названий / строк → enum-члены.
+# Фронтенд шлёт русские названия, БД хранит enum-значения.
+_RENOVATION_MAP: dict[str, RenovationType] = {
+    "": RenovationType.NONE,
+    "none": RenovationType.NONE,
+    "Без ремонта": RenovationType.NONE,
+    "cosmetic": RenovationType.COSMETIC,
+    "Косметический": RenovationType.COSMETIC,
+    "euro": RenovationType.EURO,
+    "Евроремонт": RenovationType.EURO,
+    "designer": RenovationType.DESIGNER,
+    "Дизайнерский": RenovationType.DESIGNER,
+    "needs_renovation": RenovationType.NEEDS_RENOVATION,
+    "Требует ремонта": RenovationType.NEEDS_RENOVATION,
+}
+
+
+def _coerce_renovation(v: str | RenovationType | None) -> RenovationType | None:
+    """Нормализовать ремонт в enum для записи в БД."""
+    if v is None or (isinstance(v, str) and v.strip() == ""):
+        return None
+    if isinstance(v, RenovationType):
+        return v
+    return _RENOVATION_MAP.get(str(v).strip(), RenovationType.NONE)
 
 
 class PropertyPhotoBase(BaseSchema):
@@ -90,6 +119,11 @@ class PropertyBase(BaseSchema):
     is_new_building: bool = False
     description: str | None = None
 
+    @field_validator("renovation")
+    @classmethod
+    def _norm_renovation(cls, v: str | RenovationType | None) -> RenovationType | None:
+        return _coerce_renovation(v)
+
 
 class PropertyCreate(PropertyBase):
     photos: list[PropertyPhotoCreate] = []
@@ -120,6 +154,11 @@ class PropertyUpdate(BaseSchema):
     elevator: bool | None = None
     is_new_building: bool | None = None
     description: str | None = None
+
+    @field_validator("renovation")
+    @classmethod
+    def _norm_renovation(cls, v: str | RenovationType | None) -> RenovationType | None:
+        return _coerce_renovation(v)
 
 
 class PropertyShortRead(BaseSchema):
@@ -306,6 +345,11 @@ class PropertyFilterParams(BaseSchema):
     page_size: int = 20
     with_photos_only: bool = False
     is_favorite_only: bool = False
+
+    @field_validator("renovation")
+    @classmethod
+    def _norm_renovation(cls, v: str | RenovationType | None) -> RenovationType | None:
+        return _coerce_renovation(v)
 
 
 # Aliases for backward compatibility with routes
