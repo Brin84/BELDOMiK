@@ -14,8 +14,17 @@ const OPERATION_META: Record<OperationKey, { icon: string; subtitle: string }> =
   exchange: { icon: '🔄', subtitle: 'Обмен недвижимости' },
 };
 
+// Маппинг из БД-имён (русские / name_en) → ключи формы.
+// Бэкенд хранит name = "Продажа", "Аренда", "Посуточная аренда", "Обмен".
+const NAME_TO_KEY: Record<string, OperationKey> = {
+  sale: 'sale', 'Продажа': 'sale', Продажа: 'sale',
+  rent: 'rent', 'Аренда': 'rent', Аренда: 'rent',
+  daily_rent: 'daily_rent', 'Посуточная аренда': 'daily_rent', Посуточная: 'daily_rent',
+  exchange: 'exchange', 'Обмен': 'exchange', Обмен: 'exchange',
+};
+
 function toOperationKey(name: string): OperationKey | null {
-  return name === 'sale' || name === 'rent' || name === 'daily_rent' || name === 'exchange' ? name : null;
+  return NAME_TO_KEY[name] ?? null;
 }
 
 type PickerName = 'operation' | 'property';
@@ -88,6 +97,7 @@ export function Step1OperationType() {
         onSelect={handlePropertyTypeChange}
         open={openPicker === 'property'}
         onToggle={() => handleToggle('property')}
+        columns={1}
       />
     </div>
   );
