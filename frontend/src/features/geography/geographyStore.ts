@@ -80,7 +80,7 @@ export const useGeographyStore = create<GeographyState>((set, get) => ({
     try {
       const data = await api.get<City[]>(API_ENDPOINTS.geography.cities, { region_id: regionId });
       // Частичная загрузка инвалидирует «все города»: после неё fetchAllCities
-      // обязан перезапросить полный список, иначе в CitySelectorSheet остаются
+      // обязан перезапросить полный список, иначе в списках городов остаются
       // города только одного региона, а все остальные области пусты.
       set({ cities: data, loadedCities: true, loadedAllCities: false });
     } catch (error) {

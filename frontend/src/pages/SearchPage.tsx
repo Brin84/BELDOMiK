@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useDebounce } from '@/shared/lib/hooks';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useGeographyStore } from '@/features/geography/geographyStore';
-import { CitySelectorSheet } from '@/features/geography/components/CitySelectorSheet';
 import { useFavoritesStore } from '@/features/favorites';
 import { PropertyCard } from '@/entities/property';
 import { ListSkeleton, EmptyState, InlineError } from '@/shared/ui';
@@ -19,6 +19,7 @@ const OPERATION_OPTIONS = [
 
 export function SearchPage() {
   const { trigger } = useHaptics();
+  const navigate = useNavigate();
   const {
     properties,
     isLoading,
@@ -41,7 +42,6 @@ export function SearchPage() {
     operationTypes,
     fetchRegions,
     fetchCities,
-    fetchAllCities,
     fetchDistricts,
     fetchNeighborhoods,
     fetchStreets,
@@ -52,14 +52,12 @@ export function SearchPage() {
     getDistrictById,
     getPropertyTypeById,
     getMetroStationById,
-    cities,
   } = useGeographyStore();
 
   // Local state for UI
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
   const [filterBottomSheetOpen, setFilterBottomSheetOpen] = useState(false);
-  const [isCitySheetOpen, setIsCitySheetOpen] = useState(false);
   const [saveSearchModalOpen, setSaveSearchModalOpen] = useState(false);
 
   // Apply saved search filters from sessionStorage on mount
@@ -119,13 +117,6 @@ export function SearchPage() {
       fetchMetroLines(filters.city_id);
     }
   }, [filters.city_id, fetchDistricts, fetchNeighborhoods, fetchStreets, fetchMetroLines]);
-
-  // Load all cities when the city selector opens
-  useEffect(() => {
-    if (isCitySheetOpen) {
-      fetchAllCities();
-    }
-  }, [isCitySheetOpen, fetchAllCities]);
 
   // Update propertiesStore filters when local filter state changes
   const updateFilters = useCallback(
@@ -426,15 +417,14 @@ export function SearchPage() {
       <button
         onClick={() => {
           trigger('light');
-          setIsCitySheetOpen(true);
+          navigate('/regions');
         }}
         className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-colors"
         style={{
           backgroundColor: 'var(--tg-theme-secondary-bg-color)',
           border: '1px solid var(--tg-theme-hint-color)',
         }}
-        aria-haspopup="dialog"
-        aria-label="Выбрать город"
+        aria-label="Выбрать область и город"
       >
         <span style={{ color: 'var(--tg-theme-text-color)' }}>
           📍 {currentCity?.name || currentRegion?.name || 'Все Беларусь'}
@@ -573,23 +563,6 @@ export function SearchPage() {
             </p>
           )}
         </>
-      )}
-
-      {/* City Selector Bottom Sheet */}
-      {isCitySheetOpen && (
-        <CitySelectorSheet
-          cities={cities}
-          currentCityId={filters.city_id}
-          onSelect={(cityId) => {
-            trigger('light');
-            updateFilters({ city_id: cityId });
-            setIsCitySheetOpen(false);
-          }}
-          onClose={() => {
-            trigger('light');
-            setIsCitySheetOpen(false);
-          }}
-        />
       )}
 
       {/* Filter Bottom Sheet */}

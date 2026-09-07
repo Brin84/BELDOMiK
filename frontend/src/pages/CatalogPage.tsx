@@ -5,7 +5,6 @@ import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useGeographyStore } from '@/features/geography/geographyStore';
-import { CitySelectorSheet } from '@/features/geography/components/CitySelectorSheet';
 import { useFavoritesStore } from '@/features/favorites';
 import { HotPropertyCard } from '@/entities/property';
 import { ListSkeleton, EmptyState, InlineError } from '@/shared/ui';
@@ -19,7 +18,6 @@ export function CatalogPage() {
   const { trigger } = useHaptics();
   const { hapticFeedback } = useTelegram();
   const navigate = useNavigate();
-  const [isCitySheetOpen, setIsCitySheetOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const {
     properties,
@@ -30,7 +28,6 @@ export function CatalogPage() {
     filters,
     fetchProperties,
     setOperation,
-    setCity,
     refresh,
     clearError,
   } = usePropertiesStore();
@@ -38,7 +35,6 @@ export function CatalogPage() {
     fetchRegions,
     fetchAllCities,
     fetchPropertyTypes,
-    cities,
     propertyTypes,
     getCityById,
   } = useGeographyStore();
@@ -90,13 +86,6 @@ export function CatalogPage() {
       fetchAllCities();
     }
   }, [filters.city_id, fetchAllCities]);
-
-  // Load all cities when the city selector opens
-  useEffect(() => {
-    if (isCitySheetOpen) {
-      fetchAllCities();
-    }
-  }, [isCitySheetOpen, fetchAllCities]);
 
   const handleOperationChange = useCallback((operationId: number) => {
     hapticFeedback?.impactOccurred('light');
@@ -211,33 +200,16 @@ export function CatalogPage() {
             type="button"
             onClick={() => {
               hapticFeedback?.impactOccurred('light');
-              setIsCitySheetOpen(true);
+              navigate('/regions');
             }}
             className="catalog-city"
-            aria-label="Выбрать город"
+            aria-label="Выбрать область и город"
           >
             <MapPin size={16} className="catalog-city__icon" />
             <span className="catalog-city__name">{currentCity?.name || 'Все Беларусь'}</span>
             <ChevronDown size={14} className="catalog-city__chevron" />
           </button>
         </div>
-
-        {/* City Selector Bottom Sheet */}
-        {isCitySheetOpen && (
-          <CitySelectorSheet
-            cities={cities}
-            currentCityId={filters.city_id}
-            onSelect={(cityId) => {
-              trigger('light');
-              setCity(cityId);
-              setIsCitySheetOpen(false);
-            }}
-            onClose={() => {
-              trigger('light');
-              setIsCitySheetOpen(false);
-            }}
-          />
-        )}
 
         {/* Error State */}
         {error && <InlineError message={error} onDismiss={clearError} />}
