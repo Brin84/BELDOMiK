@@ -88,6 +88,13 @@ function renderWizard() {
   );
 }
 
+// Выбор типа недвижимости через свёрнутую плитку: сначала раскрываем,
+// потом кликаем по варианту.
+async function pickPropertyType(user: ReturnType<typeof userEvent.setup>, name: string) {
+  await user.click(screen.getByText('Тип недвижимости'));
+  await user.click(screen.getByText(name));
+}
+
 describe('CreateListingWizard — кнопка «Далее»', () => {
   beforeEach(() => {
     // Авторизация
@@ -129,7 +136,16 @@ describe('CreateListingWizard — кнопка «Далее»', () => {
     const nextBtn = screen.getByRole('button', { name: 'Далее' });
     expect(nextBtn).toBeDisabled();
 
-    // Выбираем «Квартиру» → property_type_id = 1 → canProceed вычисляется «живо» → enabled.
+    // Тип сделки — свёрнутая плитка. Раскрываем и выбираем «Аренду».
+    await user.click(screen.getByText('Тип сделки'));
+    await user.click(screen.getByText('Аренда'));
+    expect(useCreateListingStore.getState().formData.operation).toBe('rent');
+    // Тип недвижимости всё ещё не выбран → кнопка остаётся заблокированной.
+    expect(nextBtn).toBeDisabled();
+
+    // Тип недвижимости: раскрываем плитку, выбираем «Квартиру» → property_type_id = 1,
+    // canProceed вычисляется «живо» → enabled.
+    await user.click(screen.getByText('Тип недвижимости'));
     await user.click(screen.getByText('Квартира'));
     expect(nextBtn).toBeEnabled();
 
@@ -150,7 +166,7 @@ describe('CreateListingWizard — кнопка «Далее»', () => {
 
     // Первый set(): выбор типа → кнопка активна. В старой реализации именно
     // на первом set() геттер canProceed замораживался в false навсегда.
-    await user.click(screen.getByText('Дом'));
+    await pickPropertyType(user, 'Дом');
     expect(nextBtn).toBeEnabled();
 
     // Повторные мутации store должны мгновенно отражаться на доступности.
@@ -166,7 +182,7 @@ describe('CreateListingWizard — кнопка «Далее»', () => {
     expect(nextBtn).toBeDisabled();
 
     // И снова enabled после валидного выбора — доступность не «застревает».
-    await user.click(screen.getByText('Квартира'));
+    await pickPropertyType(user, 'Квартира');
     expect(nextBtn).toBeEnabled();
   });
 
@@ -177,7 +193,7 @@ describe('CreateListingWizard — кнопка «Далее»', () => {
     const progress = screen.getByRole('progressbar');
     expect(progress).toHaveAttribute('aria-valuenow', '0');
 
-    await user.click(screen.getByText('Квартира'));
+    await pickPropertyType(user, 'Квартира');
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '20');
   });
 });
