@@ -1,3 +1,5 @@
+import { SelectListRowView } from './SelectList';
+
 export interface ExpandableOption<T> {
   value: T;
   icon?: string;
@@ -14,15 +16,13 @@ interface ExpandablePickerProps<T> {
   /** Открыта ли плитка. Один открытый пикер на экран — состояние извне. */
   open: boolean;
   onToggle: () => void;
-  columns?: 1 | 2;
 }
 
 /**
- * Сворачиваемая плитка выбора: в свёрнутом виде — компактный триггер
+ * Сворачиваемый вертикальный список: в свёрнутом виде — компактный триггер
  * с заголовком и текущим значением, по нажатию плавно «выплывает»
- * сетка вариантов (grid-template-rows 0fr → 1fr). Используется в шаге 1
- * визарда подачи для типа сделки и типа недвижимости, чтобы выбор
- * занимал меньше места и делался в два тапа.
+ * столбик вариантов (grid-template-rows 0fr → 1fr). Используется в шаге 1
+ * визарда подачи для типа сделки и типа недвижимости.
  */
 export function ExpandablePicker<T>({
   label,
@@ -32,7 +32,6 @@ export function ExpandablePicker<T>({
   onSelect,
   open,
   onToggle,
-  columns = 2,
 }: ExpandablePickerProps<T>) {
   const selectedOption = options.find((o) => o.value === selected) ?? null;
 
@@ -79,59 +78,28 @@ export function ExpandablePicker<T>({
         </svg>
       </button>
 
-      {/* Раскрывающаяся сетка вариантов */}
+      {/* Раскрывающийся столбик вариантов */}
       <div
         className={`grid transition-[grid-template-rows] duration-200 ease-out ${
           open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
         }`}
       >
         <div className="overflow-hidden min-h-0">
-          <div className="px-3 pb-3 pt-1">
-            <div className={`grid gap-2 ${columns === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
-              {options.map((option: ExpandableOption<T>, index: number) => {
-                const isSelected = option.value === selected;
-                return (
-                  <button
-                    key={`${String(option.value)}-${index}`}
-                    type="button"
-                    onClick={() => onSelect(option.value)}
-                    aria-pressed={isSelected}
-                    className="flex items-center gap-2.5 p-3 rounded-xl text-left transition-colors active:opacity-80"
-                    style={{
-                      backgroundColor: isSelected ? '#2171ee' : '#eef1f6',
-                      color: isSelected ? '#ffffff' : '#0f172a',
-                    }}
-                  >
-                    {option.icon && <span className="text-2xl leading-none flex-shrink-0">{option.icon}</span>}
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-[15px] font-medium leading-tight">{option.title}</span>
-                      {option.subtitle && (
-                        <span
-                          className="block text-xs mt-0.5"
-                          style={{ color: isSelected ? 'rgba(255,255,255,0.85)' : '#94a3b8' }}
-                        >
-                          {option.subtitle}
-                        </span>
-                      )}
-                    </span>
-                    {isSelected && (
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={2.5}
-                        className="flex-shrink-0"
-                        aria-hidden="true"
-                      >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+          <div className="pt-1 pb-2" style={{ borderTop: '1px solid #f1f5f9' }}>
+            {options.map((option: ExpandableOption<T>, index: number) => (
+              <SelectListRowView<ExpandableOption<T>>
+                key={`${String(option.value)}-${index}`}
+                row={{
+                  value: option,
+                  label: option.title,
+                  hint: option.subtitle,
+                  icon: option.icon,
+                }}
+                isSelected={option.value === selected}
+                onSelect={() => onSelect(option.value)}
+                showDivider={index < options.length - 1}
+              />
+            ))}
           </div>
         </div>
       </div>

@@ -77,7 +77,7 @@ export function Step1OperationType() {
         onSelect={handlePropertyTypeChange}
         open={openPicker === 'property'}
         onToggle={() => handleToggle('property')}
-        columns={1}
+
       />
     </div>
   );
