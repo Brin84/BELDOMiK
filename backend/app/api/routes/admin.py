@@ -7,7 +7,7 @@ from sqlalchemy import String, func
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_admin_user, get_db
-from app.models.moderation import ModerationAction
+from app.models.moderation import ModerationAction, ModerationActionType
 from app.models.property import Property, PropertyView, Report
 from app.models.user import User
 from app.schemas.user import UserRead
@@ -318,14 +318,25 @@ def update_property_status(
         prop.moderated_at = datetime.now(UTC)
         prop.moderated_by = admin.id
 
-    # Log moderation action
-    action = ModerationAction(
-        property_id=property_id,
-        admin_id=admin.id,
-        action=data.status,
-        reason=data.reason,
-    )
-    db.add(action)
+    # Журналируем модерационное действие коротким значением ModerationActionType.
+    # Колонка moderation_actions.action в БД — varchar(7) (миграция String(7),
+    # в проде НЕ enum, несмотря на модель), поэтому статусы вида
+    # 'published'/'pending_moderation' в неё не помещаются →
+    # StringDataRightTruncation на commit. Переходы draft/pending_moderation
+    # модерационными действиями не являются — для них запись не создаём.
+    action_type = {
+        "published": ModerationActionType.APPROVE,
+        "rejected": ModerationActionType.REJECT,
+        "blocked": ModerationActionType.BLOCK,
+        "archived": ModerationActionType.ARCHIVE,
+    }.get(data.status)
+    if action_type is not None:
+        db.add(ModerationAction(
+            property_id=property_id,
+            admin_id=admin.id,
+            action=action_type,
+            reason=data.reason,
+        ))
     db.commit()
 
     # Автопубликация объявления в Telegram-канал при публикации
