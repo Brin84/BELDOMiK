@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
+import { Building2, MapPin, Search } from 'lucide-react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useDebounce } from '@/shared/lib/hooks';
@@ -11,6 +12,8 @@ import { FilterBottomSheet, ActiveFilterChips, SortSelector, QuickFilters } from
 import { MapView, PropertyMapPreview, MapControls } from '@/features/map/components';
 import { formatPriceByn, formatArea } from '@/shared/lib/format';
 import type { PropertyFilterParams } from '@/shared/api/types';
+import '@/features/search/components/search-form.css';
+import '@/features/map/components/map.css';
 
 const OPERATION_OPTIONS = [
   { id: 1, label: 'Купить' },
@@ -420,217 +423,185 @@ export function MapPage() {
 
       {/* List View */}
       {viewMode === 'list' && (
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24" style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom, 0px))' }}>
-          {/* Search Bar */}
-          <div className="sticky top-4 z-10">
-            <div className="relative">
-              <svg
-                className="absolute left-4 top-1/2 -translate-y-1/2 flex-shrink-0"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                style={{ color: 'var(--tg-theme-hint-color)' }}
-                aria-hidden="true"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Что ищете?"
-                className="w-full pl-12 pr-4 py-3 rounded-xl text-tg-text text-base"
-                style={{
-                  backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                  border: '1px solid var(--tg-theme-hint-color)',
-                  color: 'var(--tg-theme-text-color)',
-                }}
-                inputMode="search"
-                autoComplete="off"
-                aria-label="Поиск недвижимости"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => {
-                    trigger('light');
-                    setSearchQuery('');
-                  }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full flex-shrink-0"
-                  style={{ color: 'var(--tg-theme-hint-color)' }}
-                  aria-label="Очистить поиск"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
-              )}
+        <div className="map-list">
+          <div className="map-list__inner">
+            {/* Search Bar */}
+            <div className="search-sticky">
+              <div className="search-field">
+                <Search size={20} className="search-field__icon" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Что ищете?"
+                  className="search-field__input"
+                  inputMode="search"
+                  autoComplete="off"
+                  aria-label="Поиск недвижимости"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => {
+                      trigger('light');
+                      setSearchQuery('');
+                    }}
+                    className="search-field__clear"
+                    aria-label="Очистить поиск"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Operation Toggle */}
-          <div className="flex gap-2" role="group" aria-label="Тип сделки">
-            {OPERATION_OPTIONS.map((op) => (
-              <button
-                key={op.id}
-                onClick={() => handleOperationChange(op.id)}
-                className={`flex-1 py-3 rounded-xl font-medium transition-colors ${
-                  filters.operation_id === op.id ? 'shadow-sm' : ''
-                }`}
-                style={{
-                  backgroundColor: filters.operation_id === op.id
-                    ? 'var(--tg-theme-button-color)'
-                    : 'var(--tg-theme-secondary-bg-color)',
-                  color: filters.operation_id === op.id
-                    ? 'var(--tg-theme-button-text-color)'
-                    : 'var(--tg-theme-text-color)',
-                  border: filters.operation_id !== op.id ? '1px solid var(--tg-theme-hint-color)' : 'none',
-                }}
-                aria-pressed={filters.operation_id === op.id}
-              >
-                {op.label}
-              </button>
-            ))}
-          </div>
+            {/* Operation Toggle */}
+            <div className="search-operation" role="group" aria-label="Тип сделки">
+              {OPERATION_OPTIONS.map((op) => (
+                <button
+                  key={op.id}
+                  onClick={() => handleOperationChange(op.id)}
+                  className={`search-operation__btn ${
+                    filters.operation_id === op.id ? 'search-operation__btn--active' : ''
+                  }`}
+                  aria-pressed={filters.operation_id === op.id}
+                >
+                  {op.label}
+                </button>
+              ))}
+            </div>
 
-          {/* Location Selector */}
-          <button
-            onClick={() => {
-              trigger('light');
-              setFilterBottomSheetOpen(true);
-            }}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-colors"
-            style={{
-              backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-              border: '1px solid var(--tg-theme-hint-color)',
-            }}
-            aria-haspopup="dialog"
-            aria-label="Выбрать локацию"
-          >
-            <span style={{ color: 'var(--tg-theme-text-color)' }}>
-              📍 {currentCity?.name || currentRegion?.name || 'Все Беларусь'}
-            </span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: 'var(--tg-theme-hint-color)' }}>
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
-
-          {/* Property Type Selector */}
-          {propertyTypes.length > 0 && (
+            {/* Location Selector */}
             <button
               onClick={() => {
                 trigger('light');
                 setFilterBottomSheetOpen(true);
               }}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-colors"
-              style={{
-                backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                border: '1px solid var(--tg-theme-hint-color)',
-              }}
+              className="search-row"
               aria-haspopup="dialog"
-              aria-label="Выбрать тип недвижимости"
+              aria-label="Выбрать локацию"
             >
-              <span style={{ color: 'var(--tg-theme-text-color)' }}>
-                🏠 {filters.type_id ? getPropertyTypeById(filters.type_id)?.name || 'Тип недвижимости' : 'Тип недвижимости'}
+              <span className="search-row__label">
+                <MapPin size={18} className="search-row__icon" />
+                {currentCity?.name || currentRegion?.name || 'Все Беларусь'}
               </span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: 'var(--tg-theme-hint-color)' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="search-row__chevron">
                 <polyline points="6 9 12 15 18 9" />
               </svg>
             </button>
-          )}
 
-          {/* Quick Filters */}
-          <QuickFilters
-            filters={filters}
-            onRoomsChange={handleRoomsChange}
-            onPriceChange={handlePriceChange}
-            onAreaChange={handleAreaChange}
-            onMoreFiltersClick={() => setFilterBottomSheetOpen(true)}
-          />
-
-          {/* Active Filter Chips */}
-          <ActiveFilterChips
-            filters={filters}
-            onRemoveFilter={(key) => {
-              trigger('light');
-              updateFilters({ [key]: undefined });
-            }}
-            getFilterLabel={getFilterLabel}
-          />
-
-          {/* Error State */}
-          {error && <InlineError message={error} onDismiss={clearError} />}
-
-          {/* Sort Selector & Result Count */}
-          <div className="flex items-center justify-between">
-            <span className="text-tg-text text-lg font-semibold">
-              {total > 0 ? `Найдено: ${total}` : 'Результаты поиска'}
-            </span>
-            <SortSelector currentSort={filters.sort_by || 'created_at_desc'} onChange={handleSortChange} />
-          </div>
-
-          {/* Results */}
-          {isLoading && properties.length === 0 ? (
-            <ListSkeleton count={5} />
-          ) : properties.length === 0 ? (
-            <EmptyState
-              icon={
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2} className="text-tg-hint" style={{ opacity: 0.5 }}>
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                  <line x1="4" y1="4" x2="7.5" y2="7.5" />
+            {/* Property Type Selector */}
+            {propertyTypes.length > 0 && (
+              <button
+                onClick={() => {
+                  trigger('light');
+                  setFilterBottomSheetOpen(true);
+                }}
+                className="search-row"
+                aria-haspopup="dialog"
+                aria-label="Выбрать тип недвижимости"
+              >
+                <span className={`search-row__label ${filters.type_id ? '' : 'search-row__label--muted'}`}>
+                  <Building2 size={18} className="search-row__icon" />
+                  {filters.type_id ? getPropertyTypeById(filters.type_id)?.name || 'Тип недвижимости' : 'Тип недвижимости'}
+                </span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="search-row__chevron">
+                  <polyline points="6 9 12 15 18 9" />
                 </svg>
-              }
-              title={searchQuery ? 'Ничего не найдено' : 'Настройте фильтры для поиска'}
-              description={
-                searchQuery
-                  ? (
-                    <>
-                      По запросу «{searchQuery}» результатов нет.
-                      <br />
-                      Попробуйте изменить фильтры или поисковый запрос.
-                    </>
-                  )
-                  : (
-                    <>
-                      Выберите параметры поиска и начните подбор недвижимости.
-                      <br />
-                      <span className="text-xs">
-                        {currentCity?.name || currentRegion?.name || 'Все Беларусь'}, {filters.operation_id === 1 ? 'покупка' : 'аренда'}
-                      </span>
-                    </>
-                  )
-              }
-              action={error ? { label: 'Повторить', onClick: handleRetry } : undefined}
+              </button>
+            )}
+
+            {/* Quick Filters */}
+            <QuickFilters
+              filters={filters}
+              onRoomsChange={handleRoomsChange}
+              onPriceChange={handlePriceChange}
+              onAreaChange={handleAreaChange}
+              onMoreFiltersClick={() => setFilterBottomSheetOpen(true)}
             />
-          ) : (
-            <>
-              <div className="space-y-3">
-                {properties.map((property) => (
-                  <PropertyCard
-                    key={property.id}
-                    property={property}
-                    onFavoriteToggle={handleFavoriteToggle}
-                  />
-                ))}
-              </div>
 
-              {properties.length > 0 && (
-                <p className="text-center text-tg-hint text-sm py-4" style={{ color: 'var(--tg-theme-hint-color)' }}>
-                  Все {total} объявлений загружены
-                </p>
-              )}
-            </>
-          )}
+            {/* Active Filter Chips */}
+            <ActiveFilterChips
+              filters={filters}
+              onRemoveFilter={(key) => {
+                trigger('light');
+                updateFilters({ [key]: undefined });
+              }}
+              getFilterLabel={getFilterLabel}
+            />
 
-          {/* Footer info */}
-          <p className="text-center text-tg-hint text-sm pt-8" style={{ color: 'var(--tg-theme-hint-color)' }}>
-            BELDOMiK 🇧🇾 — недвижимость Беларуси
-          </p>
+            {/* Error State */}
+            {error && <InlineError message={error} onDismiss={clearError} />}
+
+            {/* Sort Selector & Result Count */}
+            <div className="search-meta">
+              <span className="search-meta__count">
+                {total > 0 ? `Найдено: ${total}` : 'Результаты поиска'}
+              </span>
+              <SortSelector currentSort={filters.sort_by || 'created_at_desc'} onChange={handleSortChange} />
+            </div>
+
+            {/* Results */}
+            {isLoading && properties.length === 0 ? (
+              <ListSkeleton count={5} />
+            ) : properties.length === 0 ? (
+              <EmptyState
+                icon={
+                  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2} className="text-tg-hint" style={{ opacity: 0.5 }}>
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    <line x1="4" y1="4" x2="7.5" y2="7.5" />
+                  </svg>
+                }
+                title={searchQuery ? 'Ничего не найдено' : 'Настройте фильтры для поиска'}
+                description={
+                  searchQuery
+                    ? (
+                      <>
+                        По запросу «{searchQuery}» результатов нет.
+                        <br />
+                        Попробуйте изменить фильтры или поисковый запрос.
+                      </>
+                    )
+                    : (
+                      <>
+                        Выберите параметры поиска и начните подбор недвижимости.
+                        <br />
+                        <span className="text-xs">
+                          {currentCity?.name || currentRegion?.name || 'Все Беларусь'}, {filters.operation_id === 1 ? 'покупка' : 'аренда'}
+                        </span>
+                      </>
+                    )
+                }
+                action={error ? { label: 'Повторить', onClick: handleRetry } : undefined}
+              />
+            ) : (
+              <>
+                <div className="space-y-3">
+                  {properties.map((property) => (
+                    <PropertyCard
+                      key={property.id}
+                      property={property}
+                      onFavoriteToggle={handleFavoriteToggle}
+                    />
+                  ))}
+                </div>
+
+                {properties.length > 0 && (
+                  <p className="search-loaded">
+                    Все {total} объявлений загружены
+                  </p>
+                )}
+              </>
+            )}
+
+            {/* Footer info */}
+            <p className="search-footer">
+              BELDOMiK 🇧🇾 — недвижимость Беларуси
+            </p>
+          </div>
         </div>
       )}
 

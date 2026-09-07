@@ -520,7 +520,7 @@ export function SearchPage() {
           </div>
 
           {properties.length > 0 && (
-            <p className="text-center text-tg-hint text-sm py-4" style={{ color: 'var(--tg-theme-hint-color)' }}>
+            <p className="search-loaded">
               Все {total} объявлений загружены
             </p>
           )}

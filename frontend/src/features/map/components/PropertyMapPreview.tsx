@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
 import { formatPriceByn, formatArea, formatRooms } from '@/shared/lib/format';
 import type { PropertyShort } from '@/shared/api/types';
+import './map.css';
 
 interface PropertyMapPreviewProps {
   property: PropertyShort | null;
@@ -68,24 +69,17 @@ export function PropertyMapPreview({ property, onClose }: PropertyMapPreviewProp
 
       {/* Preview Card */}
       <div
-        className="relative mx-4 mb-4 rounded-2xl shadow-2xl overflow-hidden"
-        style={{
-          backgroundColor: 'var(--tg-theme-bg-color)',
-          border: '1px solid var(--tg-theme-hint-color)',
-          borderWidth: '0.5px',
-        }}
+        className="mpv__card"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drag handle */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full" style={{ backgroundColor: 'var(--tg-theme-hint-color)', opacity: 0.4 }} />
-        </div>
+        <div className="mpv__grabber" />
 
-        <div className="p-4 space-y-3">
+        <div className="mpv__body">
           {/* Header: Photo + Type + Operation + Close */}
           <div className="flex items-start gap-3">
             {/* Photo */}
-            <div className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden" style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}>
+            <div className="mpv__photo">
               {property.photo_url ? (
                 <img
                   src={property.photo_url}
@@ -93,8 +87,8 @@ export function PropertyMapPreview({ property, onClose }: PropertyMapPreviewProp
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="text-tg-hint" style={{ opacity: 0.3 }}>
+                <div className="w-full h-full flex items-center justify-center" style={{ color: '#a0aec0' }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} style={{ opacity: 0.4 }}>
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                     <line x1="3" y1="9" x2="21" y2="9" />
                     <line x1="9" y1="21" x2="9" y2="9" />
@@ -110,14 +104,14 @@ export function PropertyMapPreview({ property, onClose }: PropertyMapPreviewProp
 
             {/* Type, Operation, Location */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-tg-text font-semibold text-base leading-tight truncate">
+              <h3 className="mpv__title">
                 {typeLabel}
                 {rooms && (
-                  <span className="font-normal text-tg-hint ml-1">{formatRooms(rooms)}</span>
+                  <span className="mpv__title-rooms">{formatRooms(rooms)}</span>
                 )}
               </h3>
-              <p className="text-tg-hint text-sm mt-0.5">{operationLabel}</p>
-              <p className="text-tg-hint text-sm truncate mt-1">
+              <p className="mpv__sub">{operationLabel}</p>
+              <p className="mpv__loc">
                 {property.city_name}
                 {property.district_name && `, ${property.district_name}`}
                 {property.neighborhood_name && `, ${property.neighborhood_name}`}
@@ -127,11 +121,10 @@ export function PropertyMapPreview({ property, onClose }: PropertyMapPreviewProp
             {/* Close button */}
             <button
               onClick={onClose}
-              className="p-2 rounded-xl flex-shrink-0 transition-colors"
-              style={{ color: 'var(--tg-theme-hint-color)' }}
+              className="mpv__close"
               aria-label="Закрыть"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
@@ -139,19 +132,19 @@ export function PropertyMapPreview({ property, onClose }: PropertyMapPreviewProp
           </div>
 
           {/* Price & Area */}
-          <div className="flex items-center justify-between pt-2 border-t" style={{ borderColor: 'var(--tg-theme-hint-color)', borderWidth: '0.5px' }}>
+          <div className="mpv__price-row">
             <div className="flex flex-col">
-              <span className="text-tg-text font-bold text-xl" style={{ whiteSpace: 'nowrap' }}>
+              <span className="mpv__price" style={{ whiteSpace: 'nowrap' }}>
                 {formatPriceByn(price, { compact: true })}
               </span>
               {property.price_per_m2_byn && (
-                <span className="text-tg-hint text-xs">
+                <span className="mpv__price-m2">
                   {formatPriceByn(property.price_per_m2_byn)} / м²
                 </span>
               )}
             </div>
             {area && (
-              <div className="flex items-center gap-1.5 text-tg-hint text-sm">
+              <div className="mpv__area">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ opacity: 0.7 }}>
                   <rect x="3" y="3" width="18" height="18" rx="2" />
                 </svg>
@@ -163,11 +156,7 @@ export function PropertyMapPreview({ property, onClose }: PropertyMapPreviewProp
           {/* Action button */}
           <button
             onClick={handleOpenDetail}
-            className="w-full py-3 rounded-xl font-medium transition-colors"
-            style={{
-              backgroundColor: 'var(--tg-theme-button-color)',
-              color: 'var(--tg-theme-button-text-color)',
-            }}
+            className="mpv__cta"
           >
             Подробнее
           </button>

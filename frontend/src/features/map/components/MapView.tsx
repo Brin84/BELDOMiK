@@ -285,7 +285,7 @@ export function MapView({
           const ctx = canvas.getContext('2d')!;
 
           // Draw marker background
-          ctx.fillStyle = '#1E88E5';
+          ctx.fillStyle = '#2171ee';
           ctx.beginPath();
           ctx.roundRect(4, 4, size - 8, size - 8, 8);
           ctx.fill();
@@ -298,7 +298,7 @@ export function MapView({
           ctx.fillText(priceText, size / 2, size / 2 - 2);
 
           // Draw triangle pointer at bottom
-          ctx.fillStyle = '#1E88E5';
+          ctx.fillStyle = '#2171ee';
           ctx.beginPath();
           ctx.moveTo(size / 2, size - 4);
           ctx.lineTo(size / 2 - 8, size - 16);
@@ -360,7 +360,7 @@ export function MapView({
         width: 20px;
         height: 20px;
         border-radius: 50%;
-        background: #1E88E5;
+        background: #2171ee;
         border: 3px solid #fff;
         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         animation: pulse 2s infinite;
@@ -372,9 +372,9 @@ export function MapView({
         style.id = 'user-location-styles';
         style.textContent = `
           @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(30, 136, 229, 0.7); }
-            70% { box-shadow: 0 0 0 12px rgba(30, 136, 229, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(30, 136, 229, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(33, 113, 238, 0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(33, 113, 238, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(33, 113, 238, 0); }
           }
         `;
         document.head.appendChild(style);
@@ -393,31 +393,32 @@ export function MapView({
         ref={mapContainerRef}
         className="w-full h-full flex items-center justify-center"
         style={{
-          backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+          backgroundColor: '#f7f9fc',
           minHeight: `${viewportStableHeight}px`,
         }}
       >
         <div className="text-center p-4">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="mx-auto mb-3" style={{ color: 'var(--tg-theme-hint-color)', opacity: 0.5 }}>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="mx-auto mb-3" style={{ color: '#a0aec0' }}>
             <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
             <line x1="9" y1="3" x2="9" y2="18" />
             <line x1="15" y1="6" x2="15" y2="21" />
             <circle cx="12" cy="12" r="3" />
           </svg>
-          <p className="text-tg-text font-medium mb-1">{mapError}</p>
+          <p className="font-medium mb-1" style={{ color: '#334155' }}>{mapError}</p>
           {onRetry ? (
             <button
               onClick={onRetry}
               className="mt-3 px-4 py-2 rounded-xl font-medium transition-colors"
               style={{
-                backgroundColor: 'var(--tg-theme-button-color)',
-                color: 'var(--tg-theme-button-text-color)',
+                background: 'linear-gradient(135deg, #4c91ff 0%, #2171ee 100%)',
+                color: '#fff',
+                border: 'none',
               }}
             >
               Повторить загрузку
             </button>
           ) : (
-            <p className="text-tg-hint text-sm">Попробуйте обновить страницу</p>
+            <p className="text-sm" style={{ color: '#64748b' }}>Попробуйте обновить страницу</p>
           )}
         </div>
       </div>
