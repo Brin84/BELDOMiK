@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
+import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useAuthStore } from '@/features/auth';
 import { useCreateListingStore } from '../createListingStore';
 import { Step1OperationType } from './steps/Step1OperationType';
@@ -12,6 +13,7 @@ import { EmptyState } from '@/shared/ui';
 
 export function CreateListingWizard() {
   const { trigger } = useHaptics();
+  const { backButton } = useTelegram();
   const { user, status } = useAuthStore();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -53,6 +55,25 @@ export function CreateListingWizard() {
     }
   }, [isAuthenticated, navigate]);
 
+  // Native Telegram BackButton: step back on steps 2-5, leave wizard on step 1
+  useEffect(() => {
+    if (!backButton || !isAuthenticated) return;
+    backButton.show();
+    const handleBack = () => {
+      if (currentStep > 1) {
+        trigger('light');
+        prevStep();
+      } else {
+        navigate(-1);
+      }
+    };
+    backButton.onClick(handleBack);
+    return () => {
+      backButton.hide();
+      backButton.offClick(handleBack);
+    };
+  }, [backButton, currentStep, prevStep, navigate, trigger, isAuthenticated]);
+
   // Handle successful submission
   const handleSubmit = async () => {
     if (!validateAll()) {
@@ -73,9 +94,25 @@ export function CreateListingWizard() {
     }
   };
 
+  const handlePrimary = () => {
+    if (currentStep === 5) {
+      handleSubmit();
+    } else if (canProceed) {
+      trigger('medium');
+      nextStep();
+    } else {
+      trigger('error');
+    }
+  };
+
+  const primaryLabel = currentStep === 5
+    ? (isSubmitting ? 'Отправка...' : 'Отправить на модерацию')
+    : 'Далее';
+  const primaryDisabled = currentStep === 5 ? isSubmitting : !canProceed;
+
   if (!isAuthenticated) {
     return (
-      <div className="p-4 space-y-6 pb-20">
+      <div className="p-4 space-y-6">
         <EmptyState
           title="Требуется авторизация"
           description="Войдите в профиль, чтобы создавать объявления"
@@ -91,26 +128,26 @@ export function CreateListingWizard() {
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <Step1OperationType onNext={nextStep} canProceed={canProceed} />;
+        return <Step1OperationType />;
       case 2:
-        return <Step2Location onNext={nextStep} onPrev={prevStep} canProceed={canProceed} />;
+        return <Step2Location />;
       case 3:
-        return <Step3Details onNext={nextStep} onPrev={prevStep} canProceed={canProceed} />;
+        return <Step3Details />;
       case 4:
-        return <Step4Photos onNext={nextStep} onPrev={prevStep} />;
+        return <Step4Photos />;
       case 5:
-        return <Step5Preview onSubmit={handleSubmit} onPrev={prevStep} isSubmitting={isSubmitting} />;
+        return <Step5Preview />;
       default:
         return null;
     }
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--tg-theme-bg-color)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#f7f9fc' }}>
       {/* Header with progress */}
-      <div className="sticky top-0 z-10 p-4 border-b" style={{ backgroundColor: 'var(--tg-theme-bg-color)', borderColor: 'var(--tg-theme-hint-color)', borderWidth: '0.5px' }}>
+      <div className="sticky top-0 z-10 p-4 border-b" style={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderWidth: '0.5px' }}>
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-tg-text text-xl font-bold">Создание объявления</h1>
+          <h1 className="text-[#0f172a] text-xl font-bold">Создание объявления</h1>
           {error && (
             <div className="text-red-500 text-sm flex items-center gap-1">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -195,8 +232,47 @@ export function CreateListingWizard() {
       </div>
 
       {/* Step content */}
-      <div className="pb-24">
+      <div className="pb-32">
         {renderStep()}
+      </div>
+
+      {/* Sticky bottom action bar (always visible — works in Telegram and browser) */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-40 border-t"
+        style={{
+          backgroundColor: '#ffffff',
+          borderColor: '#e2e8f0',
+          borderWidth: '0.5px',
+          padding: '12px 16px calc(12px + env(safe-area-inset-bottom, 0px))',
+          boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.04)',
+        }}
+      >
+        <div className="flex gap-3 max-w-[560px] mx-auto">
+          {currentStep > 1 && (
+            <button
+              onClick={() => {
+                trigger('light');
+                prevStep();
+              }}
+              className="flex-1 py-3.5 rounded-xl font-medium transition-colors active:opacity-80"
+              style={{ backgroundColor: 'transparent', color: '#0f172a', border: '1px solid #e2e8f0' }}
+            >
+              Назад
+            </button>
+          )}
+          <button
+            onClick={handlePrimary}
+            disabled={primaryDisabled}
+            className="flex-1 py-3.5 rounded-xl font-semibold transition-colors active:opacity-90 disabled:opacity-60"
+            style={{
+              backgroundColor: '#2171ee',
+              color: '#ffffff',
+              boxShadow: '0 6px 18px rgba(33, 113, 238, 0.35)',
+            }}
+          >
+            {primaryLabel}
+          </button>
+        </div>
       </div>
     </div>
   );

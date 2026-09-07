@@ -1,24 +1,14 @@
-import React, { useEffect } from 'react';
-import { useTelegram } from '@/app/providers/TelegramProvider';
-import { useHaptics } from '@/shared/lib/haptics';
+import React from 'react';
 import { useCreateListingStore } from '../../createListingStore';
 import { useGeographyStore } from '@/features/geography/geographyStore';
 import { formatPriceByn } from '@/shared/lib/format';
-
-interface Step5PreviewProps {
-  onSubmit: () => void;
-  onPrev: () => void;
-  isSubmitting: boolean;
-}
 
 function formatPrice(price: number): React.ReactNode {
   return formatPriceByn(price);
 }
 
-export function Step5Preview({ onSubmit, onPrev, isSubmitting }: Step5PreviewProps) {
-  const { trigger } = useHaptics();
-  const { mainButton, backButton } = useTelegram();
-  const { formData, currentStep } = useCreateListingStore();
+export function Step5Preview() {
+  const { formData } = useCreateListingStore();
   const { propertyTypes, operationTypes, getRegionById, getCityById, getDistrictById, getNeighborhoodById, getStreetById } = useGeographyStore();
 
   // Find display names
@@ -30,46 +20,6 @@ export function Step5Preview({ onSubmit, onPrev, isSubmitting }: Step5PreviewPro
   const neighborhood = formData.neighborhood_id ? getNeighborhoodById(formData.neighborhood_id) : null;
   const street = formData.street_id ? getStreetById(formData.street_id) : null;
 
-  // Setup Telegram buttons
-  useEffect(() => {
-    if (mainButton && currentStep === 5) {
-      mainButton.setParams({
-        text: isSubmitting ? 'Отправка...' : 'Отправить на модерацию',
-        is_visible: true,
-        is_active: !isSubmitting,
-      });
-      mainButton.show();
-
-      const handleClick = () => {
-        if (!isSubmitting) {
-          trigger('success');
-          onSubmit();
-        }
-      };
-      mainButton.onClick(handleClick);
-
-      return () => {
-        mainButton.hide();
-        mainButton.offClick(handleClick);
-      };
-    }
-  }, [mainButton, currentStep, isSubmitting, onSubmit, trigger]);
-
-  useEffect(() => {
-    if (backButton && currentStep === 5) {
-      backButton.show();
-      const handleBack = () => {
-        trigger('light');
-        onPrev();
-      };
-      backButton.onClick(handleBack);
-      return () => {
-        backButton.hide();
-        backButton.offClick(handleBack);
-      };
-    }
-  }, [backButton, currentStep, onPrev, trigger]);
-
   const renderPreviewRow = (label: string, value: React.ReactNode) => (
     <div className="flex items-start gap-3 py-3 border-b" style={{ borderColor: 'var(--tg-theme-hint-color)', borderWidth: '0.5px' }}>
       <div className="w-36 flex-shrink-0 text-tg-hint text-sm">{label}</div>
@@ -78,23 +28,7 @@ export function Step5Preview({ onSubmit, onPrev, isSubmitting }: Step5PreviewPro
   );
 
   return (
-    <div className="p-4 space-y-6 pb-24" style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom, 0px))' }}>
-      {/* Progress Indicator */}
-      <div className="flex items-center gap-2">
-        {[1, 2, 3, 4, 5].map((step) => (
-          <React.Fragment key={step}>
-            <div
-              className="h-2 flex-1 rounded-full transition-colors"
-              style={{
-                backgroundColor: 'var(--tg-theme-button-color)',
-                opacity: 1,
-              }}
-            />
-            {step < 5 && <div className="w-1" />}
-          </React.Fragment>
-        ))}
-      </div>
-
+    <div className="p-4 space-y-6">
       <div className="space-y-6">
         {/* Preview Card */}
         <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)', border: '1px solid var(--tg-theme-hint-color)' }}>
@@ -177,37 +111,6 @@ export function Step5Preview({ onSubmit, onPrev, isSubmitting }: Step5PreviewPro
             </div>
           </div>
         </div>
-
-        {/* Submit Button (fallback for web) */}
-        <button
-          onClick={() => {
-            if (!isSubmitting) {
-              trigger('success');
-              onSubmit();
-            }
-          }}
-          disabled={isSubmitting}
-          className="w-full py-3.5 rounded-xl font-medium transition-colors"
-          style={{
-            backgroundColor: 'var(--tg-theme-button-color)',
-            color: 'var(--tg-theme-button-text-color)',
-            opacity: isSubmitting ? 0.7 : 1,
-          }}
-        >
-          {isSubmitting ? 'Отправка...' : 'Отправить на модерацию'}
-        </button>
-
-        <button
-          onClick={onPrev}
-          className="w-full py-3.5 rounded-xl font-medium transition-colors"
-          style={{
-            backgroundColor: 'transparent',
-            color: 'var(--tg-theme-text-color)',
-            border: '1px solid var(--tg-theme-hint-color)',
-          }}
-        >
-          Назад к фото
-        </button>
       </div>
     </div>
   );

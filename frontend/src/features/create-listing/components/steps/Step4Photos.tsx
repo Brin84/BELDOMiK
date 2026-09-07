@@ -1,17 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useTelegram } from '@/app/providers/TelegramProvider';
+import { useEffect, useRef, useState } from 'react';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useCreateListingStore } from '../../createListingStore';
 
-interface Step4PhotosProps {
-  onNext: () => void;
-  onPrev: () => void;
-}
-
-export function Step4Photos({ onNext, onPrev }: Step4PhotosProps) {
+export function Step4Photos() {
   const { trigger } = useHaptics();
-  const { mainButton, backButton } = useTelegram();
-  const { currentStep, photos, addPhotos, removePhoto, reorderPhotos } = useCreateListingStore();
+  const { photos, addPhotos, removePhoto, reorderPhotos } = useCreateListingStore();
 
   const [previews, setPreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,44 +22,6 @@ export function Step4Photos({ onNext, onPrev }: Step4PhotosProps) {
       newPreviews.forEach(p => URL.revokeObjectURL(p));
     };
   }, [photos]);
-
-  // Setup Telegram buttons
-  useEffect(() => {
-    if (mainButton && currentStep === 4) {
-      mainButton.setParams({
-        text: 'Далее',
-        is_visible: true,
-        is_active: true, // Photos are optional
-      });
-      mainButton.show();
-
-      const handleClick = () => {
-        trigger('medium');
-        onNext();
-      };
-      mainButton.onClick(handleClick);
-
-      return () => {
-        mainButton.hide();
-        mainButton.offClick(handleClick);
-      };
-    }
-  }, [mainButton, currentStep, onNext, trigger]);
-
-  useEffect(() => {
-    if (backButton && currentStep === 4) {
-      backButton.show();
-      const handleBack = () => {
-        trigger('light');
-        onPrev();
-      };
-      backButton.onClick(handleBack);
-      return () => {
-        backButton.hide();
-        backButton.offClick(handleBack);
-      };
-    }
-  }, [backButton, currentStep, onPrev, trigger]);
 
   const handleFileSelect = (files: FileList) => {
     trigger('selection');
@@ -122,27 +77,7 @@ export function Step4Photos({ onNext, onPrev }: Step4PhotosProps) {
   };
 
   return (
-    <div className="p-4 space-y-6 pb-24" style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom, 0px))' }}>
-      {/* Progress Indicator */}
-      <div className="flex items-center gap-2">
-        {[1, 2, 3, 4, 5].map((step) => (
-          <React.Fragment key={step}>
-            <div
-              className="h-2 flex-1 rounded-full transition-colors"
-              style={{
-                backgroundColor: step < 4
-                  ? 'var(--tg-theme-button-color)'
-                  : step === 4
-                  ? 'var(--tg-theme-button-color)'
-                  : 'var(--tg-theme-hint-color)',
-                opacity: step <= 4 ? 1 : 0.3,
-              }}
-            />
-            {step < 5 && <div className="w-1" />}
-          </React.Fragment>
-        ))}
-      </div>
-
+    <div className="p-4 space-y-6">
       <div className="space-y-6">
         {/* Header */}
         <div>

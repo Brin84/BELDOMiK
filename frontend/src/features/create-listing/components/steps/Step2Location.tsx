@@ -1,20 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useTelegram } from '@/app/providers/TelegramProvider';
+import { useEffect, useMemo, useState } from 'react';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useCreateListingStore } from '../../createListingStore';
 import { useGeographyStore } from '@/features/geography/geographyStore';
 import type { Region, City, District, Neighborhood, Street } from '@/shared/api/types';
 
-interface Step2LocationProps {
-  onNext: () => void;
-  onPrev: () => void;
-  canProceed: boolean;
-}
-
-export function Step2Location({ onNext, onPrev, canProceed }: Step2LocationProps) {
+export function Step2Location() {
   const { trigger } = useHaptics();
-  const { mainButton, backButton } = useTelegram();
-  const { updateFormData, formData, currentStep } = useCreateListingStore();
+  const { updateFormData, formData } = useCreateListingStore();
   const [citySearchQuery, setCitySearchQuery] = useState('');
   const [isAddingCity, setIsAddingCity] = useState(false);
 
@@ -58,48 +50,6 @@ export function Step2Location({ onNext, onPrev, canProceed }: Step2LocationProps
       updateFormData({ district_id: undefined, neighborhood_id: undefined, street_id: undefined });
     }
   }, [formData.city_id, fetchDistricts, fetchNeighborhoods, fetchStreets, updateFormData]);
-
-  // Setup Telegram buttons
-  useEffect(() => {
-    if (mainButton && currentStep === 2) {
-      mainButton.setParams({
-        text: 'Далее',
-        is_visible: true,
-        is_active: canProceed,
-      });
-      mainButton.show();
-
-      const handleClick = () => {
-        if (canProceed) {
-          trigger('medium');
-          onNext();
-        } else {
-          trigger('error');
-        }
-      };
-      mainButton.onClick(handleClick);
-
-      return () => {
-        mainButton.hide();
-        mainButton.offClick(handleClick);
-      };
-    }
-  }, [mainButton, currentStep, canProceed, onNext, trigger]);
-
-  useEffect(() => {
-    if (backButton && currentStep === 2) {
-      backButton.show();
-      const handleBack = () => {
-        trigger('light');
-        onPrev();
-      };
-      backButton.onClick(handleBack);
-      return () => {
-        backButton.hide();
-        backButton.offClick(handleBack);
-      };
-    }
-  }, [backButton, currentStep, onPrev, trigger]);
 
   const selectedRegion = formData.region_id ? getRegionById(formData.region_id) : null;
   const selectedCity = formData.city_id ? getCityById(formData.city_id) : null;
@@ -154,27 +104,7 @@ export function Step2Location({ onNext, onPrev, canProceed }: Step2LocationProps
   };
 
   return (
-    <div className="p-4 space-y-6 pb-24" style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom, 0px))' }}>
-      {/* Progress Indicator */}
-      <div className="flex items-center gap-2">
-        {[1, 2, 3, 4, 5].map((step) => (
-          <React.Fragment key={step}>
-            <div
-              className="h-2 flex-1 rounded-full transition-colors"
-              style={{
-                backgroundColor: step < 2
-                  ? 'var(--tg-theme-button-color)'
-                  : step === 2
-                  ? 'var(--tg-theme-button-color)'
-                  : 'var(--tg-theme-hint-color)',
-                opacity: step <= 2 ? 1 : 0.3,
-              }}
-            />
-            {step < 5 && <div className="w-1" />}
-          </React.Fragment>
-        ))}
-      </div>
-
+    <div className="p-4 space-y-6">
       <div className="space-y-6">
         {/* Location Summary */}
         {(selectedRegion || selectedCity || selectedDistrict) && (

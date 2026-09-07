@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useCreateListingStore } from '../../createListingStore';
 import { BynSymbol } from '@/shared/ui';
-
-interface Step3DetailsProps {
-  onNext: () => void;
-  onPrev: () => void;
-  canProceed: boolean;
-}
 
 const REPAIR_TYPES = [
   'Без ремонта',
@@ -76,75 +69,12 @@ function NumberInput({ label, value, onChange, placeholder, min, max, unit, requ
   );
 }
 
-export function Step3Details({ onNext, onPrev, canProceed }: Step3DetailsProps) {
+export function Step3Details() {
   const { trigger } = useHaptics();
-  const { mainButton, backButton } = useTelegram();
-  const { updateFormData, formData, currentStep, clearError, errors } = useCreateListingStore();
-
-  // Setup Telegram buttons
-  useEffect(() => {
-    if (mainButton && currentStep === 3) {
-      mainButton.setParams({
-        text: 'Далее',
-        is_visible: true,
-        is_active: canProceed,
-      });
-      mainButton.show();
-
-      const handleClick = () => {
-        if (canProceed) {
-          trigger('medium');
-          onNext();
-        } else {
-          trigger('error');
-        }
-      };
-      mainButton.onClick(handleClick);
-
-      return () => {
-        mainButton.hide();
-        mainButton.offClick(handleClick);
-      };
-    }
-  }, [mainButton, currentStep, canProceed, onNext, trigger]);
-
-  useEffect(() => {
-    if (backButton && currentStep === 3) {
-      backButton.show();
-      const handleBack = () => {
-        trigger('light');
-        onPrev();
-      };
-      backButton.onClick(handleBack);
-      return () => {
-        backButton.hide();
-        backButton.offClick(handleBack);
-      };
-    }
-  }, [backButton, currentStep, onPrev, trigger]);
+  const { updateFormData, formData, clearError, errors } = useCreateListingStore();
 
   return (
-    <div className="p-4 space-y-6 pb-24" style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom, 0px))' }}>
-      {/* Progress Indicator */}
-      <div className="flex items-center gap-2">
-        {[1, 2, 3, 4, 5].map((step) => (
-          <React.Fragment key={step}>
-            <div
-              className="h-2 flex-1 rounded-full transition-colors"
-              style={{
-                backgroundColor: step < 3
-                  ? 'var(--tg-theme-button-color)'
-                  : step === 3
-                  ? 'var(--tg-theme-button-color)'
-                  : 'var(--tg-theme-hint-color)',
-                opacity: step <= 3 ? 1 : 0.3,
-              }}
-            />
-            {step < 5 && <div className="w-1" />}
-          </React.Fragment>
-        ))}
-      </div>
-
+    <div className="p-4 space-y-6">
       <div className="space-y-6">
         {/* Title */}
         <section>

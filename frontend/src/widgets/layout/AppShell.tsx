@@ -13,7 +13,12 @@ export function AppShell({ children }: { children?: ReactNode }) {
   const navigate = useNavigate();
   // На детальной странице объявления нижнюю навигацию заменяет свой липкий
   // контактный бар «Написать / Позвонить» (стиль Krisha) — см. PropertyDetailPage.
+  // На визарде подачи объявления нижнюю навигацию заменяет собственная панель
+  // действий «Назад / Далее» (см. CreateListingWizard) — чтобы она не сталкивалась
+  // с плавающей панелью вкладов.
   const isPropertyDetail = /^\/property\/\d+/.test(location.pathname);
+  const isWizard = location.pathname === '/create-listing';
+  const hideBottomNav = isPropertyDetail || isWizard;
 
   // Bootstrap authentication on mount. TelegramProvider fills initData
   // asynchronously, so re-run until it's available. Runs at most once a page
@@ -72,14 +77,14 @@ export function AppShell({ children }: { children?: ReactNode }) {
     <div className="flex flex-col min-h-[100vh] min-h-[100dvh] safe-top safe-bottom">
       {/* Main content area */}
       <main
-        className={`flex-1 overflow-y-auto ${isPropertyDetail ? 'pb-0' : 'pb-36'}`}
+        className={`flex-1 overflow-y-auto ${hideBottomNav ? 'pb-0' : 'pb-36'}`}
         style={{ maxHeight: 'calc(var(--tg-viewport-stable-height, 100vh) - 56px)' }}
       >
         {children ?? <Outlet />}
       </main>
 
-      {/* Bottom Navigation — скрыта на странице деталей объявления */}
-      {!isPropertyDetail && <BottomNav />}
+      {/* Bottom Navigation — скрыта на странице деталей объявления и в визарде подачи */}
+      {!hideBottomNav && <BottomNav />}
     </div>
   );
 }

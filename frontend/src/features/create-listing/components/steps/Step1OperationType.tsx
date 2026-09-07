@@ -1,19 +1,12 @@
-import React, { useEffect } from 'react';
-import { useTelegram } from '@/app/providers/TelegramProvider';
+import { useEffect } from 'react';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useCreateListingStore } from '../../createListingStore';
 import { useGeographyStore } from '@/features/geography/geographyStore';
 import type { OperationTypeData, PropertyType } from '@/shared/api/types';
 
-interface Step1OperationTypeProps {
-  onNext: () => void;
-  canProceed: boolean;
-}
-
-export function Step1OperationType({ onNext, canProceed }: Step1OperationTypeProps) {
+export function Step1OperationType() {
   const { trigger } = useHaptics();
-  const { mainButton } = useTelegram();
-  const { updateFormData, formData, currentStep } = useCreateListingStore();
+  const { updateFormData, formData } = useCreateListingStore();
   const { operationTypes, propertyTypes, fetchOperationTypes, fetchPropertyTypes } = useGeographyStore();
 
   // Load operation types and property types on mount
@@ -21,33 +14,6 @@ export function Step1OperationType({ onNext, canProceed }: Step1OperationTypePro
     fetchOperationTypes();
     fetchPropertyTypes();
   }, [fetchOperationTypes, fetchPropertyTypes]);
-
-  // Setup Telegram main button
-  useEffect(() => {
-    if (mainButton && currentStep === 1) {
-      mainButton.setParams({
-        text: 'Далее',
-        is_visible: true,
-        is_active: canProceed,
-      });
-      mainButton.show();
-
-      const handleClick = () => {
-        if (canProceed) {
-          trigger('medium');
-          onNext();
-        } else {
-          trigger('error');
-        }
-      };
-      mainButton.onClick(handleClick);
-
-      return () => {
-        mainButton.hide();
-        mainButton.offClick(handleClick);
-      };
-    }
-  }, [mainButton, currentStep, canProceed, onNext, trigger]);
 
   const handleOperationChange = (operation: OperationTypeData) => {
     trigger('selection');
@@ -60,27 +26,7 @@ export function Step1OperationType({ onNext, canProceed }: Step1OperationTypePro
   };
 
   return (
-    <div className="p-4 space-y-6 pb-24" style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom, 0px))' }}>
-      {/* Progress Indicator */}
-      <div className="flex items-center gap-2">
-        {[1, 2, 3, 4, 5].map((step) => (
-          <React.Fragment key={step}>
-            <div
-              className={`h-2 flex-1 rounded-full transition-colors ${
-                step < 1 ? 'bg-tg-button' : step === 1 ? 'bg-tg-button' : 'bg-tg-hint'
-              }`}
-              style={{
-                backgroundColor: step <= 1
-                  ? 'var(--tg-theme-button-color)'
-                  : 'var(--tg-theme-hint-color)',
-                opacity: step <= 1 ? 1 : 0.3,
-              }}
-            />
-            {step < 5 && <div className="w-1" />}
-          </React.Fragment>
-        ))}
-      </div>
-
+    <div className="p-4 space-y-6">
       <div className="space-y-6">
         {/* Operation Type */}
         <section>
