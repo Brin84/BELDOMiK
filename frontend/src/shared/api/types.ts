@@ -30,6 +30,7 @@ export interface User {
   is_admin: boolean;
   is_moderator: boolean;
   is_verified: boolean;
+  avatar_url?: string | null;
   created_at: string;
   updated_at: string;
 }

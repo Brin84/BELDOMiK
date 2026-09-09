@@ -117,6 +117,7 @@ class AuthService:
         """
         tg_id = int(tg_user_data["id"])
         is_admin = tg_id in settings.ADMIN_IDS
+        avatar_url = tg_user_data.get("photo_url")
 
         user = db.query(User).filter(User.tg_id == tg_id).first()
 
@@ -138,9 +139,9 @@ class AuthService:
             db.commit()
             db.refresh(user)
 
-            # Create profile
+            # Create profile with Telegram avatar (photo_url from initData)
             from app.models.user import UserProfile
-            profile = UserProfile(user_id=user.id, is_agency=False)
+            profile = UserProfile(user_id=user.id, is_agency=False, avatar_url=avatar_url)
             db.add(profile)
             db.commit()
 
@@ -156,6 +157,18 @@ class AuthService:
             user.username = tg_user_data["username"]
         if tg_user_data.get("language_code"):
             user.language_code = tg_user_data["language_code"]
+        # Refresh Telegram avatar on every login so a changed profile
+        # photo propagates to the app (user_profiles.avatar_url).
+        # Profile гарантирован для пользователей, созданных через этот же
+        # flow; для legacy-пользователей создаём при необходимости.
+        profile = user.profile
+        if avatar_url:
+            if not profile:
+                from app.models.user import UserProfile
+                profile = UserProfile(user_id=user.id, is_agency=False)
+                db.add(profile)
+                db.flush()
+            profile.avatar_url = avatar_url
         user.is_active = True
 
         # Promote to admin if listed in ADMIN_IDS (idempotent)

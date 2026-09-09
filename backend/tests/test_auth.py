@@ -82,6 +82,7 @@ def valid_user_data() -> dict:
         "language_code": "ru",
         "is_premium": True,
         "allows_write_to_pm": True,
+        "photo_url": "https://t.me/i/userpic/320/test.jpg",
     }
 
 
@@ -114,6 +115,8 @@ class TestTelegramWebAppAuth:
         assert "user" in data
         assert data["user"]["telegram_id"] == 987654321
         assert data["user"]["username"] == "telegramuser"
+        # Telegram avatar должен подтянуться из initData photo_url
+        assert data["user"]["avatar_url"] == "https://t.me/i/userpic/320/test.jpg"
 
     def test_invalid_hash_rejected(self, client, valid_init_data: str):
         """Test that init_data with invalid hash is rejected with 401."""
@@ -242,6 +245,36 @@ class TestTelegramWebAppAuth:
         # Verify in DB
         user = db_session.query(User).filter(User.id == user_id).first()
         assert user.first_name == "UpdatedName"
+
+    def test_avatar_updated_on_reauth(
+        self, client, db_session: Session, valid_user_data: dict
+    ):
+        """Test that Telegram photo_url is stored and refreshed on re-auth."""
+        bot_token = settings.TELEGRAM_BOT_TOKEN or "test_bot_token_12345"
+
+        # First auth — avatar saved from initData photo_url
+        init_data1 = generate_valid_init_data(bot_token, valid_user_data)
+        response1 = client.post(
+            "/api/v1/auth/telegram",
+            json={"init_data": init_data1},
+        )
+        assert response1.status_code == 200
+        user_id = response1.json()["user"]["id"]
+        assert response1.json()["user"]["avatar_url"] == valid_user_data["photo_url"]
+
+        user = db_session.query(User).filter(User.id == user_id).first()
+        assert user.profile.avatar_url == valid_user_data["photo_url"]
+
+        # Re-auth with a new photo — avatar_url must be refreshed
+        updated_user_data = dict(valid_user_data)
+        updated_user_data["photo_url"] = "https://t.me/i/userpic/320/changed.jpg"
+        init_data2 = generate_valid_init_data(bot_token, updated_user_data)
+        response2 = client.post(
+            "/api/v1/auth/telegram",
+            json={"init_data": init_data2},
+        )
+        assert response2.status_code == 200
+        assert response2.json()["user"]["avatar_url"] == "https://t.me/i/userpic/320/changed.jpg"
 
     def test_refresh_token_flow(
         self, client, db_session: Session, valid_init_data: str

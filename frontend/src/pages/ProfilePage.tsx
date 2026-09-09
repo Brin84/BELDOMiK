@@ -146,14 +146,28 @@ export function ProfilePage() {
     <div className="p-4 space-y-6 pb-20">
       {/* Profile Header */}
       <div className="flex items-center gap-4">
-        <div
-          className="w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-bold flex-shrink-0"
-          style={{
-            backgroundColor: 'var(--tg-theme-button-color)',
-            color: 'var(--tg-theme-button-text-color)',
-          }}
-        >
-          {initials}
+        <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0">
+          {/* Fallback: initials, видимы пока аватар не загрузился/отсутствует */}
+          <div
+            className="absolute inset-0 flex items-center justify-center text-2xl font-bold"
+            style={{
+              backgroundColor: 'var(--tg-theme-button-color)',
+              color: 'var(--tg-theme-button-text-color)',
+            }}
+          >
+            {initials}
+          </div>
+          {/* Аватар Telegram поверх инициалов. Если URL не отдаёт картинку
+              (блокировка Referer и т.п.) — img прячется, остаются инициалы. */}
+          {user.avatar_url && (
+            <img
+              src={user.avatar_url}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+              onError={(e) => e.currentTarget.remove()}
+            />
+          )}
         </div>
         <div className="flex-1 min-w-0">
           <h1 className="text-tg-text text-xl font-bold truncate">
