@@ -10,6 +10,7 @@ import { Step3Details } from './steps/Step3Details';
 import { Step4Photos } from './steps/Step4Photos';
 import { Step5Preview } from './steps/Step5Preview';
 import { EmptyState } from '@/shared/ui';
+import { useKeyboardVisible } from '@/shared/lib/useKeyboardVisible';
 
 export function CreateListingWizard() {
   const { trigger } = useHaptics();
@@ -32,6 +33,7 @@ export function CreateListingWizard() {
   } = useCreateListingStore();
 
   const isAuthenticated = status === 'authenticated' && user;
+  const keyboardVisible = useKeyboardVisible();
 
   // canProceed/completionPercentage НЕ берём из store: в Zustand v5 геттер
   // в состоянии после первого set() замораживается в обычное значение
@@ -247,49 +249,52 @@ export function CreateListingWizard() {
         </div>
       </div>
 
-      {/* Step content */}
-      <div className="pb-32">
+      {/* Step content — pb when keyboard hidden, more pb when keyboard visible */}
+      <div style={{ paddingBottom: keyboardVisible ? 16 : 128 }}>
         {renderStep()}
       </div>
 
-      {/* Sticky bottom action bar (always visible — works in Telegram and browser) */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-40 border-t"
-        style={{
-          backgroundColor: '#ffffff',
-          borderColor: '#e2e8f0',
-          borderWidth: '0.5px',
-          padding: '12px 16px calc(12px + env(safe-area-inset-bottom, 0px))',
-          boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.04)',
-        }}
-      >
-        <div className="flex gap-3 max-w-[560px] mx-auto">
-          {currentStep > 1 && (
+      {/* Sticky bottom action bar — hidden when virtual keyboard is open
+          (address input in Step2 would be covered by the bar) */}
+      {!keyboardVisible && (
+        <div
+          className="fixed bottom-0 left-0 right-0 z-40 border-t"
+          style={{
+            backgroundColor: '#ffffff',
+            borderColor: '#e2e8f0',
+            borderWidth: '0.5px',
+            padding: '12px 16px calc(12px + env(safe-area-inset-bottom, 0px))',
+            boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.04)',
+          }}
+        >
+          <div className="flex gap-3 max-w-[560px] mx-auto">
+            {currentStep > 1 && (
+              <button
+                onClick={() => {
+                  trigger('light');
+                  prevStep();
+                }}
+                className="flex-1 py-3.5 rounded-xl font-medium transition-colors active:opacity-80"
+                style={{ backgroundColor: 'transparent', color: '#0f172a', border: '1px solid #e2e8f0' }}
+              >
+                Назад
+              </button>
+            )}
             <button
-              onClick={() => {
-                trigger('light');
-                prevStep();
+              onClick={handlePrimary}
+              disabled={primaryDisabled}
+              className="flex-1 py-3.5 rounded-xl font-semibold transition-colors active:opacity-90 disabled:opacity-60"
+              style={{
+                backgroundColor: '#2171ee',
+                color: '#ffffff',
+                boxShadow: '0 6px 18px rgba(33, 113, 238, 0.35)',
               }}
-              className="flex-1 py-3.5 rounded-xl font-medium transition-colors active:opacity-80"
-              style={{ backgroundColor: 'transparent', color: '#0f172a', border: '1px solid #e2e8f0' }}
             >
-              Назад
+              {primaryLabel}
             </button>
-          )}
-          <button
-            onClick={handlePrimary}
-            disabled={primaryDisabled}
-            className="flex-1 py-3.5 rounded-xl font-semibold transition-colors active:opacity-90 disabled:opacity-60"
-            style={{
-              backgroundColor: '#2171ee',
-              color: '#ffffff',
-              boxShadow: '0 6px 18px rgba(33, 113, 238, 0.35)',
-            }}
-          >
-            {primaryLabel}
-          </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

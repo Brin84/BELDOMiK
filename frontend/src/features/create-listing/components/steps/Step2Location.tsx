@@ -1,13 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useCreateListingStore } from '../../createListingStore';
 import { useGeographyStore } from '@/features/geography/geographyStore';
+import { ExpandablePicker, type ExpandableOption } from '../ExpandablePicker';
 import type { Region, City, District, Neighborhood, Street } from '@/shared/api/types';
+
+type PickerName = 'region' | 'city';
 
 export function Step2Location() {
   const { trigger } = useHaptics();
   const { updateFormData, formData } = useCreateListingStore();
-  const [citySearchQuery, setCitySearchQuery] = useState('');
+  const [openPicker, setOpenPicker] = useState<PickerName | null>(null);
   const [isAddingCity, setIsAddingCity] = useState(false);
 
   const {
@@ -21,9 +24,6 @@ export function Step2Location() {
     fetchDistricts,
     fetchNeighborhoods,
     fetchStreets,
-    getRegionById,
-    getCityById,
-    getDistrictById,
     addCity,
   } = useGeographyStore();
 
@@ -36,7 +36,6 @@ export function Step2Location() {
   useEffect(() => {
     if (formData.region_id) {
       fetchCities(formData.region_id);
-      setCitySearchQuery('');
       updateFormData({ city_id: 0, district_id: undefined, neighborhood_id: undefined, street_id: undefined });
     }
   }, [formData.region_id, fetchCities, updateFormData]);
@@ -51,42 +50,47 @@ export function Step2Location() {
     }
   }, [formData.city_id, fetchDistricts, fetchNeighborhoods, fetchStreets, updateFormData]);
 
-  const selectedRegion = formData.region_id ? getRegionById(formData.region_id) : null;
-  const selectedCity = formData.city_id ? getCityById(formData.city_id) : null;
-  const selectedDistrict = formData.district_id ? getDistrictById(formData.district_id) : null;
+  // ── Region picker ──────────────────────────────────────
 
-  const handleRegionChange = (region: Region) => {
-    trigger('selection');
-    updateFormData({ region_id: region.id });
+  const regionOptions: ExpandableOption<number>[] = regions.map((r: Region) => ({
+    value: r.id,
+    title: r.name,
+  }));
+
+  const handleRegionChange = (value: number) => {
+    updateFormData({ region_id: value });
+    setOpenPicker(null);
   };
 
-  const handleCityChange = (city: City) => {
-    trigger('selection');
-    updateFormData({ city_id: city.id });
+  // ── City picker ────────────────────────────────────────
+
+  const cityOptions: ExpandableOption<number>[] = cities.map((c: City) => ({
+    value: c.id,
+    title: c.name,
+    subtitle: c.is_major ? 'областной центр' : undefined,
+  }));
+
+  const handleCityChange = (value: number) => {
+    updateFormData({ city_id: value });
+    setOpenPicker(null);
   };
 
-  const trimmedCityQuery = citySearchQuery.trim();
-  const filteredCities = useMemo(() => {
-    if (!trimmedCityQuery) return cities;
-    const q = trimmedCityQuery.toLowerCase();
-    return cities.filter((c) => c.name.toLowerCase().includes(q));
-  }, [cities, trimmedCityQuery]);
-
-  const cityNoMatches = trimmedCityQuery.length > 0 && filteredCities.length === 0;
-
-  const handleAddCity = async () => {
-    if (!cityNoMatches || !trimmedCityQuery || !formData.region_id) return;
+  const handleAddCity = async (query: string) => {
+    if (!query || !formData.region_id) return;
     setIsAddingCity(true);
     trigger('selection');
-    const city = await addCity(trimmedCityQuery, formData.region_id);
+    const city = await addCity(query, formData.region_id);
     setIsAddingCity(false);
     if (city) {
       trigger('success');
       updateFormData({ city_id: city.id, district_id: undefined, neighborhood_id: undefined, street_id: undefined });
+      setOpenPicker(null);
     } else {
       trigger('error');
     }
   };
+
+  // ── District / Neighborhood / Street ────────────────────
 
   const handleDistrictChange = (district: District | undefined) => {
     trigger('selection');
@@ -103,331 +107,209 @@ export function Step2Location() {
     updateFormData({ street_id: street?.id });
   };
 
+  const handleToggle = (picker: PickerName) => {
+    trigger('light');
+    setOpenPicker((prev) => (prev === picker ? null : picker));
+  };
+
   return (
     <div className="p-4 space-y-6">
-      <div className="space-y-6">
-        {/* Location Summary */}
-        {(selectedRegion || selectedCity || selectedDistrict) && (
-          <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}>
-            <div className="text-tg-hint text-xs mb-1">Выбранный адрес:</div>
-            <div className="text-tg-text text-sm font-medium flex flex-wrap gap-1">
-              {selectedRegion && <span>{selectedRegion.name}</span>}
-              {selectedRegion && selectedCity && <span className="text-tg-hint">,</span>}
-              {selectedCity && <span>{selectedCity.name}</span>}
-              {selectedCity && selectedDistrict && <span className="text-tg-hint">,</span>}
-              {selectedDistrict && <span>{selectedDistrict.name}</span>}
-            </div>
-          </div>
-        )}
+      <div className="space-y-3">
+        {/* Region Selector — ExpandablePicker */}
+        <ExpandablePicker<number>
+          label="Область"
+          placeholder="Выберите область"
+          selected={formData.region_id || null}
+          options={regionOptions}
+          onSelect={handleRegionChange}
+          open={openPicker === 'region'}
+          onToggle={() => handleToggle('region')}
+        />
 
-        {/* Region Selector */}
+        {/* City Selector — ExpandablePicker с поиском и «Добавить» */}
+        {formData.region_id && (
+          <ExpandablePicker<number>
+            label="Город / деревня"
+            placeholder="Выберите город"
+            selected={formData.city_id || null}
+            options={cityOptions}
+            onSelect={handleCityChange}
+            open={openPicker === 'city'}
+            onToggle={() => handleToggle('city')}
+            searchable
+            searchPlaceholder="Название города или деревни"
+            addOption={{
+              label: 'Добавить',
+              onAdd: handleAddCity,
+              isAdding: isAddingCity,
+            }}
+          />
+        )}
+      </div>
+
+      {/* District Selector */}
+      {formData.city_id && districts.length > 0 && (
         <section>
-          <h2 className="text-tg-text text-xl font-bold mb-4">Область <span className="text-tg-hint font-normal">*</span></h2>
+          <h2 className="text-tg-text text-xl font-bold mb-4">Район</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {regions.map((region) => (
+            <button
+              onClick={() => handleDistrictChange(undefined)}
+              className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
+                !formData.district_id ? 'ring-2 shadow-sm' : ''
+              }`}
+              style={{
+                backgroundColor: !formData.district_id
+                  ? 'var(--tg-theme-button-color)'
+                  : 'var(--tg-theme-secondary-bg-color)',
+                color: !formData.district_id
+                  ? 'var(--tg-theme-button-text-color)'
+                  : 'var(--tg-theme-text-color)',
+                border: formData.district_id ? '1px solid var(--tg-theme-hint-color)' : 'none',
+              }}
+              aria-pressed={!formData.district_id}
+            >
+              Любой район
+            </button>
+            {districts.map((district) => (
               <button
-                key={region.id}
-                onClick={() => handleRegionChange(region)}
+                key={district.id}
+                onClick={() => handleDistrictChange(district)}
                 className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
-                  formData.region_id === region.id ? 'ring-2 shadow-sm' : ''
+                  formData.district_id === district.id ? 'ring-2 shadow-sm' : ''
                 }`}
                 style={{
-                  backgroundColor: formData.region_id === region.id
+                  backgroundColor: formData.district_id === district.id
                     ? 'var(--tg-theme-button-color)'
                     : 'var(--tg-theme-secondary-bg-color)',
-                  color: formData.region_id === region.id
+                  color: formData.district_id === district.id
                     ? 'var(--tg-theme-button-text-color)'
                     : 'var(--tg-theme-text-color)',
-                  border: formData.region_id !== region.id ? '1px solid var(--tg-theme-hint-color)' : 'none',
+                  border: formData.district_id !== district.id ? '1px solid var(--tg-theme-hint-color)' : 'none',
                 }}
-                aria-pressed={formData.region_id === region.id}
+                aria-pressed={formData.district_id === district.id}
               >
-                {region.name}
+                {district.name}
               </button>
             ))}
           </div>
         </section>
+      )}
 
-        {/* City Selector */}
-        {formData.region_id && (
-          <section>
-            <h2 className="text-tg-text text-xl font-bold mb-4">Город <span className="text-tg-hint font-normal">*</span></h2>
-
-            {/* City search */}
-            <div className="relative mb-3">
-              <svg
-                className="absolute left-4 top-1/2 -translate-y-1/2 flex-shrink-0"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                style={{ color: '#94a3b8' }}
-                aria-hidden="true"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <input
-                type="text"
-                value={citySearchQuery}
-                onChange={(e) => setCitySearchQuery(e.target.value)}
-                placeholder="Поиск города или деревни"
-                className="w-full pl-11 pr-10 py-3 rounded-xl text-tg-text text-base"
-                style={{
-                  backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                  border: '1px solid var(--tg-theme-hint-color)',
-                  color: 'var(--tg-theme-text-color)',
-                }}
-                autoComplete="off"
-                maxLength={100}
-                aria-label="Поиск города или деревни"
-              />
-              {citySearchQuery && (
-                <button
-                  onClick={() => {
-                    trigger('light');
-                    setCitySearchQuery('');
-                  }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full"
-                  style={{ color: '#94a3b8' }}
-                  aria-label="Очистить поиск"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
-              )}
-            </div>
-
-            {cityNoMatches ? (
-              <div className="text-center">
-                <p className="py-2 text-sm" style={{ color: '#94a3b8' }}>
-                  «{trimmedCityQuery}» нет в списке
-                </p>
-                <button
-                  onClick={handleAddCity}
-                  disabled={isAddingCity}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-medium transition-colors active:opacity-80 disabled:opacity-60"
-                  style={{
-                    backgroundColor: 'var(--tg-theme-button-color)',
-                    color: 'var(--tg-theme-button-text-color)',
-                  }}
-                >
-                  {isAddingCity ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
-                      Добавляем...
-                    </>
-                  ) : (
-                    <>➕ Добавить «{trimmedCityQuery}»</>
-                  )}
-                </button>
-                <p className="pt-2 text-xs" style={{ color: '#94a3b8' }}>
-                  Деревня добавится в список области
-                </p>
-              </div>
-            ) : cities.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto">
-                {filteredCities.map((city) => (
-                  <button
-                    key={city.id}
-                    onClick={() => handleCityChange(city)}
-                    className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
-                      formData.city_id === city.id ? 'ring-2 shadow-sm' : ''
-                    }`}
-                    style={{
-                      backgroundColor: formData.city_id === city.id
-                        ? 'var(--tg-theme-button-color)'
-                        : 'var(--tg-theme-secondary-bg-color)',
-                      color: formData.city_id === city.id
-                        ? 'var(--tg-theme-button-text-color)'
-                        : 'var(--tg-theme-text-color)',
-                      border: formData.city_id !== city.id ? '1px solid var(--tg-theme-hint-color)' : 'none',
-                    }}
-                    aria-pressed={formData.city_id === city.id}
-                  >
-                    {city.name} {city.is_major && <span className="text-xs ml-1">⭐</span>}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="py-8 text-center text-tg-hint">Загрузка городов...</div>
-            )}
-          </section>
-        )}
-
-        {/* District Selector */}
-        {formData.city_id && districts.length > 0 && (
-          <section>
-            <h2 className="text-tg-text text-xl font-bold mb-4">Район</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => handleDistrictChange(undefined)}
-                className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
-                  !formData.district_id ? 'ring-2 shadow-sm' : ''
-                }`}
-                style={{
-                  backgroundColor: !formData.district_id
-                    ? 'var(--tg-theme-button-color)'
-                    : 'var(--tg-theme-secondary-bg-color)',
-                  color: !formData.district_id
-                    ? 'var(--tg-theme-button-text-color)'
-                    : 'var(--tg-theme-text-color)',
-                  border: formData.district_id ? '1px solid var(--tg-theme-hint-color)' : 'none',
-                }}
-                aria-pressed={!formData.district_id}
-              >
-                Любой район
-              </button>
-              {districts.map((district) => (
-                <button
-                  key={district.id}
-                  onClick={() => handleDistrictChange(district)}
-                  className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
-                    formData.district_id === district.id ? 'ring-2 shadow-sm' : ''
-                  }`}
-                  style={{
-                    backgroundColor: formData.district_id === district.id
-                      ? 'var(--tg-theme-button-color)'
-                      : 'var(--tg-theme-secondary-bg-color)',
-                    color: formData.district_id === district.id
-                      ? 'var(--tg-theme-button-text-color)'
-                      : 'var(--tg-theme-text-color)',
-                    border: formData.district_id !== district.id ? '1px solid var(--tg-theme-hint-color)' : 'none',
-                  }}
-                  aria-pressed={formData.district_id === district.id}
-                >
-                  {district.name}
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Neighborhood Selector */}
-        {formData.city_id && neighborhoods.length > 0 && (
-          <section>
-            <h2 className="text-tg-text text-xl font-bold mb-4">Микрорайон / ЖК</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              <button
-                onClick={() => handleNeighborhoodChange(undefined)}
-                className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
-                  !formData.neighborhood_id ? 'ring-2 shadow-sm' : ''
-                }`}
-                style={{
-                  backgroundColor: !formData.neighborhood_id
-                    ? 'var(--tg-theme-button-color)'
-                    : 'var(--tg-theme-secondary-bg-color)',
-                  color: !formData.neighborhood_id
-                    ? 'var(--tg-theme-button-text-color)'
-                    : 'var(--tg-theme-text-color)',
-                  border: formData.neighborhood_id ? '1px solid var(--tg-theme-hint-color)' : 'none',
-                }}
-                aria-pressed={!formData.neighborhood_id}
-              >
-                Любой
-              </button>
-              {neighborhoods.map((neighborhood) => (
-                <button
-                  key={neighborhood.id}
-                  onClick={() => handleNeighborhoodChange(neighborhood)}
-                  className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
-                    formData.neighborhood_id === neighborhood.id ? 'ring-2 shadow-sm' : ''
-                  }`}
-                  style={{
-                    backgroundColor: formData.neighborhood_id === neighborhood.id
-                      ? 'var(--tg-theme-button-color)'
-                      : 'var(--tg-theme-secondary-bg-color)',
-                    color: formData.neighborhood_id === neighborhood.id
-                      ? 'var(--tg-theme-button-text-color)'
-                      : 'var(--tg-theme-text-color)',
-                    border: formData.neighborhood_id !== neighborhood.id ? '1px solid var(--tg-theme-hint-color)' : 'none',
-                  }}
-                  aria-pressed={formData.neighborhood_id === neighborhood.id}
-                >
-                  {neighborhood.name}
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Street Selector */}
-        {formData.city_id && streets.length > 0 && (
-          <section>
-            <h2 className="text-tg-text text-xl font-bold mb-4">Улица</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto">
-              <button
-                onClick={() => handleStreetChange(undefined)}
-                className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
-                  !formData.street_id ? 'ring-2 shadow-sm' : ''
-                }`}
-                style={{
-                  backgroundColor: !formData.street_id
-                    ? 'var(--tg-theme-button-color)'
-                    : 'var(--tg-theme-secondary-bg-color)',
-                  color: !formData.street_id
-                    ? 'var(--tg-theme-button-text-color)'
-                    : 'var(--tg-theme-text-color)',
-                  border: formData.street_id ? '1px solid var(--tg-theme-hint-color)' : 'none',
-                }}
-                aria-pressed={!formData.street_id}
-              >
-                Любая улица
-              </button>
-              {streets.map((street) => (
-                <button
-                  key={street.id}
-                  onClick={() => handleStreetChange(street)}
-                  className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
-                    formData.street_id === street.id ? 'ring-2 shadow-sm' : ''
-                  }`}
-                  style={{
-                    backgroundColor: formData.street_id === street.id
-                      ? 'var(--tg-theme-button-color)'
-                      : 'var(--tg-theme-secondary-bg-color)',
-                    color: formData.street_id === street.id
-                      ? 'var(--tg-theme-button-text-color)'
-                      : 'var(--tg-theme-text-color)',
-                    border: formData.street_id !== street.id ? '1px solid var(--tg-theme-hint-color)' : 'none',
-                  }}
-                  aria-pressed={formData.street_id === street.id}
-                >
-                  {street.name}
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Address Input */}
+      {/* Neighborhood Selector */}
+      {formData.city_id && neighborhoods.length > 0 && (
         <section>
-          <h2 className="text-tg-text text-xl font-bold mb-4">Точный адрес (дом, корпус, квартира)</h2>
-          <input
-            type="text"
-            value={formData.address || ''}
-            onChange={(e) => {
-              trigger('selection');
-              updateFormData({ address: e.target.value });
-            }}
-            placeholder="ул. Ленина, д. 10, кв. 5"
-            className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
-            style={{
-              backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-              border: '1px solid var(--tg-theme-hint-color)',
-              color: 'var(--tg-theme-text-color)',
-            }}
-            maxLength={200}
-          />
-          <p className="text-tg-hint text-xs mt-1">Укажите номер дома, корпуса и квартиры для точного расположения на карте</p>
+          <h2 className="text-tg-text text-xl font-bold mb-4">Микрорайон / ЖК</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <button
+              onClick={() => handleNeighborhoodChange(undefined)}
+              className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
+                !formData.neighborhood_id ? 'ring-2 shadow-sm' : ''
+              }`}
+              style={{
+                backgroundColor: !formData.neighborhood_id
+                  ? 'var(--tg-theme-button-color)'
+                  : 'var(--tg-theme-secondary-bg-color)',
+                color: !formData.neighborhood_id
+                  ? 'var(--tg-theme-button-text-color)'
+                  : 'var(--tg-theme-text-color)',
+                border: formData.neighborhood_id ? '1px solid var(--tg-theme-hint-color)' : 'none',
+              }}
+              aria-pressed={!formData.neighborhood_id}
+            >
+              Любой
+            </button>
+            {neighborhoods.map((neighborhood) => (
+              <button
+                key={neighborhood.id}
+                onClick={() => handleNeighborhoodChange(neighborhood)}
+                className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
+                  formData.neighborhood_id === neighborhood.id ? 'ring-2 shadow-sm' : ''
+                }`}
+                style={{
+                  backgroundColor: formData.neighborhood_id === neighborhood.id
+                    ? 'var(--tg-theme-button-color)'
+                    : 'var(--tg-theme-secondary-bg-color)',
+                  color: formData.neighborhood_id === neighborhood.id
+                    ? 'var(--tg-theme-button-text-color)'
+                    : 'var(--tg-theme-text-color)',
+                  border: formData.neighborhood_id !== neighborhood.id ? '1px solid var(--tg-theme-hint-color)' : 'none',
+                }}
+                aria-pressed={formData.neighborhood_id === neighborhood.id}
+              >
+                {neighborhood.name}
+              </button>
+            ))}
+          </div>
         </section>
-      </div>
+      )}
+
+      {/* Street Selector */}
+      {formData.city_id && streets.length > 0 && (
+        <section>
+          <h2 className="text-tg-text text-xl font-bold mb-4">Улица</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto">
+            <button
+              onClick={() => handleStreetChange(undefined)}
+              className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
+                !formData.street_id ? 'ring-2 shadow-sm' : ''
+              }`}
+              style={{
+                backgroundColor: !formData.street_id
+                  ? 'var(--tg-theme-button-color)'
+                  : 'var(--tg-theme-secondary-bg-color)',
+                color: !formData.street_id
+                  ? 'var(--tg-theme-button-text-color)'
+                  : 'var(--tg-theme-text-color)',
+                border: formData.street_id ? '1px solid var(--tg-theme-hint-color)' : 'none',
+              }}
+              aria-pressed={!formData.street_id}
+            >
+              Любая улица
+            </button>
+            {streets.map((street) => (
+              <button
+                key={street.id}
+                onClick={() => handleStreetChange(street)}
+                className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
+                  formData.street_id === street.id ? 'ring-2 shadow-sm' : ''
+                }`}
+                style={{
+                  backgroundColor: formData.street_id === street.id
+                    ? 'var(--tg-theme-button-color)'
+                    : 'var(--tg-theme-secondary-bg-color)',
+                  color: formData.street_id === street.id
+                    ? 'var(--tg-theme-button-text-color)'
+                    : 'var(--tg-theme-text-color)',
+                  border: formData.street_id !== street.id ? '1px solid var(--tg-theme-hint-color)' : 'none',
+                }}
+                aria-pressed={formData.street_id === street.id}
+              >
+                {street.name}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Address Input */}
+      <section>
+        <h2 className="text-tg-text text-xl font-bold mb-4">Точный адрес (дом, корпус, квартира)</h2>
+        <input
+          type="text"
+          value={formData.address || ''}
+          onChange={(e) => updateFormData({ address: e.target.value })}
+          placeholder="ул. Ленина, д. 10, кв. 5"
+          className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
+          style={{
+            backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+            border: '1px solid var(--tg-theme-hint-color)',
+            color: 'var(--tg-theme-text-color)',
+          }}
+          maxLength={200}
+          autoComplete="off"
+        />
+        <p className="text-tg-hint text-xs mt-1">Укажите номер дома, корпуса и квартиры для точного расположения на карте</p>
+      </section>
     </div>
   );
 }
