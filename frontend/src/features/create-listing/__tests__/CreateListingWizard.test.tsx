@@ -92,8 +92,14 @@ function renderWizard() {
 }
 
 // Выбор типа недвижимости через свёрнутую плитку: сначала раскрываем,
-// потом кликаем по варианту.
+// потом кликаем по варианту. Если тип сделки ещё не выбран (изначально
+// operation = '' — «не выбран»), сначала выбираем «Аренду»: шаг 1 требует
+// и тип сделки, и тип недвижимости.
 async function pickPropertyType(user: ReturnType<typeof userEvent.setup>, name: string) {
+  if (!useCreateListingStore.getState().formData.operation) {
+    await user.click(screen.getByText('Тип сделки'));
+    await user.click(screen.getByText('Аренда'));
+  }
   await user.click(screen.getByText('Тип недвижимости'));
   await user.click(screen.getByText(name));
 }
@@ -134,8 +140,8 @@ describe('CreateListingWizard — кнопка «Далее»', () => {
     const user = userEvent.setup();
     renderWizard();
 
-    // Изначально property_type_id = 0, валидация шага 1 падает → кнопка заблокирована,
-    // даже несмотря на выбранную операцию «sale» (валидна).
+    // Изначально property_type_id = 0 и operation = '' → валидация шага 1
+    // падает → кнопка заблокирована.
     const nextBtn = screen.getByRole('button', { name: 'Далее' });
     expect(nextBtn).toBeDisabled();
 

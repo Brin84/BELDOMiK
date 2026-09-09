@@ -470,6 +470,7 @@ class PropertyService:
                 is_new_building=prop.is_new_building,
                 description=prop.description,
                 status=prop.status.value if hasattr(prop.status, 'value') else str(prop.status),
+                moderation_reason=prop.moderation_reason,
                 views_count=prop.views_count,
                 favorites_count=prop.favorites_count,
                 created_at=prop.created_at,
@@ -558,16 +559,47 @@ class PropertyService:
 
     @staticmethod
     def submit_for_moderation(db: Session, property_id: int, user_id: int) -> Property | None:
-        """Submit property for moderation."""
+        """Отправить объявление на автоматическую модерацию.
+
+        Стандартные правила (см. auto_moderation.check_standard_rules):
+        прошла проверку → статус PUBLISHED + публикация в Telegram-канал;
+        не прошла → REJECTED с причиной в Property.moderation_reason
+        (причина показывается пользователю в «Мои объявления» и визарде).
+        """
+        from app.services.auto_moderation import check_standard_rules
+        from app.services.moderation_service import _publish_to_channel
+
         property_obj = db.query(Property).filter(Property.id == property_id).first()
         if not property_obj or property_obj.owner_id != user_id:
             return None
         if property_obj.status not in (PropertyStatus.DRAFT, PropertyStatus.REJECTED):
             return None
 
-        property_obj.status = PropertyStatus.PENDING_MODERATION
+        issues = check_standard_rules(property_obj)
+        if issues:
+            reason = "; ".join(issues)
+            property_obj.status = PropertyStatus.REJECTED
+            property_obj.moderation_reason = reason
+            property_obj.moderated_at = datetime.now(UTC)
+            property_obj.moderated_by = None
+            db.commit()
+            db.refresh(property_obj)
+            logger.warning(
+                "Автомодерация отклонила объявление %s (owner %s): %s",
+                property_id, user_id, reason,
+            )
+            return property_obj
+
+        property_obj.status = PropertyStatus.PUBLISHED
+        property_obj.moderation_reason = None
+        property_obj.moderated_at = datetime.now(UTC)
+        property_obj.moderated_by = None
+        property_obj.published_at = datetime.now(UTC)
         db.commit()
         db.refresh(property_obj)
+        # Автопубликация в Telegram-канал (best-effort, не ломает подачу при
+        # ошибке сети/канала).
+        _publish_to_channel(db, property_obj)
         return property_obj
 
     @staticmethod

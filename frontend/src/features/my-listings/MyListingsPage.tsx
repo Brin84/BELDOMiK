@@ -108,6 +108,11 @@ function PropertyCard({ property, onClick, onEdit, onDelete, onPromote }: {
         <div className="text-tg-hint text-xs mt-1">
           Создано: {formatDate(property.created_at)}
         </div>
+        {property.status === 'rejected' && property.moderation_reason && (
+          <div className="text-xs mt-1.5 leading-snug" style={{ color: '#ff3b30' }}>
+            {property.moderation_reason}
+          </div>
+        )}
       </div>
 
       {/* Actions */}

@@ -81,6 +81,7 @@ export interface PropertyShort {
   is_new_building: boolean;
   description: string | null;
   status: PropertyStatus;
+  moderation_reason?: string | null;
   views_count: number;
   favorites_count: number;
   created_at: string;
@@ -233,7 +234,8 @@ export interface PropertyFilterParams {
 export interface PropertyCreate {
   title: string;
   description?: string;
-  operation: OperationType;
+  /** Тип сделки: '' = ещё не выбран в визарде (валидируется перед подачей). */
+  operation: OperationType | '';
   property_type_id: number;
   region_id: number;
   city_id: number;

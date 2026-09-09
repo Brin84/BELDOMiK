@@ -9,6 +9,7 @@ import {
   formatRelativeTime,
 } from '@/shared/lib/format';
 import type { PropertyShort } from '@/shared/api/types';
+import { buildPropertyTitle } from '@/shared/lib/propertyTitle';
 
 interface HotPropertyCardProps {
   property: PropertyShort;
@@ -48,16 +49,12 @@ export function HotPropertyCard({ property, onFavoriteToggle, showTime = false }
     ? (formatPriceByn(property.price_byn!, { showCurrency: false }) as string)
     : 'Договорная';
 
-  const title =
-    property.address ||
-    property.street_name ||
-    property.neighborhood_name ||
-    property.district_name ||
-    property.city_name ||
-    property.type_name ||
-    'Объявление';
+  // Заголовок — синтезированный «тип, N-комн., площадь м², город».
+  const title = buildPropertyTitle(property);
 
-  const location = [property.city_name, property.district_name].filter(Boolean).join(', ');
+  // Адрес уходит в строку локации, а не в заголовок.
+  const address = [property.street_name, property.address].filter(Boolean).join(', ');
+  const location = [property.city_name, property.district_name, address].filter(Boolean).join(', ');
 
   const statusLabel =
     property.status !== 'published' && property.status !== 'draft'

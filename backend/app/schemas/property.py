@@ -190,6 +190,8 @@ class PropertyShortRead(BaseSchema):
     is_new_building: bool = False
     description: str | None = None
     status: str
+    # Причина отклонения модерацией (автомодерация пишет её при REJECTED).
+    moderation_reason: str | None = None
     views_count: int = 0
     favorites_count: int = 0
     created_at: datetime

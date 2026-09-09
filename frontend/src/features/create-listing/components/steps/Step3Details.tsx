@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useCreateListingStore } from '../../createListingStore';
 import { BynSymbol } from '@/shared/ui';
-import { SelectListRowView, type SelectListRow } from '../SelectList';
+import { ExpandablePicker, type ExpandableOption } from '../ExpandablePicker';
 
 const REPAIR_TYPES = [
   'Без ремонта',
@@ -77,14 +77,24 @@ function NumberInput({ label, value, onChange, placeholder, min, max, unit, requ
   );
 }
 
+type SectionName = 'repair' | 'features';
+
 export function Step3Details() {
   const { trigger } = useHaptics();
   const { updateFormData, formData, clearError, errors } = useCreateListingStore();
+  const [openSection, setOpenSection] = useState<SectionName | null>(null);
 
-  const repairRows: SelectListRow<string>[] = REPAIR_TYPES.map((r) => ({
+  const repairOptions: ExpandableOption<string>[] = REPAIR_TYPES.map((r) => ({
     value: r,
-    label: r,
+    title: r,
   }));
+
+  const selectedFeaturesCount = FEATURES.filter((f) => !!formData[f.key]).length;
+
+  const handleToggle = (section: SectionName) => {
+    trigger('light');
+    setOpenSection((prev) => (prev === section ? null : section));
+  };
 
   return (
     <div className="p-4 space-y-6">
@@ -264,88 +274,119 @@ export function Step3Details() {
         )}
       </section>
 
-      {/* Repair Type — вертикальный список */}
+      {/* Ремонт — компактный раскрывающийся пикер (как «Тип сделки» в шаге 1) */}
       <section>
-        <div
-          className="rounded-2xl overflow-hidden"
-          style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
-        >
-          {/* «Не указан» — строка для сброса (аналог clearLabel, но вручную) */}
-          <SelectListRowView<string>
-            row={{ value: '', label: 'Не указан' }}
-            isSelected={!formData.repair_type}
-            onSelect={() => {
-              trigger('selection');
-              updateFormData({ repair_type: '' });
-            }}
-            showDivider={true}
-          />
-          {repairRows.map((row, index) => (
-            <SelectListRowView<string>
-              key={row.value}
-              row={row}
-              isSelected={formData.repair_type === row.value}
-              onSelect={() => {
-                trigger('selection');
-                updateFormData({ repair_type: row.value });
-              }}
-              showDivider={index < repairRows.length - 1}
-            />
-          ))}
-        </div>
+        <ExpandablePicker<string>
+          label="Ремонт"
+          placeholder="Не указан"
+          selected={formData.repair_type ? formData.repair_type : null}
+          options={repairOptions}
+          onSelect={(value) => {
+            trigger('selection');
+            updateFormData({ repair_type: value });
+            setOpenSection(null);
+          }}
+          open={openSection === 'repair'}
+          onToggle={() => handleToggle('repair')}
+        />
       </section>
 
-      {/* Features — вертикальный список с чекбоксами */}
+      {/* Особенности — сворачиваемая секция с чекбоксами */}
       <section>
-        <h2 style={{ color: '#0f172a', fontSize: '20px', fontWeight: 700, marginBottom: '16px' }}>Особенности</h2>
         <div
-          className="rounded-2xl overflow-hidden"
-          style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
+          className="rounded-2xl overflow-hidden transition-shadow"
+          style={{
+            backgroundColor: '#ffffff',
+            border: openSection === 'features' ? '1px solid #cbd5e1' : '1px solid #e2e8f0',
+            boxShadow: openSection === 'features' ? '0 8px 24px rgba(2, 6, 23, 0.06)' : 'none',
+          }}
         >
-          {FEATURES.map(({ key, label, icon }, index) => {
-            const checked = !!formData[key];
-            return (
-              <button
-                key={key}
-                type="button"
-                onClick={() => {
-                  trigger('selection');
-                  updateFormData({ [key]: !formData[key] });
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors active:opacity-80"
-                style={{
-                  backgroundColor: checked ? '#e8f0fe' : '#ffffff',
-                  borderBottom: index < FEATURES.length - 1 ? '1px solid #f1f5f9' : 'none',
-                }}
-                aria-pressed={checked}
+          {/* Триггер-строка */}
+          <button
+            type="button"
+            onClick={() => handleToggle('features')}
+            aria-expanded={openSection === 'features'}
+            className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-opacity active:opacity-80"
+          >
+            <div className="flex-1 min-w-0">
+              <div className="text-[13px] leading-tight" style={{ color: '#94a3b8' }}>Особенности</div>
+              <div
+                className="text-[17px] font-semibold truncate mt-0.5"
+                style={{ color: selectedFeaturesCount > 0 ? '#0f172a' : '#94a3b8' }}
               >
-                <span className="text-2xl leading-none flex-shrink-0">{icon}</span>
-                <span className="min-w-0 flex-1">
-                  <span
-                    className="block text-[16px] font-medium leading-tight"
-                    style={{ color: checked ? '#2171ee' : '#0f172a' }}
-                  >
-                    {label}
-                  </span>
-                </span>
-                {/* Чекбокс-кружок */}
-                <span
-                  className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-md transition-colors"
-                  style={{
-                    backgroundColor: checked ? '#2171ee' : '#f1f5f9',
-                    border: checked ? 'none' : '1.5px solid #cbd5e1',
-                  }}
-                  aria-hidden="true"
-                >
-                  {checked && (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth={3}>
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  )}
-                </span>
-              </button>
-            );
-          })}
+                {selectedFeaturesCount > 0 ? `${selectedFeaturesCount} выбрано` : 'Не выбраны'}
+              </div>
+            </div>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              className={`flex-shrink-0 transition-transform duration-200 ${openSection === 'features' ? 'rotate-180' : ''}`}
+              style={{ color: '#94a3b8' }}
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+
+          {/* Раскрывающийся столбик чекбоксов */}
+          <div
+            className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+              openSection === 'features' ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+            }`}
+          >
+            <div className="overflow-hidden min-h-0">
+              <div className="pt-1 pb-2" style={{ borderTop: '1px solid #f1f5f9' }}>
+                {FEATURES.map(({ key, label, icon }, index) => {
+                  const checked = !!formData[key];
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => {
+                        trigger('selection');
+                        updateFormData({ [key]: !formData[key] });
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors active:opacity-80"
+                      style={{
+                        backgroundColor: checked ? '#e8f0fe' : '#ffffff',
+                        borderBottom: index < FEATURES.length - 1 ? '1px solid #f1f5f9' : 'none',
+                      }}
+                      aria-pressed={checked}
+                    >
+                      <span className="text-2xl leading-none flex-shrink-0">{icon}</span>
+                      <span className="min-w-0 flex-1">
+                        <span
+                          className="block text-[16px] font-medium leading-tight"
+                          style={{ color: checked ? '#2171ee' : '#0f172a' }}
+                        >
+                          {label}
+                        </span>
+                      </span>
+                      {/* Чекбокс-кружок */}
+                      <span
+                        className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-md transition-colors"
+                        style={{
+                          backgroundColor: checked ? '#2171ee' : '#f1f5f9',
+                          border: checked ? 'none' : '1.5px solid #cbd5e1',
+                        }}
+                        aria-hidden="true"
+                      >
+                        {checked && (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth={3}>
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>

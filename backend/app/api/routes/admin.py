@@ -314,9 +314,11 @@ def update_property_status(
         prop.published_at = datetime.now(UTC)
         prop.moderated_at = datetime.now(UTC)
         prop.moderated_by = admin.id
+        prop.moderation_reason = None
     elif data.status in ("rejected", "blocked"):
         prop.moderated_at = datetime.now(UTC)
         prop.moderated_by = admin.id
+        prop.moderation_reason = data.reason
 
     # Журналируем модерационное действие коротким значением ModerationActionType.
     # Колонка moderation_actions.action в БД — varchar(7) (миграция String(7),

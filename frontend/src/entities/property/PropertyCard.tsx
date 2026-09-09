@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, ImageOff } from 'lucide-react';
+import { Heart, ImageOff, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
 import {
@@ -8,6 +8,7 @@ import {
   formatRooms,
 } from '@/shared/lib/format';
 import type { PropertyShort } from '@/shared/api/types';
+import { buildPropertyTitle } from '@/shared/lib/propertyTitle';
 
 interface PropertyCardProps {
   property: PropertyShort;
@@ -58,15 +59,13 @@ export function PropertyCard({
   const rooms = property.rooms_count;
   const area = property.total_area;
 
-  // Заголовок — самый характерный элемент адреса: сначала адрес/улица,
-  // иначе район/микрорайон, иначе город.
-  const title =
-    property.address ||
-    [property.street_name, property.address].filter(Boolean)[0] ||
-    property.neighborhood_name ||
-    property.district_name ||
-    property.city_name ||
-    typeLabel;
+  // Заголовок — синтезированный «тип, N-комн., площадь м², город»
+  // (как Property.title на бэкенде). Адрес показывается отдельной строкой.
+  const title = buildPropertyTitle(property);
+  const addressLine =
+    [property.street_name, property.address, property.neighborhood_name, property.district_name]
+      .filter(Boolean)
+      .join(', ') || null;
 
   // Неопубликованные статусы приоритетнее бейджа «Новостройка».
   const statusLabel =
@@ -156,7 +155,13 @@ export function PropertyCard({
           {title}
         </h3>
         {specLabel && (
-          <p className="mt-2 text-[16px] text-slate-500">{specLabel}</p>
+          <p className="mt-2 text-[15px] text-slate-500">{specLabel}</p>
+        )}
+        {addressLine && (
+          <p className="mt-1.5 flex items-center gap-1 text-[14px] text-slate-400 truncate">
+            <MapPin size={13} className="flex-shrink-0" />
+            <span className="truncate">{addressLine}</span>
+          </p>
         )}
         <p className="mt-2 text-[17px] font-extrabold text-slate-900 leading-tight">
           {priceLabel}

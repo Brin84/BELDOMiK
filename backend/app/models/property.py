@@ -96,6 +96,8 @@ class Property(Base):
     # Moderation
     moderated_at = Column(DateTime, nullable=True)
     moderated_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    # Причина отклонения автомодерацией (и ручной модерацией при желании).
+    moderation_reason = Column(Text, nullable=True)
     published_at = Column(DateTime, nullable=True)
     archived_at = Column(DateTime, nullable=True)
 

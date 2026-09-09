@@ -64,7 +64,7 @@ export interface CreateListingState {
 const defaultFormData: PropertyCreate = {
   title: '',
   description: '',
-  operation: 'sale',
+  operation: '',
   property_type_id: 0,
   region_id: 0,
   city_id: 0,
@@ -233,7 +233,8 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
     set({ isSubmitting: true, error: null });
 
     try {
-      // First update the property with any changes
+      // First update the property with any changes. Опциональные поля формы
+      // (operation не выбран в шаге 1 — до подачи это уже валидировано).
       const backendData = {
         type_id: formData.property_type_id,
         operation_id: formData.operation === 'sale' ? 1 : formData.operation === 'rent' ? 2 : formData.operation === 'daily_rent' ? 3 : 4,
@@ -266,8 +267,10 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
       };
 
       // Свежая подача из визарда (без черновика): сначала создаём объявление
-      // (бэкенд создаёт его со статусом DRAFT), затем отправляем на модерацию.
-      // Если редактируем существующий черновик — обновляем его.
+      // (бэкенд создаёт его со статусом DRAFT). Если редактируем существующий
+      // черновик — обновляем его. ID держим в draftId на случай отклонения
+      // автомодерацией, чтобы повторная подача исправляла то же объявление,
+      // а не плодила новые.
       let propertyId = draftId;
       if (!propertyId) {
         const created = await api.post<PropertyShort>(API_ENDPOINTS.properties.create, backendData);
@@ -275,11 +278,10 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
       } else {
         await api.put<PropertyShort>(API_ENDPOINTS.properties.update(propertyId), backendData);
       }
+      set({ draftId: propertyId });
 
-      // Then submit for moderation (DRAFT → PENDING_MODERATION)
-      const response = await api.post<PropertyShort>(`/api/v1/properties/${propertyId}/submit`, {});
-
-      // Upload photos if any
+      // Загружаем фото ДО отправки на модерацию: автомодерация проверяет
+      // наличие хотя бы одной фотографии при самом submit.
       if (photos.length > 0) {
         const formDataUpload = new FormData();
         photos.forEach((photo) => {
@@ -287,6 +289,20 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
         });
 
         await api.postFormData(API_ENDPOINTS.properties.photosUpload(propertyId), formDataUpload);
+      }
+
+      // Автомодерация: объявление сразу публикуется (status=published) либо
+      // отклоняется с причиной (status=rejected + moderation_reason).
+      const response = await api.post<PropertyShort>(`/api/v1/properties/${propertyId}/submit`, {});
+
+      if (response.status === 'rejected') {
+        // Показываем причину в шапке визарда и остаёмся на месте, чтобы
+        // пользователь мог исправить объявление и подать повторно.
+        set({
+          isSubmitting: false,
+          error: response.moderation_reason || 'Объявление не прошло автоматическую модерацию',
+        });
+        return null;
       }
 
       set({ isSubmitting: false, draftId: null, photos: [] });
