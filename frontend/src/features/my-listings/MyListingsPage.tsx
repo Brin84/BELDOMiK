@@ -1,11 +1,12 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
-import { useHaptics } from '@/shared/lib/haptics';
+import { useHaptics, hapticMedium } from '@/shared/lib/haptics';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/authStore';
 import { api, API_ENDPOINTS } from '@/shared/api';
 import type { PropertyShort } from '@/shared/api/types';
 import { formatPriceByn } from '@/shared/lib/format';
+import { buildPropertyTitle } from '@/shared/lib/propertyTitle';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { PromoteListingModal } from '@/features/monetization/components/PromoteListingModal';
@@ -95,13 +96,11 @@ function PropertyCard({ property, onClick, onEdit, onDelete, onPromote }: {
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-tg-text font-medium truncate">{property.type_name || `Объявление #${property.id}`}</h3>
+          <h3 className="text-tg-text font-medium truncate">{buildPropertyTitle(property)}</h3>
           <StatusBadge status={property.status} />
         </div>
         <div className="flex items-center gap-2 text-tg-hint text-xs mt-1">
           <span>{property.operation_name || OPERATION_LABELS[property.operation_name || ''] || property.operation_name}</span>
-          <span>·</span>
-          <span>{property.type_name}</span>
           {property.city_name && <>· {property.city_name}</>}
         </div>
         <div className="text-tg-text font-bold mt-1">{formatPrice(property.price_byn ?? 0)}</div>
@@ -204,27 +203,31 @@ export function MyListingsPage() {
 
 
   // Telegram MainButton - logout
+  // Use module-level hapticMedium (stable ref) instead of per-render `trigger`
+  // to keep deps stable — unstable dep causes effect re-run → hide()+show() race.
   useEffect(() => {
-    if (mainButton && isAuthenticated) {
-      mainButton.setParams({
-        text: 'Выйти',
-        is_visible: true,
-        // Telegram MainButton accepts only hex color strings, not CSS var()
-        color: '#ff3b30',
-        text_color: '#ffffff',
-      });
-      const handleClick = () => {
-        trigger('medium');
-        logout();
-      };
-      mainButton.onClick(handleClick);
-      mainButton.show();
-      return () => {
-        mainButton.hide();
-        mainButton.offClick(handleClick);
-      };
-    }
-  }, [mainButton, isAuthenticated, logout, trigger]);
+    if (!mainButton || !isAuthenticated) return;
+
+    const handleClick = () => {
+      hapticMedium();
+      logout();
+    };
+
+    mainButton.setParams({
+      text: 'Выйти',
+      is_visible: true,
+      // Telegram MainButton accepts only hex color strings, not CSS var()
+      color: '#ff3b30',
+      text_color: '#ffffff',
+    });
+    mainButton.onClick(handleClick);
+    mainButton.show();
+
+    return () => {
+      mainButton.offClick(handleClick);
+      mainButton.hide();
+    };
+  }, [mainButton, isAuthenticated, logout]);
 
   if (!isAuthenticated) {
     return (

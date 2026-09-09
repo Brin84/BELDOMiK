@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { EmptyState } from '@/shared/ui';
 import { useAuthStore } from '@/features/auth';
@@ -6,8 +6,9 @@ import { useHaptics, hapticMedium } from '@/shared/lib/haptics';
 import { useNavigate } from 'react-router-dom';
 import { SavedSearchList } from '@/features/saved-searches/components';
 import { useCollectionsStore } from '@/features/collections';
-import type { UserRole } from '@/shared/api';
 import { useAdminStore } from '@/features/admin';
+import { api, API_ENDPOINTS } from '@/shared/api';
+import type { PropertyShort, UserRole } from '@/shared/api';
 
 export function ProfilePage() {
   const { user, status, error, logout, login } = useAuthStore();
@@ -18,6 +19,16 @@ export function ProfilePage() {
 
   const { collections, fetchCollections } = useCollectionsStore();
   const { fetchDashboard } = useAdminStore();
+  const [myListingsCount, setMyListingsCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchCollections();
+      api.get<PropertyShort[]>(API_ENDPOINTS.properties.myProperties)
+        .then(items => setMyListingsCount(items.length))
+        .catch(() => {});
+    }
+  }, [isAuthenticated, fetchCollections]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -213,8 +224,13 @@ export function ProfilePage() {
               <path d="M3 9h18" />
               <path d="M9 21V9" />
             </svg>
-            <span style={{ color: 'var(--tg-theme-text-color)' }}>Все мои объявления</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: '#94a3b8' }}>
+            <span className="flex-1" style={{ color: 'var(--tg-theme-text-color)' }}>Все мои объявления</span>
+            {myListingsCount !== null && myListingsCount > 0 && (
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--tg-theme-button-color)', color: 'var(--tg-theme-button-text-color)' }}>
+                {myListingsCount}
+              </span>
+            )}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: '#94a3b8' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
