@@ -83,79 +83,56 @@
   cursor: pointer;
 }
 
-/* ---------- Поиск ---------- */
+/* ---------- Рекламные баннеры (автопрокрутка) ---------- */
 
-.catalog-search {
+.catalog-banner {
+  position: relative;
   margin-top: 16px;
-}
-
-.catalog-search__box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 50px;
-  padding: 0 4px 0 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 18px;
+  border: 1px dashed #c8d6e9;
+  border-radius: 20px;
   background: #fff;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
-.catalog-search__icon {
-  color: #a0aec0;
-  flex-shrink: 0;
+.catalog-banner__track {
+  display: flex;
+  transition: transform 0.5s ease;
 }
 
-.catalog-search__input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 16px;
-  color: #1e293b;
-}
-
-.catalog-search__input::placeholder {
-  color: #a0aec0;
-}
-
-/* Глобальный input: !important фон/рамка/скругление рисует внутри
-   pill-бокса внутреннюю рамку. Переопределяем прозрачным инпутом
-   (селектор выше специфичностью глобального input:not(...)...). */
-.catalog-search__box input:not([type='range']):not([type='checkbox']):not([type='radio']) {
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
-
-.catalog-search__box input:not([type='range']):not([type='checkbox']):not([type='radio']):focus {
-  border: none !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  background: transparent !important;
-}
-
-.catalog-search__divider {
-  width: 1px;
-  height: 26px;
-  background: #e2e8f0;
-  flex-shrink: 0;
-}
-
-.catalog-search__filter {
+.catalog-banner__slide {
+  flex: 0 0 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
-  border: none;
-  border-radius: 13px;
-  background: #f1f5f9;
-  color: #64748b;
-  cursor: pointer;
-  flex-shrink: 0;
+  height: 96px;
+  padding: 0 16px 14px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  color: #334155;
+}
+
+.catalog-banner__dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 9px;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.catalog-banner__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #cbd8ec;
+  transition: all 0.3s ease;
+}
+
+.catalog-banner__dot--active {
+  width: 15px;
+  background: #2171ee;
 }
 
 /* ---------- Тип сделки + город ---------- */

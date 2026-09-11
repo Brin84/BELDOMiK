@@ -1,5 +1,5 @@
-import { useEffect, useCallback, useState, type FormEvent } from 'react';
-import { ChevronRight, Globe, Search, SlidersHorizontal } from 'lucide-react';
+import { useEffect, useCallback, useState } from 'react';
+import { ChevronRight, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
@@ -14,11 +14,18 @@ import beldomikAvatar from '@/assets/beldomik-avatar.webp';
 
 import './CatalogPage/CatalogPage.css';
 
+/** Рекламные слайды: фон меняется, надпись неизменна — «место под рекламу». */
+const AD_BANNER_BG: readonly string[] = [
+  'linear-gradient(135deg, #eef4ff 0%, #dcebff 100%)',
+  'linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%)',
+  'linear-gradient(135deg, #f4f8ff 0%, #e9efff 100%)',
+];
+
 export function CatalogPage() {
   const { trigger } = useHaptics();
   const { hapticFeedback } = useTelegram();
   const navigate = useNavigate();
-  const [searchValue, setSearchValue] = useState('');
+  const [adIndex, setAdIndex] = useState(0);
   const {
     properties,
     hotProperties,
@@ -47,6 +54,14 @@ export function CatalogPage() {
     fetchProperties(true);
   }, [fetchRegions, fetchPropertyTypes, fetchProperties]);
 
+  // Автопрокрутка рекламных баннеров (цикл по слайдам).
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setAdIndex((i) => (i + 1) % AD_BANNER_BG.length);
+    }, 3500);
+    return () => window.clearInterval(timer);
+  }, []);
+
   // Переход на поиск с предзаполненными фильтрами (категория/новостройки).
   // SearchPage применяет сохранённые фильтры через sessionStorage-механизм
   // applySavedSearchFilters на монтировании.
@@ -57,16 +72,6 @@ export function CatalogPage() {
       navigate('/search');
     },
     [trigger, navigate]
-  );
-
-  // Поиск по тексту — отправка введённого запроса на страницу поиска.
-  const handleSearchSubmit = useCallback(
-    (e: FormEvent) => {
-      e.preventDefault();
-      const q = searchValue.trim();
-      navigateWithFilters(q ? { q } : {});
-    },
-    [searchValue, navigateWithFilters]
   );
 
   const handleCategoryClick = useCallback(
@@ -147,29 +152,29 @@ export function CatalogPage() {
           </button>
         </header>
 
-        {/* SEARCH — настоящее поле ввода с кнопкой фильтров */}
-        <form onSubmit={handleSearchSubmit} className="catalog-search">
-          <div className="catalog-search__box">
-            <Search size={22} className="catalog-search__icon" />
-            <input
-              type="text"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              placeholder="Что ищете?"
-              enterKeyHint="search"
-              className="catalog-search__input"
-            />
-            <div className="catalog-search__divider" />
-            <button
-              type="button"
-              onClick={() => navigateWithFilters({})}
-              aria-label="Фильтры"
-              className="catalog-search__filter"
-            >
-              <SlidersHorizontal size={19} />
-            </button>
+        {/* BANNERS — автопрокручивающиеся рекламные баннеры */}
+        <section className="catalog-banner" aria-label="Рекламные баннеры">
+          <div
+            className="catalog-banner__track"
+            style={{ transform: `translateX(-${adIndex * 100}%)` }}
+          >
+            {AD_BANNER_BG.map((bg, i) => (
+              <div key={i} className="catalog-banner__slide" style={{ background: bg }}>
+                <span className="catalog-banner__label">Здесь может быть Ваша реклама</span>
+              </div>
+            ))}
           </div>
-        </form>
+          <div className="catalog-banner__dots">
+            {AD_BANNER_BG.map((_, i) => (
+              <span
+                key={i}
+                className={`catalog-banner__dot${
+                  i === adIndex ? ' catalog-banner__dot--active' : ''
+                }`}
+              />
+            ))}
+          </div>
+        </section>
 
         {/* OPERATION + LOCATION */}
         <div className="catalog-location">

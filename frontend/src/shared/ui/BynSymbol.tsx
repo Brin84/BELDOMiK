@@ -3,6 +3,10 @@
  * Тот же подход, что в baraholka-belarus (components/RubleIcon.tsx):
  * инлайн-SVG, currentColor + em-размеры, transform переводит исходные
  * координаты (до 4520) в viewBox 700×700 — без transform глиф невидим.
+ *
+ * Визуальный размер глифа ≈ высоте цифр в той же строке: официальная
+ * фигура занимает почти всю em-высоту бокса, поэтому при 1em выглядит
+ * в ~1.5 раза крупнее цифр. 0.68em ставит знак в один габарит с числом.
  */
 interface BynSymbolProps {
   className?: string;
@@ -11,7 +15,7 @@ interface BynSymbolProps {
 export function BynSymbol({ className = '' }: BynSymbolProps) {
   return (
     <svg
-      className={`inline-block w-[1em] h-[1em] align-[-0.1em] shrink-0 ${className}`}
+      className={`inline-block w-[0.68em] h-[0.68em] align-[-0.09em] shrink-0 ${className}`}
       viewBox="0 0 700 700"
       aria-hidden="true"
     >
