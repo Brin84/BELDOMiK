@@ -95,7 +95,8 @@ def _add_property(
 
 
 class TestDeleteAdminOnly:
-    """Удаление объявления — админская возможность; владелец тоже своё удаляет."""
+    """Удаление объявления — админская возможность (физическое удаление); владелец
+    снимает с публикации через archive (мягкое удаление в архив)."""
 
     def test_owner_deletes_own_property(
         self, client: TestClient, db_session: Session, seed_test_data
@@ -134,8 +135,22 @@ class TestDeleteAdminOnly:
         resp = client.delete(
             f"/api/v1/properties/{prop.id}", headers=_auth_headers(admin)
         )
+        # Админское «Удалить» = физическое удаление (не архивация).
         assert resp.status_code == 200, resp.text
-        assert db_session.get(Property, prop.id).status is PropertyStatus.ARCHIVED
+        assert db_session.get(Property, prop.id) is None
+
+    def test_admin_deletes_already_archived(
+        self, client: TestClient, db_session: Session, seed_test_data
+    ):
+        owner = _add_user(db_session, 1006)
+        admin = _add_user(db_session, 1007, role="admin")
+        prop = _add_property(db_session, owner.id, status=PropertyStatus.ARCHIVED)
+
+        resp = client.delete(
+            f"/api/v1/properties/{prop.id}", headers=_auth_headers(admin)
+        )
+        assert resp.status_code == 200, resp.text
+        assert db_session.get(Property, prop.id) is None
 
 
 class TestActiveListingLimit:

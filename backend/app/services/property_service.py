@@ -565,15 +565,25 @@ class PropertyService:
     def delete_property(
         db: Session, property_id: int, user_id: int, is_admin: bool = False
     ) -> bool:
-        """Soft delete (archive) property."""
+        """Удалить объявление.
+
+        Админ («Удалить» в «Моих объявлениях») — физическое удаление: запись
+        исчезает из базы и из списка владельца, включая уже архивированные
+        (связанные строки чистятся каскадом по FK ondelete=CASCADE). Обычный
+        владелец — мягкое удаление (status → ARCHIVED): запись остаётся в архиве,
+        слот лимита активных освобождается.
+        """
         property_obj = db.query(Property).filter(Property.id == property_id).first()
         if not property_obj:
             return False
         if not is_admin and property_obj.owner_id != user_id:
             return False
 
-        property_obj.status = PropertyStatus.ARCHIVED
-        property_obj.archived_at = datetime.now(UTC)
+        if is_admin:
+            db.delete(property_obj)
+        else:
+            property_obj.status = PropertyStatus.ARCHIVED
+            property_obj.archived_at = datetime.now(UTC)
         db.commit()
         return True
 
