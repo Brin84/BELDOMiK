@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import create_access_token
 from app.models.geography import City
+from app.models.monetization import Payment, PaymentStatus
 from app.models.property import Property, PropertyPrice, PropertyStatus
 from app.models.property_types import OperationType, PropertyType
 from app.models.user import AgencyMember, User
@@ -145,6 +146,61 @@ class TestDeleteAdminOnly:
         owner = _add_user(db_session, 1006)
         admin = _add_user(db_session, 1007, role="admin")
         prop = _add_property(db_session, owner.id, status=PropertyStatus.ARCHIVED)
+
+        resp = client.delete(
+            f"/api/v1/properties/{prop.id}", headers=_auth_headers(admin)
+        )
+        assert resp.status_code == 200, resp.text
+        assert db_session.get(Property, prop.id) is None
+
+    def test_admin_deletes_property_with_payments(
+        self, client: TestClient, db_session: Session, seed_test_data
+    ):
+        """Админское удаление работает даже при наличии платежей (payments).
+
+        В PostgreSQL FK ON DELETE CASCADE удалит и платежи; в SQLite тест
+        проверяет только то, что эндпоинт не падает.
+        """
+        owner = _add_user(db_session, 1008)
+        admin = _add_user(db_session, 1009, role="admin")
+        prop = _add_property(db_session, owner.id, status=PropertyStatus.PUBLISHED)
+        db_session.add(
+            Payment(
+                property_id=prop.id,
+                user_id=owner.id,
+                amount_byn=500,
+                status=PaymentStatus.PENDING,
+            )
+        )
+        db_session.commit()
+
+        resp = client.delete(
+            f"/api/v1/properties/{prop.id}", headers=_auth_headers(admin)
+        )
+        assert resp.status_code == 200, resp.text
+        assert db_session.get(Property, prop.id) is None
+
+    def test_admin_deletes_property_with_payments(
+        self, client: TestClient, db_session: Session, seed_test_data
+    ):
+        """Админское удаление работает даже при наличии связанных платежей.
+
+        В PostgreSQL FK ON DELETE CASCADE (миграция 34f6a5d9b0c1) удалит и
+        платежи. SQLite в тестах не исполняет FK — проверяем только прикладной
+        путь: 200 + запись удалена. Каскад валиден на проде.
+        """
+        owner = _add_user(db_session, 1010)
+        admin = _add_user(db_session, 1011, role="admin")
+        prop = _add_property(db_session, owner.id, status=PropertyStatus.PUBLISHED)
+        db_session.add(
+            Payment(
+                property_id=prop.id,
+                user_id=owner.id,
+                amount_byn=500,
+                status=PaymentStatus.PENDING,
+            )
+        )
+        db_session.commit()
 
         resp = client.delete(
             f"/api/v1/properties/{prop.id}", headers=_auth_headers(admin)
