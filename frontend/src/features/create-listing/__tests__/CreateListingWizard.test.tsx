@@ -195,7 +195,7 @@ describe('CreateListingWizard — кнопка «Далее»', () => {
     expect(nextBtn).toBeEnabled();
   });
 
-  it('прогресс-бар: 0% на незаполненном шаге 1 → 20% после валидного выбора типа', async () => {
+  it('прогресс-бар: 0% на незаполненном шаге 1 → 17% после валидного выбора типа (1 из 6 шагов)', async () => {
     const user = userEvent.setup();
     renderWizard();
 
@@ -203,7 +203,7 @@ describe('CreateListingWizard — кнопка «Далее»', () => {
     expect(progress).toHaveAttribute('aria-valuenow', '0');
 
     await pickPropertyType(user, 'Квартира');
-    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '20');
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '17');
   });
 
   it('типы недвижимости: английские слаги из БД выводятся как эмодзи, без английских слов', async () => {

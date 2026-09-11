@@ -2,14 +2,18 @@ import { useEffect, useRef, useState } from 'react';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useCreateListingStore } from '../../createListingStore';
 
-export function Step4Photos() {
+/**
+ * Шаг 5 «Фотографии». Как в Kufar: максимум 10 фото, счётчик занятых мест,
+ * первое фото — обложка объявления.
+ */
+export function Step5Photos() {
   const { trigger } = useHaptics();
   const { photos, addPhotos, removePhoto, reorderPhotos } = useCreateListingStore();
 
   const [previews, setPreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const MAX_PHOTOS = 20;
+  const MAX_PHOTOS = 10;
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
   // Sync previews with photos from store
@@ -80,11 +84,25 @@ export function Step4Photos() {
     <div className="p-4 space-y-6">
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h2 className="text-tg-text text-xl font-bold mb-2">Фотографии</h2>
-          <p className="text-tg-hint text-sm">
-            Добавьте до {MAX_PHOTOS} фото (макс. 10 МБ каждое). Первое фото станет обложкой объявления.
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold" style={{ color: '#0f172a' }}>Фотографии</h2>
+            <p className="text-sm mt-1" style={{ color: '#64748b' }}>
+              Первое фото станет обложкой объявления
+            </p>
+          </div>
+          {/* Счётчик фото (как «3/10» на Kufar) */}
+          {photos.length > 0 && (
+            <span
+              className="px-3 py-1.5 rounded-full text-sm font-semibold flex-shrink-0"
+              style={{
+                backgroundColor: photos.length === MAX_PHOTOS ? '#fee2e2' : '#f1f5f9',
+                color: photos.length === MAX_PHOTOS ? '#dc2626' : '#64748b',
+              }}
+            >
+              {photos.length}/{MAX_PHOTOS}
+            </span>
+          )}
         </div>
 
         {/* Photo Grid */}
@@ -93,11 +111,11 @@ export function Step4Photos() {
           {photos.length < MAX_PHOTOS && (
             <button
               onClick={openFilePicker}
-              className="aspect-square rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-colors"
+              className="aspect-square rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-colors active:opacity-80"
               style={{
-                borderColor: 'var(--tg-theme-hint-color)',
-                backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                color: 'var(--tg-theme-text-color)',
+                borderColor: '#cbd5e1',
+                backgroundColor: '#f8fafc',
+                color: '#0f172a',
               }}
             >
               <input
@@ -113,7 +131,7 @@ export function Step4Photos() {
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
               <span className="text-sm">Добавить фото</span>
-              <span className="text-xs text-tg-hint">{photos.length}/{MAX_PHOTOS}</span>
+              <span className="text-xs" style={{ color: '#94a3b8' }}>{photos.length}/{MAX_PHOTOS}</span>
             </button>
           )}
 
@@ -122,7 +140,7 @@ export function Step4Photos() {
             <div
               key={index}
               className="relative aspect-square rounded-2xl overflow-hidden"
-              style={{ backgroundColor: 'var(--tg-theme-tertiary-bg-color, var(--tg-theme-secondary-bg-color))' }}
+              style={{ backgroundColor: '#e2e8f0' }}
             >
               <img
                 src={preview}
@@ -136,7 +154,7 @@ export function Step4Photos() {
               )}
               <button
                 onClick={() => handleRemovePhoto(index)}
-                className="absolute top-2 right-2 p-1.5 rounded-full flex items-center justify-center transition-colors"
+                className="absolute top-2 right-2 p-1.5 rounded-full flex items-center justify-center transition-colors active:opacity-70"
                 style={{ backgroundColor: 'rgba(255,59,48,0.9)', color: 'white' }}
                 aria-label="Удалить фото"
               >
@@ -148,7 +166,7 @@ export function Step4Photos() {
               <button
                 onClick={() => index > 0 && handleReorderPhotos(index, 0)}
                 disabled={index === 0}
-                className="absolute bottom-2 left-2 p-1.5 rounded-full flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
+                className="absolute bottom-2 left-2 p-1.5 rounded-full flex items-center justify-center transition-colors"
                 style={{ backgroundColor: 'rgba(0,0,0,0.7)', color: 'white' }}
                 aria-label="Сделать обложкой"
               >
@@ -163,18 +181,18 @@ export function Step4Photos() {
         </div>
 
         {/* Photo Tips */}
-        <div className="p-4 rounded-xl border" style={{ borderColor: 'var(--tg-theme-hint-color)', borderWidth: '0.5px' }}>
-          <h3 className="text-tg-text font-medium mb-2 flex items-center gap-2">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: 'var(--tg-theme-button-color)' }}>
+        <div className="p-4 rounded-xl border" style={{ borderColor: '#e2e8f0', borderWidth: '0.5px' }}>
+          <h3 className="font-medium mb-2 flex items-center gap-2" style={{ color: '#0f172a' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: '#2171ee' }}>
               <circle cx="12" cy="12" r="10" />
               <path d="M12 16v-4" />
               <path d="M12 8h.01" />
             </svg>
             Рекомендации для лучших результатов:
           </h3>
-          <ul className="text-tg-hint text-sm space-y-1" style={{ color: '#94a3b8' }}>
+          <ul className="text-sm space-y-1" style={{ color: '#64748b' }}>
             <li>• Первое фото — обложка, выбирайте самое привлекательное</li>
-            <li>• Фото интерьера: salón, кухня, спальни, санузел</li>
+            <li>• Фото интерьера: гостиная, кухня, спальни, санузел</li>
             <li>• Фото внешнего вида: фасад, двор, вид из окна</li>
             <li>• Хорошее освещение, горизонтальная ориентация</li>
             <li>• Избегайте скриншотов, коллажей и водяных знаков</li>

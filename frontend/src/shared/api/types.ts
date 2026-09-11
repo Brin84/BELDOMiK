@@ -81,6 +81,11 @@ export interface PropertyShort {
   elevator: boolean;
   is_new_building: boolean;
   description: string | null;
+  contact_name: string | null;
+  contact_phone: string | null;
+  show_phone: boolean;
+  /** «Договорная цена» — price_byn=0, цена не фиксирована. */
+  is_negotiable: boolean;
   status: PropertyStatus;
   moderation_reason?: string | null;
   views_count: number;
@@ -248,6 +253,8 @@ export interface PropertyCreate {
   longitude?: number;
   price_byn: number;
   price_usd?: number;
+  /** «Договорная цена» — при true price_byn=0, цена не фиксирована. */
+  is_negotiable?: boolean;
   area?: number;
   rooms?: number;
   floor?: number;
@@ -258,6 +265,10 @@ export interface PropertyCreate {
   has_furniture?: boolean;
   has_elevator?: boolean;
   has_parking?: boolean;
+  /** Kufar-контакты: имя + телефон, показ/скрытие номера. */
+  contact_name?: string;
+  contact_phone?: string;
+  show_phone?: boolean;
 }
 
 export interface PropertyUpdate extends Partial<PropertyCreate> {}

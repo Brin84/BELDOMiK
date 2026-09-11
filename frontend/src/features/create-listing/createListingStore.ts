@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { api, API_ENDPOINTS } from '@/shared/api';
-import type { PropertyCreate, PropertyShort, OperationType } from '@/shared/api/types';
+import type { PropertyCreate, PropertyShort, OperationType, PromotionTypeName, PaymentCheckout } from '@/shared/api/types';
 import { useGeographyStore } from '@/features/geography/geographyStore';
+import { toOperationKey } from '@/shared/lib/operationKey';
 
-export type CreateListingStep = 1 | 2 | 3 | 4 | 5;
+export type CreateListingStep = 1 | 2 | 3 | 4 | 5 | 6;
 
 // Маппинг enum-значений ремонта из ответа API → русская метка для пикера.
 const RENOV_ENUM_TO_LABEL: Record<string, string> = {
@@ -22,13 +23,16 @@ function renovEnumToLabel(value: string | null | undefined): string {
 export interface CreateListingState {
   // Wizard state
   currentStep: CreateListingStep;
-  totalSteps: 5;
+  totalSteps: 6;
 
   // Form data
   formData: PropertyCreate;
 
   // Photos (stored locally during wizard, uploaded after property creation)
   photos: File[];
+
+  // Продвижение: выбранная услуга (0 или 1) на шаге превью (Kufar-модель)
+  selectedPromotion: PromotionTypeName | null;
 
   // Validation errors
   errors: Record<string, string>;
@@ -50,6 +54,7 @@ export interface CreateListingState {
   addPhotos: (photos: File[]) => void;
   removePhoto: (index: number) => void;
   reorderPhotos: (fromIndex: number, toIndex: number) => void;
+  setSelectedPromotion: (type: PromotionTypeName | null) => void;
   validateStep: (step: CreateListingStep) => boolean;
   validateAll: () => boolean;
   setError: (field: string, error: string) => void;
@@ -76,6 +81,7 @@ const defaultFormData: PropertyCreate = {
   longitude: undefined,
   price_byn: 0,
   price_usd: undefined,
+  is_negotiable: false,
   area: undefined,
   rooms: undefined,
   floor: undefined,
@@ -86,20 +92,30 @@ const defaultFormData: PropertyCreate = {
   has_furniture: false,
   has_elevator: false,
   has_parking: false,
+  contact_name: '',
+  contact_phone: '',
+  show_phone: true,
 };
 
 const stepFields: Record<CreateListingStep, string[]> = {
   1: ['operation', 'property_type_id'],
   2: ['region_id', 'city_id'],
   3: ['title', 'description', 'price_byn', 'area', 'rooms', 'floor', 'floors_total', 'build_year', 'repair_type', 'has_balcony', 'has_furniture', 'has_elevator', 'has_parking', 'district_id', 'neighborhood_id', 'street_id', 'address'],
-  4: ['title', 'description', 'price_byn', 'area', 'rooms', 'floor', 'floors_total', 'build_year', 'repair_type', 'has_balcony', 'has_furniture', 'has_elevator', 'has_parking', 'district_id', 'neighborhood_id', 'street_id', 'address', 'latitude', 'longitude'],
-  5: [], // Preview step - no required fields
+  4: ['contact_name', 'contact_phone'],
+  5: ['title', 'description', 'price_byn', 'area', 'rooms', 'floor', 'floors_total', 'build_year', 'repair_type', 'has_balcony', 'has_furniture', 'has_elevator', 'has_parking', 'district_id', 'neighborhood_id', 'street_id', 'address', 'latitude', 'longitude'],
+  6: [], // Preview step - no required fields
 };
+
+// Номер телефона: допускаем +375..., 8 0xx..., просто 9+ цифр.
+function isPhoneValid(value: string): boolean {
+  const digits = value.replace(/\D/g, '');
+  return digits.length >= 9 && digits.length <= 13;
+}
 
 const stepValidationRules: Record<string, (data: PropertyCreate) => string | null> = {
   title: (data) => data.title.trim().length < 10 ? 'Название должно содержать минимум 10 символов' : data.title.trim().length > 100 ? 'Название не должно превышать 100 символов' : null,
   description: (data) => data.description && data.description.length > 5000 ? 'Описание не должно превышать 5000 символов' : null,
-  price_byn: (data) => data.price_byn <= 0 ? 'Укажите цену' : data.price_byn > 100000000 ? 'Цена слишком высокая' : null,
+  price_byn: (data) => data.is_negotiable ? null : data.price_byn <= 0 ? 'Укажите цену' : data.price_byn > 100000000 ? 'Цена слишком высокая' : null,
   area: (data) => data.area !== undefined && (data.area <= 0 || data.area > 10000) ? 'Некорректная площадь' : null,
   rooms: (data) => data.rooms !== undefined && (data.rooms < 0 || data.rooms > 50) ? 'Некорректное количество комнат' : null,
   floor: (data) => data.floor !== undefined && (data.floor < 1 || data.floor > 100) ? 'Некорректный этаж' : null,
@@ -109,13 +125,16 @@ const stepValidationRules: Record<string, (data: PropertyCreate) => string | nul
   property_type_id: (data) => data.property_type_id <= 0 ? 'Выберите тип недвижимости' : null,
   region_id: (data) => data.region_id <= 0 ? 'Выберите область' : null,
   city_id: (data) => data.city_id <= 0 ? 'Выберите город' : null,
+  contact_name: (data) => !data.contact_name?.trim() ? 'Укажите имя контактного лица' : data.contact_name.trim().length < 2 ? 'Имя слишком короткое' : null,
+  contact_phone: (data) => !data.contact_phone?.trim() ? 'Укажите контактный телефон' : !isPhoneValid(data.contact_phone) ? 'Некорректный номер телефона' : null,
 };
 
 export const useCreateListingStore = create<CreateListingState>((set, get) => ({
   currentStep: 1,
-  totalSteps: 5,
+  totalSteps: 6,
   formData: defaultFormData,
   photos: [],
+  selectedPromotion: null,
   errors: {},
   isSubmitting: false,
   isLoading: false,
@@ -123,7 +142,7 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
   draftId: null,
 
   setStep: (step: CreateListingStep) => {
-    if (step < 1 || step > 5) return;
+    if (step < 1 || step > 6) return;
     // Allow going back always, but only go forward if current step is valid
     if (step > get().currentStep && !get().validateStep(get().currentStep)) return;
     set({ currentStep: step });
@@ -177,6 +196,10 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
       newPhotos.splice(toIndex, 0, removed);
       return { photos: newPhotos };
     });
+  },
+
+  setSelectedPromotion: (type: PromotionTypeName | null) => {
+    set({ selectedPromotion: type });
   },
 
   validateStep: (step: CreateListingStep) => {
@@ -260,8 +283,13 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
         parking: formData.has_parking,
         elevator: formData.has_elevator,
         description: formData.description,
-        price_byn: formData.price_byn,
-        price_usd: formData.price_usd,
+        price_byn: formData.is_negotiable ? 0 : formData.price_byn,
+        price_usd: formData.is_negotiable ? undefined : formData.price_usd,
+        is_negotiable: formData.is_negotiable || false,
+        // Kufar-контакты: имя + телефон, показ/скрытие номера.
+        contact_name: formData.contact_name,
+        contact_phone: formData.contact_phone,
+        show_phone: formData.show_phone !== false,
         photos: [], // Photos uploaded separately
         features: [],
       };
@@ -305,7 +333,23 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
         return null;
       }
 
-      set({ isSubmitting: false, draftId: null, photos: [] });
+      // Kufar-монетизация: продвижение, выбранное на превью, оплачиваем сразу
+      // после публикации (мок-провайдер подтверждает мгновенно). Ошибка здесь
+      // не откатывает публикацию — услугу можно оплатить из «Мои объявления».
+      const promo = get().selectedPromotion;
+      if (response.status === 'published' && promo) {
+        try {
+          const checkout = await api.post<PaymentCheckout>(
+            API_ENDPOINTS.monetization.promote(propertyId as number),
+            { promotion_type: promo },
+          );
+          await api.post(API_ENDPOINTS.monetization.confirmPayment(checkout.payment_id), {});
+        } catch (promoError) {
+          // best-effort: публикация уже состоялась, продвижение не критично
+        }
+      }
+
+      set({ isSubmitting: false, draftId: null, photos: [], selectedPromotion: null });
       return response;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Ошибка при отправке на модерацию';
@@ -344,8 +388,12 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
         parking: formData.has_parking,
         elevator: formData.has_elevator,
         description: formData.description,
-        price_byn: formData.price_byn,
-        price_usd: formData.price_usd,
+        price_byn: formData.is_negotiable ? 0 : formData.price_byn,
+        price_usd: formData.is_negotiable ? undefined : formData.price_usd,
+        is_negotiable: formData.is_negotiable || false,
+        contact_name: formData.contact_name,
+        contact_phone: formData.contact_phone,
+        show_phone: formData.show_phone !== false,
         photos: [],
         features: [],
       };
@@ -376,8 +424,14 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
       if (!geo.loadedAllCities) {
         await geo.fetchAllCities();
       }
+      // Типы сделки тоже должны быть загружены: без этого getOperationTypeById
+      // вернёт undefined и операция упадёт в fallback 'sale' (пустой пикер).
+      if (!geo.loadedOperationTypes) {
+        await geo.fetchOperationTypes();
+      }
       const cityRegionId = geo.getCityById(response.city_id)?.region_id ?? undefined;
-      const operationSlug = geo.getOperationTypeById(response.operation_id)?.name_en as OperationType | undefined;
+      const opType = geo.getOperationTypeById(response.operation_id);
+      const operationSlug = (opType ? toOperationKey(opType.name) : null) as OperationType | null;
 
       const titleParts = [
         response.type_name,
@@ -402,12 +456,16 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
         longitude: response.lng ?? undefined,
         price_byn: response.price_byn ?? 0,
         price_usd: response.price_usd ?? undefined,
+        is_negotiable: response.is_negotiable || false,
         area: response.total_area ?? undefined,
         rooms: response.rooms_count ?? undefined,
         floor: response.floor ?? undefined,
         floors_total: response.total_floors ?? undefined,
         build_year: response.build_year ?? undefined,
         repair_type: renovEnumToLabel(response.renovation),
+        contact_name: response.contact_name ?? '',
+        contact_phone: response.contact_phone ?? '',
+        show_phone: response.show_phone !== false,
         has_balcony: response.balcony || false,
         has_furniture: response.furniture || false,
         has_elevator: response.elevator || false,
@@ -423,6 +481,7 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
     currentStep: 1,
     formData: defaultFormData,
     photos: [],
+    selectedPromotion: null,
     errors: {},
     isSubmitting: false,
     isLoading: false,

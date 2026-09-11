@@ -118,6 +118,12 @@ class PropertyBase(BaseSchema):
     elevator: bool = False
     is_new_building: bool = False
     description: str | None = None
+    # Kufar-контакты: имя + телефон, показ/скрытие номера
+    contact_name: str | None = None
+    contact_phone: str | None = None
+    show_phone: bool = True
+    # «Договорная цена» (price_byn=0 при is_negotiable=True)
+    is_negotiable: bool = False
 
     @field_validator("renovation")
     @classmethod
@@ -132,6 +138,12 @@ class PropertyCreate(PropertyBase):
 
 
 class PropertyUpdate(BaseSchema):
+    # Базовые классификационные поля: фронтенд шлёт их в PUT при правке
+    # черновика/повторной подаче (визард шаги 1-2). Без них Pydantic
+    # молча игнорирует изменения типа/сделки/города существующего объявления.
+    type_id: int | None = None
+    operation_id: int | None = None
+    city_id: int | None = None
     district_id: int | None = None
     neighborhood_id: int | None = None
     street_id: int | None = None
@@ -154,6 +166,10 @@ class PropertyUpdate(BaseSchema):
     elevator: bool | None = None
     is_new_building: bool | None = None
     description: str | None = None
+    contact_name: str | None = None
+    contact_phone: str | None = None
+    show_phone: bool | None = None
+    is_negotiable: bool | None = None
 
     @field_validator("renovation")
     @classmethod
@@ -189,6 +205,10 @@ class PropertyShortRead(BaseSchema):
     elevator: bool = False
     is_new_building: bool = False
     description: str | None = None
+    contact_name: str | None = None
+    contact_phone: str | None = None
+    show_phone: bool = True
+    is_negotiable: bool = False
     status: str
     # Причина отклонения модерацией (автомодерация пишет её при REJECTED).
     moderation_reason: str | None = None

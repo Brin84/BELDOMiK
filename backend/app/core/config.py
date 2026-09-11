@@ -81,7 +81,8 @@ class Settings(BaseSettings):
     # File Upload
     MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10 MB
     ALLOWED_IMAGE_TYPES: list[str] = ["image/jpeg", "image/png", "image/webp", "image/avif"]
-    MAX_IMAGES_PER_PROPERTY: int = 20
+    # Kufar-модель: до 10 фотографий на объявление.
+    MAX_IMAGES_PER_PROPERTY: int = 10
     # Server-side image compression (same approach as baraholka)
     PHOTO_MAX_DIMENSION: int = 1600
     PHOTO_QUALITY: int = 80

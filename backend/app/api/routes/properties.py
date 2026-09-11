@@ -20,6 +20,16 @@ from app.services.upload_service import upload_service
 router = APIRouter(prefix="/properties", tags=["Properties"])
 
 
+def _build_property_response(property_obj: Property) -> dict:
+    """Serialise a property together with its joined/derived fields (price,
+    type/city names, owner, photos summary). Every route returning a
+    PropertyResponse uses this so the contract is identical everywhere —
+    otherwise the frontend gets empty cards (missing price/type/city)."""
+    result = PropertyResponse.model_validate(property_obj).model_dump()
+    result.update(PropertyService.property_read_dict(property_obj))
+    return result
+
+
 @router.get("", response_model=PropertyListResponse)
 def list_properties(
     db: Session = Depends(get_db),
@@ -118,10 +128,7 @@ def get_property(
     property_obj = PropertyService.get_property(db, property_id, user_id)
     if not property_obj:
         raise HTTPException(status_code=404, detail="Property not found")
-    result = PropertyResponse.model_validate(property_obj).model_dump()
-    # Overlay the joined/derived fields (price, type/city names, owner, photos
-    # summary) so the detail response matches the list contract.
-    result.update(PropertyService.property_read_dict(property_obj))
+    result = _build_property_response(property_obj)
     return result
 
 
@@ -135,7 +142,7 @@ def create_property(
     # Enforce the agency subscription listing cap (no-op for private owners).
     MonetizationService.enforce_property_quota(db, current_user)
     property_obj = PropertyService.create_property(db, current_user.id, data)
-    return PropertyResponse.model_validate(property_obj)
+    return _build_property_response(property_obj)
 
 
 @router.put("/{property_id}", response_model=PropertyResponse)
@@ -149,7 +156,7 @@ def update_property(
     property_obj = PropertyService.update_property(db, property_id, data, current_user.id)
     if not property_obj:
         raise HTTPException(status_code=404, detail="Property not found or not owned")
-    return PropertyResponse.model_validate(property_obj)
+    return _build_property_response(property_obj)
 
 
 @router.post("/{property_id}/submit", response_model=PropertyResponse)
@@ -165,7 +172,7 @@ def submit_for_moderation(
             status_code=404,
             detail="Property not found, not owned, or cannot be submitted",
         )
-    return PropertyResponse.model_validate(property_obj)
+    return _build_property_response(property_obj)
 
 
 @router.delete("/{property_id}")
@@ -188,7 +195,7 @@ def get_my_properties(
 ):
     """Get current user's properties."""
     properties = db.query(Property).filter(Property.owner_id == current_user.id).all()
-    return [PropertyResponse.model_validate(p) for p in properties]
+    return [_build_property_response(p) for p in properties]
 
 
 @router.post("/{property_id}/photos", response_model=dict)

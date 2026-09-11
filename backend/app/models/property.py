@@ -88,6 +88,13 @@ class Property(Base):
     # Description
     description = Column(Text, nullable=True)
 
+    # Contacts (Kufar-модель: имя + телефон, показ/скрытие номера)
+    contact_name = Column(String(200), nullable=True)
+    contact_phone = Column(String(50), nullable=True)
+    show_phone = Column(Boolean, default=True, nullable=False)
+    # «Договорная цена» (price_byn=0 при is_negotiable=True)
+    is_negotiable = Column(Boolean, default=False, nullable=False)
+
     # Status
     status = Column(Enum(PropertyStatus), default=PropertyStatus.DRAFT, nullable=False, index=True)
     views_count = Column(Integer, default=0, nullable=False)

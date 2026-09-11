@@ -391,6 +391,66 @@ class TestPropertyOwnerLifecycle:
         )
         assert resp.status_code == 404
 
+    def test_update_core_classification_fields(self, client: TestClient, db_session: Session, owner_auth):
+        # Правка базовых полей черновика через PUT: тип/сделка меняются.
+        # Раньше Pydantic молча отбрасывал type_id/operation_id/city_id
+        # (их не было в PropertyUpdate) — правки шагов 1-2 визарда терялись.
+        created = client.post(
+            "/api/v1/properties", json=self._payload(db_session), headers=owner_auth
+        ).json()
+        pid = created["id"]
+
+        house_type = db_session.query(PropertyType).filter(PropertyType.name == "Дом").first()
+        rent_op = db_session.query(OperationType).filter(OperationType.name == "Аренда").first()
+
+        resp = client.put(
+            f"/api/v1/properties/{pid}",
+            json={"type_id": house_type.id, "operation_id": rent_op.id},
+            headers=owner_auth,
+        )
+        assert resp.status_code == 200, resp.text
+        data = resp.json()
+        assert data["type_id"] == house_type.id
+        assert data["operation_id"] == rent_op.id
+        assert data["type_name"] == "Дом"
+        assert data["operation_name"] == "Аренда"
+
+    def test_contact_fields_roundtrip(self, client: TestClient, db_session: Session, owner_auth):
+        # Kufar-контакты (имя + телефон + скрытие номера) сохраняются и возвращаются.
+        payload = self._payload(db_session)
+        payload["contact_name"] = "Алекс"
+        payload["contact_phone"] = "+375291112233"
+        payload["show_phone"] = False
+        resp = client.post("/api/v1/properties", json=payload, headers=owner_auth)
+        assert resp.status_code == 201, resp.text
+        data = resp.json()
+        assert data["contact_name"] == "Алекс"
+        assert data["contact_phone"] == "+375291112233"
+        assert data["show_phone"] is False
+
+        # PUT тоже сохраняет контакты (обновление в визарде).
+        pid = data["id"]
+        resp = client.put(
+            f"/api/v1/properties/{pid}",
+            json={"contact_phone": "+375336665544", "show_phone": True},
+            headers=owner_auth,
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json()["contact_phone"] == "+375336665544"
+        assert resp.json()["show_phone"] is True
+
+    def test_negotiable_price_roundtrip(self, client: TestClient, db_session: Session, owner_auth):
+        # «Договорная цена»: is_negotiable=True и цена 0 не падают на конвертации.
+        payload = self._payload(db_session)
+        payload["price_byn"] = 0
+        payload["price_usd"] = None
+        payload["is_negotiable"] = True
+        resp = client.post("/api/v1/properties", json=payload, headers=owner_auth)
+        assert resp.status_code == 201, resp.text
+        data = resp.json()
+        assert data["is_negotiable"] is True
+        assert data["price_byn"] == 0
+
     def test_my_properties_is_direct_true(self, client: TestClient, db_session: Session, owner_auth):
         # «Мои объявления» тоже сообщают is_direct (ранее жёсткий дефолт False).
         created = client.post(
@@ -401,3 +461,18 @@ class TestPropertyOwnerLifecycle:
         mine = [p for p in resp.json() if p["id"] == created["id"]]
         assert len(mine) == 1
         assert mine[0]["is_direct"] is True
+
+    def test_my_properties_populates_joined_fields(self, client: TestClient, db_session: Session, owner_auth):
+        # «Мои объявления» должны заполнять joined-поля (price, название типа/операции/города),
+        # иначе карточки на фронте рендерятся пустыми (регрессия «три пустых плитки»).
+        created = client.post(
+            "/api/v1/properties", json=self._payload(db_session), headers=owner_auth
+        ).json()
+        resp = client.get("/api/v1/properties/user/my", headers=owner_auth)
+        assert resp.status_code == 200, resp.text
+        mine = next(p for p in resp.json() if p["id"] == created["id"])
+        assert mine["type_name"] == "Квартира"
+        assert mine["operation_name"] == "Продажа"
+        assert mine["city_name"] == "Минск"
+        assert mine["price_byn"] == 120000
+        assert mine["photo_url"] is None  # фото не загружали

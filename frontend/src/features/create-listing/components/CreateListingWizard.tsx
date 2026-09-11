@@ -3,12 +3,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useAuthStore } from '@/features/auth';
-import { useCreateListingStore } from '../createListingStore';
+import { useCreateListingStore, type CreateListingStep } from '../createListingStore';
 import { Step1OperationType } from './steps/Step1OperationType';
 import { Step2Location } from './steps/Step2Location';
 import { Step3Details } from './steps/Step3Details';
-import { Step4Photos } from './steps/Step4Photos';
-import { Step5Preview } from './steps/Step5Preview';
+import { Step4Contacts } from './steps/Step4Contacts';
+import { Step5Photos } from './steps/Step5Photos';
+import { Step6Preview } from './steps/Step6Preview';
 import { EmptyState } from '@/shared/ui';
 import { useKeyboardVisible } from '@/shared/lib/useKeyboardVisible';
 
@@ -43,9 +44,9 @@ export function CreateListingWizard() {
   // на любое изменение.
   const canProceed = validateStep(currentStep);
   const completionPercentage = Math.round(
-    ([1, 2, 3, 4, 5]
-      .filter((s) => s <= currentStep && validateStep(s as 1 | 2 | 3 | 4 | 5))
-      .length / 5) * 100,
+    ([1, 2, 3, 4, 5, 6]
+      .filter((s) => s <= currentStep && validateStep(s as CreateListingStep))
+      .length / 6) * 100,
   );
 
   // Load draft from URL parameter on mount
@@ -108,7 +109,7 @@ export function CreateListingWizard() {
   };
 
   const handlePrimary = () => {
-    if (currentStep === 5) {
+    if (currentStep === 6) {
       handleSubmit();
     } else if (canProceed) {
       trigger('medium');
@@ -118,10 +119,10 @@ export function CreateListingWizard() {
     }
   };
 
-  const primaryLabel = currentStep === 5
+  const primaryLabel = currentStep === 6
     ? (isSubmitting ? 'Отправка...' : 'Отправить на модерацию')
     : 'Далее';
-  const primaryDisabled = currentStep === 5 ? isSubmitting : !canProceed;
+  const primaryDisabled = currentStep === 6 ? isSubmitting : !canProceed;
 
   if (!isAuthenticated) {
     return (
@@ -147,9 +148,11 @@ export function CreateListingWizard() {
       case 3:
         return <Step3Details />;
       case 4:
-        return <Step4Photos />;
+        return <Step4Contacts />;
       case 5:
-        return <Step5Preview />;
+        return <Step5Photos />;
+      case 6:
+        return <Step6Preview />;
       default:
         return null;
     }
@@ -175,13 +178,13 @@ export function CreateListingWizard() {
 
         {/* Step indicators */}
         <div className="flex items-center gap-1">
-          {[1, 2, 3, 4, 5].map((step) => (
+          {[1, 2, 3, 4, 5, 6].map((step) => (
             <React.Fragment key={step}>
               <button
                 onClick={() => {
-                  if (step <= currentStep || validateStep(step as 1 | 2 | 3 | 4 | 5)) {
+                  if (step <= currentStep || validateStep(step as CreateListingStep)) {
                     trigger('light');
-                    setStep(step as 1 | 2 | 3 | 4 | 5);
+                    setStep(step as CreateListingStep);
                   } else {
                     trigger('error');
                   }
@@ -199,7 +202,7 @@ export function CreateListingWizard() {
                     ? 'var(--tg-theme-button-text-color)'
                     : 'var(--tg-theme-hint-color)',
                 }}
-                disabled={step > currentStep && !validateStep(step as 1 | 2 | 3 | 4 | 5)}
+                disabled={step > currentStep && !validateStep(step as CreateListingStep)}
                 aria-label={`Шаг ${step}`}
               >
                 {step < currentStep ? (
@@ -208,7 +211,7 @@ export function CreateListingWizard() {
                   </svg>
                 ) : step}
               </button>
-              {step < 5 && (
+              {step < 6 && (
                 <div
                   className="flex-1 h-1 rounded transition-colors"
                   style={{
@@ -228,6 +231,7 @@ export function CreateListingWizard() {
           <span>Сделка</span>
           <span>Локация</span>
           <span>Детали</span>
+          <span>Контакты</span>
           <span>Фото</span>
           <span>Превью</span>
         </div>

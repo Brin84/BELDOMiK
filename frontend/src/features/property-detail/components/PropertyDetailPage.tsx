@@ -81,12 +81,16 @@ export function PropertyDetailPage() {
   ].filter(Boolean);
   const propertyTitle = titleParts.join(', ') || `Объявление #${property.id}`;
 
-  const ownerPhone = property.owner_phone ?? null;
+  // Kufar-модель: звонок идёт на контактный номер из подачи (contact_phone),
+  // если владелец разрешил показ (show_phone). Стрые объявления без contact_*
+  // фолбэчат на телефон аккаунта владельца.
+  const contactPhone = property.contact_phone || property.owner_phone || null;
   const ownerUsername = property.owner_username ?? null;
+  const canCall = property.show_phone !== false && !!contactPhone;
 
   const handleCall = () => {
     trigger('success');
-    window.location.href = `tel:${ownerPhone!.replace(/[^\d+]/g, '')}`;
+    window.location.href = `tel:${contactPhone!.replace(/[^\d+]/g, '')}`;
   };
 
   const handleTelegram = () => {
@@ -129,8 +133,9 @@ export function PropertyDetailPage() {
         <PropertyOwner owner={null} property={property} />
       </div>
 
-      {/* Липкий нижний бар «Написать / Позвонить» */}
-      {(ownerUsername || ownerPhone) && (
+      {/* Липкий нижний бар «Написать / Позвонить».
+          Позвонить — только если контактный номер задан и разрешён к показу. */}
+      {(ownerUsername || canCall) && (
         <div className="property-bottom-bar">
           {ownerUsername && (
             <button
@@ -144,7 +149,7 @@ export function PropertyDetailPage() {
               Написать
             </button>
           )}
-          {ownerPhone && (
+          {canCall && (
             <button
               type="button"
               onClick={handleCall}

@@ -49,9 +49,19 @@ def check_standard_rules(property_obj: Property) -> list[str]:
 
     # Цена живёт в отдельной таблице PropertyPrice (в properties колонки
     # price нет). Актуальная цена — запись с is_current либо первая.
+    # «Договорная цена» (is_negotiable) освобождает от обязательной цены.
     price = property_obj.prices[0] if property_obj.prices else None
-    if not price or not price.price_byn or price.price_byn <= 0:
-        issues.append("Укажите корректную цену")
+    if not property_obj.is_negotiable and (
+        not price or not price.price_byn or price.price_byn <= 0
+    ):
+        issues.append("Укажите цену или отметьте «Договорная»")
+
+    # Контакты (Kufar-модель): имя + телефон обязательны; номер можно скрыть
+    # (show_phone=False), но он всё равно нужен связи через чат/звонок.
+    if not (property_obj.contact_name or "").strip():
+        issues.append("Укажите имя контактного лица")
+    if not property_obj.contact_phone or len(str(property_obj.contact_phone).strip()) < 5:
+        issues.append("Укажите контактный телефон")
 
     if not property_obj.photos or len(property_obj.photos) < MIN_PHOTOS:
         issues.append("Добавьте хотя бы одну фотографию")

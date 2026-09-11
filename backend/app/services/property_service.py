@@ -48,18 +48,24 @@ class PropertyService:
         agency_id: int | None = None,
     ) -> Property:
         """Create a new property listing."""
-        # Calculate price per m2
-        price_per_m2 = CurrencyService.calculate_per_m2(data.price_byn, data.total_area)
+        # «Договорная цена»: храним 0 и не конвертируем в USD/за м².
+        price_per_m2 = None
+        price_usd = None
+        price_per_m2_usd = None
+        rate = None
+        if not data.is_negotiable:
+            # Calculate price per m2
+            price_per_m2 = CurrencyService.calculate_per_m2(data.price_byn, data.total_area)
 
-        # Get USD rate and convert
-        import asyncio
-        rate = asyncio.run(CurrencyService.get_usd_to_byn_rate(db))
-        price_usd = CurrencyService.convert_byn_to_usd(data.price_byn, rate)
-        price_per_m2_usd = (
-            CurrencyService.convert_byn_to_usd(price_per_m2, rate)
-            if price_per_m2
-            else None
-        )
+            # Get USD rate and convert
+            import asyncio
+            rate = asyncio.run(CurrencyService.get_usd_to_byn_rate(db))
+            price_usd = CurrencyService.convert_byn_to_usd(data.price_byn, rate)
+            price_per_m2_usd = (
+                CurrencyService.convert_byn_to_usd(price_per_m2, rate)
+                if price_per_m2
+                else None
+            )
 
         property_obj = Property(
             owner_id=owner_id,
@@ -89,6 +95,10 @@ class PropertyService:
             elevator=data.elevator,
             is_new_building=data.is_new_building,
             description=data.description,
+            contact_name=data.contact_name,
+            contact_phone=data.contact_phone,
+            show_phone=data.show_phone,
+            is_negotiable=data.is_negotiable,
             status=PropertyStatus.DRAFT,
         )
 
@@ -469,6 +479,10 @@ class PropertyService:
                 elevator=prop.elevator,
                 is_new_building=prop.is_new_building,
                 description=prop.description,
+                contact_name=prop.contact_name,
+                contact_phone=prop.contact_phone,
+                show_phone=prop.show_phone,
+                is_negotiable=prop.is_negotiable,
                 status=prop.status.value if hasattr(prop.status, 'value') else str(prop.status),
                 moderation_reason=prop.moderation_reason,
                 views_count=prop.views_count,

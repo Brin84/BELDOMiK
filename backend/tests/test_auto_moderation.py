@@ -40,6 +40,9 @@ def moderation_seed(db_session: Session, seed_test_data) -> dict:
             total_floors=9,
             build_year=2015,
             description="Уютная квартира рядом с метро в хорошем состоянии",
+            contact_name="Иван",
+            contact_phone="+375291234567",
+            show_phone=True,
         )
         props.update(overrides)
         prop = Property(**props)
@@ -89,6 +92,23 @@ def test_standard_rules_no_price(moderation_seed):
 
     issues = check_standard_rules(prop)
     assert any("цен" in i for i in issues)
+
+
+def test_standard_rules_negotiable_skips_price(moderation_seed):
+    # «Договорная цена» (is_negotiable=True, price_byn=0) проходит правило
+    # цены — публикация разрешена без фиксированной цены.
+    prop = moderation_seed["make"](is_negotiable=True)
+    db_session = prop.owner._sa_instance_state.session
+    db_session.query(PropertyPrice).filter(PropertyPrice.property_id == prop.id).update(
+        {PropertyPrice.price_byn: 0, PropertyPrice.price_usd: None}
+    )
+    db_session.add(PropertyPhoto(property_id=prop.id, url="https://ex.com/p.jpg"))
+    db_session.commit()
+    db_session.refresh(prop)
+
+    issues = check_standard_rules(prop)
+    assert not any("цен" in i for i in issues)
+    assert issues == []
 
 
 def test_standard_rules_short_description(moderation_seed):

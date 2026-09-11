@@ -48,6 +48,9 @@ function validFormData() {
     floors_total: 12,
     build_year: 2010,
     repair_type: 'euro',
+    // Шаг 4 «Контакты» (Kufar-модель) обязателен для автомодерации.
+    contact_name: 'Иван Петров',
+    contact_phone: '+375291234567',
   };
 }
 

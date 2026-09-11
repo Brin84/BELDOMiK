@@ -148,59 +148,103 @@ export function Step3Details() {
         <p className="text-xs mt-1 text-right" style={{ color: '#94a3b8' }}>{(formData.description || '').length}/5000</p>
       </section>
 
-      {/* Price */}
+      {/* Price (Kufar-модель: фикс. цена или «Договорная») */}
       <section>
         <h2 style={{ color: '#0f172a', fontSize: '20px', fontWeight: 700, marginBottom: '16px' }}>
-          Цена <span style={{ color: '#94a3b8', fontWeight: 400 }}>*</span>
+          Цена {!formData.is_negotiable && <span style={{ color: '#94a3b8', fontWeight: 400 }}>*</span>}
         </h2>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex-1">
-            <label className="block text-sm mb-1" style={{ color: '#64748b' }}>Цена в <BynSymbol /> *</label>
-            <input
-              type="number"
-              value={formData.price_byn || ''}
-              onChange={(e) => {
+
+        {/* Переключатель «Договорная цена» */}
+        <div
+          className="rounded-2xl p-4"
+          style={{
+            backgroundColor: '#ffffff',
+            border: formData.is_negotiable ? '1px solid #2171ee' : '1px solid #e2e8f0',
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="text-[16px] font-semibold" style={{ color: '#0f172a' }}>Договорная цена</div>
+              <div className="text-[13px] mt-1 leading-snug" style={{ color: '#64748b' }}>
+                {formData.is_negotiable
+                  ? 'Цена не публикуется — покупатели предложат свою'
+                  : 'Укажите цену, или включите переключатель и цена будет скрыта'}
+              </div>
+            </div>
+            <button
+              role="switch"
+              aria-checked={formData.is_negotiable}
+              onClick={() => {
                 trigger('selection');
-                const val = e.target.value;
-                updateFormData({ price_byn: val === '' ? 0 : parseInt(val, 10) });
+                updateFormData({
+                  is_negotiable: !formData.is_negotiable,
+                  // При включении «Договорной» — обнуляем цену (Kufar: price=0)
+                  price_byn: !formData.is_negotiable ? 0 : formData.price_byn,
+                });
                 clearError('price_byn');
               }}
-              placeholder="150000"
-              className="w-full px-4 py-3 rounded-xl text-base outline-none"
-              style={{
-                backgroundColor: '#f1f5f9',
-                border: errors.price_byn ? '2px solid #ef4444' : '1px solid #e2e8f0',
-                color: '#0f172a',
-              }}
-              inputMode="numeric"
-              min="1"
-              max="100000000"
-            />
-            {errors.price_byn && <p className="text-sm mt-1" style={{ color: '#ef4444' }}>{errors.price_byn}</p>}
-          </div>
-          <div className="flex-1">
-            <label className="block text-sm mb-1" style={{ color: '#64748b' }}>Цена в USD (опционально)</label>
-            <input
-              type="number"
-              value={formData.price_usd || ''}
-              onChange={(e) => {
-                trigger('selection');
-                const val = e.target.value;
-                updateFormData({ price_usd: val === '' ? undefined : parseInt(val, 10) });
-              }}
-              placeholder="45000"
-              className="w-full px-4 py-3 rounded-xl text-base outline-none"
-              style={{
-                backgroundColor: '#f1f5f9',
-                border: '1px solid #e2e8f0',
-                color: '#0f172a',
-              }}
-              inputMode="numeric"
-              min="1"
-              max="10000000"
-            />
+              className="relative w-[52px] h-8 rounded-full transition-colors flex-shrink-0"
+              style={{ backgroundColor: formData.is_negotiable ? '#2171ee' : '#e2e8f0' }}
+            >
+              <span
+                className="absolute top-1 w-6 h-6 rounded-full shadow transition-all"
+                style={{ backgroundColor: '#ffffff', left: formData.is_negotiable ? '24px' : '4px' }}
+              />
+            </button>
           </div>
         </div>
+
+        {/* Поля цены — скрыты при «Договорной» */}
+        {!formData.is_negotiable && (
+          <div className="grid grid-cols-2 gap-3 mt-3">
+            <div className="flex-1">
+              <label className="block text-sm mb-1" style={{ color: '#64748b' }}>Цена в <BynSymbol /> *</label>
+              <input
+                type="number"
+                value={formData.price_byn || ''}
+                onChange={(e) => {
+                  trigger('selection');
+                  const val = e.target.value;
+                  updateFormData({ price_byn: val === '' ? 0 : parseInt(val, 10) });
+                  clearError('price_byn');
+                }}
+                placeholder="150000"
+                className="w-full px-4 py-3 rounded-xl text-base outline-none"
+                style={{
+                  backgroundColor: '#f1f5f9',
+                  border: errors.price_byn ? '2px solid #ef4444' : '1px solid #e2e8f0',
+                  color: '#0f172a',
+                }}
+                inputMode="numeric"
+                min="1"
+                max="100000000"
+              />
+              {errors.price_byn && <p className="text-sm mt-1" style={{ color: '#ef4444' }}>{errors.price_byn}</p>}
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm mb-1" style={{ color: '#64748b' }}>Цена в USD (опционально)</label>
+              <input
+                type="number"
+                value={formData.price_usd || ''}
+                onChange={(e) => {
+                  trigger('selection');
+                  const val = e.target.value;
+                  updateFormData({ price_usd: val === '' ? undefined : parseInt(val, 10) });
+                }}
+                placeholder="45000"
+                className="w-full px-4 py-3 rounded-xl text-base outline-none"
+                style={{
+                  backgroundColor: '#f1f5f9',
+                  border: '1px solid #e2e8f0',
+                  color: '#0f172a',
+                }}
+                inputMode="numeric"
+                min="1"
+                max="10000000"
+              />
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Area, Rooms, Floor */}

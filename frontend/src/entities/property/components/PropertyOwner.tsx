@@ -6,9 +6,9 @@ interface PropertyOwnerProps {
   property: PropertyDetail;
 }
 
-/** Карточка продавца в стиле Krisha: аватар, имя, бейдж верификации, компания. */
+/** Карточка продавца: имя из Kufar-контакта (contact_name), иначе — аккаунт. */
 export function PropertyOwner({ owner, property }: PropertyOwnerProps) {
-  const displayName = owner?.name || property.owner_name || 'Частное лицо';
+  const displayName = property.contact_name || owner?.name || property.owner_name || 'Частное лицо';
   const displayIsAgency = owner?.is_agency ?? (property.agency_id != null);
   const displayAgencyName = owner?.agency_name || property.agency_name;
   const displayVerified = owner?.phone_verified ?? owner?.telegram_verified ?? property.is_verified ?? false;

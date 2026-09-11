@@ -17,15 +17,16 @@ interface MyListingsState {
   error: string | null;
 }
 
+// Ключи — строчные: PropertyStatus (StrEnum) на бэке возвращает draft/published/...
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
-  DRAFT: { label: 'Черновик', color: '#ff9500', bg: 'rgba(255, 149, 0, 0.1)' },
-  PENDING_MODERATION: { label: 'На модерации', color: '#007aff', bg: 'rgba(0, 122, 255, 0.1)' },
-  PUBLISHED: { label: 'Опубликовано', color: '#34c759', bg: 'rgba(52, 199, 89, 0.1)' },
-  REJECTED: { label: 'Отклонено', color: '#ff3b30', bg: 'rgba(255, 59, 48, 0.1)' },
-  ARCHIVED: { label: 'В архиве', color: '#8e8e93', bg: 'rgba(142, 142, 147, 0.1)' },
-  SOLD: { label: 'Продано', color: '#5856d6', bg: 'rgba(88, 86, 214, 0.1)' },
-  RENTED: { label: 'Сдано', color: '#5856d6', bg: 'rgba(88, 86, 214, 0.1)' },
-  BLOCKED: { label: 'Заблокировано', color: '#ff3b30', bg: 'rgba(255, 59, 48, 0.1)' },
+  draft: { label: 'Черновик', color: '#ff9500', bg: 'rgba(255, 149, 0, 0.1)' },
+  pending_moderation: { label: 'На модерации', color: '#007aff', bg: 'rgba(0, 122, 255, 0.1)' },
+  published: { label: 'Опубликовано', color: '#34c759', bg: 'rgba(52, 199, 89, 0.1)' },
+  rejected: { label: 'Отклонено', color: '#ff3b30', bg: 'rgba(255, 59, 48, 0.1)' },
+  archived: { label: 'В архиве', color: '#8e8e93', bg: 'rgba(142, 142, 147, 0.1)' },
+  sold: { label: 'Продано', color: '#5856d6', bg: 'rgba(88, 86, 214, 0.1)' },
+  rented: { label: 'Сдано', color: '#5856d6', bg: 'rgba(88, 86, 214, 0.1)' },
+  blocked: { label: 'Заблокировано', color: '#ff3b30', bg: 'rgba(255, 59, 48, 0.1)' },
 };
 
 const OPERATION_LABELS: Record<string, string> = {
@@ -103,7 +104,9 @@ function PropertyCard({ property, onClick, onEdit, onDelete, onPromote }: {
           <span>{property.operation_name || OPERATION_LABELS[property.operation_name || ''] || property.operation_name}</span>
           {property.city_name && <>· {property.city_name}</>}
         </div>
-        <div className="text-tg-text font-bold mt-1">{formatPrice(property.price_byn ?? 0)}</div>
+        <div className="text-tg-text font-bold mt-1">
+          {property.is_negotiable ? 'Договорная' : formatPrice(property.price_byn ?? 0)}
+        </div>
         <div className="text-tg-hint text-xs mt-1">
           Создано: {formatDate(property.created_at)}
         </div>
