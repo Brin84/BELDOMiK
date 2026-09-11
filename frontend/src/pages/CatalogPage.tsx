@@ -33,6 +33,9 @@ export function CatalogPage() {
   // Свайп: горизонтальный сдвиг ленты при перетаскивании пальцем (px).
   const [dragX, setDragX] = useState<number | null>(null);
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
+  // Тач-жест отслеживаем отдельно от мыши: идентификатор пальца + точка старта.
+  const touchIdRef = useRef<number | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const {
     properties,
     hotProperties,
@@ -44,6 +47,7 @@ export function CatalogPage() {
     setOperation,
     refresh,
     clearError,
+    setLocalFavorite,
   } = usePropertiesStore();
   const {
     fetchRegions,
@@ -52,14 +56,17 @@ export function CatalogPage() {
     propertyTypes,
     getCityById,
   } = useGeographyStore();
-  const { toggleFavorite } = useFavoritesStore();
+  const { toggleFavorite, fetchFavoriteIds } = useFavoritesStore();
 
   // Initialize on mount
   useEffect(() => {
     fetchRegions();
     fetchPropertyTypes();
+    // Синхронизируем набор избранного на входе: toggleFavorite определяет
+    // направление по favoriteIds, и он должен совпадать с is_favorite карточек.
+    fetchFavoriteIds();
     fetchProperties(true);
-  }, [fetchRegions, fetchPropertyTypes, fetchProperties]);
+  }, [fetchRegions, fetchPropertyTypes, fetchFavoriteIds, fetchProperties]);
 
   // Автопрокрутка рекламной карусели: слайды едут влево и вправо —
   // на краях ленты направление разворачивается, 3.5s на баннер.
@@ -102,31 +109,68 @@ export function CatalogPage() {
     });
   }, []);
 
-  // ----- Свайп пальцем -----
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    dragStartRef.current = { x: e.clientX, y: e.clientY };
+  // ----- Свайп пальцем (native touch) + drag мышью -----
+  // Pointer events на части мобильных WebView ведут себя нестабильно
+  // (жест отменяется, пока не установлен захват указателя), поэтому для
+  // тача используем классические touch-события, для мыши — mouse.
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    const t = e.changedTouches[0];
+    if (!t) return;
+    touchIdRef.current = t.identifier;
+    touchStartRef.current = { x: t.clientX, y: t.clientY };
     setDragX(0);
   };
 
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const start = dragStartRef.current;
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    const start = touchStartRef.current;
     if (!start) return;
-    const dx = e.clientX - start.x;
-    const dy = e.clientY - start.y;
+    const touch = Array.from(e.touches).find((t) => t.identifier === touchIdRef.current);
+    if (!touch) return;
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
     if (Math.abs(dy) > Math.abs(dx)) {
       // Вертикальный свайп — уступаем скроллу страницы.
-      e.currentTarget.releasePointerCapture?.(e.pointerId);
-      dragStartRef.current = null;
+      touchIdRef.current = null;
+      touchStartRef.current = null;
       setDragX(null);
       return;
     }
-    e.currentTarget.setPointerCapture?.(e.pointerId);
     const width = e.currentTarget.clientWidth || 1;
     const limited = Math.max(-width * 0.4, Math.min(width * 0.4, dx));
     setDragX(limited);
   };
 
-  const handlePointerEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    const start = touchStartRef.current;
+    touchIdRef.current = null;
+    touchStartRef.current = null;
+    setDragX(null);
+    if (!start) return;
+    const t = e.changedTouches[0];
+    const dx = t ? t.clientX - start.x : 0;
+    const width = e.currentTarget.clientWidth || 1;
+    if (dx <= -width * 0.2) advance(1);
+    else if (dx >= width * 0.2) advance(-1);
+    restartAutoplay();
+  };
+
+  // Мышь (desktop/тачпад): pointer-события не навешиваем, чтобы на телефонах
+  // (там touch и pointer приходят вместе) жест не обрабатывался дважды.
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    setDragX(0);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const start = dragStartRef.current;
+    if (!start) return;
+    const dx = e.clientX - start.x;
+    const width = e.currentTarget.clientWidth || 1;
+    const limited = Math.max(-width * 0.4, Math.min(width * 0.4, dx));
+    setDragX(limited);
+  };
+
+  const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
     const start = dragStartRef.current;
     dragStartRef.current = null;
     setDragX(null);
@@ -185,14 +229,20 @@ export function CatalogPage() {
   const handleFavoriteToggle = useCallback(
     async (propertyId: number) => {
       trigger('light');
+      // Направление считаем по favoriteIds — тому же источнику, что читает
+      // toggleFavorite: карточка рисует по property.is_favorite, и эти два
+      // источника должны совпадать, чтобы сердце не «съезжало».
+      const wasFavorite = useFavoritesStore.getState().favoriteIds.has(propertyId);
       try {
         await toggleFavorite(propertyId);
-        await fetchProperties(true);
+        // Обновляем флаг локально, без перезагрузки всего каталога:
+        // fetchProperties(true) раньше обнулял список и мигал скелетоном.
+        setLocalFavorite(propertyId, !wasFavorite);
       } catch {
         // Error already handled in store
       }
     },
-    [trigger, toggleFavorite, fetchProperties]
+    [trigger, toggleFavorite, setLocalFavorite]
   );
 
   return (
@@ -239,11 +289,14 @@ export function CatalogPage() {
                   : `translateX(calc(-${adPos.index * 100}% + ${dragX}px))`,
               transition: dragX === null ? undefined : 'none',
             }}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerEnd}
-            onPointerCancel={handlePointerEnd}
-            onPointerLeave={handlePointerEnd}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
           >
             {AD_BANNER_BG.map((bg, i) => (
               <div key={i} className="catalog-banner__slide" style={{ background: bg }}>

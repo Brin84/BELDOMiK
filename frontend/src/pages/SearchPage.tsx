@@ -33,6 +33,7 @@ export function SearchPage() {
     setOperation,
     refresh,
     clearError,
+    setLocalFavorite,
     // fetchProperties is available but not used directly - filters trigger auto-fetch
   } = usePropertiesStore();
   const { toggleFavorite } = useFavoritesStore();
@@ -316,15 +317,17 @@ export function SearchPage() {
   const handleFavoriteToggle = useCallback(
     async (propertyId: number, _isFavorite: boolean) => {
       trigger('light');
+      const wasFavorite = useFavoritesStore.getState().favoriteIds.has(propertyId);
       try {
         await toggleFavorite(propertyId);
-        // Note: properties store will auto-refresh on filter changes,
-        // or user can pull-to-refresh
+        // Локально обновляем флаг в карточке, чтобы сердце реагировало сразу
+        // (без перезагрузки всего списка).
+        setLocalFavorite(propertyId, !wasFavorite);
       } catch {
         // Error already handled in store
       }
     },
-    [trigger, toggleFavorite]
+    [trigger, toggleFavorite, setLocalFavorite]
   );
 
   // Handle retry

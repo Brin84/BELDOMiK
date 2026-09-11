@@ -114,6 +114,11 @@
   font-weight: 700;
   text-align: center;
   color: #334155;
+  /* тач-жест обрабатываем сами (touch-обработчики), вертикаль отдаём скроллу */
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .catalog-banner__dots {

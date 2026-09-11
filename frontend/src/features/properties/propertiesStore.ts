@@ -43,6 +43,7 @@ export interface PropertiesState {
   setStreet: (streetId: number | undefined) => void;
   setMetroStation: (metroStationId: number | undefined) => void;
   refresh: () => Promise<void>;
+  setLocalFavorite: (propertyId: number, isFavorite: boolean) => void;
   clearError: () => void;
   clearPropertyDetail: () => void;
 }
@@ -253,6 +254,20 @@ export const usePropertiesStore = create<PropertiesState>((set, get) => ({
 
   refresh: async () => {
     await get().fetchProperties(true);
+  },
+
+  // Точечное обновление флага избранного в уже загруженном списке —
+  // без повторного запроса (fetchProperties(reset=true) обнуляет список
+  // и вызывает мерцание скелетоном на каждом клике по сердцу).
+  setLocalFavorite: (propertyId: number, isFavorite: boolean) => {
+    set((state) => ({
+      properties: state.properties.map((p) =>
+        p.id === propertyId ? { ...p, is_favorite: isFavorite } : p
+      ),
+      hotProperties: state.hotProperties.map((p) =>
+        p.id === propertyId ? { ...p, is_favorite: isFavorite } : p
+      ),
+    }));
   },
 
   clearError: () => set({ error: null }),

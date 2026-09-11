@@ -2,7 +2,6 @@ import { useEffect, useCallback } from 'react';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useAuthStore } from '@/features/auth';
 import { useFavoritesStore } from '@/features/favorites';
-import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { PropertyCard } from '@/entities/property';
 import { ListSkeleton, EmptyState, InlineError } from '@/shared/ui';
 
@@ -19,8 +18,6 @@ export function FavoritesPage() {
     fetchFavorites,
     clearError,
   } = useFavoritesStore();
-
-  const { fetchProperties } = usePropertiesStore();
 
   // Initialize on mount
   useEffect(() => {
@@ -89,8 +86,6 @@ export function FavoritesPage() {
                   trigger('light');
                   try {
                     await useFavoritesStore.getState().toggleFavorite(propertyId);
-                    // Refresh properties store to update is_favorite there too
-                    await fetchProperties(true);
                   } catch {
                     // Error already handled in store
                   }
