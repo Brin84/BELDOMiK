@@ -6,6 +6,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.models.monetization import (
     Payment,
     PaymentStatus,
@@ -381,6 +382,38 @@ class MonetizationService:
             raise ValueError(
                 f"Достигнут лимит объявлений агентства ({max_properties}). "
                 "Оформите подписку PRO или ENTERPRISE."
+            )
+
+    @staticmethod
+    def enforce_active_listing_limit(db: Session, user: User) -> None:
+        """Лимит одновременных активных объявлений для частных (не агентских)
+        не-админов — Kufar-модель монетизации.
+
+        Активными считаются объявления со статусом pending_moderation/published;
+        черновики, отклонённые и снятые слот не занимают. Для пользователей
+        агентств лимитом управляет подписка (enforce_property_quota).
+        """
+        limit = settings.MAX_ACTIVE_LISTINGS_PER_USER
+        if limit <= 0 or user.role == "admin":
+            return
+        member = db.query(AgencyMember).filter(AgencyMember.user_id == user.id).first()
+        if member:
+            return  # квота агентства уже проверяется при создании
+
+        used = (
+            db.query(Property)
+            .filter(
+                Property.owner_id == user.id,
+                Property.status.in_(
+                    [PropertyStatus.PENDING_MODERATION, PropertyStatus.PUBLISHED]
+                ),
+            )
+            .count()
+        )
+        if used >= limit:
+            raise ValueError(
+                f"Достигнут лимит активных объявлений ({limit}). "
+                "Оформите подписку PRO, чтобы размещать больше."
             )
 
 

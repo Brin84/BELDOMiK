@@ -140,7 +140,11 @@ def create_property(
 ):
     """Create a new property."""
     # Enforce the agency subscription listing cap (no-op for private owners).
-    MonetizationService.enforce_property_quota(db, current_user)
+    # ValueError → 403 (у main.py нет глобального обработчика ValueError).
+    try:
+        MonetizationService.enforce_property_quota(db, current_user)
+    except ValueError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from None
     property_obj = PropertyService.create_property(db, current_user.id, data)
     return _build_property_response(property_obj)
 
@@ -166,6 +170,13 @@ def submit_for_moderation(
     current_user: User = Depends(get_current_user),
 ):
     """Submit property for moderation."""
+    # Kufar-модель: частные (не админ/не агентство) пользователи ограничены
+    # числом одновременных активных объявлений. 403 вместо 500 (глобального
+    # обработчика ValueError в main.py нет).
+    try:
+        MonetizationService.enforce_active_listing_limit(db, current_user)
+    except ValueError as e:
+        raise HTTPException(status_code=403, detail=str(e)) from None
     property_obj = PropertyService.submit_for_moderation(db, property_id, current_user.id)
     if not property_obj:
         raise HTTPException(
@@ -181,11 +192,35 @@ def delete_property(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a property."""
-    success = PropertyService.delete_property(db, property_id, current_user.id)
+    """Delete a property.
+
+    Дизайн платформы: удаление — админская возможность (role == "admin") — админ
+    может удалить любое объявление. Обычный владелец снимает своё с публикации
+    через POST /{property_id}/archive, а не удаляет.
+    """
+    success = PropertyService.delete_property(
+        db, property_id, current_user.id, is_admin=current_user.role == "admin"
+    )
     if not success:
         raise HTTPException(status_code=404, detail="Property not found or not owned")
     return {"message": "Property deleted successfully"}
+
+
+@router.post("/{property_id}/archive", response_model=PropertyResponse)
+def archive_property(
+    property_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Снять своё объявление с публикации (владелец).
+
+    status → archived; освобождает слот в лимите активных (Kufar-модель).
+    Только владелец и только для активных состояний (published/pending_moderation).
+    """
+    property_obj = PropertyService.archive_property(db, property_id, current_user.id)
+    if not property_obj:
+        raise HTTPException(status_code=404, detail="Property not found or not owned")
+    return _build_property_response(property_obj)
 
 
 @router.get("/user/my", response_model=list[PropertyResponse])

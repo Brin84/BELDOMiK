@@ -578,6 +578,29 @@ class PropertyService:
         return True
 
     @staticmethod
+    def archive_property(db: Session, property_id: int, user_id: int) -> Property | None:
+        """Владелец снимает своё объявление с публикации (status → ARCHIVED).
+
+        В отличие от delete_property: только владелец (не админ-кросскутом) и только
+        для активных состояний (published/pending_moderation). Снимает слот в лимите
+        активных объявлений (Kufar-модель), админского «Удалить» не заменяет.
+        """
+        property_obj = db.query(Property).filter(Property.id == property_id).first()
+        if not property_obj or property_obj.owner_id != user_id:
+            return None
+        if property_obj.status not in (
+            PropertyStatus.PUBLISHED,
+            PropertyStatus.PENDING_MODERATION,
+        ):
+            return None
+
+        property_obj.status = PropertyStatus.ARCHIVED
+        property_obj.archived_at = datetime.now(UTC)
+        db.commit()
+        db.refresh(property_obj)
+        return property_obj
+
+    @staticmethod
     def submit_for_moderation(db: Session, property_id: int, user_id: int) -> Property | None:
         """Отправить объявление на автоматическую модерацию.
 

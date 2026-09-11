@@ -1,3 +1,4 @@
+
 export const API_ENDPOINTS = {
   auth: {
     telegram: '/api/v1/auth/telegram',
@@ -25,6 +26,7 @@ export const API_ENDPOINTS = {
     create: '/api/v1/properties',
     update: (id: number) => `/api/v1/properties/${id}`,
     delete: (id: number) => `/api/v1/properties/${id}`,
+    archive: (id: number) => `/api/v1/properties/${id}/archive`,
     myProperties: '/api/v1/properties/user/my',
     photos: (id: number) => `/api/v1/properties/${id}/photos`,
     photosUpload: (id: number) => `/api/v1/properties/${id}/photos/upload`,

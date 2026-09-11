@@ -83,6 +83,10 @@ class Settings(BaseSettings):
     ALLOWED_IMAGE_TYPES: list[str] = ["image/jpeg", "image/png", "image/webp", "image/avif"]
     # Kufar-модель: до 10 фотографий на объявление.
     MAX_IMAGES_PER_PROPERTY: int = 10
+    # Kufar-модель: лимит одновременных активных объявлений (опубликованных /
+    # на модерации) для частных (не админ, не агентство) пользователей.
+    # 0 = без лимита. Двигает монетизацию: при превышении предлагается подписка PRO.
+    MAX_ACTIVE_LISTINGS_PER_USER: int = 3
     # Server-side image compression (same approach as baraholka)
     PHOTO_MAX_DIMENSION: int = 1600
     PHOTO_QUALITY: int = 80

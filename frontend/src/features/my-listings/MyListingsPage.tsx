@@ -59,12 +59,15 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function PropertyCard({ property, onClick, onEdit, onDelete, onPromote }: {
+function PropertyCard({ property, onClick, onEdit, onDelete, onArchive, onPromote, isAdmin }: {
   property: PropertyShort;
   onClick: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onArchive: () => void;
   onPromote: () => void;
+  /** Удаление — админская возможность; остальные снимают с публикации. */
+  isAdmin: boolean;
 }) {
   const { trigger } = useHaptics();
   const mainPhoto = property.photo_url;
@@ -140,17 +143,32 @@ function PropertyCard({ property, onClick, onEdit, onDelete, onPromote }: {
         >
           ⭐ Продвинуть
         </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); trigger('error'); onDelete(); }}
-          className="px-3 py-1.5 rounded-lg text-xs font-medium flex-shrink-0"
-          style={{
-            backgroundColor: 'rgba(255, 59, 48, 0.1)',
-            color: '#ff3b30',
-            border: '1px solid rgba(255, 59, 48, 0.3)',
-          }}
-        >
-          Удалить
-        </button>
+        {!isAdmin && property.status === 'published' && (
+          <button
+            onClick={(e) => { e.stopPropagation(); trigger('medium'); onArchive(); }}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium flex-shrink-0"
+            style={{
+              backgroundColor: 'rgba(142, 142, 147, 0.1)',
+              color: '#8e8e93',
+              border: '1px solid rgba(142, 142, 147, 0.3)',
+            }}
+          >
+            Снять с публикации
+          </button>
+        )}
+        {isAdmin && (
+          <button
+            onClick={(e) => { e.stopPropagation(); trigger('error'); onDelete(); }}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium flex-shrink-0"
+            style={{
+              backgroundColor: 'rgba(255, 59, 48, 0.1)',
+              color: '#ff3b30',
+              border: '1px solid rgba(255, 59, 48, 0.3)',
+            }}
+          >
+            Удалить
+          </button>
+        )}
       </div>
     </button>
   );
@@ -185,6 +203,7 @@ export function MyListingsPage() {
   const [promoteTarget, setPromoteTarget] = useState<number | null>(null);
 
   const isAuthenticated = status === 'authenticated' && user;
+  const isAdmin = user?.role === 'admin';
 
   // Load user properties on mount
   useEffect(() => {
@@ -271,6 +290,24 @@ export function MyListingsPage() {
     }
   };
 
+  // Kufar-модель: обычный владелец снимает опубликованное вместо удаления —
+  // освобождает слот в лимите активных. Карточка переходит в статус «В архиве».
+  const handleArchive = async (propertyId: number) => {
+    trigger('success');
+    try {
+      const updated = await api.post<PropertyShort>(
+        API_ENDPOINTS.properties.archive(propertyId)
+      );
+      setState(prev => ({
+        ...prev,
+        properties: prev.properties.map(p => (p.id === propertyId ? updated : p)),
+      }));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Ошибка при снятии с публикации';
+      alert(message);
+    }
+  };
+
   const handleView = (propertyId: number) => {
     navigate(`/property/${propertyId}`);
   };
@@ -326,7 +363,9 @@ export function MyListingsPage() {
               onClick={() => handleView(property.id)}
               onEdit={() => handleEdit(property.id)}
               onDelete={() => handleDelete(property.id)}
+              onArchive={() => handleArchive(property.id)}
               onPromote={() => setPromoteTarget(property.id)}
+              isAdmin={isAdmin}
             />
           ))}
         </div>
