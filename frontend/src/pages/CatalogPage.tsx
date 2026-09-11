@@ -14,18 +14,22 @@ import beldomikAvatar from '@/assets/beldomik-avatar.webp';
 
 import './CatalogPage/CatalogPage.css';
 
-/** Рекламные слайды: фон меняется, надпись неизменна — «место под рекламу». */
+/** Рекламные слайды карусели: 5 пастельных фонов под «место под рекламу». */
 const AD_BANNER_BG: readonly string[] = [
   'linear-gradient(135deg, #eef4ff 0%, #dcebff 100%)',
   'linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%)',
   'linear-gradient(135deg, #f4f8ff 0%, #e9efff 100%)',
+  'linear-gradient(135deg, #ecfdf5 0%, #d6f5e3 100%)',
+  'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
 ];
 
 export function CatalogPage() {
   const { trigger } = useHaptics();
   const { hapticFeedback } = useTelegram();
   const navigate = useNavigate();
-  const [adIndex, setAdIndex] = useState(0);
+  // Позиция слайда + направление движения. Автоскрол ходит туда-обратно
+  // («влево-вправо»): дошёл до правого края → развернулся, затем к левому.
+  const [adPos, setAdPos] = useState({ index: 0, dir: 1 });
   const {
     properties,
     hotProperties,
@@ -54,10 +58,20 @@ export function CatalogPage() {
     fetchProperties(true);
   }, [fetchRegions, fetchPropertyTypes, fetchProperties]);
 
-  // Автопрокрутка рекламных баннеров (цикл по слайдам).
+  // Автопрокрутка рекламной карусели: слайды едут влево и вправо —
+  // на краях ленты направление разворачивается, 3.5s на баннер.
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setAdIndex((i) => (i + 1) % AD_BANNER_BG.length);
+      setAdPos(({ index, dir }) => {
+        const next = index + dir;
+        if (next >= AD_BANNER_BG.length) {
+          return { index: AD_BANNER_BG.length - 2, dir: -1 };
+        }
+        if (next < 0) {
+          return { index: 1, dir: 1 };
+        }
+        return { index: next, dir };
+      });
     }, 3500);
     return () => window.clearInterval(timer);
   }, []);
@@ -156,7 +170,7 @@ export function CatalogPage() {
         <section className="catalog-banner" aria-label="Рекламные баннеры">
           <div
             className="catalog-banner__track"
-            style={{ transform: `translateX(-${adIndex * 100}%)` }}
+            style={{ transform: `translateX(-${adPos.index * 100}%)` }}
           >
             {AD_BANNER_BG.map((bg, i) => (
               <div key={i} className="catalog-banner__slide" style={{ background: bg }}>
@@ -169,7 +183,7 @@ export function CatalogPage() {
               <span
                 key={i}
                 className={`catalog-banner__dot${
-                  i === adIndex ? ' catalog-banner__dot--active' : ''
+                  i === adPos.index ? ' catalog-banner__dot--active' : ''
                 }`}
               />
             ))}
