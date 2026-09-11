@@ -18,7 +18,7 @@ export function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { trigger } = useHaptics();
-  const { fetchPropertyDetail, propertyDetail, isLoadingDetail, errorDetail, clearPropertyDetail } = usePropertiesStore();
+  const { fetchPropertyDetail, propertyDetail, isLoadingDetail, errorDetail, clearPropertyDetail, setLocalFavorite } = usePropertiesStore();
   const { toggleFavorite } = useFavoritesStore();
 
   const propertyId = id ? parseInt(id, 10) : null;
@@ -109,14 +109,20 @@ export function PropertyDetailPage() {
           property={property}
           propertyTitle={propertyTitle}
           propertyUrl={typeof window !== 'undefined' ? window.location.href : undefined}
-          onFavoriteToggle={async (propertyId, _currentState) => {
+          onFavoriteToggle={async (propertyId, isCurrentlyFavorite) => {
             trigger('light');
             try {
               await toggleFavorite(propertyId);
-              await fetchPropertyDetail(propertyId);
-            } catch {
-              // Error already handled in store
+            } catch (e) {
+              // Error already handled in store; пробрасываем, чтобы
+              // PropertyInfoSection откатил локальное сердце.
+              throw e;
             }
+            // Синхронизируем флаг в списках точечно, БЕЗ ре-фетча детальной
+            // страницы: fetchPropertyDetail ставил isLoadingDetail:true и
+            // обнулял propertyDetail → вся страница мигала скелетоном на
+            // каждом клике по сердцу («объявление обновляется»).
+            setLocalFavorite(propertyId, !isCurrentlyFavorite);
           }}
         />
 
