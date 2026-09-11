@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronRight, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '@/app/providers/TelegramProvider';
@@ -30,6 +30,9 @@ export function CatalogPage() {
   // Позиция слайда + направление движения. Автоскрол ходит туда-обратно
   // («влево-вправо»): дошёл до правого края → развернулся, затем к левому.
   const [adPos, setAdPos] = useState({ index: 0, dir: 1 });
+  // Свайп: горизонтальный сдвиг ленты при перетаскивании пальцем (px).
+  const [dragX, setDragX] = useState<number | null>(null);
+  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const {
     properties,
     hotProperties,
@@ -60,8 +63,12 @@ export function CatalogPage() {
 
   // Автопрокрутка рекламной карусели: слайды едут влево и вправо —
   // на краях ленты направление разворачивается, 3.5s на баннер.
-  useEffect(() => {
-    const timer = window.setInterval(() => {
+  // Таймер живёт в ref: ручной свайп перезапускает его — автоскрол
+  // «не навязывается», но и не останавливается навсегда.
+  const timerRef = useRef<number>(0);
+  const restartAutoplay = useCallback(() => {
+    window.clearInterval(timerRef.current);
+    timerRef.current = window.setInterval(() => {
       setAdPos(({ index, dir }) => {
         const next = index + dir;
         if (next >= AD_BANNER_BG.length) {
@@ -73,8 +80,63 @@ export function CatalogPage() {
         return { index: next, dir };
       });
     }, 3500);
-    return () => window.clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    restartAutoplay();
+    return () => window.clearInterval(timerRef.current);
+  }, [restartAutoplay]);
+
+  // Ручное переключение слайда (свайп). Направление автоскролла
+  // выравнивается под движение пальца.
+  const advance = useCallback((step: 1 | -1) => {
+    setAdPos(({ index }) => {
+      const next = index + step;
+      if (next >= AD_BANNER_BG.length) {
+        return { index: AD_BANNER_BG.length - 1, dir: -1 };
+      }
+      if (next < 0) {
+        return { index: 0, dir: 1 };
+      }
+      return { index: next, dir: step };
+    });
+  }, []);
+
+  // ----- Свайп пальцем -----
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    setDragX(0);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const start = dragStartRef.current;
+    if (!start) return;
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    if (Math.abs(dy) > Math.abs(dx)) {
+      // Вертикальный свайп — уступаем скроллу страницы.
+      e.currentTarget.releasePointerCapture?.(e.pointerId);
+      dragStartRef.current = null;
+      setDragX(null);
+      return;
+    }
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    const width = e.currentTarget.clientWidth || 1;
+    const limited = Math.max(-width * 0.4, Math.min(width * 0.4, dx));
+    setDragX(limited);
+  };
+
+  const handlePointerEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+    const start = dragStartRef.current;
+    dragStartRef.current = null;
+    setDragX(null);
+    if (!start) return;
+    const dx = e.clientX - start.x;
+    const width = e.currentTarget.clientWidth || 1;
+    if (dx <= -width * 0.2) advance(1);
+    else if (dx >= width * 0.2) advance(-1);
+    restartAutoplay();
+  };
 
   // Переход на поиск с предзаполненными фильтрами (категория/новостройки).
   // SearchPage применяет сохранённые фильтры через sessionStorage-механизм
@@ -170,7 +232,18 @@ export function CatalogPage() {
         <section className="catalog-banner" aria-label="Рекламные баннеры">
           <div
             className="catalog-banner__track"
-            style={{ transform: `translateX(-${adPos.index * 100}%)` }}
+            style={{
+              transform:
+                dragX === null
+                  ? `translateX(-${adPos.index * 100}%)`
+                  : `translateX(calc(-${adPos.index * 100}% + ${dragX}px))`,
+              transition: dragX === null ? undefined : 'none',
+            }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerEnd}
+            onPointerCancel={handlePointerEnd}
+            onPointerLeave={handlePointerEnd}
           >
             {AD_BANNER_BG.map((bg, i) => (
               <div key={i} className="catalog-banner__slide" style={{ background: bg }}>
