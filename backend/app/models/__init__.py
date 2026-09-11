@@ -50,6 +50,7 @@ from app.models.user import (
     AgencyMember,
     User,
     UserProfile,
+    UserSettings,
 )
 
 __all__ = [
@@ -92,5 +93,6 @@ __all__ = [
     "SubscriptionStatus",
     "User",
     "UserProfile",
+    "UserSettings",
     "ViewingRequest",
 ]

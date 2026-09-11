@@ -15,6 +15,7 @@ export interface AuthState {
   setTokens: (accessToken: string, refreshToken: string) => void;
   refresh: () => Promise<boolean>;
   fetchUser: () => Promise<void>;
+  updateUser: (partial: Partial<User>) => void;
   clearError: () => void;
 }
 
@@ -86,6 +87,10 @@ export const useAuthStore = create<AuthState>()(
           // Keep previously known user on transient failures; the api
           // client's 401 interceptor handles real session expiry.
         }
+      },
+
+      updateUser: (partial: Partial<User>) => {
+        set((state) => ({ user: state.user ? { ...state.user, ...partial } : partial as User }));
       },
 
       clearError: () => set({ error: null }),

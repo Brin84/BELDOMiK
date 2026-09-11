@@ -37,6 +37,12 @@ class User(Base):
         uselist=False,
         cascade="all, delete-orphan",
     )
+    settings = relationship(
+        "UserSettings",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
     properties = relationship(
         "Property",
         back_populates="owner",
@@ -76,6 +82,34 @@ class UserProfile(Base):
     # Relationships
     user = relationship("User", back_populates="profile")
     agency = relationship("Agency", back_populates="members_profiles")
+
+
+class UserSettings(Base):
+    """App settings for a user (Kufar-standard: notifications, default region).
+
+    Одна строка на пользователя. Настройтели создаются при первой записи
+    (lazy) — у пользователей без строки поведение сервисов = значения по
+    умолчанию (уведомления включены).
+    """
+    __tablename__ = "user_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True, index=True)
+    # Регион по умолчанию (город подсказки в поиске/подаче).
+    default_city_id = Column(Integer, ForeignKey("cities.id"), nullable=True, index=True)
+    # Уведомления (Telegram-рассылка; гейтится в NotificationService).
+    notify_price_drop = Column(Boolean, default=True, nullable=False)
+    notify_saved_searches = Column(Boolean, default=True, nullable=False)
+    # Задел под Kufar-стандарт (в MVP интерфейс только светлый/русский).
+    theme = Column(String(10), default="light", nullable=False)
+    language = Column(String(5), default="ru", nullable=False)
+
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    # Relationships
+    user = relationship("User", back_populates="settings")
+    city = relationship("City", foreign_keys=[default_city_id])
 
 
 class Agency(Base):

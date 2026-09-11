@@ -4,6 +4,8 @@ export const API_ENDPOINTS = {
     telegram: '/api/v1/auth/telegram',
     refresh: '/api/v1/auth/refresh',
     me: '/api/v1/auth/me',
+    update: '/api/v1/auth/me',
+    updateSettings: '/api/v1/auth/me/settings',
     logout: '/api/v1/auth/logout',
   },
   geography: {

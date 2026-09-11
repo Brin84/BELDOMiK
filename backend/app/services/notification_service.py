@@ -292,16 +292,20 @@ class NotificationService:
             # TODO: Implement filter matching logic
             # For now, just notify all active searches (will be improved)
             user = db.query(User).filter(User.id == search.user_id).first()
-            if user and user.tg_id:
-                text, markup = NotificationService.format_property_notification(
-                    property_obj, current_price.price_byn, current_price.price_usd
-                )
-                success = await NotificationService.send_telegram_message(
+            if not user or not user.tg_id:
+                continue
+            if user.settings is not None and not user.settings.notify_saved_searches:
+                # Пользователь отключил уведомления по сохранённым поискам.
+                continue
+            text, markup = NotificationService.format_property_notification(
+                property_obj, current_price.price_byn, current_price.price_usd
+            )
+            success = await NotificationService.send_telegram_message(
                 user.tg_id, text, reply_markup=markup
             )
-                if success:
-                    NotificationService.record_notification(db, search.id, property_obj.id)
-                    sent_count += 1
+            if success:
+                NotificationService.record_notification(db, search.id, property_obj.id)
+                sent_count += 1
 
         return sent_count
 
@@ -318,30 +322,34 @@ class NotificationService:
 
         for fav in favorites:
             user = db.query(User).filter(User.id == fav.user_id).first()
-            if user and user.tg_id:
-                drop = old_price - new_price
-                drop_pct = round((drop / old_price) * 100, 1)
+            if not user or not user.tg_id:
+                continue
+            if user.settings is not None and not user.settings.notify_price_drop:
+                # Пользователь отключил уведомления о снижении цены.
+                continue
+            drop = old_price - new_price
+            drop_pct = round((drop / old_price) * 100, 1)
 
-                text = (
-                    f"📉 <b>Цена снижена!</b>\n\n"
-                    f"{property_obj.type.name if property_obj.type else 'Недвижимость'}\n"
-                    f"{property_obj.city.name if property_obj.city else ''}\n"
-                    f"Было: {old_price:,} BYN\n"
-                    f"Стало: <b>{new_price:,} BYN</b> (-{drop} BYN, {drop_pct}%)\n"
-                ).replace(",", " ")
+            text = (
+                f"📉 <b>Цена снижена!</b>\n\n"
+                f"{property_obj.type.name if property_obj.type else 'Недвижимость'}\n"
+                f"{property_obj.city.name if property_obj.city else ''}\n"
+                f"Было: {old_price:,} BYN\n"
+                f"Стало: <b>{new_price:,} BYN</b> (-{drop} BYN, {drop_pct}%)\n"
+            ).replace(",", " ")
 
-                deep_link = f"https://t.me/{settings.TELEGRAM_BOT_USERNAME}/app?startapp=property_{property_obj.id}"
-                reply_markup = {
-                    "inline_keyboard": [
-                        [{"text": "👀 Посмотреть", "url": deep_link}],
-                    ]
-                }
+            deep_link = f"https://t.me/{settings.TELEGRAM_BOT_USERNAME}/app?startapp=property_{property_obj.id}"
+            reply_markup = {
+                "inline_keyboard": [
+                    [{"text": "👀 Посмотреть", "url": deep_link}],
+                ]
+            }
 
-                success = await NotificationService.send_telegram_message(
-                    user.tg_id, text, reply_markup=reply_markup
-                )
-                if success:
-                    sent_count += 1
+            success = await NotificationService.send_telegram_message(
+                user.tg_id, text, reply_markup=reply_markup
+            )
+            if success:
+                sent_count += 1
 
         return sent_count
 

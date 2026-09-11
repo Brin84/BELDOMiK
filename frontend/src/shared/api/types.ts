@@ -26,13 +26,33 @@ export interface User {
   username?: string;
   first_name?: string;
   last_name?: string;
+  phone?: string | null;
   role: UserRole;
   is_admin: boolean;
   is_moderator: boolean;
   is_verified: boolean;
   avatar_url?: string | null;
+  bio?: string | null;
+  settings?: UserSettings;
   created_at: string;
   updated_at: string;
+}
+
+/** Настройки приложения (Kufar-стандарт): регион + уведомления. */
+export interface UserSettings {
+  default_city_id: number | null;
+  notify_price_drop: boolean;
+  notify_saved_searches: boolean;
+  theme: string;
+  language: string;
+}
+
+export interface UserSettingsUpdate {
+  default_city_id?: number | null;
+  notify_price_drop?: boolean;
+  notify_saved_searches?: boolean;
+  theme?: string;
+  language?: string;
 }
 
 export interface TokenResponse {

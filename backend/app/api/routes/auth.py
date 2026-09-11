@@ -3,14 +3,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user, get_db
-from app.models.user import User
+from app.models.user import User, UserProfile, UserSettings
 from app.schemas.auth import (
     RefreshTokenRequest,
     RefreshTokenResponse,
     TelegramAuthRequest,
     TokenResponse,
 )
-from app.schemas.user import UserResponse
+from app.schemas.user import UserResponse, UserSettingsUpdate, UserUpdate
 from app.services.auth import AuthService
 from app.services.telegram_auth import TelegramAuthService
 
@@ -83,6 +83,63 @@ def get_current_user_info(
     current_user: User = Depends(get_current_user),
 ):
     """Get current user profile."""
+    return UserResponse.model_validate(current_user)
+
+
+def _get_or_create_settings(db: Session, user: User) -> UserSettings:
+    """Строка настроек пользователя, создаётся lazy при первой записи."""
+    if not user.settings:
+        user.settings = UserSettings(user_id=user.id)
+        db.add(user.settings)
+        db.flush()
+    return user.settings
+
+
+@router.patch("/me", response_model=UserResponse)
+def update_profile(
+    request: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Частичное обновление профиля (имя, фамилия, телефон, «о себе»).
+
+    Применяются только явно переданные поля (model_fields_set) — неизменённые
+    поля не затираются. bio хранится в user_profiles (строка создаётся lazy,
+    как профиль при регистрации).
+    """
+    fields = request.model_fields_set
+    for column_name in ("first_name", "last_name", "phone"):
+        if column_name in fields:
+            setattr(current_user, column_name, getattr(request, column_name))
+    if "bio" in fields:
+        profile = current_user.profile
+        if not profile:
+            profile = UserProfile(user_id=current_user.id)
+            db.add(profile)
+            db.flush()
+        profile.bio = request.bio
+    db.commit()
+    db.refresh(current_user)
+    return UserResponse.model_validate(current_user)
+
+
+@router.patch("/me/settings", response_model=UserResponse)
+def update_settings(
+    request: UserSettingsUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Частичное обновление настроек приложения (Kufar-стандарт).
+
+    Строка user_settings создаётся при первом сохранении; применяются только
+    переданные поля. Возвращается актуальный UserResponse — фронт обновляет
+    пользователя целиком.
+    """
+    settings_obj = _get_or_create_settings(db, current_user)
+    for field_name in request.model_fields_set:
+        setattr(settings_obj, field_name, getattr(request, field_name))
+    db.commit()
+    db.refresh(current_user)
     return UserResponse.model_validate(current_user)
 
 
