@@ -86,6 +86,9 @@ jobs:
           service: ${{ env.SERVICE_NAME }}
           region: ${{ env.GCP_REGION }}
           image: ${{ env.IMAGE }}:${{ github.sha }}
+          # Ждать полной готовности новой ревизии (latestReady, трафик переключён),
+          # иначе шаг завершится раньше и CI останется зелёным при мёртвой ревизии.
+          wait: true
           flags: >-
             --port=8080
             --min-instances=0
