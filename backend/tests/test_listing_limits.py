@@ -8,7 +8,7 @@
 - POST /properties/{id}/archive — самоснятие владельца (status → ARCHIVED),
   только для своих и только из активных состояний.
 """
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 import pytest
@@ -17,7 +17,13 @@ from sqlalchemy.orm import Session
 
 from app.core.security import create_access_token
 from app.models.geography import City
-from app.models.monetization import Payment, PaymentStatus
+from app.models.monetization import (
+    Payment,
+    PaymentStatus,
+    Promotion,
+    PromotionStatus,
+    PromotionType,
+)
 from app.models.property import Property, PropertyPrice, PropertyStatus
 from app.models.property_types import OperationType, PropertyType
 from app.models.user import AgencyMember, User
@@ -198,6 +204,46 @@ class TestDeleteAdminOnly:
                 user_id=owner.id,
                 amount_byn=500,
                 status=PaymentStatus.PENDING,
+            )
+        )
+        db_session.commit()
+
+        resp = client.delete(
+            f"/api/v1/properties/{prop.id}", headers=_auth_headers(admin)
+        )
+        assert resp.status_code == 200, resp.text
+        assert db_session.get(Property, prop.id) is None
+
+    def test_admin_deletes_property_with_promotion_payment(
+        self, client: TestClient, db_session: Session, seed_test_data
+    ):
+        """Платёж, привязанный к промо (payments.promotion_id), не блокирует
+        админское удаление.
+
+        Удаление объявления каскадит на promotions (property_id), а платёж за
+        продвижение должен уйти вместе с промо (fk_payments_promotion_id с
+        ON DELETE CASCADE, миграция 44f6c7e0b2d2). SQLite FK не исполняет —
+        проверяем прикладной путь; каскад валиден на проде (PostgreSQL).
+        """
+        owner = _add_user(db_session, 1012)
+        admin = _add_user(db_session, 1013, role="admin")
+        prop = _add_property(db_session, owner.id, status=PropertyStatus.PUBLISHED)
+        promo = Promotion(
+            property_id=prop.id,
+            type=PromotionType.TOP,
+            price_byn=200,
+            status=PromotionStatus.ACTIVE,
+            expires_at=datetime.now(UTC) + timedelta(days=7),
+        )
+        db_session.add(promo)
+        db_session.flush()
+        db_session.add(
+            Payment(
+                property_id=prop.id,
+                promotion_id=promo.id,
+                user_id=owner.id,
+                amount_byn=200,
+                status=PaymentStatus.SUCCEEDED,
             )
         )
         db_session.commit()

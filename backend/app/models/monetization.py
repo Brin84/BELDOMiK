@@ -91,7 +91,9 @@ class Payment(Base):
     property_id = Column(
         Integer, ForeignKey("properties.id", ondelete="CASCADE"), nullable=True, index=True
     )
-    promotion_id = Column(Integer, ForeignKey("promotions.id"), nullable=True, index=True)
+    promotion_id = Column(
+        Integer, ForeignKey("promotions.id", ondelete="CASCADE"), nullable=True, index=True
+    )
     subscription_id = Column(Integer, ForeignKey("subscriptions.id"), nullable=True, index=True)
     amount_byn = Column(Integer, nullable=False)
     currency = Column(String(3), default="BYN", nullable=False)
