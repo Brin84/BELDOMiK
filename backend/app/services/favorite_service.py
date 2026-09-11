@@ -123,6 +123,10 @@ class FavoriteService:
                 MetroStation.name,
                 PropertyType.name,
                 OperationType.name,
+                # Колонка ORDER BY обязана входить в GROUP BY для строгого
+                # PostgreSQL (Neon): без неё list_favorites падал с
+                # GroupingError «favorites.created_at must appear in GROUP BY».
+                Favorite.created_at,
             )
             .order_by(Favorite.created_at.desc())
         )
