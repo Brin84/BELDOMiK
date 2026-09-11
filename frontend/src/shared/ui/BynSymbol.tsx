@@ -7,6 +7,8 @@
  * Визуальный размер глифа ≈ высоте цифр в той же строке: официальная
  * фигура занимает почти всю em-высоту бокса, поэтому при 1em выглядит
  * в ~1.5 раза крупнее цифр. 0.68em ставит знак в один габарит с числом.
+ * Знак выравнивается по baseline (как цифры): -0.09em раньше опускал
+ * его ниже строки цены, а юзер просил «на уровень цены».
  */
 interface BynSymbolProps {
   className?: string;
@@ -15,7 +17,7 @@ interface BynSymbolProps {
 export function BynSymbol({ className = '' }: BynSymbolProps) {
   return (
     <svg
-      className={`inline-block w-[0.68em] h-[0.68em] align-[-0.09em] shrink-0 ${className}`}
+      className={`inline-block w-[0.68em] h-[0.68em] align-baseline shrink-0 ${className}`}
       viewBox="0 0 700 700"
       aria-hidden="true"
     >
