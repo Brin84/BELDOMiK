@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { EmptyState } from '@/shared/ui';
 import { useAuthStore } from '@/features/auth';
-import { useHaptics, hapticMedium } from '@/shared/lib/haptics';
+import { useHaptics } from '@/shared/lib/haptics';
 import { useNavigate } from 'react-router-dom';
 import { SavedSearchList } from '@/features/saved-searches/components';
 import { useCollectionsStore } from '@/features/collections';
@@ -11,8 +11,8 @@ import { api, API_ENDPOINTS } from '@/shared/api';
 import type { PropertyShort, UserRole } from '@/shared/api';
 
 export function ProfilePage() {
-  const { user, status, error, logout, login } = useAuthStore();
-  const { mainButton, initData } = useTelegram();
+  const { user, status, error, login } = useAuthStore();
+  const { initData } = useTelegram();
   const { trigger } = useHaptics();
   const navigate = useNavigate();
   const isAuthenticated = status === 'authenticated' && user;
@@ -36,35 +36,7 @@ export function ProfilePage() {
     }
   }, [isAuthenticated, fetchCollections]);
 
-  // Show main button with logout when authenticated.
-  // Hidden on unmount so it doesn't linger on other pages (SPA navigation).
-  // Deps must stay stable (module-level hapticMedium, not the per-render
-  // `trigger` from useHaptics) — an unstable dep re-runs the effect on every
-  // render, so cleanup hide() races the show() and the button flickers/never
-  // stays visible.
-  useEffect(() => {
-    if (!mainButton || !isAuthenticated) return;
-
-    const handleLogout = () => {
-      hapticMedium();
-      logout();
-    };
-
-    mainButton.setParams({
-      text: 'Выйти',
-      is_visible: true,
-      // Telegram MainButton accepts only hex color strings, not CSS var()
-      color: '#ff3b30',
-      text_color: '#ffffff',
-    });
-    mainButton.onClick(handleLogout);
-    mainButton.show();
-
-    return () => {
-      mainButton.offClick(handleLogout);
-      mainButton.hide();
-    };
-  }, [mainButton, isAuthenticated, logout]);
+  // Выход из аккаунта только в «Настройках» (/settings) — здесь намеренно ничего нет.
 
   const handleApplySavedSearch = (filtersJson: string) => {
     trigger('selection');
