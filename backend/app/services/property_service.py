@@ -23,6 +23,7 @@ from app.schemas.property import (
     PropertyUpdate,
 )
 from app.services.currency_service import CurrencyService
+from app.services.geocoding_service import GeocodingService
 from app.services.monetization_service import MonetizationService
 
 logger = logging.getLogger(__name__)
@@ -139,6 +140,11 @@ class PropertyService:
             is_current=True,
             change_reason="initial",
         ))
+
+        # Best-effort геокодинг адреса: если пользователь не передал координаты,
+        # резолвим их по адресу (Nominatim), чтобы карта в «Расположении»
+        # показывалась. При сбое объявление просто остаётся без координат.
+        GeocodingService.maybe_geocode(db, property_obj)
 
         db.commit()
         db.refresh(property_obj)
@@ -588,6 +594,11 @@ class PropertyService:
             return None
         if property_obj.status not in (PropertyStatus.DRAFT, PropertyStatus.REJECTED):
             return None
+
+        # Последний шанс получить координаты перед публикацией: покрывает как
+        # свежие подачи из визарда, так и повторные после REJECTED (и старые
+        # черновики без координат). Best-effort — подачу не ломает.
+        GeocodingService.maybe_geocode(db, property_obj)
 
         issues = check_standard_rules(property_obj)
         if issues:

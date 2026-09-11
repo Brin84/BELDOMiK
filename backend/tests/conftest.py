@@ -7,6 +7,9 @@ os.environ["SECRET_KEY"] = "test-secret-key-for-testing-only"
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["DATABASE_POOL_SIZE"] = "1"
 os.environ["DATABASE_MAX_OVERFLOW"] = "0"
+# Geocoding ходит в сеть (Nominatim, 1 req/s) — в общем прогоне тестов выключен;
+# включается точечно в test_geocoding.py через monkeypatch на settings.
+os.environ["GEOCODING_ENABLED"] = "false"
 
 import pytest
 from fastapi.testclient import TestClient
@@ -35,6 +38,18 @@ def create_tables():
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
+
+
+@pytest.fixture(autouse=True)
+def _disable_geocoder(monkeypatch):
+    """Геокодинг ходит в сеть (Nominatim) — в остальных тестах он no-op.
+
+    Функциональность геокодинга проверяется отдельно в test_geocoding.py,
+    где сетевое поведение замокано через httpx.MockTransport.
+    """
+    from app.services.geocoding_service import GeocodingService
+
+    monkeypatch.setattr(GeocodingService, "maybe_geocode", lambda db, prop: False)
 
 
 @pytest.fixture

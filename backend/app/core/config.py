@@ -92,6 +92,14 @@ class Settings(BaseSettings):
     SUPPORTED_CURRENCIES: list[str] = ["BYN", "USD"]
     EXCHANGE_RATE_API_URL: str = "https://www.nbrb.by/api/exrates/rates/431"  # USD to BYN
 
+    # Geocoding (OSM Nominatim, best-effort, без API-ключа): адрес объявления →
+    # координаты, чтобы карта в «Расположении» показывалась у всех объявлений.
+    GEOCODING_ENABLED: bool = True
+    GEOCODING_API_URL: str = "https://nominatim.openstreetmap.org/search"
+    GEOCODING_USER_AGENT: str = "BELDOMiK/1.0 (Telegram WebApp)"
+    GEOCODING_TIMEOUT: float = 4.0
+    GEOCODING_COUNTRY_CODES: str = "by"
+
     # Pagination
     DEFAULT_PAGE_SIZE: int = 20
     MAX_PAGE_SIZE: int = 100
