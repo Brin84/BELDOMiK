@@ -1,9 +1,11 @@
-import { Building2, Heart, Plus, Search, User } from 'lucide-react';
+import { Building2, Heart, MessageCircle, Plus, User } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
 
-// Плавающая панель с grid-раскладкой: Каталог · Поиск · «+» · Избранное · Профиль.
+// Плавающая панель с grid-раскладкой: Каталог · Избранное · «+» · Сообщения · Профиль.
 // Активная вкладка подсвечивается синей плашкой — стиль Baraholka.
+// Поиск вынесен на главную страницу (кнопка над баннерами); отдельной вкладки
+// в нижней навигации больше нет.
 interface NavItem {
   path: string;
   label: string;
@@ -12,9 +14,9 @@ interface NavItem {
 
 const navItems: readonly NavItem[] = [
   { path: '/catalog', label: 'Каталог', icon: Building2 },
-  { path: '/search', label: 'Поиск', icon: Search },
-  { path: '/create-listing', label: 'Подать', icon: Plus },
   { path: '/favorites', label: 'Избранное', icon: Heart },
+  { path: '/create-listing', label: 'Подать', icon: Plus },
+  { path: '/messages', label: 'Сообщения', icon: MessageCircle },
   { path: '/profile', label: 'Профиль', icon: User },
 ];
 

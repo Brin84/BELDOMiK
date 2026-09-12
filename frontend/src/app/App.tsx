@@ -16,6 +16,7 @@ import { AdminPage } from '@/pages/AdminPage';
 import { CollectionsPage } from '@/pages/CollectionsPage';
 import { CollectionDetailPage } from '@/pages/CollectionDetailPage';
 import { ViewingsPage } from '@/pages/ViewingsPage';
+import { MessagesPage } from '@/pages/MessagesPage';
 import { AgencyCatalogPage } from '@/pages/AgencyCatalogPage';
 import { AgencyDetailPage } from '@/pages/AgencyDetailPage';
 import { MyAgencyPage } from '@/pages/MyAgencyPage';
@@ -78,6 +79,7 @@ export function App() {
         <Route path="/collections" element={<CollectionsPage />} />
         <Route path="/collections/:id" element={<CollectionDetailPage />} />
         <Route path="/viewings" element={<ViewingsPage />} />
+        <Route path="/messages" element={<MessagesPage />} />
         <Route path="/agencies" element={<AgencyCatalogPage />} />
         <Route path="/agencies/me" element={<MyAgencyPage />} />
         <Route path="/agencies/:id" element={<AgencyDetailPage />} />

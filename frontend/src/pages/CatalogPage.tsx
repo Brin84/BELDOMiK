@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ChevronRight, Globe } from 'lucide-react';
+import { ChevronRight, Globe, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
@@ -277,6 +277,21 @@ export function CatalogPage() {
             •••
           </button>
         </header>
+
+        {/* SEARCH — вход в поиск с главной страницы (над баннерами).
+            В нижней навигации отдельной вкладки «Поиск» больше нет. */}
+        <button
+          type="button"
+          onClick={() => {
+            trigger('light');
+            navigate('/search');
+          }}
+          className="catalog-search"
+          aria-label="Поиск по каталогу"
+        >
+          <Search size={18} className="catalog-search__icon" />
+          <span className="catalog-search__placeholder">Поиск: город, метро, цена…</span>
+        </button>
 
         {/* BANNERS — автопрокручивающиеся рекламные баннеры */}
         <section className="catalog-banner" aria-label="Рекламные баннеры">
