@@ -98,11 +98,12 @@ try:
     db.add_all(districts)
     db.commit()
 
-    # Metro lines for Minsk
+    # Metro lines for Minsk (real composition + Zelenoluzhskaya line)
     print("Seeding metro lines...")
     metro_lines_data = [
         ("Московская линия", "#FF0000"),
         ("Автозаводская линия", "#0000FF"),
+        ("Зеленолужская линия", "#00A651"),
     ]
 
     for line_name, color in metro_lines_data:
@@ -113,32 +114,42 @@ try:
     # Get the lines
     line1 = db.query(MetroLine).filter(MetroLine.name == "Московская линия").first()
     line2 = db.query(MetroLine).filter(MetroLine.name == "Автозаводская линия").first()
+    line3 = db.query(MetroLine).filter(MetroLine.name == "Зеленолужская линия").first()
 
-    # Metro stations for line 1 (Moskovskaya)
+    # Metro stations. Canonical sets, travel order (same data as migration
+    # 5e8a2c7d4f1b_fix_minsk_metro.py — keep the two in sync).
     print("Seeding metro stations...")
     stations_line1 = [
-        ("Уручье", 1), ("Борисовский тракт", 2), ("Кунцевщина", 3), ("Купаловская", 4),
-        ("Петровщина", 5), ("Молодежная", 6), ("Фрунзенская", 7), ("Немига", 8),
-        ("Купаловская", 9), ("Октябрьская", 10), ("Площадь Якуба Коласа", 11),
-        ("Площадь Победы", 12), ("Институт культуры", 13), ("Автозаводская", 14),
-        ("Машпроект", 15), ("Спортивная", 16), ("Проспект независимости", 17),
-        ("Якуба Коласа", 18), ("Площадь Ленина", 19), ("Московская", 20),
+        ("Малиновка", 1), ("Петровщина", 2), ("Михалово", 3), ("Грушевка", 4),
+        ("Институт культуры", 5), ("Площадь Ленина", 6), ("Октябрьская", 7),
+        ("Площадь Победы", 8), ("Площадь Якуба Коласа", 9), ("Академия наук", 10),
+        ("Парк Челюскинцев", 11), ("Московская", 12), ("Восток", 13),
+        ("Борисовский тракт", 14), ("Уручье", 15),
     ]
 
     for station_name, sort_order in stations_line1:
         station = MetroStation(name=station_name, line_id=line1.id, sort_order=sort_order)
         db.add(station)
 
-    # Metro stations for line 2 (Avtozavodskaya)
     stations_line2 = [
-        ("Пушкинская", 1), ("Молодежная", 2), ("Фрунзенская", 3), ("Немига", 4),
-        ("Купаловская", 5), ("Октябрьская", 6), ("Площадь Якуба Коласа", 7),
-        ("Площадь Победы", 8), ("Институт культуры", 9), ("Автозаводская", 10),
-        ("Машпроект", 11), ("Уручье", 12), ("Борисовский тракт", 13),
+        ("Каменная Горка", 1), ("Кунцевщина", 2), ("Спортивная", 3),
+        ("Пушкинская", 4), ("Молодёжная", 5), ("Фрунзенская", 6), ("Немига", 7),
+        ("Купаловская", 8), ("Первомайская", 9), ("Пролетарская", 10),
+        ("Тракторный завод", 11), ("Партизанская", 12), ("Автозаводская", 13),
+        ("Могилёвская", 14),
     ]
 
     for station_name, sort_order in stations_line2:
         station = MetroStation(name=station_name, line_id=line2.id, sort_order=sort_order)
+        db.add(station)
+
+    stations_line3 = [
+        ("Вокзальная", 1), ("Площадь Франтишка Богушевича", 2),
+        ("Юбилейная площадь", 3), ("Ковальская Слобода", 4),
+    ]
+
+    for station_name, sort_order in stations_line3:
+        station = MetroStation(name=station_name, line_id=line3.id, sort_order=sort_order)
         db.add(station)
     db.commit()
 
