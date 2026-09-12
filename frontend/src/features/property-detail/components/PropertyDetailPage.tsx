@@ -42,10 +42,13 @@ export function PropertyDetailPage() {
     return (
       <div className="property-page">
         <div className="property-page__content">
-          <Skeleton className="aspect-[16/10] w-full rounded-none" />
-          <Skeleton className="h-40 w-full rounded-none" />
-          <Skeleton className="h-48 w-full rounded-none" />
-          <Skeleton className="h-64 w-full rounded-none" />
+          <Skeleton className="mx-4 mt-3 mb-1 aspect-square rounded-2xl" />
+          <div className="property-section">
+            <Skeleton className="h-8 w-2/3 rounded-lg" />
+            <Skeleton className="h-4 w-1/2 mt-3 rounded-lg" />
+          </div>
+          <Skeleton className="h-48 rounded-2xl" />
+          <Skeleton className="h-64 rounded-2xl" />
         </div>
       </div>
     );
@@ -97,7 +100,11 @@ export function PropertyDetailPage() {
   // молча глотает window.location.href на tel:, а SDK openLink принимает только
   // http/https (иначе WebAppTgUrlInvalid). Нативный клик по анкору позволяет
   // клиенту Telegram передать номер системной звонилке.
-  const callHref = `tel:${contactPhone!.replace(/[^\d+]/g, '')}`;
+  // Телефон можно НЕ задать (тестовые/старые объявления без contact_phone):
+  // тогда canCall=false и href не вычисляется, иначе null.replace() даёт
+  // TypeError и вся страница падает в ErrorBoundary «Что-то пошло не так».
+  const callDigits = contactPhone?.replace(/[^\d+]/g, '') || '';
+  const callHref = canCall ? `tel:${callDigits}` : undefined;
   const handleCall = () => {
     trigger('success');
   };
@@ -122,11 +129,11 @@ export function PropertyDetailPage() {
 
   return (
     <div className="property-page">
-      {/* Kufar-галерея: ключевое фото + сетка */}
+      {/* Полноширинная галерея */}
       <PropertyHeroGallery photos={property.photos || []} />
 
       <div className="property-page__content">
-        {/* Цена (BYN + USD + $/м²) + адрес + чипсы + действия */}
+        {/* Цена + действия + тип·площадь */}
         <PropertyInfoSection
           property={property}
           propertyTitle={propertyTitle}
@@ -148,31 +155,17 @@ export function PropertyDetailPage() {
           }}
         />
 
-        {/* «О квартире/доме» + «Общие характеристики» */}
-        <PropertyCharacteristics property={property} />
-
-        {/* Расположение (карта-превью + адрес) */}
+        {/* Расположение (карта + адрес) */}
         <PropertyLocation property={property} />
+
+        {/* Параметры + Дополнительно */}
+        <PropertyCharacteristics property={property} />
 
         {/* Описание */}
         <PropertyDescription description={property.description} />
 
         {/* Продавец */}
         <PropertyOwner owner={null} property={property} />
-
-        {/* Мои телефоны (Kufar: контактные номера продавца) */}
-        {canCall && (
-          <section className="property-phone-section">
-            <div className="property-phone-section__title">Мои телефоны</div>
-            <a
-              href={callHref}
-              onClick={handleCall}
-              className="property-phone-section__number"
-            >
-              {contactPhone}
-            </a>
-          </section>
-        )}
       </div>
 
       {/* Липкий нижний бар «Написать / Позвонить».

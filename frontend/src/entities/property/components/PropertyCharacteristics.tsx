@@ -18,22 +18,11 @@ const RENOVATION_LABELS: Record<string, string> = {
   designer: 'Дизайнерский',
 };
 
-/** Заголовок секции по типу объекта (Kufar: «О квартире», «О доме»…). */
-function sectionTitle(typeName?: string | null): string {
-  const t = (typeName || '').toLowerCase();
-  if (t.includes('квартир')) return 'О квартире';
-  if (t.includes('комнат')) return 'О комнате';
-  if (t.includes('дом')) return 'О доме';
-  if (t.includes('участок')) return 'Об участке';
-  if (t.includes('коммер') || t.includes('офис') || t.includes('помещен')) return 'О помещении';
-  if (t.includes('гараж')) return 'О гараже';
-  return 'Характеристики';
-}
-
-/** Ключевые параметры объекта. */
+/** Секция «Параметры» — ключевые характеристики объекта. */
 function buildParams(p: PropertyDetail): Row[] {
   const rows: Row[] = [];
 
+  if (p.type_name) rows.push({ label: 'Назначение', value: p.type_name });
   if (p.total_area) rows.push({ label: 'Общая площадь', value: formatArea(p.total_area) });
   if (p.living_area) rows.push({ label: 'Жилая площадь', value: formatArea(p.living_area) });
   if (p.kitchen_area) rows.push({ label: 'Площадь кухни', value: formatArea(p.kitchen_area) });
@@ -54,7 +43,7 @@ function buildParams(p: PropertyDetail): Row[] {
   return rows;
 }
 
-/** Инфраструктура и дополнительные условия. */
+/** Секция «Дополнительно» — особенности и инфраструктура. */
 function buildAdditional(p: PropertyDetail): Row[] {
   const rows: Row[] = [];
 
@@ -66,6 +55,7 @@ function buildAdditional(p: PropertyDetail): Row[] {
   if (p.balcony_count && p.balcony_count > 0) {
     rows.push({ label: 'Балкон', value: String(p.balcony_count) });
   } else if (p.balcony) {
+    // Старые объявления без balcony_count, но с флагом «есть балкон».
     rows.push({ label: 'Балкон / Лоджия', value: 'Есть' });
   }
   if (p.loggia_count && p.loggia_count > 0) {
@@ -73,6 +63,8 @@ function buildAdditional(p: PropertyDetail): Row[] {
   }
   if (p.parking) rows.push({ label: 'Парковка', value: 'Есть' });
   if (p.elevator) rows.push({ label: 'Лифт', value: 'Есть' });
+  if (p.is_new_building) rows.push({ label: 'Новостройка', value: 'Да' });
+  if (p.agency_id == null) rows.push({ label: 'Без посредников', value: 'Да' });
 
   return rows;
 }
@@ -99,13 +91,13 @@ export function PropertyCharacteristics({ property }: PropertyCharacteristicsPro
     <>
       {params.length > 0 && (
         <section className="property-section">
-          <h2 className="property-section__title">{sectionTitle(property.type_name)}</h2>
+          <h2 className="property-section__title">Параметры</h2>
           <RowsBlock rows={params} />
         </section>
       )}
       {additional.length > 0 && (
         <section className="property-section">
-          <h2 className="property-section__title">Общие характеристики</h2>
+          <h2 className="property-section__title">Дополнительно</h2>
           <RowsBlock rows={additional} />
         </section>
       )}

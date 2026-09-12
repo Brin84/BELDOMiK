@@ -1,161 +1,126 @@
 /* ============================================================
-   PropertyDetail — дизайн по эталону Kufar.
-   Plain CSS + BEM. Только светлая тема.
-   Структура: галерея (3×2 сетка) → цена/действия → адрес
-   → «О квартире» → «О доме» → «Общие характеристики» → описание
-   → расположение (карта) → продавец → липкий нижний бар.
+   PropertyDetail — дизайн по эталону Krisha.kz.
+   Plain CSS + BEM. Только светлая тема (как каталог).
+   Структура: полноширинная галерея → цена/действия → тип·площадь
+   → расположение (карта) → параметры → дополнительно → описание
+   → карточка продавца → липкий нижний бар «Написать / Позвонить».
    ============================================================ */
 
 .property-page {
   min-height: 100vh;
-  background: #f5f5f5;
-  color: #1a1a1a;
+  background: #f7f9fc;
+  color: #1e293b;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
-  padding-bottom: 80px; /* место под липкий нижний бар */
-}
-
-/* ── Контейнер контента под галереей ──────────────────────── */
-.property-page__content {
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ── Kufar-стиль: секция без карточек, через серую полосу ── */
-.property-section {
-  background: #fff;
-  padding: 18px 16px;
-  border-bottom: 1px solid #e8e8e8;
-}
-
-.property-section:first-child {
-  border-top: none;
-}
-
-.property-section__title {
-  font-size: 17px;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 12px;
-  padding: 0;
+  padding-bottom: 92px; /* место под липкий нижний бар */
 }
 
 /* ============================================================
-   Галерея — Kufar 3×2 сетка
+   Галерея — крупное фото со скруглёнными углами и боковыми
+   отступами (экрану + отступы, чтобы скругление было видно).
    ============================================================ */
 
-.kg-gallery {
-  background: #e8e8e8;
-}
-
-.kg-gallery__hero {
+.property-gallery {
   position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  background: #e8e8e8;
+  margin: 12px 16px 4px;
+  width: calc(100% - 32px);
+  aspect-ratio: 1 / 1; /* квадрат — заметно крупнее прежнего 4/3 */
+  border-radius: 16px;
+  background: #eef1f5;
   overflow: hidden;
-  cursor: pointer;
 }
 
-.kg-gallery__grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-}
-
-.kg-gallery__cell {
-  position: relative;
-  aspect-ratio: 1;
-  background: #e8e8e8;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.kg-gallery__img {
+.property-gallery__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.property-gallery__placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+}
+
+.property-gallery__counter {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.property-gallery__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
   transition: opacity 0.2s ease;
 }
 
-.kg-gallery__placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #999;
-  background: #f0f0f0;
+.property-gallery:hover .property-gallery__arrow {
+  opacity: 1;
 }
 
-.kg-gallery__placeholder--sm {
-  color: #bbb;
+.property-gallery__arrow--prev {
+  left: 12px;
 }
 
-.kg-gallery__counter {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  z-index: 2;
-  padding: 4px 10px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 500;
+.property-gallery__arrow--next {
+  right: 12px;
 }
 
-.kg-gallery__more {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  color: #fff;
-  font-size: 22px;
-  font-weight: 700;
-}
-
-/* ── Полноэкранный просмотр ─────────────────────────────── */
-.kg-fs {
+/* Полноэкранный просмотр */
+.property-fullscreen {
   position: fixed;
   inset: 0;
   z-index: 100;
   background: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.kg-fs__img {
+.property-fullscreen__img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
 }
 
-.kg-fs__placeholder {
-  color: #666;
-}
-
-.kg-fs__close {
+.property-fullscreen__close {
   position: absolute;
   top: 16px;
   right: 16px;
-  width: 40px;
-  height: 40px;
-  border: none;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: #fff;
   display: flex;
   align-items: center;
@@ -164,33 +129,17 @@
   z-index: 2;
 }
 
-.kg-fs__counter {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-  padding: 5px 14px;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.kg-fs__arrow {
+.property-fullscreen__arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
-  border: none;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: #fff;
   display: flex;
   align-items: center;
@@ -199,25 +148,43 @@
   z-index: 2;
 }
 
-.kg-fs__arrow--prev {
-  left: 12px;
+.property-fullscreen__arrow--prev {
+  left: 16px;
 }
 
-.kg-fs__arrow--next {
-  right: 12px;
+.property-fullscreen__arrow--next {
+  right: 16px;
+}
+
+/* Контейнер контента под галереей (единый боковой отступ) */
+.property-page__content {
+  padding: 18px 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Универсальная белая карточка-секция */
+.property-section {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+}
+
+.property-section__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 12px;
 }
 
 /* ============================================================
-   Цена + действия ( PropertyInfoSection )
+   Цена + действия
    ============================================================ */
 
 .property-info {
-  background: #fff;
-  padding: 18px 16px;
-  border-bottom: 1px solid #e8e8e8;
-}
-
-.property-info__row {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -230,29 +197,38 @@
 }
 
 .property-info__price {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 800;
-  color: #1a1a1a;
-  line-height: 1.15;
-}
-
-.property-info__price-usd {
-  margin-top: 3px;
-  font-size: 15px;
-  font-weight: 500;
-  color: #757575;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
 }
 
 .property-info__price-sqm {
   margin-top: 4px;
   font-size: 14px;
-  font-weight: 500;
-  color: #9e9e9e;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.property-info__subtitle {
+  margin-top: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.property-info__subtitle-dot {
+  color: #cbd5e1;
 }
 
 .property-info__actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   flex-shrink: 0;
 }
 
@@ -262,12 +238,12 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e2e8f0;
   border-radius: 50%;
   background: #fff;
-  color: #757575;
+  color: #64748b;
   cursor: pointer;
-  transition: transform 0.12s ease, background 0.12s ease;
+  transition: transform 0.15s ease, background 0.15s ease;
 }
 
 .property-info__action:active {
@@ -275,7 +251,7 @@
 }
 
 .property-info__action--favorite {
-  color: #757575;
+  color: #64748b;
 }
 
 .property-info__action--favorite-active {
@@ -284,117 +260,44 @@
   background: #fff1f2;
 }
 
-/* ── Адрес ────────────────────────────────────────────────── */
-.property-info__address {
-  margin-top: 14px;
-  font-size: 14px;
-  color: #757575;
-  line-height: 1.4;
-}
-
-/* ── Теги / чипсы ─────────────────────────────────────────── */
-.property-info__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.property-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  background: #f0f0f0;
-  font-size: 13px;
-  font-weight: 500;
-  color: #424242;
-}
-
-.property-chip--new {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
-
-.property-chip--no-middleman {
-  background: #e3f2fd;
-  color: #1565c0;
-}
-
-/* Бейдж */
+/* Бейджи статуса/типа (в subtitle) */
 .property-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 8px;
-  border-radius: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
-  background: #e3f2fd;
-  color: #1565c0;
+  background: #eef4ff;
+  color: #2171ee;
 }
 
 .property-badge--green {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: #ecfdf5;
+  color: #059669;
 }
 
 .property-badge--dark {
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(15, 23, 42, 0.75);
   color: #fff;
 }
 
 /* ============================================================
-   Расположение — карта-превью
+   Расположение
    ============================================================ */
-
-.property-location__map-wrap {
-  position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid #e8e8e8;
-}
 
 .property-location__map {
   width: 100%;
   height: 180px;
   border: none;
+  border-radius: 14px;
   display: block;
-  background: #e8e8e8;
+  background: #eef1f5;
 }
 
-.property-location__overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.25);
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.property-location__overlay:hover {
-  background: rgba(0, 0, 0, 0.35);
-}
-
-.property-location__overlay-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border-radius: 8px;
-  background: #fff;
-  border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  font-size: 14px;
-  font-weight: 600;
-  color: #1a1a1a;
-  cursor: pointer;
-}
-
-.property-location__overlay-btn svg {
-  color: #4285f4;
+.property-location__map-wrap {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
 }
 
 .property-location__address {
@@ -403,11 +306,11 @@
   align-items: flex-start;
   gap: 8px;
   font-size: 14px;
-  color: #424242;
+  color: #334155;
 }
 
 .property-location__address-icon {
-  color: #757575;
+  color: #2171ee;
   flex-shrink: 0;
   margin-top: 1px;
 }
@@ -417,7 +320,7 @@
 }
 
 /* ============================================================
-   Параметры / Характеристики (строки ключ → значение)
+   Параметры / Дополнительно (строки ключ → значение)
    ============================================================ */
 
 .property-rows {
@@ -430,8 +333,8 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
-  padding: 11px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .property-rows__row:last-child {
@@ -445,20 +348,20 @@
 
 .property-rows__label {
   font-size: 14px;
-  color: #757575;
+  color: #64748b;
   flex-shrink: 0;
 }
 
 .property-rows__value {
   font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #1e293b;
   text-align: right;
   word-break: break-word;
 }
 
 .property-rows__value--muted {
-  color: #9e9e9e;
+  color: #64748b;
 }
 
 /* ============================================================
@@ -468,16 +371,16 @@
 .property-description__text {
   font-size: 14.5px;
   line-height: 1.55;
-  color: #424242;
+  color: #334155;
   white-space: pre-wrap;
 }
 
 .property-description__toggle {
-  margin-top: 10px;
+  margin-top: 12px;
   padding: 0;
   border: none;
   background: none;
-  color: #1565c0;
+  color: #2171ee;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -499,15 +402,15 @@
 .agent-card__avatar {
   position: relative;
   flex-shrink: 0;
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: #e0e0e0;
+  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   overflow: hidden;
 }
@@ -527,9 +430,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #0f172a;
   overflow: hidden;
 }
 
@@ -543,10 +446,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: #4caf50;
+  background: #2171ee;
   color: #fff;
   flex-shrink: 0;
 }
@@ -554,8 +457,8 @@
 .agent-card__type {
   margin-top: 2px;
   font-size: 13px;
-  font-weight: 500;
-  color: #9e9e9e;
+  font-weight: 600;
+  color: #64748b;
 }
 
 .agent-card__company {
@@ -564,36 +467,16 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: #9e9e9e;
+  color: #94a3b8;
 }
 
 .agent-card__chevron {
-  color: #bdbdbd;
+  color: #cbd5e1;
   flex-shrink: 0;
 }
 
-/* ── Мой телефон ──────────────────────────────────────────── */
-.property-phone-section {
-  background: #fff;
-  padding: 18px 16px;
-  border-bottom: 1px solid #e8e8e8;
-}
-
-.property-phone-section__title {
-  font-size: 17px;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 10px;
-}
-
-.property-phone-section__number {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
 /* ============================================================
-   Липкий нижний бар «Написать / Позвонить» — Kufar стиль
+   Липкий нижний бар «Написать / Позвонить»
    ============================================================ */
 
 .property-bottom-bar {
@@ -608,7 +491,8 @@
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid #eef1f5;
+  box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.08);
 }
 
 .property-bottom-bar__btn {
@@ -617,14 +501,14 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 48px;
+  height: 50px;
   border: none;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 700;
   cursor: pointer;
   text-decoration: none;
-  transition: transform 0.12s ease;
+  transition: transform 0.15s ease;
 }
 
 .property-bottom-bar__btn:active {
@@ -634,9 +518,11 @@
 .property-bottom-bar__btn--telegram {
   background: #229ed9;
   color: #fff;
+  box-shadow: 0 6px 16px rgba(34, 158, 217, 0.35);
 }
 
 .property-bottom-bar__btn--call {
   background: #34c759;
   color: #fff;
+  box-shadow: 0 6px 16px rgba(52, 199, 89, 0.35);
 }
