@@ -51,17 +51,18 @@ class Settings(BaseSettings):
     TELEGRAM_BOT_USERNAME: str = Field(
         default="BELDOMiK_BOT", validation_alias="TELEGRAM_BOT_USERNAME"
     )
-    # Суффикс мини-приложения (последний сегмент t.me/<бот>/<суффикс>) из
-    # BotFather. Используется в глубоких ссылках на конкретное объявление
-    # (startapp=property_<id>). По умолчанию "app".
+    # Суффикс мини-приложения (t.me/<бот>/<суффикс>), legacy. Глубокие ссылки
+    # по умолчанию используют формат без пути t.me/<бот>?startapp=... (проверен
+    # на проде); суффикс пригождается только вместе с TELEGRAM_MINIAPP_URL.
     TELEGRAM_MINIAPP_PATH: str = Field(
         default="app", validation_alias="TELEGRAM_MINIAPP_PATH"
     )
     TELEGRAM_WEBAPP_URL: str = Field(default="", validation_alias="TELEGRAM_WEBAPP_URL")
-    # Канонический базовый URL мини-приложения для глубоких ссылок
-    # (https://t.me/<бот>/<суффикс>, без query). Приоритет в miniapp_deep_link:
-    # TELEGRAM_MINIAPP_URL → TELEGRAM_WEBAPP_URL (если это t.me-ссылка) →
-    # TELEGRAM_BOT_USERNAME + TELEGRAM_MINIAPP_PATH.
+    # Канонический базовый URL мини-приложения для глубоких ссылок (без query).
+    # Рабочий формат: https://t.me/<бот>?startapp=... — берётся из
+    # TELEGRAM_BOT_USERNAME. MINIAPP_URL актуален только если зарегистрировано
+    # короткое имя вида t.me/<бот>/<имя> (приоритет у него). TELEGRAM_WEBAPP_URL
+    # для deep-link НЕ используется: в проде это хостинговая ссылка SPA.
     TELEGRAM_MINIAPP_URL: str = Field(default="", validation_alias="TELEGRAM_MINIAPP_URL")
     TELEGRAM_WEBHOOK_SECRET: str = Field(default="", validation_alias="TELEGRAM_WEBHOOK_SECRET")
 

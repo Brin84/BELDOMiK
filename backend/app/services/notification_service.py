@@ -55,24 +55,20 @@ class NotificationService:
     def miniapp_deep_link(start_param: str = "") -> str:
         """Глубокая ссылка на мини-приложение для inline-кнопок.
 
-        Базовый URL `https://t.me/<бот>/<суффикс>` берётся по приоритету:
-        1. TELEGRAM_MINIAPP_URL — канонический адрес MiniApp из BotFather;
-        2. TELEGRAM_WEBAPP_URL — если это уже t.me-ссылка (dev/тесты);
-        3. TELEGRAM_BOT_USERNAME + TELEGRAM_MINIAPP_PATH (по умолчанию "app").
+        Проверенный рабочий формат: `https://t.me/<бот>?startapp=<param>` — база
+        БЕЗ пути. Суффикс вида /app резолвится в чат бота, а не в приложение
+        (MiniApp живёт по Web App URL бота, а не по t.me-пути). Приоритет базы:
+        1. TELEGRAM_MINIAPP_URL — каноническая t.me-база из BotFather, если
+           зарегистрировано короткое имя t.me/<бот>/<имя>;
+        2. TELEGRAM_BOT_USERNAME — универсально для любого бота с настроенным
+           Web App URL (Menu Button / web_app-кнопка /start).
 
-        Суффикс пути — имя мини-приложения из BotFather. Ссылка вида
-        `...?startapp=property_123` открывает конкретный экран внутри MiniApp.
+        TELEGRAM_WEBAPP_URL в deep-link НЕ используется: в проде это хостинговая
+        ссылка SPA (нужна для web_app-кнопки), а не t.me-адрес.
         """
         base = settings.TELEGRAM_MINIAPP_URL.rstrip("/")
         if not base:
-            webapp = settings.TELEGRAM_WEBAPP_URL.rstrip("/")
-            if webapp.startswith("https://t.me/"):
-                base = webapp
-            else:
-                base = (
-                    f"https://t.me/{settings.TELEGRAM_BOT_USERNAME}/"
-                    f"{settings.TELEGRAM_MINIAPP_PATH}"
-                )
+            base = f"https://t.me/{settings.TELEGRAM_BOT_USERNAME}"
         if not start_param:
             return base
         return f"{base}?startapp={start_param}"

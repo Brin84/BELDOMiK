@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
-import { useAuthStore } from '@/features/auth';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useFavoritesStore } from '@/features/favorites';
 import { useChatStore } from '@/features/chat';
@@ -24,7 +23,6 @@ export function PropertyDetailPage() {
   const { openTelegramLink } = useTelegram();
   const { fetchPropertyDetail, propertyDetail, isLoadingDetail, errorDetail, clearPropertyDetail, setLocalFavorite } = usePropertiesStore();
   const { toggleFavorite } = useFavoritesStore();
-  const { user: me } = useAuthStore();
   const { startChat } = useChatStore();
 
   const propertyId = id ? parseInt(id, 10) : null;
@@ -93,9 +91,10 @@ export function PropertyDetailPage() {
   const contactPhone = property.contact_phone || property.owner_phone || null;
   const ownerUsername = property.owner_username ?? null;
   const canCall = property.show_phone !== false && !!contactPhone;
-  // На своём объявлении переписка не показывается — писать себе бессмысленно.
-  const isOwnListing = property.owner_id === me?.id;
-  const canWrite = !isOwnListing;
+  // Требование продакта: «Написать»+«Позвонить» видны на любой карточке, когда
+  // есть телефон. Чат с самим собой бэкенд отклоняет (get_or_create → 404), и
+  // handleWrite уйдёт в фолбэк на внешний Telegram — редкий и безвредный случай.
+  const canWrite = true;
 
   // Звонок — реальный <a href="tel:">, БЕЗ JS-навигации: WebView Telegram
   // молча глотает window.location.href на tel:, а SDK openLink принимает только
