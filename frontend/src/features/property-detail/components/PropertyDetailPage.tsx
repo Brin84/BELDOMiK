@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
+import { useAuthStore } from '@/features/auth';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useFavoritesStore } from '@/features/favorites';
+import { useChatStore } from '@/features/chat';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { PropertyHeroGallery } from './PropertyHeroGallery';
@@ -20,6 +22,8 @@ export function PropertyDetailPage() {
   const { trigger } = useHaptics();
   const { fetchPropertyDetail, propertyDetail, isLoadingDetail, errorDetail, clearPropertyDetail, setLocalFavorite } = usePropertiesStore();
   const { toggleFavorite } = useFavoritesStore();
+  const { user: me } = useAuthStore();
+  const { startChat } = useChatStore();
 
   const propertyId = id ? parseInt(id, 10) : null;
 
@@ -87,15 +91,29 @@ export function PropertyDetailPage() {
   const contactPhone = property.contact_phone || property.owner_phone || null;
   const ownerUsername = property.owner_username ?? null;
   const canCall = property.show_phone !== false && !!contactPhone;
+  // На своём объявлении переписка не показывается — писать себе бессмысленно.
+  const isOwnListing = property.owner_id === me?.id;
+  const canWrite = !isOwnListing;
 
   const handleCall = () => {
     trigger('success');
     window.location.href = `tel:${contactPhone!.replace(/[^\d+]/g, '')}`;
   };
 
-  const handleTelegram = () => {
-    trigger('success');
-    window.open(`https://t.me/${ownerUsername!.replace('@', '')}`, '_blank');
+  const handleWrite = async () => {
+    trigger('light');
+    try {
+      // Встроенный чат (Kufar-модель): переписка сохраняется, пока не удалишь.
+      const conversationId = await startChat(propertyId!, undefined);
+      navigate(`/messages/${conversationId}`);
+    } catch {
+      // Чат недоступен (объявление снято/заблокировано, владелец без аккаунта
+      // MiniApp) — фолбэк на внешний Telegram, если username известен.
+      if (ownerUsername) {
+        trigger('success');
+        window.open(`https://t.me/${ownerUsername.replace('@', '')}`, '_blank');
+      }
+    }
   };
 
   return (
@@ -140,13 +158,15 @@ export function PropertyDetailPage() {
       </div>
 
       {/* Липкий нижний бар «Написать / Позвонить».
-          Позвонить — только если контактный номер задан и разрешён к показу. */}
-      {(ownerUsername || canCall) && (
+          «Написать» открывает встроенный чат с продавцом; фолбэк на внешний t.me
+          обрабатывается в handleWrite. Позвонить — только если контактный номер
+          задан и разрешён к показу. */}
+      {(canWrite || canCall) && (
         <div className="property-bottom-bar">
-          {ownerUsername && (
+          {canWrite && (
             <button
               type="button"
-              onClick={handleTelegram}
+              onClick={handleWrite}
               className="property-bottom-bar__btn property-bottom-bar__btn--telegram"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>

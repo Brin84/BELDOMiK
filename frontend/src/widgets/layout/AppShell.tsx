@@ -18,7 +18,10 @@ export function AppShell({ children }: { children?: ReactNode }) {
   // с плавающей панелью вкладов.
   const isPropertyDetail = /^\/property\/\d+/.test(location.pathname);
   const isWizard = location.pathname === '/create-listing';
-  const hideBottomNav = isPropertyDetail || isWizard;
+  // Окно переписки — полноэкранная под-страница (как карточка объявления):
+  // нижняя навигация скрыта, поле ввода прижато к низу экрана.
+  const isChat = /^\/messages\/\d+/.test(location.pathname);
+  const hideBottomNav = isPropertyDetail || isWizard || isChat;
 
   // Bootstrap authentication on mount. TelegramProvider fills initData
   // asynchronously, so re-run until it's available. Runs at most once a page

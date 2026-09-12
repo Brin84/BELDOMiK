@@ -1,0 +1,226 @@
+/* ============================================================
+   ChatPage — окно переписки (светлый стиль Baraholka).
+   ============================================================ */
+
+.chat-page {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  margin: 0 auto;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  background: #f7f9fc;
+  color: #1e293b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+}
+
+.chat-page__body {
+  padding: 14px 16px;
+}
+
+/* ---------- Шапка ---------- */
+
+.chat-page__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.chat-page__icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  background: #fff;
+  color: #475569;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chat-page__icon-btn:active {
+  transform: scale(0.94);
+}
+
+.chat-page__icon-btn--danger {
+  color: #dc2626;
+}
+
+.chat-page__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chat-page__name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.chat-page__sub {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 12px;
+  color: #9aa7b8;
+  cursor: pointer;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.chat-page__sub-icon {
+  flex-shrink: 0;
+}
+
+.chat-page__error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 13px;
+  border-bottom: 1px solid #fecaca;
+}
+
+.chat-page__error button {
+  border: none;
+  background: none;
+  color: #b91c1c;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+/* ---------- Лента сообщений ---------- */
+
+.chat-track {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-track__empty {
+  margin: auto;
+  font-size: 13px;
+  color: #9aa7b8;
+  text-align: center;
+  max-width: 260px;
+}
+
+.chat-bubble {
+  max-width: 78%;
+  padding: 9px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.chat-bubble--mine {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
+  color: #fff;
+  border-bottom-right-radius: 6px;
+  box-shadow: 0 4px 12px rgba(33, 113, 238, 0.25);
+}
+
+.chat-bubble--theirs {
+  align-self: flex-start;
+  background: #fff;
+  color: #1e293b;
+  border: 1px solid #e2e8f0;
+  border-bottom-left-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.chat-bubble__text {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.chat-bubble__time {
+  display: block;
+  margin-top: 3px;
+  font-size: 10.5px;
+  opacity: 0.75;
+  text-align: right;
+}
+
+/* ---------- Поле ввода ---------- */
+
+.chat-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+}
+
+.chat-input__field {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #f7f9fc;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1e293b;
+  outline: none;
+}
+
+.chat-input__field:focus {
+  border-color: #4c91ff;
+  background: #fff;
+}
+
+.chat-input__send {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chat-input__send:active {
+  transform: scale(0.94);
+}
+
+.chat-input__send:disabled {
+  opacity: 0.45;
+  cursor: default;
+}

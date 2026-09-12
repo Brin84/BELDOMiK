@@ -1,5 +1,6 @@
 """BELDOMiK database models."""
 
+from app.models.chat import ChatMessage, Conversation
 from app.models.collection import Collection, CollectionItem
 from app.models.mortgage import MortgageCalculation
 from app.models.property_note import PropertyNote
@@ -56,9 +57,11 @@ from app.models.user import (
 __all__ = [
     "Agency",
     "AgencyMember",
+    "ChatMessage",
     "City",
     "Collection",
     "CollectionItem",
+    "Conversation",
     "District",
     "Favorite",
     "MetroLine",

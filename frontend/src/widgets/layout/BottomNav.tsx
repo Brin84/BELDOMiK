@@ -1,6 +1,10 @@
+import { useEffect } from 'react';
 import { Building2, Heart, MessageCircle, Plus, User } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
+import { useChatStore } from '@/features/chat';
+
+import './BottomNav.css';
 
 // Плавающая панель с grid-раскладкой: Каталог · Избранное · «+» · Сообщения · Профиль.
 // Активная вкладка подсвечивается синей плашкой — стиль Baraholka.
@@ -31,6 +35,16 @@ export function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const { trigger } = useHaptics();
+  const unreadCount = useChatStore((s) => s.unreadCount);
+  const fetchUnreadCount = useChatStore((s) => s.fetchUnreadCount);
+
+  // Пульс бейджа «Сообщения»: обновляем счётчик при появлении на страницах,
+  // а затем опрашиваем не слишком часто (чаты работают в фоне).
+  useEffect(() => {
+    void fetchUnreadCount();
+    const poll = window.setInterval(() => void fetchUnreadCount(), 15000);
+    return () => window.clearInterval(poll);
+  }, [fetchUnreadCount]);
 
   const renderItem = (item: NavItem) => {
     const active = isPathActive(item.path, location.pathname);
@@ -43,7 +57,14 @@ export function BottomNav() {
         style={{ color: active ? '#2171ee' : '#64748b' }}
         aria-current={active ? 'page' : undefined}
       >
-        <Icon size={20} strokeWidth={active ? 2.3 : 1.8} />
+        <span className="bottom-nav__icon">
+          <Icon size={20} strokeWidth={active ? 2.3 : 1.8} />
+          {item.path === '/messages' && (unreadCount ?? 0) > 0 && (
+            <span className="bottom-nav__badge">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
+        </span>
         <span>{item.label}</span>
       </NavLink>
     );

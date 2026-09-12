@@ -1,0 +1,153 @@
+/* ============================================================
+   MessagesPage — вкладка «Сообщения» (светлый стиль Baraholka).
+   ============================================================ */
+
+.messages-page {
+  min-height: 100vh;
+  background: #f7f9fc;
+  color: #1e293b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+}
+
+.messages-page__inner {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 14px 16px 0;
+}
+
+.messages-page__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.messages-page__title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #0f172a;
+}
+
+.messages-page__count {
+  font-size: 13px;
+  color: #9aa7b8;
+}
+
+.messages-page__footer {
+  padding-top: 20px;
+  padding-bottom: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: #9aa7b8;
+}
+
+/* ---------- Список переписок ---------- */
+
+.inbox {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inbox__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.inbox__item:active {
+  transform: scale(0.98);
+}
+
+.inbox__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
+  box-shadow: 0 4px 12px rgba(33, 113, 238, 0.25);
+}
+
+.inbox__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.inbox__top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inbox__name {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.inbox__time {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #9aa7b8;
+}
+
+.inbox__preview {
+  margin-top: 2px;
+  font-size: 13px;
+  color: #64748b;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.inbox__property {
+  margin-top: 3px;
+  font-size: 12px;
+  color: #9aa7b8;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.inbox__badge {
+  flex-shrink: 0;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ff3b30;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(255, 59, 48, 0.3);
+}

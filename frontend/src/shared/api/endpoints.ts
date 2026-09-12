@@ -60,6 +60,14 @@ export const API_ENDPOINTS = {
     list: '/api/v1/viewings',
     updateStatus: (id: number) => `/api/v1/viewings/${id}`,
   },
+  messages: {
+    list: '/api/v1/messages',
+    unreadCount: '/api/v1/messages/unread-count',
+    start: '/api/v1/messages',
+    detail: (id: number) => `/api/v1/messages/${id}`,
+    send: (id: number) => `/api/v1/messages/${id}/messages`,
+    delete: (id: number) => `/api/v1/messages/${id}`,
+  },
   savedSearches: {
     list: '/api/v1/saved-searches',
     create: '/api/v1/saved-searches',

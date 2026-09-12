@@ -17,6 +17,7 @@ import { CollectionsPage } from '@/pages/CollectionsPage';
 import { CollectionDetailPage } from '@/pages/CollectionDetailPage';
 import { ViewingsPage } from '@/pages/ViewingsPage';
 import { MessagesPage } from '@/pages/MessagesPage';
+import { ChatPage } from '@/pages/ChatPage';
 import { AgencyCatalogPage } from '@/pages/AgencyCatalogPage';
 import { AgencyDetailPage } from '@/pages/AgencyDetailPage';
 import { MyAgencyPage } from '@/pages/MyAgencyPage';
@@ -46,13 +47,19 @@ export function App() {
   const navigate = useNavigate();
   const { startParam } = useTelegram();
 
-  // Глубокая ссылка из бота/канала (startapp=property_<id>): открываем
-  // конкретное объявление сразу при старте MiniApp, а не каталог.
+  // Глубокая ссылка из бота/канала:
+  // startapp=property_<id> → открываем конкретное объявление;
+  // startapp=chat_<id>    → открываем переписку (уведомление о сообщении).
   useEffect(() => {
     if (!startParam) return;
-    const m = /^property_(\d+)$/.exec(startParam);
-    if (m) {
-      navigate(`/property/${m[1]}`, { replace: true });
+    const property = /^property_(\d+)$/.exec(startParam);
+    if (property) {
+      navigate(`/property/${property[1]}`, { replace: true });
+      return;
+    }
+    const chat = /^chat_(\d+)$/.exec(startParam);
+    if (chat) {
+      navigate(`/messages/${chat[1]}`, { replace: true });
     }
   }, [startParam, navigate]);
 
@@ -80,6 +87,7 @@ export function App() {
         <Route path="/collections/:id" element={<CollectionDetailPage />} />
         <Route path="/viewings" element={<ViewingsPage />} />
         <Route path="/messages" element={<MessagesPage />} />
+        <Route path="/messages/:id" element={<ChatPage />} />
         <Route path="/agencies" element={<AgencyCatalogPage />} />
         <Route path="/agencies/me" element={<MyAgencyPage />} />
         <Route path="/agencies/:id" element={<AgencyDetailPage />} />
