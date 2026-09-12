@@ -1,6 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { useTelegram } from '@/app/providers/TelegramProvider';
-import { useHaptics, hapticMedium } from '@/shared/lib/haptics';
+import { useHaptics } from '@/shared/lib/haptics';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/authStore';
 import { api, API_ENDPOINTS } from '@/shared/api';
@@ -192,8 +191,7 @@ function LoadingCard() {
 
 export function MyListingsPage() {
   const { trigger } = useHaptics();
-  const { mainButton } = useTelegram();
-  const { user, status, logout } = useAuthStore();
+  const { user, status } = useAuthStore();
   const navigate = useNavigate();
   const [state, setState] = useState<MyListingsState>({
     properties: [],
@@ -222,34 +220,6 @@ export function MyListingsPage() {
 
     loadProperties();
   }, [isAuthenticated, user?.id]);
-
-
-  // Telegram MainButton - logout
-  // Use module-level hapticMedium (stable ref) instead of per-render `trigger`
-  // to keep deps stable — unstable dep causes effect re-run → hide()+show() race.
-  useEffect(() => {
-    if (!mainButton || !isAuthenticated) return;
-
-    const handleClick = () => {
-      hapticMedium();
-      logout();
-    };
-
-    mainButton.setParams({
-      text: 'Выйти',
-      is_visible: true,
-      // Telegram MainButton accepts only hex color strings, not CSS var()
-      color: '#ff3b30',
-      text_color: '#ffffff',
-    });
-    mainButton.onClick(handleClick);
-    mainButton.show();
-
-    return () => {
-      mainButton.offClick(handleClick);
-      mainButton.hide();
-    };
-  }, [mainButton, isAuthenticated, logout]);
 
   if (!isAuthenticated) {
     return (

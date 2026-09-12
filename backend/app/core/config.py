@@ -58,6 +58,11 @@ class Settings(BaseSettings):
         default="app", validation_alias="TELEGRAM_MINIAPP_PATH"
     )
     TELEGRAM_WEBAPP_URL: str = Field(default="", validation_alias="TELEGRAM_WEBAPP_URL")
+    # Канонический базовый URL мини-приложения для глубоких ссылок
+    # (https://t.me/<бот>/<суффикс>, без query). Приоритет в miniapp_deep_link:
+    # TELEGRAM_MINIAPP_URL → TELEGRAM_WEBAPP_URL (если это t.me-ссылка) →
+    # TELEGRAM_BOT_USERNAME + TELEGRAM_MINIAPP_PATH.
+    TELEGRAM_MINIAPP_URL: str = Field(default="", validation_alias="TELEGRAM_MINIAPP_URL")
     TELEGRAM_WEBHOOK_SECRET: str = Field(default="", validation_alias="TELEGRAM_WEBHOOK_SECRET")
 
     # Admin Telegram IDs (auto-assigned admin role on first login)

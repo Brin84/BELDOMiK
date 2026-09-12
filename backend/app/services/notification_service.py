@@ -55,15 +55,24 @@ class NotificationService:
     def miniapp_deep_link(start_param: str = "") -> str:
         """Глубокая ссылка на мини-приложение для inline-кнопок.
 
-        Формат `https://t.me/<bot_username>/<miniapp_path>?startapp=<param>`.
-        Суффикс пути — имя мини-приложения из BotFather (TELEGRAM_MINIAPP_PATH,
-        по умолчанию "app"); username — TELEGRAM_BOT_USERNAME. Такая ссылка
-        открывает конкретный экран внутри MiniApp (например property_123).
+        Базовый URL `https://t.me/<бот>/<суффикс>` берётся по приоритету:
+        1. TELEGRAM_MINIAPP_URL — канонический адрес MiniApp из BotFather;
+        2. TELEGRAM_WEBAPP_URL — если это уже t.me-ссылка (dev/тесты);
+        3. TELEGRAM_BOT_USERNAME + TELEGRAM_MINIAPP_PATH (по умолчанию "app").
+
+        Суффикс пути — имя мини-приложения из BotFather. Ссылка вида
+        `...?startapp=property_123` открывает конкретный экран внутри MiniApp.
         """
-        base = (
-            f"https://t.me/{settings.TELEGRAM_BOT_USERNAME}/"
-            f"{settings.TELEGRAM_MINIAPP_PATH}"
-        )
+        base = settings.TELEGRAM_MINIAPP_URL.rstrip("/")
+        if not base:
+            webapp = settings.TELEGRAM_WEBAPP_URL.rstrip("/")
+            if webapp.startswith("https://t.me/"):
+                base = webapp
+            else:
+                base = (
+                    f"https://t.me/{settings.TELEGRAM_BOT_USERNAME}/"
+                    f"{settings.TELEGRAM_MINIAPP_PATH}"
+                )
         if not start_param:
             return base
         return f"{base}?startapp={start_param}"

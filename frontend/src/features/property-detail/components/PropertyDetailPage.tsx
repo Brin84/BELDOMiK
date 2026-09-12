@@ -5,6 +5,7 @@ import { useAuthStore } from '@/features/auth';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useFavoritesStore } from '@/features/favorites';
 import { useChatStore } from '@/features/chat';
+import { useTelegram } from '@/app/providers/TelegramProvider';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { PropertyHeroGallery } from './PropertyHeroGallery';
@@ -20,6 +21,7 @@ export function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { trigger } = useHaptics();
+  const { openTelegramLink } = useTelegram();
   const { fetchPropertyDetail, propertyDetail, isLoadingDetail, errorDetail, clearPropertyDetail, setLocalFavorite } = usePropertiesStore();
   const { toggleFavorite } = useFavoritesStore();
   const { user: me } = useAuthStore();
@@ -95,9 +97,13 @@ export function PropertyDetailPage() {
   const isOwnListing = property.owner_id === me?.id;
   const canWrite = !isOwnListing;
 
+  // Звонок — реальный <a href="tel:">, БЕЗ JS-навигации: WebView Telegram
+  // молча глотает window.location.href на tel:, а SDK openLink принимает только
+  // http/https (иначе WebAppTgUrlInvalid). Нативный клик по анкору позволяет
+  // клиенту Telegram передать номер системной звонилке.
+  const callHref = `tel:${contactPhone!.replace(/[^\d+]/g, '')}`;
   const handleCall = () => {
     trigger('success');
-    window.location.href = `tel:${contactPhone!.replace(/[^\d+]/g, '')}`;
   };
 
   const handleWrite = async () => {
@@ -111,7 +117,7 @@ export function PropertyDetailPage() {
       // MiniApp) — фолбэк на внешний Telegram, если username известен.
       if (ownerUsername) {
         trigger('success');
-        window.open(`https://t.me/${ownerUsername.replace('@', '')}`, '_blank');
+        openTelegramLink(`https://t.me/${ownerUsername.replace('@', '')}`);
       }
     }
   };
@@ -176,8 +182,8 @@ export function PropertyDetailPage() {
             </button>
           )}
           {canCall && (
-            <button
-              type="button"
+            <a
+              href={callHref}
               onClick={handleCall}
               className="property-bottom-bar__btn property-bottom-bar__btn--call"
             >
@@ -185,7 +191,7 @@ export function PropertyDetailPage() {
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
               </svg>
               Позвонить
-            </button>
+            </a>
           )}
         </div>
       )}

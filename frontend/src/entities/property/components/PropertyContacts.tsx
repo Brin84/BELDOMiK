@@ -53,12 +53,12 @@ export function PropertyContacts({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => {
-              e.preventDefault();
               trigger('light');
+              // Нативный анкор сам открывает t.me/... внутри Telegram; перехват
+              // только если родитель хочет управлять переходом (onTelegramClick).
               if (onTelegramClick) {
+                e.preventDefault();
                 onTelegramClick(effectiveTelegram.replace('@', ''));
-              } else {
-                window.open(telegramHref(effectiveTelegram), '_blank');
               }
             }}
             className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl font-medium text-base"
@@ -78,12 +78,13 @@ export function PropertyContacts({
           <a
             href={`tel:${cleanPhone(effectivePhone)}`}
             onClick={(e) => {
-              e.preventDefault();
               trigger('light');
+              // Нативный анкор tel: открывает звонилку в Telegram WebView
+              // (window.location.href/jsf-навигация на tel: проглатывается);
+              // перехват — только если родитель управляет переходом (onCallClick).
               if (onCallClick) {
+                e.preventDefault();
                 onCallClick(effectivePhone);
-              } else {
-                window.location.href = `tel:${cleanPhone(effectivePhone)}`;
               }
             }}
             className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl font-medium text-base"
