@@ -52,6 +52,23 @@ class NotificationService:
     # ── Telegram channel (автопубликация объявлений) ─────────────
 
     @staticmethod
+    def miniapp_deep_link(start_param: str = "") -> str:
+        """Глубокая ссылка на мини-приложение для inline-кнопок.
+
+        Формат `https://t.me/<bot_username>/<miniapp_path>?startapp=<param>`.
+        Суффикс пути — имя мини-приложения из BotFather (TELEGRAM_MINIAPP_PATH,
+        по умолчанию "app"); username — TELEGRAM_BOT_USERNAME. Такая ссылка
+        открывает конкретный экран внутри MiniApp (например property_123).
+        """
+        base = (
+            f"https://t.me/{settings.TELEGRAM_BOT_USERNAME}/"
+            f"{settings.TELEGRAM_MINIAPP_PATH}"
+        )
+        if not start_param:
+            return base
+        return f"{base}?startapp={start_param}"
+
+    @staticmethod
     def channel_chat_id() -> str | None:
         """Channel @username derived from CHANNEL_URL.
 
@@ -170,10 +187,7 @@ class NotificationService:
             rooms_count=rooms_count,
             description=description,
         )
-        deep_link = (
-            f"https://t.me/{settings.TELEGRAM_BOT_USERNAME}/app"
-            f"?startapp=property_{property_id}"
-        )
+        deep_link = NotificationService.miniapp_deep_link(f"property_{property_id}")
         keyboard = {
             "inline_keyboard": [
                 [{"text": "👀 Открыть объявление", "url": deep_link}],
@@ -200,13 +214,14 @@ class NotificationService:
             await NotificationService.send_telegram_message(
                 chat_id, caption, reply_markup=keyboard
             )
-            return True
         except Exception:
             logger.exception("Автопостинг объявления в канал не удался")
             return False
+        else:
+            return True
 
     @staticmethod
-    def post_property_to_channel_sync(**kwargs) -> bool:
+    def post_property_to_channel_sync(**kwargs: object) -> bool:
         """Синхронная обёртка для вызова из sync-контекста (модерация)."""
         try:
             return asyncio.run(NotificationService.post_property_to_channel(**kwargs))
@@ -224,7 +239,7 @@ class NotificationService:
 
         text = (
             "🎉 <b>BELDOMiK</b> — недвижимость Беларуси 🇧🇾\n\n"
-            "В этом канале публикуются все новые объявления:\n"
+            "В этом канале публикуются все новые объявления:\n"  # noqa: RUF001
             "🏢 Квартиры и дома\n"
             "🌍 Земельные участки\n"
             "🏪 Коммерческая недвижимость\n\n"
@@ -234,7 +249,7 @@ class NotificationService:
             "inline_keyboard": [
                 [{
                     "text": "🏠 Открыть BELDOMiK",
-                    "url": f"https://t.me/{settings.TELEGRAM_BOT_USERNAME}/app",
+                    "url": NotificationService.miniapp_deep_link(),
                 }],
             ]
         }
@@ -265,7 +280,7 @@ class NotificationService:
         )
 
         # Inline keyboard with View button
-        deep_link = f"https://t.me/{settings.TELEGRAM_BOT_USERNAME}/app?startapp=property_{property_obj.id}"
+        deep_link = NotificationService.miniapp_deep_link(f"property_{property_obj.id}")
         reply_markup = {
             "inline_keyboard": [
                 [{"text": "👀 Посмотреть", "url": deep_link}],
@@ -338,7 +353,7 @@ class NotificationService:
                 f"Стало: <b>{new_price:,} BYN</b> (-{drop} BYN, {drop_pct}%)\n"
             ).replace(",", " ")
 
-            deep_link = f"https://t.me/{settings.TELEGRAM_BOT_USERNAME}/app?startapp=property_{property_obj.id}"
+            deep_link = NotificationService.miniapp_deep_link(f"property_{property_obj.id}")
             reply_markup = {
                 "inline_keyboard": [
                     [{"text": "👀 Посмотреть", "url": deep_link}],

@@ -1,5 +1,6 @@
-import { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Suspense, lazy, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { useTelegram } from '@/app/providers/TelegramProvider';
 import { AppShell } from '@/widgets/layout/AppShell';
 import { CatalogPage } from '@/pages/CatalogPage';
 import { FavoritesPage } from '@/pages/FavoritesPage';
@@ -41,6 +42,19 @@ function MapPageFallback() {
 }
 
 export function App() {
+  const navigate = useNavigate();
+  const { startParam } = useTelegram();
+
+  // Глубокая ссылка из бота/канала (startapp=property_<id>): открываем
+  // конкретное объявление сразу при старте MiniApp, а не каталог.
+  useEffect(() => {
+    if (!startParam) return;
+    const m = /^property_(\d+)$/.exec(startParam);
+    if (m) {
+      navigate(`/property/${m[1]}`, { replace: true });
+    }
+  }, [startParam, navigate]);
+
   return (
     <ToastProvider>
       <AppShell>

@@ -4,6 +4,8 @@ import WebApp from '@twa-dev/sdk';
 interface TelegramContextValue {
   webApp: typeof WebApp;
   initData: string | null;
+  /** Значение start_param из глубокой ссылки (startapp=...) — например property_123. */
+  startParam: string | null;
   themeParams: Record<string, string | number> | null;
   colorScheme: 'light' | 'dark';
   isReady: boolean;
@@ -49,6 +51,7 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
     top: number; bottom: number; left: number; right: number;
   } | null>(null);
   const [initData, setInitData] = useState<string | null>(null);
+  const [startParam, setStartParam] = useState<string | null>(null);
 
   useEffect(() => {
     const webApp = WebApp;
@@ -72,6 +75,10 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
     if (webApp.initData) {
       setInitData(webApp.initData);
     }
+
+    // start_param из глубокой ссылки (t.me/<bot>/<app>?startapp=property_123)
+    // — используется для перехода на конкретное объявление при открытии.
+    setStartParam(webApp.initDataUnsafe?.start_param ?? null);
 
     // Get theme params
     if (webApp.themeParams) {
@@ -190,6 +197,7 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
   const value: TelegramContextValue = {
     webApp: WebApp,
     initData,
+    startParam,
     themeParams,
     colorScheme,
     isReady,

@@ -51,6 +51,12 @@ class Settings(BaseSettings):
     TELEGRAM_BOT_USERNAME: str = Field(
         default="BELDOMiK_BOT", validation_alias="TELEGRAM_BOT_USERNAME"
     )
+    # Суффикс мини-приложения (последний сегмент t.me/<бот>/<суффикс>) из
+    # BotFather. Используется в глубоких ссылках на конкретное объявление
+    # (startapp=property_<id>). По умолчанию "app".
+    TELEGRAM_MINIAPP_PATH: str = Field(
+        default="app", validation_alias="TELEGRAM_MINIAPP_PATH"
+    )
     TELEGRAM_WEBAPP_URL: str = Field(default="", validation_alias="TELEGRAM_WEBAPP_URL")
     TELEGRAM_WEBHOOK_SECRET: str = Field(default="", validation_alias="TELEGRAM_WEBHOOK_SECRET")
 
