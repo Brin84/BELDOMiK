@@ -129,6 +129,8 @@ export const API_ENDPOINTS = {
     propertyStatus: (id: number) => `/api/v1/admin/properties/${id}/status`,
     reports: '/api/v1/admin/reports',
     resolveReport: (id: number) => `/api/v1/admin/reports/${id}/resolve`,
+    channelPostListing: (id: number) => `/api/v1/admin/telegram/post-listing/${id}`,
+    channelWelcome: '/api/v1/admin/telegram/channel-welcome',
   },
   health: '/health',
 } as const;

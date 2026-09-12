@@ -248,6 +248,22 @@ class TestChatAPI:
 
         app.dependency_overrides.clear()
 
+    def test_self_chat_returns_own_property_message(
+        self, client, chat_owner: User, chat_property: Property
+    ):
+        from app.main import app
+
+        # Владелец пытается «написать» себе — не 404 с общим текстом, а явная
+        # причина, которую фронт показывает тостом (никакого внешнего Telegram).
+        self._auth(app, chat_owner)
+        response = client.post(
+            "/api/v1/messages", json={"property_id": chat_property.id}
+        )
+        assert response.status_code == 404
+        assert "ваше объявление" in response.json()["detail"]
+
+        app.dependency_overrides.clear()
+
     def test_messages_require_auth(self, client):
         assert client.get("/api/v1/messages").status_code == 401
         assert client.get("/api/v1/messages/unread-count").status_code == 401

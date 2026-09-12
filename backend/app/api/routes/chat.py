@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user, get_db
+from app.models.property import Property
 from app.models.user import User
 from app.schemas.chat import (
     ChatMessageCreate,
@@ -52,6 +53,14 @@ async def start_conversation(
     """Открыть переписку по объявлению: создаётся при первом обращении."""
     conversation = ChatService.get_or_create(db, current_user.id, data.property_id)
     if conversation is None:
+        # Точная причина — чтобы фронт показал внятный тост, а не молча ушёл
+        # во внешний Telegram. Своё объявление и недоступное различимы.
+        prop = db.get(Property, data.property_id)
+        if prop is not None and prop.owner_id == current_user.id:
+            raise HTTPException(
+                status_code=404,
+                detail="Это ваше объявление — переписка с самим собой недоступна",
+            )
         raise HTTPException(status_code=404, detail="Объявление недоступно для переписки")
 
     if data.text:

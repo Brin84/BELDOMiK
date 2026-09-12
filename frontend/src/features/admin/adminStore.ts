@@ -36,6 +36,7 @@ interface AdminState {
   blockUser: (userId: number, blocked: boolean) => Promise<void>;
   updatePropertyStatus: (propertyId: number, status: string, reason?: string) => Promise<void>;
   resolveReport: (reportId: number) => Promise<void>;
+  postListingToChannel: (propertyId: number) => Promise<void>;
 }
 
 export const useAdminStore = create<AdminState>((set, get) => ({
@@ -165,5 +166,11 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     } catch (err) {
       console.error('Failed to resolve report:', err);
     }
+  },
+
+  postListingToChannel: async (propertyId) => {
+    await api.post<{ success: boolean; message: string }>(
+      API_ENDPOINTS.admin.channelPostListing(propertyId)
+    );
   },
 }));

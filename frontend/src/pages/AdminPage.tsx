@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useAuthStore } from '@/features/auth';
 import { useHaptics } from '@/shared/lib/haptics';
+import { useToast } from '@/shared/ui/Toast';
 import { useNavigate } from 'react-router-dom';
 import { useAdminStore } from '@/features/admin';
 import type { UserRole, PropertyStatus } from '@/shared/api';
@@ -42,6 +43,7 @@ const STATUS_COLORS: Record<PropertyStatus, { bg: string; text: string }> = {
 export function AdminPage() {
   const { user } = useAuthStore();
   const { trigger } = useHaptics();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const { hapticFeedback } = useTelegram();
 
@@ -53,6 +55,7 @@ export function AdminPage() {
     usersLoading, propertiesLoading, reportsLoading,
     fetchDashboard, fetchUsers, fetchProperties, fetchReports,
     updateUserRole, blockUser, updatePropertyStatus, resolveReport,
+    postListingToChannel,
   } = useAdminStore();
 
   // Filters
@@ -520,16 +523,39 @@ export function AdminPage() {
                       </>
                     )}
                     {p.status === 'published' && (
-                      <button
-                        onClick={() => {
-                          hapticFeedback.impactOccurred('heavy');
-                          updatePropertyStatus(p.id, 'blocked');
-                        }}
-                        className="px-2 py-1 rounded-lg text-[10px] font-bold"
-                        style={{ backgroundColor: 'rgba(255,59,48,0.15)', color: '#ff3b30' }}
-                      >
-                        🚫 Заблокировать
-                      </button>
+                      <>
+                        <button
+                          onClick={() => {
+                            hapticFeedback.impactOccurred('light');
+                            postListingToChannel(p.id)
+                              .then(() => {
+                                trigger('success');
+                                showToast(`Объявление #${p.id} опубликовано в канале`, 'success');
+                              })
+                              .catch((err) => {
+                                trigger('error');
+                                showToast(
+                                  err instanceof Error && err.message ? err.message : 'Не удалось опубликовать в канал',
+                                  'error'
+                                );
+                              });
+                          }}
+                          className="px-2 py-1 rounded-lg text-[10px] font-bold"
+                          style={{ backgroundColor: 'rgba(0,122,255,0.15)', color: '#007aff' }}
+                        >
+                          📢 В канал
+                        </button>
+                        <button
+                          onClick={() => {
+                            hapticFeedback.impactOccurred('heavy');
+                            updatePropertyStatus(p.id, 'blocked');
+                          }}
+                          className="px-2 py-1 rounded-lg text-[10px] font-bold"
+                          style={{ backgroundColor: 'rgba(255,59,48,0.15)', color: '#ff3b30' }}
+                        >
+                          🚫 Заблокировать
+                        </button>
+                      </>
                     )}
                     {(p.status === 'rejected' || p.status === 'blocked') && (
                       <button

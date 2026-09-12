@@ -4,7 +4,7 @@ import { useHaptics } from '@/shared/lib/haptics';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useFavoritesStore } from '@/features/favorites';
 import { useChatStore } from '@/features/chat';
-import { useTelegram } from '@/app/providers/TelegramProvider';
+import { useToast } from '@/shared/ui/Toast';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { PropertyHeroGallery } from './PropertyHeroGallery';
@@ -20,7 +20,7 @@ export function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { trigger } = useHaptics();
-  const { openTelegramLink } = useTelegram();
+  const { showToast } = useToast();
   const { fetchPropertyDetail, propertyDetail, isLoadingDetail, errorDetail, clearPropertyDetail, setLocalFavorite } = usePropertiesStore();
   const { toggleFavorite } = useFavoritesStore();
   const { startChat } = useChatStore();
@@ -89,11 +89,11 @@ export function PropertyDetailPage() {
   // если владелец разрешил показ (show_phone). Стрые объявления без contact_*
   // фолбэчат на телефон аккаунта владельца.
   const contactPhone = property.contact_phone || property.owner_phone || null;
-  const ownerUsername = property.owner_username ?? null;
   const canCall = property.show_phone !== false && !!contactPhone;
   // Требование продакта: «Написать»+«Позвонить» видны на любой карточке, когда
-  // есть телефон. Чат с самим собой бэкенд отклоняет (get_or_create → 404), и
-  // handleWrite уйдёт в фолбэк на внешний Telegram — редкий и безвредный случай.
+  // есть телефон. Чат с самим собой бэкенд отклоняет (get_or_create → 404) —
+  // тогда вместо входа в чат показываем тост с причиной и НЕ уводим из
+  // приложения во внешний Telegram.
   const canWrite = true;
 
   // Звонок — реальный <a href="tel:">, БЕЗ JS-навигации: WebView Telegram
@@ -111,13 +111,15 @@ export function PropertyDetailPage() {
       // Встроенный чат (Kufar-модель): переписка сохраняется, пока не удалишь.
       const conversationId = await startChat(propertyId!, undefined);
       navigate(`/messages/${conversationId}`);
-    } catch {
-      // Чат недоступен (объявление снято/заблокировано, владелец без аккаунта
-      // MiniApp) — фолбэк на внешний Telegram, если username известен.
-      if (ownerUsername) {
-        trigger('success');
-        openTelegramLink(`https://t.me/${ownerUsername.replace('@', '')}`);
-      }
+    } catch (error) {
+      // Переписка ТОЛЬКО во встроенном чате — никакого перехода во внешний
+      // Telegram. Чат недоступен (своё объявление, снято/заблокировано) →
+      // тост с причиной от бэкенда, остаёмся в приложении.
+      trigger('error');
+      showToast(
+        error instanceof Error && error.message ? error.message : 'Не удалось открыть чат',
+        'warning'
+      );
     }
   };
 
@@ -163,9 +165,9 @@ export function PropertyDetailPage() {
       </div>
 
       {/* Липкий нижний бар «Написать / Позвонить».
-          «Написать» открывает встроенный чат с продавцом; фолбэк на внешний t.me
-          обрабатывается в handleWrite. Позвонить — только если контактный номер
-          задан и разрешён к показу. */}
+          «Написать» открывает встроенный чат с продавцом (при недоступном чате —
+          тост в handleWrite, во внешний Telegram не уходит). Позвонить — только
+          если контактный номер задан и разрешён к показу. */}
       {(canWrite || canCall) && (
         <div className="property-bottom-bar">
           {canWrite && (
