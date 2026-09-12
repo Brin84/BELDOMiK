@@ -421,26 +421,6 @@ export function ProfilePage() {
             }}
             onClick={() => {
               trigger('light');
-              navigate('/mortgage');
-            }}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: '#94a3b8' }}>
-              <line x1="19" y1="5" x2="5" y2="19" />
-              <circle cx="6.5" cy="6.5" r="2.5" />
-              <circle cx="17.5" cy="17.5" r="2.5" />
-            </svg>
-            <span style={{ color: 'var(--tg-theme-text-color)' }}>Ипотечный калькулятор</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: '#94a3b8' }}>
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-          <button
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
-            style={{
-              backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-            }}
-            onClick={() => {
-              trigger('light');
               navigate('/analytics');
             }}
           >

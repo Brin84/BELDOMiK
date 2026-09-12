@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppShell } from '@/widgets/layout/AppShell';
 import { CatalogPage } from '@/pages/CatalogPage';
 import { FavoritesPage } from '@/pages/FavoritesPage';
-import { MortgagePage } from '@/pages/MortgagePage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { SearchPage } from '@/pages/SearchPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
@@ -71,7 +70,9 @@ export function App() {
         <Route path="/subscription" element={<SubscriptionPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/comparison" element={<ComparisonPage />} />
-        <Route path="/mortgage" element={<MortgagePage />} />
+        {/* Ипотечный калькулятор временно отключён от приложения:
+            роут /mortgage снят, код сохранён в features/mortgage
+            и pages/MortgagePage.tsx для повторного включения. */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AppShell>

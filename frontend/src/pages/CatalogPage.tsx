@@ -8,7 +8,7 @@ import { useGeographyStore } from '@/features/geography/geographyStore';
 import { useFavoritesStore } from '@/features/favorites';
 import { HotPropertyCard } from '@/entities/property';
 import { ListSkeleton, EmptyState, InlineError } from '@/shared/ui';
-import { CATEGORIES, CategoryCard, MortgageCard } from '@/widgets/catalog/CategoryCard';
+import { CATEGORIES, CategoryCard } from '@/widgets/catalog/CategoryCard';
 
 import beldomikAvatar from '@/assets/beldomik-avatar.webp';
 
@@ -374,14 +374,6 @@ export function CatalogPage() {
             );
           })}
         </section>
-
-        {/* MORTGAGE */}
-        <MortgageCard
-          onClick={() => {
-            trigger('light');
-            navigate('/mortgage');
-          }}
-        />
 
         {/* HOT OFFERS */}
         {hotProperties.length > 0 && (

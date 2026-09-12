@@ -1,3 +1,7 @@
+// ВРЕМЕННО ОТКЛЮЧЕНО от приложения: роут /mortgage и все точки входа
+// убраны (см. App.tsx, CatalogPage.tsx, ProfilePage.tsx). Код сохранён
+// (features/mortgage/** и MortgagePage) — для повторного включения верните
+// импорт MortgagePage и маршрут /mortgage в App.tsx.
 import { MortgageCalculator } from '@/features/mortgage';
 
 export function MortgagePage() {
