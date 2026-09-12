@@ -70,7 +70,17 @@ function formatPrice(price: number): React.ReactNode {
 
 export function Step6Preview() {
   const { formData, selectedPromotion, setSelectedPromotion } = useCreateListingStore();
-  const { propertyTypes, operationTypes, getRegionById, getCityById, getDistrictById, getNeighborhoodById, getStreetById } = useGeographyStore();
+  const {
+    propertyTypes,
+    operationTypes,
+    getRegionById,
+    getCityById,
+    getDistrictById,
+    getNeighborhoodById,
+    getStreetById,
+    getMetroStationById,
+    getMetroLineById,
+  } = useGeographyStore();
 
   // Find display names
   const propertyType = propertyTypes.find((t) => t.id === formData.property_type_id);
@@ -80,6 +90,8 @@ export function Step6Preview() {
   const district = formData.district_id ? getDistrictById(formData.district_id) : null;
   const neighborhood = formData.neighborhood_id ? getNeighborhoodById(formData.neighborhood_id) : null;
   const street = formData.street_id ? getStreetById(formData.street_id) : null;
+  const metroStation = formData.metro_station_id ? getMetroStationById(formData.metro_station_id) : null;
+  const metroLine = metroStation ? getMetroLineById(metroStation.line_id) : null;
 
   const renderPreviewRow = (label: string, value: React.ReactNode) => (
     <div className="flex items-start gap-3 py-3 border-b" style={{ borderColor: '#e2e8f0', borderWidth: '0.5px' }}>
@@ -121,10 +133,17 @@ export function Step6Preview() {
             {renderPreviewRow('Тип недвижимости', propertyType?.name || '—')}
 
             {formData.area && renderPreviewRow('Площадь', `${formData.area} м²`)}
+            {formData.living_area && renderPreviewRow('Жилая площадь', `${formData.living_area} м²`)}
+            {formData.kitchen_area && renderPreviewRow('Площадь кухни', `${formData.kitchen_area} м²`)}
             {formData.rooms !== undefined && renderPreviewRow('Комнат', formData.rooms === 0 ? 'Студия' : String(formData.rooms))}
             {formData.floor && formData.floors_total && renderPreviewRow('Этаж', `${formData.floor}/${formData.floors_total}`)}
             {formData.build_year && renderPreviewRow('Год постройки', String(formData.build_year))}
             {formData.repair_type && renderPreviewRow('Ремонт', formData.repair_type)}
+            {metroStation && renderPreviewRow(
+              'Метро',
+              `${metroStation.name}${metroLine ? ` · ${metroLine.name}` : ''}${formData.metro_distance ? ` · ${formData.metro_distance} м` : ''}`,
+            )}
+            {formData.is_new_building && renderPreviewRow('Новостройка', 'Да')}
 
             {/* Location */}
             <div className="pt-2 border-t" style={{ borderColor: '#e2e8f0', borderWidth: '0.5px' }}>
@@ -141,13 +160,19 @@ export function Step6Preview() {
 
             {/* Features */}
             <div className="pt-2 border-t" style={{ borderColor: '#e2e8f0', borderWidth: '0.5px' }}>
-              <div className="text-sm mb-2" style={{ color: '#64748b' }}>Особенности</div>
+              <div className="text-sm mb-2" style={{ color: '#64748b' }}>Дополнительно</div>
               <div className="flex flex-wrap gap-2">
-                {formData.has_balcony && <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#f1f5f9', color: '#0f172a' }}>🏠 Балкон</span>}
+                {formData.balcony_count && formData.balcony_count > 0 && (
+                  <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#f1f5f9', color: '#0f172a' }}>🏠 Балкон · {formData.balcony_count}</span>
+                )}
+                {formData.loggia_count && formData.loggia_count > 0 && (
+                  <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#f1f5f9', color: '#0f172a' }}>🪟 Лоджия · {formData.loggia_count}</span>
+                )}
+                {formData.is_new_building && <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#f1f5f9', color: '#0f172a' }}>🏗️ Новостройка</span>}
                 {formData.has_furniture && <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#f1f5f9', color: '#0f172a' }}>🛋️ Мебель</span>}
                 {formData.has_elevator && <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#f1f5f9', color: '#0f172a' }}>🛗 Лифт</span>}
                 {formData.has_parking && <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#f1f5f9', color: '#0f172a' }}>🅿️ Парковка</span>}
-                {!formData.has_balcony && !formData.has_furniture && !formData.has_elevator && !formData.has_parking && (
+                {!formData.balcony_count && !formData.loggia_count && !formData.is_new_building && !formData.has_furniture && !formData.has_elevator && !formData.has_parking && (
                   <span className="text-xs" style={{ color: '#64748b' }}>Не указано</span>
                 )}
               </div>

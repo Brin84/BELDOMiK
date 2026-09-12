@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useCreateListingStore } from '../../createListingStore';
+import { useGeographyStore } from '@/features/geography/geographyStore';
 import { BynSymbol } from '@/shared/ui';
 import { ExpandablePicker, type ExpandableOption } from '../ExpandablePicker';
 
@@ -12,8 +13,9 @@ const REPAIR_TYPES = [
   'Требует ремонта',
 ];
 
-const FEATURES: { key: 'has_balcony' | 'has_furniture' | 'has_elevator' | 'has_parking'; label: string; icon: string }[] = [
-  { key: 'has_balcony', label: 'Балкон / Лоджия', icon: '🏠' },
+// Дополнительные особенности (кроме балкона/лоджии — у них счётчики).
+const EXTRA_FEATURES: { key: 'is_new_building' | 'has_furniture' | 'has_elevator' | 'has_parking'; label: string; icon: string }[] = [
+  { key: 'is_new_building', label: 'Новостройка', icon: '🏗️' },
   { key: 'has_furniture', label: 'Мебель', icon: '🛋️' },
   { key: 'has_elevator', label: 'Лифт', icon: '🛗' },
   { key: 'has_parking', label: 'Парковка', icon: '🅿️' },
@@ -77,23 +79,118 @@ function NumberInput({ label, value, onChange, placeholder, min, max, unit, requ
   );
 }
 
-type SectionName = 'repair' | 'features';
+/** Счётчик количества (балкон/лоджия): −  N  +  */
+interface StepperProps {
+  label: string;
+  icon: string;
+  value: number | undefined;
+  onChange: (value: number | undefined) => void;
+}
+
+function Stepper({ label, icon, value, onChange }: StepperProps) {
+  const { trigger } = useHaptics();
+  const count = value ?? 0;
+  const setCount = (next: number) => {
+    if (next < 0) next = 0;
+    if (next > 10) next = 10;
+    trigger('light');
+    onChange(next === 0 ? undefined : next);
+  };
+
+  return (
+    <div className="flex items-center gap-3 px-4 py-3.5">
+      <span className="text-2xl leading-none flex-shrink-0">{icon}</span>
+      <span className="min-w-0 flex-1 text-[16px] font-medium" style={{ color: '#0f172a' }}>{label}</span>
+      <button
+        type="button"
+        onClick={() => setCount(count - 1)}
+        className="w-9 h-9 rounded-full flex items-center justify-center text-lg font-semibold transition-colors active:opacity-80"
+        style={{ backgroundColor: count > 0 ? '#e8f0fe' : '#f1f5f9', color: count > 0 ? '#2171ee' : '#94a3b8' }}
+        aria-label={`Уменьшить: ${label}`}
+      >
+        −
+      </button>
+      <span className="w-6 text-center text-base font-semibold tabular-nums" style={{ color: count > 0 ? '#0f172a' : '#94a3b8' }}>
+        {count}
+      </span>
+      <button
+        type="button"
+        onClick={() => setCount(count + 1)}
+        className="w-9 h-9 rounded-full flex items-center justify-center text-lg font-semibold transition-colors active:opacity-80"
+        style={{ backgroundColor: '#e8f0fe', color: '#2171ee' }}
+        aria-label={`Увеличить: ${label}`}
+      >
+        +
+      </button>
+    </div>
+  );
+}
+
+type SectionName = 'repair' | 'metro' | 'features';
 
 export function Step3Details() {
   const { trigger } = useHaptics();
   const { updateFormData, formData, clearError, errors } = useCreateListingStore();
   const [openSection, setOpenSection] = useState<SectionName | null>(null);
 
+  const {
+    metroStations,
+    fetchMetroLines,
+    fetchMetroStations,
+    getMetroLineById,
+  } = useGeographyStore();
+
+  // Грузим линии и станции метро выбранного города — без них пикер пуст.
+  useEffect(() => {
+    if (formData.city_id > 0) {
+      fetchMetroLines(formData.city_id);
+      fetchMetroStations(formData.city_id);
+    }
+  }, [formData.city_id, fetchMetroLines, fetchMetroStations]);
+
   const repairOptions: ExpandableOption<string>[] = REPAIR_TYPES.map((r) => ({
     value: r,
     title: r,
   }));
 
-  const selectedFeaturesCount = FEATURES.filter((f) => !!formData[f.key]).length;
+  // Станции метро выбранного города с подписью линии.
+  const metroOptions: ExpandableOption<number>[] = metroStations.map((station) => {
+    const line = getMetroLineById(station.line_id);
+    return {
+      value: station.id,
+      title: station.name,
+      subtitle: line ? line.name : undefined,
+      icon: line ? '🚇' : undefined,
+    };
+  });
+
+  const selectedFeaturesCount = EXTRA_FEATURES.filter((f) => !!formData[f.key]).length;
+  const selectedExtrasCount =
+    (formData.balcony_count && formData.balcony_count > 0 ? 1 : 0) +
+    (formData.loggia_count && formData.loggia_count > 0 ? 1 : 0) +
+    selectedFeaturesCount +
+    (formData.metro_station_id ? 1 : 0);
 
   const handleToggle = (section: SectionName) => {
     trigger('light');
     setOpenSection((prev) => (prev === section ? null : section));
+  };
+
+  const handleMetroChange = (stationId: number) => {
+    trigger('selection');
+    updateFormData({ metro_station_id: stationId });
+    setOpenSection(null);
+  };
+
+  const handleMetroClear = () => {
+    trigger('selection');
+    updateFormData({ metro_station_id: undefined, metro_distance: undefined });
+  };
+
+  const setBalconyCount = (count: number | undefined) => {
+    // «Есть балкон» (properties.balcony) синхронизируем со счётчиком: count > 0 ⇒ true —
+    // фильтры каталога ищут по этому флагу, а количество хранится отдельно.
+    updateFormData({ balcony_count: count, has_balcony: !!count && count > 0 });
   };
 
   return (
@@ -247,7 +344,7 @@ export function Step3Details() {
         )}
       </section>
 
-      {/* Area, Rooms, Floor */}
+      {/* Area, Living area, Kitchen area, Rooms, Floor */}
       <section>
         <h2 style={{ color: '#0f172a', fontSize: '20px', fontWeight: 700, marginBottom: '16px' }}>Параметры</h2>
         <div className="grid grid-cols-2 gap-3">
@@ -312,6 +409,30 @@ export function Step3Details() {
             min={1800}
             max={new Date().getFullYear() + 5}
           />
+          <NumberInput
+            label="Жилая площадь (м²)"
+            value={formData.living_area}
+            onChange={(v) => {
+              trigger('selection');
+              updateFormData({ living_area: v });
+            }}
+            placeholder="38"
+            min={1}
+            max={10000}
+            unit="м²"
+          />
+          <NumberInput
+            label="Площадь кухни (м²)"
+            value={formData.kitchen_area}
+            onChange={(v) => {
+              trigger('selection');
+              updateFormData({ kitchen_area: v });
+            }}
+            placeholder="9"
+            min={1}
+            max={10000}
+            unit="м²"
+          />
         </div>
         {(errors.area || errors.rooms || errors.floor || errors.floors_total || errors.build_year) && (
           <p className="text-sm mt-1" style={{ color: '#ef4444' }}>Проверьте корректность числовых полей</p>
@@ -335,7 +456,51 @@ export function Step3Details() {
         />
       </section>
 
-      {/* Особенности — сворачиваемая секция с чекбоксами */}
+      {/* Метро — станция выбранного города + расстояние до неё */}
+      {formData.city_id > 0 && (
+        <section className="space-y-3">
+          <ExpandablePicker<number>
+            label="Метро"
+            placeholder="Не указано"
+            selected={formData.metro_station_id ?? null}
+            options={metroOptions}
+            onSelect={handleMetroChange}
+            open={openSection === 'metro'}
+            onToggle={() => handleToggle('metro')}
+            searchable
+            searchPlaceholder="Станция метро"
+          />
+          {formData.metro_station_id && (
+            <div
+              className="rounded-2xl p-3"
+              style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
+            >
+              <NumberInput
+                label="До метро, м"
+                value={formData.metro_distance}
+                onChange={(v) => {
+                  trigger('selection');
+                  updateFormData({ metro_distance: v });
+                }}
+                placeholder="400"
+                min={0}
+                max={50000}
+                unit="м"
+              />
+              <button
+                type="button"
+                onClick={handleMetroClear}
+                className="mt-2 text-sm font-medium transition-opacity active:opacity-80"
+                style={{ color: '#ef4444' }}
+              >
+                Сбросить метро
+              </button>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* Дополнительно — счётчики балконов/лоджий и особенности */}
       <section>
         <div
           className="rounded-2xl overflow-hidden transition-shadow"
@@ -353,12 +518,12 @@ export function Step3Details() {
             className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-opacity active:opacity-80"
           >
             <div className="flex-1 min-w-0">
-              <div className="text-[13px] leading-tight" style={{ color: '#94a3b8' }}>Особенности</div>
+              <div className="text-[13px] leading-tight" style={{ color: '#94a3b8' }}>Дополнительно</div>
               <div
                 className="text-[17px] font-semibold truncate mt-0.5"
-                style={{ color: selectedFeaturesCount > 0 ? '#0f172a' : '#94a3b8' }}
+                style={{ color: selectedExtrasCount > 0 ? '#0f172a' : '#94a3b8' }}
               >
-                {selectedFeaturesCount > 0 ? `${selectedFeaturesCount} выбрано` : 'Не выбраны'}
+                {selectedExtrasCount > 0 ? `${selectedExtrasCount} выбрано` : 'Балкон, лоджия, новостройка'}
               </div>
             </div>
             <svg
@@ -376,7 +541,7 @@ export function Step3Details() {
             </svg>
           </button>
 
-          {/* Раскрывающийся столбик чекбоксов */}
+          {/* Раскрывающийся столбик */}
           <div
             className={`grid transition-[grid-template-rows] duration-200 ease-out ${
               openSection === 'features' ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
@@ -384,7 +549,26 @@ export function Step3Details() {
           >
             <div className="overflow-hidden min-h-0">
               <div className="pt-1 pb-2" style={{ borderTop: '1px solid #f1f5f9' }}>
-                {FEATURES.map(({ key, label, icon }, index) => {
+                {/* Счётчики балкона и лоджии */}
+                <div style={{ borderBottom: '1px solid #f1f5f9' }}>
+                  <Stepper
+                    label="Балкон"
+                    icon="🏠"
+                    value={formData.balcony_count}
+                    onChange={setBalconyCount}
+                  />
+                </div>
+                <div style={{ borderBottom: '1px solid #f1f5f9' }}>
+                  <Stepper
+                    label="Лоджия"
+                    icon="🪟"
+                    value={formData.loggia_count}
+                    onChange={(count) => updateFormData({ loggia_count: count })}
+                  />
+                </div>
+
+                {/* Остальные особенности — чекбоксы */}
+                {EXTRA_FEATURES.map(({ key, label, icon }, index) => {
                   const checked = !!formData[key];
                   return (
                     <button
@@ -397,7 +581,7 @@ export function Step3Details() {
                       className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors active:opacity-80"
                       style={{
                         backgroundColor: checked ? '#e8f0fe' : '#ffffff',
-                        borderBottom: index < FEATURES.length - 1 ? '1px solid #f1f5f9' : 'none',
+                        borderBottom: index < EXTRA_FEATURES.length - 1 ? '1px solid #f1f5f9' : 'none',
                       }}
                       aria-pressed={checked}
                     >

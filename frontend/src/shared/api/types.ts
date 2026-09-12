@@ -97,6 +97,8 @@ export interface PropertyShort {
   renovation: string | null;
   furniture: boolean;
   balcony: boolean;
+  balcony_count: number | null;
+  loggia_count: number | null;
   parking: boolean;
   elevator: boolean;
   is_new_building: boolean;
@@ -285,6 +287,18 @@ export interface PropertyCreate {
   has_furniture?: boolean;
   has_elevator?: boolean;
   has_parking?: boolean;
+  /** Метро: станция и расстояние до неё (м) — раздел «Дополнительно». */
+  metro_station_id?: number;
+  metro_distance?: number;
+  /** Площади: жилая и кухня (м²). */
+  living_area?: number;
+  kitchen_area?: number;
+  /** Количество балконов (0 = нет; имеет_балкон синхронизируется из него). */
+  balcony_count?: number;
+  /** Количество лоджий (0 = нет). */
+  loggia_count?: number;
+  /** Новостройка (застройщик, Krisha-раздел). */
+  is_new_building?: boolean;
   /** Kufar-контакты: имя + телефон, показ/скрытие номера. */
   contact_name?: string;
   contact_phone?: string;

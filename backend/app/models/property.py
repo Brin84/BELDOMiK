@@ -82,6 +82,8 @@ class Property(Base):
     renovation = Column(Enum(RenovationType), nullable=True, default=RenovationType.NONE)
     furniture = Column(Boolean, default=False, nullable=False)
     balcony = Column(Boolean, default=False, nullable=False)
+    balcony_count = Column(Integer, nullable=True)  # количество балконов
+    loggia_count = Column(Integer, nullable=True)  # количество лоджий
     parking = Column(Boolean, default=False, nullable=False)
     elevator = Column(Boolean, default=False, nullable=False)
 

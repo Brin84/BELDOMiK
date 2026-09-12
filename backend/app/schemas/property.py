@@ -6,7 +6,6 @@ from pydantic import field_validator
 from app.models.property import RenovationType
 from app.schemas.common import BaseSchema
 
-
 # Маппинг русских названий / строк → enum-члены.
 # Фронтенд шлёт русские названия, БД хранит enum-значения.
 _RENOVATION_MAP: dict[str, RenovationType] = {
@@ -114,6 +113,8 @@ class PropertyBase(BaseSchema):
     renovation: str | None = None
     furniture: bool = False
     balcony: bool = False
+    balcony_count: int | None = None
+    loggia_count: int | None = None
     parking: bool = False
     elevator: bool = False
     is_new_building: bool = False
@@ -162,6 +163,8 @@ class PropertyUpdate(BaseSchema):
     renovation: str | None = None
     furniture: bool | None = None
     balcony: bool | None = None
+    balcony_count: int | None = None
+    loggia_count: int | None = None
     parking: bool | None = None
     elevator: bool | None = None
     is_new_building: bool | None = None
@@ -201,6 +204,8 @@ class PropertyShortRead(BaseSchema):
     renovation: str | None = None
     furniture: bool = False
     balcony: bool = False
+    balcony_count: int | None = None
+    loggia_count: int | None = None
     parking: bool = False
     elevator: bool = False
     is_new_building: bool = False

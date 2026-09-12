@@ -31,7 +31,7 @@ export interface GeographyState {
   fetchNeighborhoods: (cityId: number) => Promise<void>;
   fetchStreets: (cityId: number) => Promise<void>;
   fetchMetroLines: (cityId: number) => Promise<void>;
-  fetchMetroStations: (lineId: number) => Promise<void>;
+  fetchMetroStations: (cityId: number) => Promise<void>;
   fetchPropertyTypes: () => Promise<void>;
   fetchOperationTypes: () => Promise<void>;
 
@@ -41,6 +41,7 @@ export interface GeographyState {
   getNeighborhoodById: (id: number) => Neighborhood | undefined;
   getStreetById: (id: number) => Street | undefined;
   getMetroStationById: (id: number) => MetroStation | undefined;
+  getMetroLineById: (id: number) => MetroLine | undefined;
   getPropertyTypeById: (id: number) => PropertyType | undefined;
   getOperationTypeById: (id: number) => OperationTypeData | undefined;
 }
@@ -155,9 +156,11 @@ export const useGeographyStore = create<GeographyState>((set, get) => ({
     }
   },
 
-  fetchMetroStations: async (lineId: number) => {
+  fetchMetroStations: async (cityId: number) => {
     try {
-      const data = await api.get<MetroStation[]>(API_ENDPOINTS.geography.metroStations, { line_id: lineId });
+      // Бэкенд отдаёт ВСЕ станции города одним запросом (join с линиями,
+      // отсортировано по line_id) — по одной линии грузить не нужно.
+      const data = await api.get<MetroStation[]>(API_ENDPOINTS.geography.metroStations, { city_id: cityId });
       set({ metroStations: data });
     } catch (error) {
       console.error('Failed to fetch metro stations:', error);
@@ -190,6 +193,7 @@ export const useGeographyStore = create<GeographyState>((set, get) => ({
   getNeighborhoodById: (id: number) => get().neighborhoods.find((n) => n.id === id),
   getStreetById: (id: number) => get().streets.find((s) => s.id === id),
   getMetroStationById: (id: number) => get().metroStations.find((s) => s.id === id),
+  getMetroLineById: (id: number) => get().metroLines.find((l) => l.id === id),
   getPropertyTypeById: (id: number) => get().propertyTypes.find((t) => t.id === id),
   getOperationTypeById: (id: number) => get().operationTypes.find((t) => t.id === id),
 }));

@@ -52,7 +52,15 @@ function buildAdditional(p: PropertyDetail): Row[] {
     rows.push({ label: 'Метро', value: `${p.metro_station_name}${distance}` });
   }
   if (p.furniture) rows.push({ label: 'Мебель', value: 'Есть' });
-  if (p.balcony) rows.push({ label: 'Балкон / Лоджия', value: 'Есть' });
+  if (p.balcony_count && p.balcony_count > 0) {
+    rows.push({ label: 'Балкон', value: String(p.balcony_count) });
+  } else if (p.balcony) {
+    // Старые объявления без balcony_count, но с флагом «есть балкон».
+    rows.push({ label: 'Балкон / Лоджия', value: 'Есть' });
+  }
+  if (p.loggia_count && p.loggia_count > 0) {
+    rows.push({ label: 'Лоджия', value: String(p.loggia_count) });
+  }
   if (p.parking) rows.push({ label: 'Парковка', value: 'Есть' });
   if (p.elevator) rows.push({ label: 'Лифт', value: 'Есть' });
   if (p.is_new_building) rows.push({ label: 'Новостройка', value: 'Да' });

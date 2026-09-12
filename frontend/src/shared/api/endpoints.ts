@@ -15,8 +15,8 @@ export const API_ENDPOINTS = {
     districts: '/api/v1/geography/districts',
     neighborhoods: '/api/v1/geography/neighborhoods',
     streets: '/api/v1/geography/streets',
-    metroLines: '/api/v1/geography/metro/lines',
-    metroStations: '/api/v1/geography/metro/stations',
+    metroLines: '/api/v1/geography/metro-lines',
+    metroStations: '/api/v1/geography/metro',
   },
   propertyTypes: {
     list: '/api/v1/property-types',

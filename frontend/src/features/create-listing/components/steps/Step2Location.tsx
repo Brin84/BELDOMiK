@@ -36,7 +36,14 @@ export function Step2Location() {
   useEffect(() => {
     if (formData.region_id) {
       fetchCities(formData.region_id);
-      updateFormData({ city_id: 0, district_id: undefined, neighborhood_id: undefined, street_id: undefined });
+      updateFormData({
+        city_id: 0,
+        district_id: undefined,
+        neighborhood_id: undefined,
+        street_id: undefined,
+        metro_station_id: undefined,
+        metro_distance: undefined,
+      });
     }
   }, [formData.region_id, fetchCities, updateFormData]);
 
@@ -46,7 +53,13 @@ export function Step2Location() {
       fetchDistricts(formData.city_id);
       fetchNeighborhoods(formData.city_id);
       fetchStreets(formData.city_id);
-      updateFormData({ district_id: undefined, neighborhood_id: undefined, street_id: undefined });
+      updateFormData({
+        district_id: undefined,
+        neighborhood_id: undefined,
+        street_id: undefined,
+        metro_station_id: undefined,
+        metro_distance: undefined,
+      });
     }
   }, [formData.city_id, fetchDistricts, fetchNeighborhoods, fetchStreets, updateFormData]);
 
@@ -83,7 +96,14 @@ export function Step2Location() {
     setIsAddingCity(false);
     if (city) {
       trigger('success');
-      updateFormData({ city_id: city.id, district_id: undefined, neighborhood_id: undefined, street_id: undefined });
+      updateFormData({
+        city_id: city.id,
+        district_id: undefined,
+        neighborhood_id: undefined,
+        street_id: undefined,
+        metro_station_id: undefined,
+        metro_distance: undefined,
+      });
       setOpenPicker(null);
     } else {
       trigger('error');
