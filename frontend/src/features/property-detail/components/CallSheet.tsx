@@ -21,21 +21,39 @@ interface CallSheetProps {
  *   Программный клик по анкору и window.location там тоже не помогают —
  *   это ограничение платформы, а не кода.
  * — на Android тот же tel: обычно отрабатывает штатно.
- * Поэтому на вид платформы и строим UI: на iOS мёртвый tel:-анкор НЕ рисуем
- * вовсе (чтобы пользователь не жал на «мёртвую» кнопку), главной делаем
- * «Скопировать номер» — единственный гарантированный путь. На Android
- * главной остаётся настоящий tel: + копирование как запасной вариант.
+ *
+ * Как звоним на iOS: WebApp.openLink() открывает HTTPS-URL в системном
+ * Safari-контексте (SFSafariViewController), где хост (Telegram) НЕ может
+ * перехватить tel:. Поэтому primary-кнопка ведёт на relay-страницу
+ * (frontend/public/relay.html), которая редиректит на tel: — iOS показывает
+ * нативный диалог «Позвонить <номер>». «Скопировать номер» — запасной вариант.
+ * На Android primary остаётся настоящим tel: + копирование как запасной.
  */
 export function CallSheet({ telHref, display, onClose }: CallSheetProps) {
   const { trigger } = useHaptics();
   const { showToast } = useToast();
-  const { platform } = useTelegram();
+  const { platform, openLink } = useTelegram();
   const [copied, setCopied] = useState(false);
 
-  // iOS WKWebView блокирует tel: полностью — кнопка «Позвонить» там «мёртвая».
-  // Узнаём платформу один раз и прячем такой анкор: на iOS единственный путь —
-  // скопировать номер, на Android — настоящий tel:.
+  // iOS WKWebView блокирует tel: полностью — прямой анкор там «мёртвый».
+  // На iOS «Позвонить» идёт через relay-страницу в Safari-контексте.
   const isIOS = platform === 'ios';
+
+  const handleCall = () => {
+    trigger('success');
+    if (isIOS) {
+      // openLink уводит Telegram в нативный Safari-контекст (SFSafariViewController),
+      // где relay-страница редиректит на tel: и iOS показывает диалог вызова.
+      // Если openLink упал (URL не https — например локальный dev без WebApp) —
+      // не закрываем лист, пользователь остаётся на кнопке копирования.
+      try {
+        openLink(`${window.location.origin}/relay.html?phone=${encodeURIComponent(telHref)}`);
+        onClose();
+      } catch {
+        showToast('Не удалось запустить звонок — скопируйте номер ниже', 'warning');
+      }
+    }
+  };
 
   const handleCopy = async () => {
     trigger('light');
@@ -65,17 +83,17 @@ export function CallSheet({ telHref, display, onClose }: CallSheetProps) {
         <div className="call-sheet__number">{display}</div>
 
         {isIOS ? (
-          // iOS: WKWebView блокирует tel: — показываем только копирование.
+          // iOS: Идём через relay-страницу — она открывается в системном Safari,
+          // где tel: запускает нативный набор (WKWebView тел: блокирует).
           <button
             type="button"
             className="call-sheet__btn call-sheet__btn--call"
-            onClick={handleCopy}
+            onClick={handleCall}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
             </svg>
-            {copied ? 'Номер скопирован' : 'Скопировать номер'}
+            Позвонить
           </button>
         ) : (
           <a
@@ -90,24 +108,20 @@ export function CallSheet({ telHref, display, onClose }: CallSheetProps) {
           </a>
         )}
 
-        {!isIOS && (
-          <button
-            type="button"
-            className="call-sheet__btn call-sheet__btn--copy"
-            onClick={handleCopy}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </svg>
-            {copied ? 'Номер скопирован' : 'Скопировать номер'}
-          </button>
-        )}
+        <button
+          type="button"
+          className="call-sheet__btn call-sheet__btn--copy"
+          onClick={handleCopy}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+          {copied ? 'Номер скопирован' : 'Скопировать номер'}
+        </button>
 
         <p className="call-sheet__hint">
-          {isIOS
-            ? 'На iPhone наберите номер в приложении «Телефон» — звонок из приложения Telegram не запускается.'
-            : 'Если звонок не запускается, скопируйте номер и наберите его в приложении «Телефон».'}
+          Если звонок не запускается, скопируйте номер и наберите его в приложении «Телефон».
         </p>
 
         <button type="button" className="call-sheet__btn call-sheet__btn--cancel" onClick={onClose}>

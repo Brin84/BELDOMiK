@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Позвонить</title>
+  <script>
+    // Relay: WKWebView (Telegram MiniApp на iOS) блокирует tel: целиком.
+    // Эта страница открывается через WebApp.openLink() в системном Safari
+    // (SFSafariViewController), где tel: работает штатно и iOS показывает
+    // нативный диалог «Позвонить <номер>».
+    (function () {
+      var phone = new URLSearchParams(location.search).get('phone');
+      if (phone && /^\+?\d[\d\s()\-]{6,20}$/.test(phone)) {
+        // Пытаемся сразу: если Safari разрешит переход без жеста — страница
+        // выгрузится и фолбэк просто не успеет показаться.
+        setTimeout(function () {
+          location.replace('tel:' + phone.replace(/[^\d+]/g, ''));
+        }, 50);
+      }
+    })();
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      font-family: -apple-system, system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 32px;
+      background: #f7f9fc;
+      color: #1a1a1a;
+      text-align: center;
+    }
+    .state { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .state--loading { display: flex; }
+    .state--fallback { display: none; }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 3px solid rgba(0, 122, 255, 0.2);
+      border-top-color: #007aff;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .state__text { font-size: 16px; font-weight: 500; color: #3c3c43; }
+    .state__number {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      font-variant-numeric: tabular-nums;
+      word-break: break-word;
+    }
+    .state__actions { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 320px; }
+    .state__btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      height: 54px;
+      border: none;
+      border-radius: 16px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .state__btn--call {
+      background: #007aff;
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(0, 122, 255, 0.35);
+    }
+    .state__btn--copy {
+      background: #e5e5ea;
+      color: #1a1a1a;
+    }
+    .state__hint { font-size: 13px; color: #8e8e93; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="state state--loading" id="loading">
+    <div class="spinner" aria-hidden="true"></div>
+    <div class="state__text">Запускаем звонок…</div>
+  </div>
+
+  <div class="state state--fallback" id="fallback">
+    <div class="state__number" id="number"></div>
+    <div class="state__actions">
+      <a id="call" class="state__btn state__btn--call">📞 Позвонить</a>
+      <button id="copy" class="state__btn state__btn--copy">📋 Скопировать номер</button>
+    </div>
+    <p class="state__hint">Нажмите «Позвонить», чтобы запустить набор</p>
+  </div>
+
+  <script>
+    var phone = new URLSearchParams(location.search).get('phone');
+    var valid = phone && /^\+?\d[\d\s()\-]{6,20}$/.test(phone);
+    var telHref = valid ? ('tel:' + phone.replace(/[^\d+]/g, '')) : '';
+
+    // Если через 1200мс страница всё ещё здесь — авто-переход заблокирован
+    // (без жеста Safari часто не отдаёт tel:). Показываем кнопку «Позвонить»:
+    // тап = пользовательский жест, tel: сработает гарантированно.
+    setTimeout(function () {
+      if (valid) {
+        document.getElementById('loading').style.display = 'none';
+        var fb = document.getElementById('fallback');
+        fb.style.display = 'flex';
+        document.getElementById('number').textContent = phone;
+        var call = document.getElementById('call');
+        call.href = telHref;
+        call.addEventListener('click', function () {
+          location.replace(telHref);
+        });
+        document.getElementById('copy').addEventListener('click', function () {
+          navigator.clipboard.writeText(phone).then(function () {
+            document.getElementById('copy').textContent = '✓ Скопировано';
+          });
+        });
+      } else {
+        // Неправдоподобный кейс (например открыли без ?phone=): перевод на главную
+        var home = location.origin || 'https://' + location.host;
+        location.replace(home);
+      }
+    }, 1200);
+  </script>
+</body>
+</html>
