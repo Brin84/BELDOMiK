@@ -475,6 +475,31 @@
   flex-shrink: 0;
 }
 
+/* Номер в карточке продавца — голубым как ссылка на номер в сообщении канала.
+   Тап открывает лист звонка (на iOS — relay → нативный диалог). */
+.agent-card__phone {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 2px 0;
+  border: none;
+  background: transparent;
+  color: #2171ee;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.agent-card__phone:active {
+  color: #1a5cd6;
+}
+
 /* ============================================================
    Липкий нижний бар «Написать / Позвонить»
    ============================================================ */
@@ -548,94 +573,109 @@
   inset: 0;
   border: none;
   padding: 0;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(15, 23, 42, 0.4);
   cursor: pointer;
   animation: call-sheet-fade 0.18s ease-out;
 }
 
-.call-sheet__panel {
+/* Плавающая панель в светлом стиле BELDOMiK: белые «карточки» как у
+   iOS-меню, но в светлой палитре — боковые отступы, скруглённые углы. */
+.call-sheet__stack {
   position: relative;
   width: 100%;
   max-width: 480px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 10px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  gap: 8px;
+  padding: 0 12px calc(12px + env(safe-area-inset-bottom, 0px));
+  animation: call-sheet-up 0.24s ease-out;
+}
+
+.call-sheet__panel,
+.call-sheet__cancel-card {
+  border-radius: 16px;
+  overflow: hidden;
   background: #fff;
-  border-radius: 22px 22px 0 0;
-  box-shadow: 0 -12px 32px rgba(15, 23, 42, 0.18);
-  animation: call-sheet-up 0.22s ease-out;
+  box-shadow: 0 10px 32px rgba(15, 23, 42, 0.14);
 }
 
-.call-sheet__grip {
-  width: 40px;
-  height: 4px;
-  margin: 0 auto 4px;
-  border-radius: 999px;
-  background: #cbd5e1;
-}
-
-.call-sheet__title {
-  text-align: center;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: #94a3b8;
-}
-
+/* Номер синим сверху — как ссылка на номер в сообщении канала. */
 .call-sheet__number {
   text-align: center;
-  font-size: 26px;
-  font-weight: 800;
+  padding: 16px 16px 13px;
+  font-size: 21px;
+  font-weight: 700;
   letter-spacing: 0.01em;
-  color: #0f172a;
+  color: #2171ee;
   font-variant-numeric: tabular-nums;
   word-break: break-word;
-  padding: 2px 0 6px;
+  border-bottom: 1px solid #eef2f7;
 }
 
-.call-sheet__btn {
+.call-sheet__menu {
+  position: relative;
+}
+
+.call-sheet__item {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 50px;
+  gap: 14px;
+  width: 100%;
+  height: 52px;
+  padding: 0 16px;
   border: none;
-  border-radius: 16px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
+  background: transparent;
+  color: #0f172a;
+  font-size: 17px;
+  font-weight: 500;
+  text-align: left;
   text-decoration: none;
-  transition: transform 0.15s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.call-sheet__btn:active {
-  transform: scale(0.97);
+.call-sheet__item + .call-sheet__item {
+  border-top: 1px solid #eef2f7;
 }
 
-.call-sheet__btn--call {
-  background: #34c759;
-  color: #fff;
-  box-shadow: 0 6px 16px rgba(52, 199, 89, 0.35);
-}
-
-.call-sheet__btn--copy {
-  background: #eef4ff;
-  color: #2171ee;
-}
-
-.call-sheet__btn--cancel {
+.call-sheet__item:active {
   background: #f1f5f9;
-  color: #475569;
+}
+
+.call-sheet__item svg {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.call-sheet__item--call svg {
+  color: #34c759;
 }
 
 .call-sheet__hint {
-  margin: 2px 0 0;
+  margin: 0;
+  padding: 8px 16px 12px;
   text-align: center;
   font-size: 12.5px;
   line-height: 1.4;
   color: #94a3b8;
+  border-top: 1px solid #eef2f7;
+}
+
+.call-sheet__cancel {
+  width: 100%;
+  height: 52px;
+  border: none;
+  background: transparent;
+  color: #2171ee;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.call-sheet__cancel:active {
+  background: #f1f5f9;
 }
 
 @keyframes call-sheet-up {

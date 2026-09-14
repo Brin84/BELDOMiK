@@ -229,8 +229,13 @@ export function PropertyDetailPage() {
         {/* Описание */}
         <PropertyDescription description={property.description} />
 
-        {/* Продавец */}
-        <PropertyOwner owner={null} property={property} />
+        {/* Продавец. Номер (если разрешён) — голубой ссылкой, тап → лист звонка. */}
+        <PropertyOwner
+          owner={null}
+          property={property}
+          phone={canCall ? contactPhone : undefined}
+          onCall={canCall ? handleCall : undefined}
+        />
       </div>
 
       {/* Липкий нижний бар «Написать / Позвонить».
