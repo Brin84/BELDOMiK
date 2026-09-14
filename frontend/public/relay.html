@@ -9,18 +9,39 @@
     // WebApp.openLink() в SFSafariViewController, где tel: НЕ блокируется
     // (в отличие от WebView MiniApp). Пытаемся уйти на tel: сразу, до отрисовки —
     // чтобы над Safari успел всплыть нативный диалог iOS «Позвонить <номер>».
-    (function () {
-      var phone = new URLSearchParams(location.search).get('phone');
-      if (!phone || !/^\+?\d[\d\s()\-]{6,20}$/.test(phone)) return;
-      var href = 'tel:' + phone.replace(/[^\d+]/g, '');
-      function tryDial() {
-        // Несколько способов — какой-нибудь из них Safari отдаст системе.
-        try { location.replace(href); } catch (e) {}
-        try { window.location.href = href; } catch (e) {}
-      }
-      tryDial();                                       // сразу, до body
-      document.addEventListener('DOMContentLoaded', tryDial); // резерв после DOM
-    })();
+    var phone = new URLSearchParams(location.search).get('phone');
+    var valid = phone && /^\+?\d[\d\s()\-]{6,20}$/.test(phone);
+    var href = valid ? 'tel:' + phone.replace(/[^\d+]/g, '') : '';
+
+    function tryDial() {
+      // Несколько способов — какой-нибудь из них Safari отдаст системе.
+      try { location.replace(href); } catch (e) {}
+      try { window.location.href = href; } catch (e) {}
+    }
+
+    // Закрыть Safari-контекст (IAB), чтобы вернуться в мини-апп, а не
+    // оставаться на этой странице. Мини-апп под openLink() не закрывается —
+    // закрытие IAB возвращает пользователя прямо в карточку объявления.
+    function closeMe() {
+      try { window.close(); } catch (e) {}
+    }
+
+    // Набор + автоматический возврат. Используется и для автозапуска,
+    // и для кнопки «Позвонить» (когда iOS требует жест).
+    function dialAndClose() {
+      tryDial();
+      setTimeout(closeMe, 1200);
+    }
+
+    if (valid) {
+      tryDial();  // сразу, до body — над Safari всплывает нативный диалог
+      document.addEventListener('DOMContentLoaded', function () {
+        // Резерв после DOM. Если авто-диалог запустился — освободим контекст
+        // через 1,5 с и вернёмся в мини-апп. Если сборка требует жест и диалога
+        // нет — страница останется экраном вызова (см. кнопку ниже).
+        setTimeout(closeMe, 1500);
+      });
+    }
   </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -37,8 +58,6 @@
       color: #1a1a1a;
       text-align: center;
     }
-    .state--busy { perspective: 600px; }
-    .state--busy { display: flex; }
     .phone-ico {
       width: 64px;
       height: 64px;
@@ -89,6 +108,10 @@
       background: #eef4ff;
       color: #2171ee;
     }
+    .state__btn--back {
+      background: #f1f5f9;
+      color: #2171ee;
+    }
     .state__hint { font-size: 13px; color: #8e8e93; }
   </style>
 </head>
@@ -99,34 +122,38 @@
     </svg>
   </div>
   <div class="state__number" id="number"></div>
-  <a id="call" class="state__btn state__btn--call" href="">
-    📞 Позвонить
-  </a>
-  <button id="copy" class="state__btn state__btn--copy" type="button">
-    📋 Скопировать номер
-  </button>
-  <p class="state__hint">Нажмите «Позвонить», если набор не запустился автоматически</p>
+  <a id="call" class="state__btn state__btn--call" href="">📞 Позвонить</a>
+  <button id="copy" class="state__btn state__btn--copy" type="button">📋 Скопировать номер</button>
+  <button id="back" class="state__btn state__btn--back" type="button">← Вернуться в объявление</button>
+  <p class="state__hint" id="hint">После звонка вы вернётесь в объявление автоматически</p>
 
   <noscript>
     <a href="" id="noscript-call" style="color:#34c759;font-size:20px;font-weight:700">Позвонить</a>
   </noscript>
 
   <script>
-    // Если автозапуск tel: заблокирован (некоторые сборки iOS требуют жест) —
-    // страница остаётся на месте: кнопка «Позвонить» уже на экране, тап = жест.
-    var phone = new URLSearchParams(location.search).get('phone');
-    var valid = phone && /^\+?\d[\d\s()\-]{6,20}$/.test(phone);
+    // Заполняем страницу только для валидного номера. После автозапуска
+    // диалога IAB закрывает window.close(); если window.close() в сборке
+    // не сработал — большие кнопки «Позвонить» (набор + закрытие) и
+    // «Вернуться в объявление» (только закрытие) не дадут остаться в Safari.
     if (valid) {
-      var href = 'tel:' + phone.replace(/[^\d+]/g, '');
-      document.getElementById('number').textContent = phone;
+      var number = document.getElementById('number');
       var call = document.getElementById('call');
+      var copy = document.getElementById('copy');
+      var back = document.getElementById('back');
+      var hint = document.getElementById('hint');
+
+      number.textContent = phone;
       call.href = href;
-      call.addEventListener('click', function () { location.href = href; });
-      document.getElementById('copy').addEventListener('click', function () {
+      call.addEventListener('click', dialAndClose);
+      copy.addEventListener('click', function () {
         navigator.clipboard.writeText(phone).then(function () {
-          document.getElementById('copy').textContent = '✓ Скопировано';
+          copy.textContent = '✓ Скопировано';
         });
       });
+      back.addEventListener('click', closeMe);
+      hint.textContent = 'Звонок начнётся; после набора вы вернётесь в объявление автоматически. Если нет — нажмите «Вернуться».';
+
       var ns = document.getElementById('noscript-call');
       if (ns) ns.href = href;
     }
