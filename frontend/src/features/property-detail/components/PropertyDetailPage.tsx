@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
+import { useTelegram } from '@/app/providers/TelegramProvider';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useFavoritesStore } from '@/features/favorites';
 import { useChatStore } from '@/features/chat';
@@ -10,6 +11,7 @@ import { useToast } from '@/shared/ui/Toast';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { PropertyHeroGallery } from './PropertyHeroGallery';
+import { CallSheet } from './CallSheet';
 import { PropertyInfoSection } from '@/entities/property/components/PropertyInfoSection';
 import { PropertyDescription } from '@/entities/property/components/PropertyDescription';
 import { PropertyCharacteristics } from '@/entities/property/components/PropertyCharacteristics';
@@ -23,10 +25,11 @@ export function PropertyDetailPage() {
   const navigate = useNavigate();
   const { trigger } = useHaptics();
   const { showToast } = useToast();
+  const { initData } = useTelegram();
   const { fetchPropertyDetail, propertyDetail, isLoadingDetail, errorDetail, clearPropertyDetail, setLocalFavorite } = usePropertiesStore();
   const { toggleFavorite } = useFavoritesStore();
   const { startChat } = useChatStore();
-  const accessToken = useAuthStore((s) => s.accessToken);
+  const [callSheetOpen, setCallSheetOpen] = useState(false);
 
   const propertyId = id ? parseInt(id, 10) : null;
 
@@ -99,48 +102,71 @@ export function PropertyDetailPage() {
   // приложения во внешний Telegram.
   const canWrite = true;
 
-  // Звонок — системная звонилка. Варианты из практики WebView Telegram:
-  // window.location.href на tel: — глотается; SDK openLink — только
-  // http/https (WebAppTgUrlInvalid). Нативный <a href="tel:"> на части
-  // клиентов (iOS WKWebView) не делегирует номер звонилке — клик визуально
-  // срабатывает, но ничего не происходит. Рабочий приём: программный клик по
-  // временному нативному анкору — напрямую через DOM, в обход React-эвента.
-  // Телефон можно НЕ задать (тестовые/старые объявления без contact_phone):
-  // тогда canCall=false и href не вычисляется, иначе null.replace() даёт
-  // TypeError и вся страница падает в ErrorBoundary «Что-то пошло не так».
+  // ── Звонок ────────────────────────────────────────────────────────────
+  // На Android Telegram WebView системный тел.: анкор <a href="tel:...">
+  // срабатывает по нажатию пользователя. На iOS (WKWebView) он НЕ делегирует
+  // номер системной звонилке — это ограничение платформы, обойти его из JS
+  // нельзя: ни программный click(), ни window.location.href, ни openLink()
+  // (SDK принимает только http/https). Поэтому:
+  // — при нажатии ВСЕГДА показываем CallSheet: реальный tel: анкор внутри
+  //   него работает там, где платформа разрешает (Android), а «Скопировать»
+  //   — гарантированный фолбэк для iOS.
   const callDigits = contactPhone?.replace(/[^\d+]/g, '') || '';
-  const handleCall = (e: React.MouseEvent) => {
-    e.preventDefault();
-    trigger('success');
-    const anchor = document.createElement('a');
-    anchor.href = `tel:${callDigits}`;
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
+
+  const handleCall = () => {
+    trigger('light');
+    setCallSheetOpen(true);
   };
 
+  // ── Написать ──────────────────────────────────────────────────────────
+  // При открытии из канала (startapp=property_<id>) авторизация идёт
+  // асинхронно (AppShell) и может не успеть/упасть на транзиентной ошибке —
+  // тогда пользователь видит «не работает». Для надёжности сам handleWrite
+  // активно гарантирует наличие токена:
+  //   1. Если токен есть → immediately.
+  //   2. Если уже идёт вход (status=authenticating) → ждём до 10 с.
+  //   3. Если ничего не идёт — запускаем login(initData) сами (до 3 попыток).
   const handleWrite = async () => {
     trigger('light');
-    // При открытии из канала (глубокая ссылка) авторизация идёт асинхронно
-    // (AppShell вызывает login(initData)) и может не успеть к моменту клика —
-    // тогда startChat падает с AuthError и «Написать» «не работает». Ждём
-    // появления токена до 8 с, затем продолжаем.startChat сам читает
-    // актуальный токен из стора, поэтому замыкание не устаревает.
-    let token = accessToken;
+
+    const store = useAuthStore.getState();
+    let token = store.accessToken;
+
     if (!token) {
       showToast('Секунду, авторизация…', 'info');
-      const deadline = Date.now() + 8000;
-      while (Date.now() < deadline) {
-        await new Promise((r) => setTimeout(r, 200));
-        token = useAuthStore.getState().accessToken;
-        if (token) break;
+
+      // 1) Если на сцене другой вход — просто ждём его завершения.
+      if (store.status === 'authenticating') {
+        const deadline = Date.now() + 10000;
+        while (Date.now() < deadline) {
+          await new Promise((r) => setTimeout(r, 200));
+          token = useAuthStore.getState().accessToken;
+          if (token) break;
+        }
       }
+
+      // 2) Если входа нет — запускаем ourselves (can happen from channel).
+      if (!token && initData) {
+        for (let i = 0; i < 3; i++) {
+          if (useAuthStore.getState().accessToken) break;
+          try {
+            await useAuthStore.getState().login(initData);
+            break;
+          } catch {
+            // Транзиентные ошибки: сеть, бэкенд. Ждём перед следующей попыткой.
+            await new Promise((r) => setTimeout(r, 400 * (i + 1)));
+          }
+        }
+        token = useAuthStore.getState().accessToken;
+      }
+
       if (!token) {
         trigger('error');
-        showToast('Авторизация не завершилась — попробуйте ещё раз', 'warning');
+        showToast('Авторизация не завершилась — откройте приложение из бота и повторите', 'warning');
         return;
       }
     }
+
     try {
       // Встроенный чат (Kufar-модель): переписка сохраняется, пока не удалишь.
       const conversationId = await startChat(propertyId!, undefined);
@@ -233,6 +259,17 @@ export function PropertyDetailPage() {
             </button>
           )}
         </div>
+      )}
+
+      {/* Bottom sheet звонка — номер + tel:-анкор + копирование.
+          Показывается всегда по нажатию «Позвонить» — на iOS это единственный
+          способ дать пользователю номер (WKWebView блокирует tel:). */}
+      {callSheetOpen && contactPhone && (
+        <CallSheet
+          telHref={callDigits}
+          display={contactPhone}
+          onClose={() => setCallSheetOpen(false)}
+        />
       )}
     </div>
   );

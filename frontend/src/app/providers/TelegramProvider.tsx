@@ -8,6 +8,9 @@ interface TelegramContextValue {
   startParam: string | null;
   themeParams: Record<string, string | number> | null;
   colorScheme: 'light' | 'dark';
+  /** Платформа клиента Telegram: 'ios' | 'android' | 'macos' | ... — нужна для
+   *  выбора способа звонка (на iOS WebView не отдаёт tel: системной звонилке). */
+  platform: string;
   isReady: boolean;
   isExpanded: boolean;
   isClosingConfirmationEnabled: boolean;
@@ -52,6 +55,7 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
   } | null>(null);
   const [initData, setInitData] = useState<string | null>(null);
   const [startParam, setStartParam] = useState<string | null>(null);
+  const [platform, setPlatform] = useState<string>('unknown');
 
   useEffect(() => {
     const webApp = WebApp;
@@ -92,6 +96,9 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
 
     // Get color scheme
     setColorScheme(webApp.colorScheme || 'light');
+
+    // Платформа клиента — определяет, работает ли tel: (см. PropertyDetailPage)
+    setPlatform(webApp.platform || 'unknown');
 
     // Viewport info
     setViewportHeight(webApp.viewportHeight || window.innerHeight);
@@ -200,6 +207,7 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
     startParam,
     themeParams,
     colorScheme,
+    platform,
     isReady,
     isExpanded,
     isClosingConfirmationEnabled,

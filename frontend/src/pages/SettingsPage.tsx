@@ -363,6 +363,12 @@ export function SettingsPage() {
       <div className="pt-4 text-center text-sm" style={{ color: '#94a3b8' }}>
         BELDOMiK 🇧🇾 — настройки по стандарту Kufar
       </div>
+
+      {/* Идентификатор сборки — по нему отличаем «код не работает» от
+          «клиент держит закэшированный старый бандл» при жалобах на фиксы. */}
+      <div className="pt-1 pb-2 text-center text-xs" style={{ color: '#cbd5e1' }}>
+        build {__BUILD_ID__}
+      </div>
     </div>
   );
 }

@@ -526,3 +526,124 @@
   color: #fff;
   box-shadow: 0 6px 16px rgba(52, 199, 89, 0.35);
 }
+
+/* ============================================================
+   Лист звонка (bottom sheet).
+   Показываем номер + два независимых пути: tel:-анкор и копирование.
+   Нужен, потому что на iOS WebView не отдаёт tel: звонилке, и прямая
+   кнопка была «мёртвой» — см. CallSheet.tsx.
+   ============================================================ */
+
+.call-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.call-sheet__backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  padding: 0;
+  background: rgba(15, 23, 42, 0.45);
+  cursor: pointer;
+  animation: call-sheet-fade 0.18s ease-out;
+}
+
+.call-sheet__panel {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  background: #fff;
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -12px 32px rgba(15, 23, 42, 0.18);
+  animation: call-sheet-up 0.22s ease-out;
+}
+
+.call-sheet__grip {
+  width: 40px;
+  height: 4px;
+  margin: 0 auto 4px;
+  border-radius: 999px;
+  background: #cbd5e1;
+}
+
+.call-sheet__title {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.call-sheet__number {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+  word-break: break-word;
+  padding: 2px 0 6px;
+}
+
+.call-sheet__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 50px;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s ease;
+}
+
+.call-sheet__btn:active {
+  transform: scale(0.97);
+}
+
+.call-sheet__btn--call {
+  background: #34c759;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(52, 199, 89, 0.35);
+}
+
+.call-sheet__btn--copy {
+  background: #eef4ff;
+  color: #2171ee;
+}
+
+.call-sheet__btn--cancel {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.call-sheet__hint {
+  margin: 2px 0 0;
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: #94a3b8;
+}
+
+@keyframes call-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes call-sheet-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

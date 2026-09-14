@@ -1,5 +1,8 @@
 /// <reference types="vite/client" />
 
+/** Идентификатор сборки из vite.config.ts (git sha + время сборки). */
+declare const __BUILD_ID__: string;
+
 interface ImportMetaEnv {
   readonly VITE_API_URL: string;
   readonly VITE_TG_BOT_USERNAME: string;

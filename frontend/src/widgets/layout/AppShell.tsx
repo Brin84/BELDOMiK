@@ -7,8 +7,15 @@ import { backHandlerBlocked } from '@/shared/lib/backButton';
 
 export function AppShell({ children }: { children?: ReactNode }) {
   const { initData, backButton, close } = useTelegram();
-  const { accessToken, login, refresh } = useAuthStore();
-  const authAttempted = useRef(false);
+  const { accessToken, login, refresh, status: authStatus } = useAuthStore();
+  // hadToken защищает logout(): как только пользователь хоть раз был
+  // авторизован за эту страницу, эффект больше не ре-входит автоматически
+  // (иначе logout() → accessToken=null → эффект вызвал login() заново).
+  const hadToken = useRef(false);
+  // Bootstrap-вход при транзиентных сбоях (сеть, 500 на бэкенде) ре-пытается,
+  // но не бесконечно — пришёл когда из канала, где авторизация не всегда готова.
+  const authRetries = useRef(0);
+  const MAX_AUTH_RETRIES = 3;
   const location = useLocation();
   const navigate = useNavigate();
   // На детальной странице объявления нижнюю навигацию заменяет свой липкий
@@ -24,28 +31,34 @@ export function AppShell({ children }: { children?: ReactNode }) {
   const hideBottomNav = isPropertyDetail || isWizard || isChat;
 
   // Bootstrap authentication on mount. TelegramProvider fills initData
-  // asynchronously, so re-run until it's available. Runs at most once a page
-  // lifetime (authAttempted) so logout() is not immediately overridden.
+  // asynchronously, so the effect re-runs until it's available. On transient
+  // failures (network, backend 500) it retries up to MAX_AUTH_RETRIES with a
+  // falling cadence, instead of giving up after a single attempt.
   useEffect(() => {
-    if (authAttempted.current) return;
+    if (hadToken.current) return;
+    if (authRetries.current >= MAX_AUTH_RETRIES) return;
+    // Другой вход уже идёт — дождёмся его (эффект перезапустится, когда
+    // authStatus выйдет из 'authenticating' с токеном или без него).
+    if (authStatus === 'authenticating') return;
 
-    const hasTokens = !!accessToken;
-    if (hasTokens) {
+    if (accessToken) {
+      // Токен уже был — фиксируем сессию, чтобы logout() не перезаписывался.
+      hadToken.current = true;
+      authRetries.current += 1;
       // Restoring session from persisted tokens; if the refresh token
       // expired, fall back to a fresh login with Telegram initData.
-      authAttempted.current = true;
       refresh().then((ok) => {
         if (!ok && initData) {
           login(initData).catch(() => {});
         }
       });
     } else if (initData) {
-      // No tokens but Telegram initData available — authenticate
-      authAttempted.current = true;
+      // No tokens but Telegram initData available — authenticate.
+      authRetries.current += 1;
       login(initData).catch(() => {});
     }
     // If no tokens and initData not ready yet — re-run when initData arrives
-  }, [initData, accessToken, login, refresh]);
+  }, [initData, accessToken, authStatus, login, refresh]);
 
   // Centralized BackButton control: show ← on all pages except main (/catalog)
   const handleBack = useCallback(() => {
