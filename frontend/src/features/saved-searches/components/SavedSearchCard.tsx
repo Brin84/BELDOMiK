@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useSavedSearchesStore } from '../savedSearchesStore';
+import { useGeographyStore } from '@/features/geography/geographyStore';
 import type { SavedSearch } from '@/shared/api/types';
 
 interface SavedSearchCardProps {
@@ -22,9 +24,36 @@ const FREQUENCY_COLORS: Record<SavedSearch['notify_frequency'], { bg: string; co
   disabled: { bg: 'rgba(142, 142, 147, 0.15)', color: '#8e8e93' },
 };
 
+// Подпись области/города/типа по id. Если id пустой (0/undefined) или название
+// неизвестно — пункт не показываем: раньше здесь выводились сырые числовые ID
+// («Область: 0», «Город: 000»), которые юзер просил убрать.
+type NameResolver = (id: number) => { name?: string } | undefined;
+
+function named(id: unknown, resolve: NameResolver): string | null {
+  const num = Number(id);
+  if (!num) return null; // 0 / пустое / NaN — «любой», не показываем
+  return resolve(num)?.name ?? null;
+}
+
 export function SavedSearchCard({ savedSearch, onApply, onEdit }: SavedSearchCardProps) {
   const { trigger } = useHaptics();
   const { deleteSavedSearch, toggleNotifications, isLoading } = useSavedSearchesStore();
+  const {
+    getRegionById,
+    getCityById,
+    getPropertyTypeById,
+    fetchRegions,
+    fetchAllCities,
+    fetchPropertyTypes,
+  } = useGeographyStore();
+
+  // Справочники для человекочитаемых подписей фильтров (guard внутри store
+  // не даёт повторно загрузить уже загруженные списки).
+  useEffect(() => {
+    fetchRegions();
+    fetchAllCities();
+    fetchPropertyTypes();
+  }, [fetchRegions, fetchAllCities, fetchPropertyTypes]);
 
   const frequency = savedSearch.notify_frequency;
   const freqColors = FREQUENCY_COLORS[frequency];
@@ -38,14 +67,17 @@ export function SavedSearchCard({ savedSearch, onApply, onEdit }: SavedSearchCar
       if (filters.operation_id) {
         parts.push(filters.operation_id === 1 ? '🏠 Купить' : '🏠 Снять');
       }
-      if (filters.type_id) {
-        parts.push(`Тип: ${filters.type_id}`);
+      const typeName = named(filters.type_id, getPropertyTypeById);
+      if (typeName) {
+        parts.push(typeName);
       }
-      if (filters.city_id) {
-        parts.push(`Город: ${filters.city_id}`);
+      const cityName = named(filters.city_id, getCityById);
+      if (cityName) {
+        parts.push(`Город: ${cityName}`);
       }
-      if (filters.region_id) {
-        parts.push(`Область: ${filters.region_id}`);
+      const regionName = named(filters.region_id, getRegionById);
+      if (regionName) {
+        parts.push(`Область: ${regionName}`);
       }
       if (filters.rooms_count) {
         parts.push(`${filters.rooms_count === 5 ? '5+' : filters.rooms_count} комн.`);

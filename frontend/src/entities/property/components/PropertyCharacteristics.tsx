@@ -35,7 +35,7 @@ function buildParams(p: PropertyDetail): Row[] {
   if (p.build_year) rows.push({ label: 'Год постройки', value: `${p.build_year} г.` });
   if (p.renovation) {
     rows.push({
-      label: 'Состояние',
+      label: 'Ремонт',
       value: RENOVATION_LABELS[p.renovation] || p.renovation,
     });
   }

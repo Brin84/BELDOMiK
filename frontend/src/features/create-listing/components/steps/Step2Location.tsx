@@ -7,6 +7,22 @@ import type { Region, City, District, Neighborhood, Street } from '@/shared/api/
 
 type PickerName = 'region' | 'city';
 
+// ── Светлые компактные плитки выбора (район / микрорайон / улица) ──────────
+// Единый стиль дизайна BELDOMiK: белые плитки со светлой рамкой #e2e8f0,
+// выбранная — синяя #2171ee. Без tg-theme-переменных и тёмных рамок.
+const tileBaseClass =
+  'py-2 px-3 rounded-lg text-sm font-medium text-center transition-all active:scale-[0.96]';
+
+const tileStyle = (selected: boolean): React.CSSProperties => ({
+  backgroundColor: selected ? '#2171ee' : '#ffffff',
+  color: selected ? '#ffffff' : '#334155',
+  border: selected ? '1px solid #2171ee' : '1px solid #e2e8f0',
+  boxShadow: selected ? '0 4px 12px rgba(33, 113, 238, 0.3)' : 'none',
+});
+
+// Заголовок секции — компактнее прежнего (text-xl → text-base).
+const sectionTitleClass = 'text-[#0f172a] text-base font-bold mb-3';
+
 export function Step2Location() {
   const { trigger } = useHaptics();
   const { updateFormData, formData } = useCreateListingStore();
@@ -132,6 +148,19 @@ export function Step2Location() {
     setOpenPicker((prev) => (prev === picker ? null : picker));
   };
 
+  // Сетка плиток: «Любой/Любая …» для сброса + варианты.
+  const districtTile = (selected: boolean, label: string, onSelect: () => void) => (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={tileBaseClass}
+      style={tileStyle(selected)}
+      aria-pressed={selected}
+    >
+      {label}
+    </button>
+  );
+
   return (
     <div className="p-4 space-y-6">
       <div className="space-y-3">
@@ -170,42 +199,16 @@ export function Step2Location() {
       {/* District Selector */}
       {formData.city_id && districts.length > 0 && (
         <section>
-          <h2 className="text-tg-text text-xl font-bold mb-4">Район</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            <button
-              onClick={() => handleDistrictChange(undefined)}
-              className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
-                !formData.district_id ? 'ring-2 shadow-sm' : ''
-              }`}
-              style={{
-                backgroundColor: !formData.district_id
-                  ? 'var(--tg-theme-button-color)'
-                  : 'var(--tg-theme-secondary-bg-color)',
-                color: !formData.district_id
-                  ? 'var(--tg-theme-button-text-color)'
-                  : 'var(--tg-theme-text-color)',
-                border: formData.district_id ? '1px solid var(--tg-theme-hint-color)' : 'none',
-              }}
-              aria-pressed={!formData.district_id}
-            >
-              Любой район
-            </button>
+          <h2 className={sectionTitleClass}>Район</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+            {districtTile(!formData.district_id, 'Любой район', () => handleDistrictChange(undefined))}
             {districts.map((district) => (
               <button
                 key={district.id}
+                type="button"
                 onClick={() => handleDistrictChange(district)}
-                className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
-                  formData.district_id === district.id ? 'ring-2 shadow-sm' : ''
-                }`}
-                style={{
-                  backgroundColor: formData.district_id === district.id
-                    ? 'var(--tg-theme-button-color)'
-                    : 'var(--tg-theme-secondary-bg-color)',
-                  color: formData.district_id === district.id
-                    ? 'var(--tg-theme-button-text-color)'
-                    : 'var(--tg-theme-text-color)',
-                  border: formData.district_id !== district.id ? '1px solid var(--tg-theme-hint-color)' : 'none',
-                }}
+                className={tileBaseClass}
+                style={tileStyle(formData.district_id === district.id)}
                 aria-pressed={formData.district_id === district.id}
               >
                 {district.name}
@@ -218,42 +221,16 @@ export function Step2Location() {
       {/* Neighborhood Selector */}
       {formData.city_id && neighborhoods.length > 0 && (
         <section>
-          <h2 className="text-tg-text text-xl font-bold mb-4">Микрорайон / ЖК</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            <button
-              onClick={() => handleNeighborhoodChange(undefined)}
-              className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
-                !formData.neighborhood_id ? 'ring-2 shadow-sm' : ''
-              }`}
-              style={{
-                backgroundColor: !formData.neighborhood_id
-                  ? 'var(--tg-theme-button-color)'
-                  : 'var(--tg-theme-secondary-bg-color)',
-                color: !formData.neighborhood_id
-                  ? 'var(--tg-theme-button-text-color)'
-                  : 'var(--tg-theme-text-color)',
-                border: formData.neighborhood_id ? '1px solid var(--tg-theme-hint-color)' : 'none',
-              }}
-              aria-pressed={!formData.neighborhood_id}
-            >
-              Любой
-            </button>
+          <h2 className={sectionTitleClass}>Микрорайон / ЖК</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+            {districtTile(!formData.neighborhood_id, 'Любой', () => handleNeighborhoodChange(undefined))}
             {neighborhoods.map((neighborhood) => (
               <button
                 key={neighborhood.id}
+                type="button"
                 onClick={() => handleNeighborhoodChange(neighborhood)}
-                className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
-                  formData.neighborhood_id === neighborhood.id ? 'ring-2 shadow-sm' : ''
-                }`}
-                style={{
-                  backgroundColor: formData.neighborhood_id === neighborhood.id
-                    ? 'var(--tg-theme-button-color)'
-                    : 'var(--tg-theme-secondary-bg-color)',
-                  color: formData.neighborhood_id === neighborhood.id
-                    ? 'var(--tg-theme-button-text-color)'
-                    : 'var(--tg-theme-text-color)',
-                  border: formData.neighborhood_id !== neighborhood.id ? '1px solid var(--tg-theme-hint-color)' : 'none',
-                }}
+                className={tileBaseClass}
+                style={tileStyle(formData.neighborhood_id === neighborhood.id)}
                 aria-pressed={formData.neighborhood_id === neighborhood.id}
               >
                 {neighborhood.name}
@@ -266,42 +243,16 @@ export function Step2Location() {
       {/* Street Selector */}
       {formData.city_id && streets.length > 0 && (
         <section>
-          <h2 className="text-tg-text text-xl font-bold mb-4">Улица</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto">
-            <button
-              onClick={() => handleStreetChange(undefined)}
-              className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
-                !formData.street_id ? 'ring-2 shadow-sm' : ''
-              }`}
-              style={{
-                backgroundColor: !formData.street_id
-                  ? 'var(--tg-theme-button-color)'
-                  : 'var(--tg-theme-secondary-bg-color)',
-                color: !formData.street_id
-                  ? 'var(--tg-theme-button-text-color)'
-                  : 'var(--tg-theme-text-color)',
-                border: formData.street_id ? '1px solid var(--tg-theme-hint-color)' : 'none',
-              }}
-              aria-pressed={!formData.street_id}
-            >
-              Любая улица
-            </button>
+          <h2 className={sectionTitleClass}>Улица</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-60 overflow-y-auto">
+            {districtTile(!formData.street_id, 'Любая улица', () => handleStreetChange(undefined))}
             {streets.map((street) => (
               <button
                 key={street.id}
+                type="button"
                 onClick={() => handleStreetChange(street)}
-                className={`py-3 px-4 rounded-xl font-medium transition-all text-center ${
-                  formData.street_id === street.id ? 'ring-2 shadow-sm' : ''
-                }`}
-                style={{
-                  backgroundColor: formData.street_id === street.id
-                    ? 'var(--tg-theme-button-color)'
-                    : 'var(--tg-theme-secondary-bg-color)',
-                  color: formData.street_id === street.id
-                    ? 'var(--tg-theme-button-text-color)'
-                    : 'var(--tg-theme-text-color)',
-                  border: formData.street_id !== street.id ? '1px solid var(--tg-theme-hint-color)' : 'none',
-                }}
+                className={tileBaseClass}
+                style={tileStyle(formData.street_id === street.id)}
                 aria-pressed={formData.street_id === street.id}
               >
                 {street.name}
@@ -313,22 +264,24 @@ export function Step2Location() {
 
       {/* Address Input */}
       <section>
-        <h2 className="text-tg-text text-xl font-bold mb-4">Точный адрес (дом, корпус, квартира)</h2>
+        <h2 className={sectionTitleClass}>Точный адрес (дом, корпус, квартира)</h2>
         <input
           type="text"
           value={formData.address || ''}
           onChange={(e) => updateFormData({ address: e.target.value })}
           placeholder="ул. Ленина, д. 10, кв. 5"
-          className="w-full px-4 py-3 rounded-xl text-tg-text text-base"
+          className="w-full px-4 py-3 rounded-xl text-base"
           style={{
-            backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-            border: '1px solid var(--tg-theme-hint-color)',
-            color: 'var(--tg-theme-text-color)',
+            backgroundColor: '#ffffff',
+            border: '1px solid #e2e8f0',
+            color: '#0f172a',
           }}
           maxLength={200}
           autoComplete="off"
         />
-        <p className="text-tg-hint text-xs mt-1">Укажите номер дома, корпуса и квартиры для точного расположения на карте</p>
+        <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>
+          Укажите номер дома, корпуса и квартиры для точного расположения на карте
+        </p>
       </section>
     </div>
   );
