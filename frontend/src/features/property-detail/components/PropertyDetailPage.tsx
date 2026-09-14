@@ -278,6 +278,7 @@ export function PropertyDetailPage() {
         <CallSheet
           telHref={callDigits}
           display={contactPhone}
+          propertyId={property.id}
           onClose={() => setCallSheetOpen(false)}
         />
       )}

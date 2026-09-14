@@ -176,7 +176,7 @@ export function Step2Location() {
         />
 
         {/* City Selector — ExpandablePicker с поиском и «Добавить» */}
-        {formData.region_id && (
+        {formData.region_id > 0 && (
           <ExpandablePicker<number>
             label="Город / деревня"
             placeholder="Выберите город"
@@ -197,7 +197,7 @@ export function Step2Location() {
       </div>
 
       {/* District Selector */}
-      {formData.city_id && districts.length > 0 && (
+      {formData.city_id > 0 && districts.length > 0 && (
         <section>
           <h2 className={sectionTitleClass}>Район</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
@@ -219,7 +219,7 @@ export function Step2Location() {
       )}
 
       {/* Neighborhood Selector */}
-      {formData.city_id && neighborhoods.length > 0 && (
+      {formData.city_id > 0 && neighborhoods.length > 0 && (
         <section>
           <h2 className={sectionTitleClass}>Микрорайон / ЖК</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
@@ -241,7 +241,7 @@ export function Step2Location() {
       )}
 
       {/* Street Selector */}
-      {formData.city_id && streets.length > 0 && (
+      {formData.city_id > 0 && streets.length > 0 && (
         <section>
           <h2 className={sectionTitleClass}>Улица</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-60 overflow-y-auto">

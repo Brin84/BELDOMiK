@@ -9,6 +9,8 @@ interface CallSheetProps {
   telHref: string;
   /** Номер как показываем человеку. */
   display: string;
+  /** ID объявления — для deep-link возврата из Safari в миниапп. */
+  propertyId: number;
   onClose: () => void;
 }
 
@@ -29,7 +31,7 @@ interface CallSheetProps {
  * нативный диалог «Позвонить <номер>». «Скопировать номер» — запасной вариант.
  * На Android primary остаётся настоящим tel: + копирование как запасной.
  */
-export function CallSheet({ telHref, display, onClose }: CallSheetProps) {
+export function CallSheet({ telHref, display, propertyId, onClose }: CallSheetProps) {
   const { trigger } = useHaptics();
   const { showToast } = useToast();
   const { platform, openLink } = useTelegram();
@@ -47,7 +49,7 @@ export function CallSheet({ telHref, display, onClose }: CallSheetProps) {
       // Если openLink упал (URL не https — например локальный dev без WebApp) —
       // не закрываем лист, пользователь остаётся на кнопке копирования.
       try {
-        openLink(`${window.location.origin}/relay.html?phone=${encodeURIComponent(telHref)}`);
+        openLink(`${window.location.origin}/relay.html?phone=${encodeURIComponent(telHref)}&property_id=${propertyId}`);
         onClose();
       } catch {
         showToast('Не удалось запустить звонок — скопируйте номер ниже', 'warning');

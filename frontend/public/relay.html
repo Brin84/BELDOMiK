@@ -9,9 +9,17 @@
     // WebApp.openLink() в SFSafariViewController, где tel: НЕ блокируется
     // (в отличие от WebView MiniApp). Пытаемся уйти на tel: сразу, до отрисовки —
     // чтобы над Safari успел всплыть нативный диалог iOS «Позвонить <номер>».
-    var phone = new URLSearchParams(location.search).get('phone');
+    var params = new URLSearchParams(location.search);
+    var phone = params.get('phone');
+    var propertyId = params.get('property_id');
     var valid = phone && /^\+?\d[\d\s()\-]{6,20}$/.test(phone);
     var href = valid ? 'tel:' + phone.replace(/[^\d+]/g, '') : '';
+
+    // Глубокий возврат в мини-апп. window.close() в SFSafariViewController
+    // молча не работает (relay открыт через WebApp.openLink), поэтому назад
+    // ведём универсальной ссылкой t.me: startapp=property_<id> сразу поднимает
+    // нужное объявление. Без id — просто в бота.
+    var returnHref = 'https://t.me/beldomik_bot' + (propertyId ? '?startapp=property_' + propertyId : '');
 
     function tryDial() {
       // Несколько способов — какой-нибудь из них Safari отдаст системе.
@@ -19,27 +27,29 @@
       try { window.location.href = href; } catch (e) {}
     }
 
-    // Закрыть Safari-контекст (IAB), чтобы вернуться в мини-апп, а не
-    // оставаться на этой странице. Мини-апп под openLink() не закрывается —
-    // закрытие IAB возвращает пользователя прямо в карточку объявления.
-    function closeMe() {
+    // Вернуться в мини-апп: пробуем закрыть контекст, затем открываем t.me.
+    // Реальная причина переключателя — window.close() не работает там, где
+    // есть SFSafariViewController, и мы возвращаемся deep link'ом в объявление.
+    function returnToApp() {
       try { window.close(); } catch (e) {}
+      try { location.replace(returnHref); } catch (e) {}
     }
 
     // Набор + автоматический возврат. Используется и для автозапуска,
     // и для кнопки «Позвонить» (когда iOS требует жест).
     function dialAndClose() {
       tryDial();
-      setTimeout(closeMe, 1200);
+      setTimeout(returnToApp, 1200);
     }
 
     if (valid) {
       tryDial();  // сразу, до body — над Safari всплывает нативный диалог
       document.addEventListener('DOMContentLoaded', function () {
-        // Резерв после DOM. Если авто-диалог запустился — освободим контекст
-        // через 1,5 с и вернёмся в мини-апп. Если сборка требует жест и диалога
-        // нет — страница останется экраном вызова (см. кнопку ниже).
-        setTimeout(closeMe, 1500);
+        // Резерв после DOM. Если авто-набор запустился — через 1,5 с уходим
+        // в Telegram обратно в объявление. Если пользователь отменил системный
+        // вызов — deep link всё равно вернёт его в мини-апп вместо
+        // застревания в Safari.
+        setTimeout(returnToApp, 1500);
       });
     }
   </script>
@@ -133,9 +143,9 @@
 
   <script>
     // Заполняем страницу только для валидного номера. После автозапуска
-    // диалога IAB закрывает window.close(); если window.close() в сборке
-    // не сработал — большие кнопки «Позвонить» (набор + закрытие) и
-    // «Вернуться в объявление» (только закрытие) не дадут остаться в Safari.
+    // возврат идёт в Telegram по deep link'у (startapp=property_<id>); если
+    // авто-возврат не успел — большие кнопки «Позвонить» (набор + возврат) и
+    // «Вернуться в объявление» (только возврат) не дадут остаться в Safari.
     if (valid) {
       var number = document.getElementById('number');
       var call = document.getElementById('call');
@@ -151,8 +161,8 @@
           copy.textContent = '✓ Скопировано';
         });
       });
-      back.addEventListener('click', closeMe);
-      hint.textContent = 'Звонок начнётся; после набора вы вернётесь в объявление автоматически. Если нет — нажмите «Вернуться».';
+      back.addEventListener('click', returnToApp);
+      hint.textContent = 'После набора вы вернётесь в Telegram автоматически. Если нет — нажмите «Вернуться в объявление».';
 
       var ns = document.getElementById('noscript-call');
       if (ns) ns.href = href;
