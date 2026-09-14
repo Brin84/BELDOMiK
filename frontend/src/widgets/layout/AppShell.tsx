@@ -65,9 +65,24 @@ export function AppShell({ children }: { children?: ReactNode }) {
     // Skip when a modal is open — the modal's own handler controls BackButton
     if (backHandlerBlocked.current) return;
     // Глубокая ссылка из канала/бота открывает страницу через
-    // navigate(..., { replace: true }) — в истории MiniApp одна запись, и
-    // navigate(-1) никуда не ведёт (кнопка «Назад» «не работает»). Тогда
-    // закрываем MiniApp вместо навигации, как это делает Telegram на главной.
+    // navigate(..., { replace: true }) — react-router кладёт в
+    // window.history.state.idx индекс записи в истории приложения; idx = 0
+    // значит «мы на корне истории MiniApp» и navigate(-1) никуда не ведёт
+    // (кнопка «Назад» «не работает»). Тогда закрываем MiniApp, как это делает
+    // Telegram на главном экране. window.history.length для этого не годится:
+    // в WebView он включает навигацию, произошедшую ДО загрузки MiniApp,
+    // поэтому всегда кажется, что «есть куда идти».
+    const st = window.history.state as { idx?: number } | null;
+    if (typeof st?.idx === 'number') {
+      if (st.idx <= 0) {
+        close();
+      } else {
+        navigate(-1);
+      }
+      return;
+    }
+    // Фолбэк для сред без idx (react-router v6 пишет его всегда, но если вдруг
+    // нет — прежняя эвристика по длине истории).
     if (window.history.length <= 1) {
       close();
       return;

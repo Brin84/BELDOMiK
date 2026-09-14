@@ -29,6 +29,10 @@ export function PropertyDetailPage() {
   const { fetchPropertyDetail, propertyDetail, isLoadingDetail, errorDetail, clearPropertyDetail, setLocalFavorite } = usePropertiesStore();
   const { toggleFavorite } = useFavoritesStore();
   const { startChat } = useChatStore();
+  // Реактивная подписка на профиль — чтобы прятать «Написать» на своём
+  // объявлении сразу после входа (объявление своё, а юзер только что
+  // авторизовался из канала).
+  const { user } = useAuthStore();
   const [callSheetOpen, setCallSheetOpen] = useState(false);
 
   const propertyId = id ? parseInt(id, 10) : null;
@@ -97,10 +101,11 @@ export function PropertyDetailPage() {
   const contactPhone = property.contact_phone || property.owner_phone || null;
   const canCall = property.show_phone !== false && !!contactPhone;
   // Требование продакта: «Написать»+«Позвонить» видны на любой карточке, когда
-  // есть телефон. Чат с самим собой бэкенд отклоняет (get_or_create → 404) —
-  // тогда вместо входа в чат показываем тост с причиной и НЕ уводим из
-  // приложения во внешний Telegram.
-  const canWrite = true;
+  // есть телефон. На СВОЁМ объявлении «Написать» не показываем вовсе — чат с
+  // самим собой бэкенд отклоняет (get_or_create → 404), и это пугало бы тостом.
+  // Владелец своей карточки видит только «Позвонить» (на всю ширину бара).
+  const isOwn = property.owner_id === user?.id;
+  const canWrite = !isOwn;
 
   // ── Звонок ────────────────────────────────────────────────────────────
   // На Android Telegram WebView системный тел.: анкор <a href="tel:...">
