@@ -4,6 +4,8 @@ import { useHaptics } from '@/shared/lib/haptics';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useFavoritesStore } from '@/features/favorites';
 import { useChatStore } from '@/features/chat';
+import { useAuthStore } from '@/features/auth';
+import { AuthError } from '@/shared/api/client';
 import { useToast } from '@/shared/ui/Toast';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { ErrorState } from '@/shared/ui/ErrorState';
@@ -24,6 +26,7 @@ export function PropertyDetailPage() {
   const { fetchPropertyDetail, propertyDetail, isLoadingDetail, errorDetail, clearPropertyDetail, setLocalFavorite } = usePropertiesStore();
   const { toggleFavorite } = useFavoritesStore();
   const { startChat } = useChatStore();
+  const accessToken = useAuthStore((s) => s.accessToken);
 
   const propertyId = id ? parseInt(id, 10) : null;
 
@@ -96,21 +99,48 @@ export function PropertyDetailPage() {
   // приложения во внешний Telegram.
   const canWrite = true;
 
-  // Звонок — реальный <a href="tel:">, БЕЗ JS-навигации: WebView Telegram
-  // молча глотает window.location.href на tel:, а SDK openLink принимает только
-  // http/https (иначе WebAppTgUrlInvalid). Нативный клик по анкору позволяет
-  // клиенту Telegram передать номер системной звонилке.
+  // Звонок — системная звонилка. Варианты из практики WebView Telegram:
+  // window.location.href на tel: — глотается; SDK openLink — только
+  // http/https (WebAppTgUrlInvalid). Нативный <a href="tel:"> на части
+  // клиентов (iOS WKWebView) не делегирует номер звонилке — клик визуально
+  // срабатывает, но ничего не происходит. Рабочий приём: программный клик по
+  // временному нативному анкору — напрямую через DOM, в обход React-эвента.
   // Телефон можно НЕ задать (тестовые/старые объявления без contact_phone):
   // тогда canCall=false и href не вычисляется, иначе null.replace() даёт
   // TypeError и вся страница падает в ErrorBoundary «Что-то пошло не так».
   const callDigits = contactPhone?.replace(/[^\d+]/g, '') || '';
-  const callHref = canCall ? `tel:${callDigits}` : undefined;
-  const handleCall = () => {
+  const handleCall = (e: React.MouseEvent) => {
+    e.preventDefault();
     trigger('success');
+    const anchor = document.createElement('a');
+    anchor.href = `tel:${callDigits}`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
   };
 
   const handleWrite = async () => {
     trigger('light');
+    // При открытии из канала (глубокая ссылка) авторизация идёт асинхронно
+    // (AppShell вызывает login(initData)) и может не успеть к моменту клика —
+    // тогда startChat падает с AuthError и «Написать» «не работает». Ждём
+    // появления токена до 8 с, затем продолжаем.startChat сам читает
+    // актуальный токен из стора, поэтому замыкание не устаревает.
+    let token = accessToken;
+    if (!token) {
+      showToast('Секунду, авторизация…', 'info');
+      const deadline = Date.now() + 8000;
+      while (Date.now() < deadline) {
+        await new Promise((r) => setTimeout(r, 200));
+        token = useAuthStore.getState().accessToken;
+        if (token) break;
+      }
+      if (!token) {
+        trigger('error');
+        showToast('Авторизация не завершилась — попробуйте ещё раз', 'warning');
+        return;
+      }
+    }
     try {
       // Встроенный чат (Kufar-модель): переписка сохраняется, пока не удалишь.
       const conversationId = await startChat(propertyId!, undefined);
@@ -120,6 +150,10 @@ export function PropertyDetailPage() {
       // Telegram. Чат недоступен (своё объявление, снято/заблокировано) →
       // тост с причиной от бэкенда, остаёмся в приложении.
       trigger('error');
+      if (error instanceof AuthError) {
+        showToast('Войдите в аккаунт и попробуйте снова', 'warning');
+        return;
+      }
       showToast(
         error instanceof Error && error.message ? error.message : 'Не удалось открыть чат',
         'warning'
@@ -187,8 +221,8 @@ export function PropertyDetailPage() {
             </button>
           )}
           {canCall && (
-            <a
-              href={callHref}
+            <button
+              type="button"
               onClick={handleCall}
               className="property-bottom-bar__btn property-bottom-bar__btn--call"
             >
@@ -196,7 +230,7 @@ export function PropertyDetailPage() {
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
               </svg>
               Позвонить
-            </a>
+            </button>
           )}
         </div>
       )}

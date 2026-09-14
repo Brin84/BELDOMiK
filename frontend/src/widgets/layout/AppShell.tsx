@@ -6,7 +6,7 @@ import { useTelegram } from '@/app/providers/TelegramProvider';
 import { backHandlerBlocked } from '@/shared/lib/backButton';
 
 export function AppShell({ children }: { children?: ReactNode }) {
-  const { initData, backButton } = useTelegram();
+  const { initData, backButton, close } = useTelegram();
   const { accessToken, login, refresh } = useAuthStore();
   const authAttempted = useRef(false);
   const location = useLocation();
@@ -51,8 +51,16 @@ export function AppShell({ children }: { children?: ReactNode }) {
   const handleBack = useCallback(() => {
     // Skip when a modal is open — the modal's own handler controls BackButton
     if (backHandlerBlocked.current) return;
+    // Глубокая ссылка из канала/бота открывает страницу через
+    // navigate(..., { replace: true }) — в истории MiniApp одна запись, и
+    // navigate(-1) никуда не ведёт (кнопка «Назад» «не работает»). Тогда
+    // закрываем MiniApp вместо навигации, как это делает Telegram на главной.
+    if (window.history.length <= 1) {
+      close();
+      return;
+    }
     navigate(-1);
-  }, [navigate]);
+  }, [navigate, close]);
 
   useEffect(() => {
     if (!backButton) return;
