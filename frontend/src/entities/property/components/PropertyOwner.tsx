@@ -1,69 +1,115 @@
-import { ChevronRight } from 'lucide-react';
-import type { PropertyOwner as PropertyOwnerType, PropertyDetail } from '@/shared/api/types';
+import { Star } from 'lucide-react';
+import type { PropertyDetail } from '@/shared/api/types';
+import { formatDateShort } from '@/shared/lib/format';
 
 interface PropertyOwnerProps {
-  owner: PropertyOwnerType | null;
   property: PropertyDetail;
-  /** Контактный номер для показа. Отображается голубым как ссылка канала. */
-  phone?: string | null;
-  /** Вызывается по тапу на номер (открывает лист звонка). */
-  onCall?: () => void;
+  /** Совершить попытку подписки/отписки (вызывается из detail-страницы). */
+  onToggleFollow: () => void;
+  /** Подписка активна (признак приходит из summary бэкенда). */
+  following: boolean;
+  /** Актуальное число подписчиков (для оптимистичного UI). */
+  followersCount: number;
+  /** Своё объявление — подписку на себя прячем (бэкенд отклоняет 400). */
+  isOwn: boolean;
 }
 
-/** Карточка продавца: имя из Kufar-контакта (contact_name), иначе — аккаунт. */
-export function PropertyOwner({ owner, property, phone, onCall }: PropertyOwnerProps) {
-  const displayName = property.contact_name || owner?.name || property.owner_name || 'Частное лицо';
-  const displayIsAgency = owner?.is_agency ?? (property.agency_id != null);
-  const displayAgencyName = owner?.agency_name || property.agency_name;
-  const displayVerified = owner?.phone_verified ?? owner?.telegram_verified ?? property.is_verified ?? false;
-  const displayLogo = owner?.agency_name ? undefined : property.agency_logo_url;
+/** Русская плюрализация: plural(1, 'отзыв', 'отзыва', 'отзывов'). */
+function plural(n: number, one: string, few: string, many: string): string {
+  const abs = Math.abs(n) % 100;
+  const last = abs % 10;
+  if (abs > 10 && abs < 20) return many;
+  if (last > 1 && last < 5) return few;
+  if (last === 1) return one;
+  return many;
+}
+
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  return (parts[0][0] + (parts[1]?.[0] ?? '')).toUpperCase();
+}
+
+/** Карточка продавца в стиле «Барахолка Apple Беларусь»: аватар из Telegram,
+ * рейтинг из отзывов, кнопка «Подписаться». Номер убран — звонок только из
+ * нижнего бара «Написать / Позвонить». */
+export function PropertyOwner({
+  property,
+  onToggleFollow,
+  following,
+  followersCount,
+  isOwn,
+}: PropertyOwnerProps) {
+  const displayName =
+    property.contact_name || property.owner_name || 'Частное лицо';
+  const displayAgency = property.agency_name;
+
+  const avatarUrl = property.owner_avatar_url || property.agency_logo_url || null;
+  const rating = property.owner_rating ?? 0;
+  const reviewsCount = property.owner_reviews_count ?? 0;
+  const dealsCount = property.owner_deals_count ?? 0;
+  const memberSince = property.owner_created_at ? formatDateShort(property.owner_created_at) : null;
+  const stars = Math.round(rating);
+
+  // Рейтинг+счётчики: одна строка фактов под именем.
+  const facts: string[] = [];
+  if (reviewsCount > 0) {
+    facts.push(`${rating.toFixed(1)} · ${reviewsCount} ${plural(reviewsCount, 'отзыв', 'отзыва', 'отзывов')}`);
+  } else {
+    facts.push('Нет отзывов');
+  }
+  if (dealsCount > 0) {
+    facts.push(`${dealsCount} ${plural(dealsCount, 'сделка', 'сделки', 'сделок')}`);
+  }
+  if (followersCount > 0) {
+    facts.push(`${followersCount} ${plural(followersCount, 'подписчик', 'подписчика', 'подписчиков')}`);
+  }
+
+  const showFollowButton = !isOwn;
 
   return (
     <section className="property-section">
-      <div className="agent-card">
-        <div className="agent-card__avatar">
-          {displayLogo ? (
-            <img src={displayLogo} alt="" />
+      <h2 className="property-section__title">Продавец</h2>
+
+      <div className="seller-card">
+        <div className="seller-card__avatar">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" referrerPolicy="no-referrer" />
           ) : (
-            displayName.charAt(0).toUpperCase()
+            initialsOf(displayName)
           )}
         </div>
 
-        <div className="agent-card__body">
-          <div className="agent-card__name">
-            <span className="agent-card__name-text">{displayName}</span>
-            {displayVerified && (
-              <span className="agent-card__verified" title="Подтверждено">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </span>
-            )}
-          </div>
-          <div className="agent-card__type">
-            {displayIsAgency ? 'Агентство недвижимости' : 'Частное лицо'}
-          </div>
-          {displayAgencyName && (
-            <div className="agent-card__company">
-              <span className="agent-card__company-name">{displayAgencyName}</span>
-            </div>
-          )}
+        <div className="seller-card__body">
+          <div className="seller-card__name">{displayName}</div>
+          {displayAgency && <div className="seller-card__company">{displayAgency}</div>}
+          {memberSince && <div className="seller-card__since">На BELDOMiK с {memberSince}</div>}
         </div>
-
-        <ChevronRight size={20} className="agent-card__chevron" />
       </div>
 
-      {phone && onCall && (
+      {/* Рейтинг звёздами (телячья шкала 1–5) */}
+      <div className="seller-card__rating">
+        {Array.from({ length: 5 }, (_, i) => (
+          <Star
+            key={i}
+            size={15}
+            strokeWidth={i < stars ? 0 : 1.6}
+            fill={i < stars ? '#f59e0b' : 'none'}
+            className={i < stars ? 'seller-card__star--filled' : 'seller-card__star--empty'}
+          />
+        ))}
+        <span className="seller-card__rating-text">{facts.join(' · ') || 'Нет отзывов'}</span>
+      </div>
+
+      {/* Кнопка подписки — как в Барахолке: голубая «Подписаться» /
+          серая «Подписан» (повторный тап — отписка). */}
+      {showFollowButton && (
         <button
           type="button"
-          className="agent-card__phone"
-          onClick={onCall}
-          aria-label={`Позвонить по номеру ${phone}`}
+          className={`seller-card__follow${following ? ' seller-card__follow--active' : ''}`}
+          onClick={onToggleFollow}
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-          </svg>
-          {phone}
+          {following ? 'Подписан' : 'Подписаться'}
         </button>
       )}
     </section>

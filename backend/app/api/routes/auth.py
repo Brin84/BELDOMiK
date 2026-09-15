@@ -34,6 +34,16 @@ def telegram_auth(
     user.last_name = user_data.get("last_name", user.last_name)
     user.username = user_data.get("username", user.username)
     user.language_code = user_data.get("language_code", user.language_code)
+
+    # Аватар из Telegram (photo_url из initData) — для карточки продавца
+    photo_url = user_data.get("photo_url")
+    if photo_url:
+        if user.profile:
+            if not user.profile.avatar_url:
+                user.profile.avatar_url = photo_url
+        else:
+            user.profile = UserProfile(user_id=user.id, avatar_url=photo_url)
+            db.add(user.profile)
     db.commit()
 
     # Create tokens

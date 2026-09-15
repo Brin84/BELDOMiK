@@ -13,6 +13,7 @@ from app.schemas.property import (
     PropertyResponse,
     PropertyUpdate,
 )
+from app.services import social_service
 from app.services.monetization_service import MonetizationService
 from app.services.property_service import PropertyListResponse, PropertyService
 from app.services.upload_service import upload_service
@@ -129,6 +130,13 @@ def get_property(
     if not property_obj:
         raise HTTPException(status_code=404, detail="Property not found")
     result = _build_property_response(property_obj)
+    # Карточка продавца (Барахолка-модель): рейтинг, подписки, аватар.
+    if property_obj.owner_id:
+        summary = social_service.user_summary(db, property_obj.owner, user_id)
+        for key, value in summary.items():
+            if key == "id":
+                continue
+            result[f"owner_{key}"] = value
     return result
 
 

@@ -132,5 +132,14 @@ export const API_ENDPOINTS = {
     channelPostListing: (id: number) => `/api/v1/admin/telegram/post-listing/${id}`,
     channelWelcome: '/api/v1/admin/telegram/channel-welcome',
   },
+  users: {
+    summary: (id: number) => `/api/v1/users/${id}`,
+    follow: (id: number) => `/api/v1/users/${id}/follow`,
+    reviews: (id: number) => `/api/v1/users/${id}/reviews`,
+  },
+  reviews: {
+    create: '/api/v1/reviews',
+    delete: (id: number) => `/api/v1/reviews/${id}`,
+  },
   health: '/health',
 } as const;

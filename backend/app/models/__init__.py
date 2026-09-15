@@ -42,6 +42,7 @@ from app.models.property import (
     SavedSearch,
     SearchNotification,
 )
+from app.models.social import Review, UserFollow
 from app.models.property_types import (
     OperationType,
     PropertyType,
@@ -88,8 +89,10 @@ __all__ = [
     "Region",
     "RenovationType",
     "Report",
+    "Review",
     "SavedSearch",
     "SearchNotification",
+    "UserFollow",
     "Street",
     "Subscription",
     "SubscriptionPlan",

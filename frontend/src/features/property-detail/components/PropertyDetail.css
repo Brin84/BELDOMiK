@@ -390,17 +390,18 @@
 }
 
 /* ============================================================
-   Карточка продавца
+   Карточка продавца (Барахолка-модель)
+   Аватар из Telegram + рейтинг звёздами + кнопка «Подписаться».
+   Номер в блоке продавца убран — звонок только из нижнего бара.
    ============================================================ */
 
-.agent-card {
+.seller-card {
   display: flex;
   align-items: center;
   gap: 14px;
 }
 
-.agent-card__avatar {
-  position: relative;
+.seller-card__avatar {
   flex-shrink: 0;
   width: 56px;
   height: 56px;
@@ -410,94 +411,96 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
   overflow: hidden;
+  border: 1px solid #e2e8f0;
 }
 
-.agent-card__avatar img {
+.seller-card__avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
-.agent-card__body {
+.seller-card__body {
   flex: 1;
   min-width: 0;
 }
 
-.agent-card__name {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.seller-card__name {
   font-size: 16px;
   font-weight: 700;
   color: #0f172a;
-  overflow: hidden;
-}
-
-.agent-card__name-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.agent-card__verified {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #2171ee;
-  color: #fff;
-  flex-shrink: 0;
-}
-
-.agent-card__type {
-  margin-top: 2px;
+.seller-card__company {
+  margin-top: 3px;
   font-size: 13px;
   font-weight: 600;
   color: #64748b;
 }
 
-.agent-card__company {
+.seller-card__since {
   margin-top: 3px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
+  font-size: 12.5px;
   color: #94a3b8;
 }
 
-.agent-card__chevron {
-  color: #cbd5e1;
+.seller-card__rating {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.seller-card__star--filled {
+  color: #f59e0b;
   flex-shrink: 0;
 }
 
-/* Номер в карточке продавца — голубым как ссылка на номер в сообщении канала.
-   Тап открывает лист звонка (на iOS — relay → нативный диалог). */
-.agent-card__phone {
-  margin-top: 10px;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 2px 0;
-  border: none;
-  background: transparent;
-  color: #2171ee;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  font-variant-numeric: tabular-nums;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+.seller-card__star--empty {
+  color: #d1d5db;
+  flex-shrink: 0;
 }
 
-.agent-card__phone:active {
-  color: #1a5cd6;
+.seller-card__rating-text {
+  margin-left: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.seller-card__follow {
+  margin-top: 14px;
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 14px;
+  background: #2171ee;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(33, 113, 238, 0.28);
+  transition: transform 0.15s ease;
+}
+
+.seller-card__follow:active {
+  transform: scale(0.97);
+}
+
+/* «Подписан» — нейтральная вторичная кнопка; тап повторно отписывает. */
+.seller-card__follow--active {
+  background: #fff;
+  color: #2171ee;
+  border: 1px solid #bfdbfe;
+  box-shadow: none;
 }
 
 /* ============================================================

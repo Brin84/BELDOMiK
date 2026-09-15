@@ -6,7 +6,9 @@ import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useFavoritesStore } from '@/features/favorites';
 import { useChatStore } from '@/features/chat';
 import { useAuthStore } from '@/features/auth';
-import { AuthError } from '@/shared/api/client';
+import { api, AuthError } from '@/shared/api/client';
+import { API_ENDPOINTS } from '@/shared/api/endpoints';
+import type { SellerSummary } from '@/shared/api/types';
 import { useToast } from '@/shared/ui/Toast';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { ErrorState } from '@/shared/ui/ErrorState';
@@ -34,8 +36,24 @@ export function PropertyDetailPage() {
   // авторизовался из канала).
   const { user } = useAuthStore();
   const [callSheetOpen, setCallSheetOpen] = useState(false);
+  // Локальное состояние подписки на продавца (оптимистичный UI). Синхронизируется
+  // из ответа detail-роута (owner_is_following / owner_followers_count).
+  const [follow, setFollow] = useState<{ following: boolean; followersCount: number }>({
+    following: false,
+    followersCount: 0,
+  });
 
   const propertyId = id ? parseInt(id, 10) : null;
+
+  // Первичная загрузка: подписка берётся из карточки объявления.
+  useEffect(() => {
+    if (propertyDetail?.owner_id) {
+      setFollow({
+        following: propertyDetail.owner_is_following ?? false,
+        followersCount: propertyDetail.owner_followers_count ?? 0,
+      });
+    }
+  }, [propertyDetail?.owner_id, propertyDetail?.owner_is_following, propertyDetail?.owner_followers_count]);
 
   // Load property detail on mount
   useEffect(() => {
@@ -123,54 +141,93 @@ export function PropertyDetailPage() {
     setCallSheetOpen(true);
   };
 
-  // ── Написать ──────────────────────────────────────────────────────────
+  // ── Авторизация по требованию ─────────────────────────────────────────
   // При открытии из канала (startapp=property_<id>) авторизация идёт
   // асинхронно (AppShell) и может не успеть/упасть на транзиентной ошибке —
-  // тогда пользователь видит «не работает». Для надёжности сам handleWrite
-  // активно гарантирует наличие токена:
-  //   1. Если токен есть → immediately.
+  // тогда пользователь видит «не работает». Для надёжности действия, которым
+  // нужен токен (чат, подписка), сами гарантируют его наличие:
+  //   1. Если токен есть → сразу.
   //   2. Если уже идёт вход (status=authenticating) → ждём до 10 с.
   //   3. Если ничего не идёт — запускаем login(initData) сами (до 3 попыток).
-  const handleWrite = async () => {
-    trigger('light');
-
+  const ensureAccessToken = async (): Promise<boolean> => {
     const store = useAuthStore.getState();
     let token = store.accessToken;
+    if (token) return true;
 
-    if (!token) {
-      showToast('Секунду, авторизация…', 'info');
+    showToast('Секунду, авторизация…', 'info');
 
-      // 1) Если на сцене другой вход — просто ждём его завершения.
-      if (store.status === 'authenticating') {
-        const deadline = Date.now() + 10000;
-        while (Date.now() < deadline) {
-          await new Promise((r) => setTimeout(r, 200));
-          token = useAuthStore.getState().accessToken;
-          if (token) break;
-        }
-      }
-
-      // 2) Если входа нет — запускаем ourselves (can happen from channel).
-      if (!token && initData) {
-        for (let i = 0; i < 3; i++) {
-          if (useAuthStore.getState().accessToken) break;
-          try {
-            await useAuthStore.getState().login(initData);
-            break;
-          } catch {
-            // Транзиентные ошибки: сеть, бэкенд. Ждём перед следующей попыткой.
-            await new Promise((r) => setTimeout(r, 400 * (i + 1)));
-          }
-        }
+    // 1) Если на сцене другой вход — просто ждём его завершения.
+    if (store.status === 'authenticating') {
+      const deadline = Date.now() + 10000;
+      while (Date.now() < deadline) {
+        await new Promise((r) => setTimeout(r, 200));
         token = useAuthStore.getState().accessToken;
-      }
-
-      if (!token) {
-        trigger('error');
-        showToast('Авторизация не завершилась — откройте приложение из бота и повторите', 'warning');
-        return;
+        if (token) break;
       }
     }
+
+    // 2) Если входа нет — запускаем ourselves (can happen from channel).
+    if (!token && initData) {
+      for (let i = 0; i < 3; i++) {
+        if (useAuthStore.getState().accessToken) break;
+        try {
+          await useAuthStore.getState().login(initData);
+          break;
+        } catch {
+          // Транзиентные ошибки: сеть, бэкенд. Ждём перед следующей попыткой.
+          await new Promise((r) => setTimeout(r, 400 * (i + 1)));
+        }
+      }
+      token = useAuthStore.getState().accessToken;
+    }
+
+    if (!token) {
+      trigger('error');
+      showToast('Авторизация не завершилась — откройте приложение из бота и повторите', 'warning');
+      return false;
+    }
+    return true;
+  };
+
+  // ── Подписаться на продавца ───────────────────────────────────────────
+  const handleToggleFollow = async () => {
+    trigger('light');
+    if (!property.owner_id || !(await ensureAccessToken())) return;
+
+    const ownerId = property.owner_id;
+    const wasFollowing = follow.following;
+
+    // Оптимистично: кнопка реагирует мгновенно, при ошибке — откат.
+    setFollow((prev) => ({
+      following: !wasFollowing,
+      followersCount: wasFollowing
+        ? Math.max(0, prev.followersCount - 1)
+        : prev.followersCount + 1,
+    }));
+
+    try {
+      if (wasFollowing) {
+        await api.delete(API_ENDPOINTS.users.follow(ownerId));
+      } else {
+        const summary = await api.post<SellerSummary>(API_ENDPOINTS.users.follow(ownerId));
+        setFollow({ following: true, followersCount: summary.followers_count });
+      }
+    } catch {
+      trigger('error');
+      setFollow((prev) => ({
+        following: wasFollowing,
+        followersCount: wasFollowing
+          ? prev.followersCount + 1
+          : Math.max(0, prev.followersCount - 1),
+      }));
+      showToast('Не удалось обновить подписку', 'warning');
+    }
+  };
+
+  // ── Написать ──────────────────────────────────────────────────────────
+  const handleWrite = async () => {
+    trigger('light');
+    if (!(await ensureAccessToken())) return;
 
     try {
       // Встроенный чат (Kufar-модель): переписка сохраняется, пока не удалишь.
@@ -229,12 +286,15 @@ export function PropertyDetailPage() {
         {/* Описание */}
         <PropertyDescription description={property.description} />
 
-        {/* Продавец. Номер (если разрешён) — голубой ссылкой, тап → лист звонка. */}
+        {/* Продавец (Барахолка-модель): аватар из Telegram, рейтинг из
+            отзывов, кнопка «Подписаться». Номер убран — звонок только из
+            нижнего бара «Написать / Позвонить». */}
         <PropertyOwner
-          owner={null}
           property={property}
-          phone={canCall ? contactPhone : undefined}
-          onCall={canCall ? handleCall : undefined}
+          onToggleFollow={handleToggleFollow}
+          following={follow.following}
+          followersCount={follow.followersCount}
+          isOwn={isOwn}
         />
       </div>
 

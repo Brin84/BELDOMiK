@@ -182,6 +182,58 @@ export interface PropertyDetail extends PropertyShort {
   agency_name?: string | null;
   agency_logo_url?: string | null;
   is_verified?: boolean;
+  // Карточка продавца (Барахолка-модель): рейтинг/отзывы/подписки/аватар.
+  // Вычисляется в detail-роуте через social_service.user_summary.
+  owner_avatar_url?: string | null;
+  owner_created_at?: string | null;
+  owner_rating?: number;
+  owner_reviews_count?: number;
+  owner_deals_count?: number;
+  owner_followers_count?: number;
+  owner_is_following?: boolean;
+}
+
+/** Мини-карточка автора отзыва. */
+export interface ReviewAuthor {
+  id: number;
+  name: string | null;
+  avatar_url: string | null;
+}
+
+/** Карточка продавца: профиль + соц-метрики (блок «Продавец»). */
+export interface SellerSummary {
+  id: number;
+  name: string | null;
+  username: string | null;
+  avatar_url: string | null;
+  created_at: string | null;
+  rating: number;
+  reviews_count: number;
+  deals_count: number;
+  followers_count: number;
+  is_following: boolean;
+  is_self: boolean;
+}
+
+export interface Review {
+  id: number;
+  target_user_id: number;
+  author: ReviewAuthor;
+  rating: number;
+  text: string | null;
+  created_at: string;
+}
+
+export interface ReviewListResponse {
+  items: Review[];
+  total: number;
+  summary: SellerSummary;
+}
+
+export interface ReviewCreate {
+  user_id: number;
+  rating: number;
+  text?: string | null;
 }
 
 export interface PropertyOwner {

@@ -266,6 +266,15 @@ class PropertyRead(PropertyShortRead):
     # "Связаться с продавцом" action.
     owner_username: str | None = None
     owner_phone: str | None = None
+    # Карточка продавца (Барахолка-модель): рейтинг, подписки, аватар.
+    # Вычисляется в detail-роуте через social_service.user_summary.
+    owner_avatar_url: str | None = None
+    owner_created_at: datetime | None = None
+    owner_rating: float = 0.0
+    owner_reviews_count: int = 0
+    owner_deals_count: int = 0
+    owner_followers_count: int = 0
+    owner_is_following: bool = False
 
 
 # Aliases for backward compatibility with routes

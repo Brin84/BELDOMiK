@@ -120,6 +120,15 @@ from app.schemas.property_types import (
     PropertyTypeResponse,
 )
 
+# Social schemas (seller card: reviews/follows)
+from app.schemas.social import (
+    ReviewAuthorRead,
+    ReviewCreate,
+    ReviewListResponse,
+    ReviewRead,
+    UserSummaryRead,
+)
+
 # User schemas
 from app.schemas.user import (
     UserBase,
@@ -205,6 +214,10 @@ __all__ = [
     "RegionRead",
     "RegionResponse",
     "ReportResponse",
+    "ReviewAuthorRead",
+    "ReviewCreate",
+    "ReviewListResponse",
+    "ReviewRead",
     "SavedSearchBase",
     "SavedSearchCreate",
     "SavedSearchRead",
@@ -229,5 +242,6 @@ __all__ = [
     "UserProfileUpdate",
     "UserRead",
     "UserResponse",
+    "UserSummaryRead",
     "UserUpdate",
 ]
