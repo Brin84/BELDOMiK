@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Star } from 'lucide-react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { EmptyState } from '@/shared/ui';
 import { useAuthStore } from '@/features/auth';
@@ -8,7 +9,7 @@ import { SavedSearchList } from '@/features/saved-searches/components';
 import { useCollectionsStore } from '@/features/collections';
 import { useAdminStore } from '@/features/admin';
 import { api, API_ENDPOINTS } from '@/shared/api';
-import type { PropertyShort, UserRole } from '@/shared/api';
+import type { PropertyShort, SellerSummary, UserRole } from '@/shared/api';
 
 export function ProfilePage() {
   const { user, status, error, login } = useAuthStore();
@@ -20,6 +21,9 @@ export function ProfilePage() {
   const { collections, fetchCollections } = useCollectionsStore();
   const { fetchDashboard } = useAdminStore();
   const [myListingsCount, setMyListingsCount] = useState<number | null>(null);
+  // Сводка соц-метрик (рейтинг/отзывы/сделки/подписчики) — Барахолка-модель,
+  // из GET /users/{id}; показывает рейтинг прямо в шапке профиля.
+  const [sellerSummary, setSellerSummary] = useState<SellerSummary | null>(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -29,6 +33,14 @@ export function ProfilePage() {
         .catch(() => {});
     }
   }, [isAuthenticated, fetchCollections]);
+
+  useEffect(() => {
+    if (user) {
+      api.get<SellerSummary>(API_ENDPOINTS.users.summary(user.id))
+        .then(setSellerSummary)
+        .catch(() => {});
+    }
+  }, [user]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -159,6 +171,18 @@ export function ProfilePage() {
               {getRoleLabel(user.role as UserRole)}
             </span>
           </div>
+          {/* Рейтинг и соц-метрики (Барахолка-модель): звёздная оценка + счётчики */}
+          {sellerSummary && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm" style={{ color: '#94a3b8' }}>
+              <span className="inline-flex items-center gap-1">
+                <Star size={14} strokeWidth={0} fill="#f59e0b" />
+                <b style={{ color: 'var(--tg-theme-text-color)' }}>{sellerSummary.rating.toFixed(1)}</b>
+              </span>
+              <span>{sellerSummary.reviews_count} отзывов</span>
+              {sellerSummary.deals_count > 0 && <span>{sellerSummary.deals_count} сделок</span>}
+              {sellerSummary.followers_count > 0 && <span>{sellerSummary.followers_count} подписчиков</span>}
+            </div>
+          )}
         </div>
       </div>
 
@@ -236,6 +260,35 @@ export function ProfilePage() {
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
             <span style={{ color: 'var(--tg-theme-button-color)' }}>Создать объявление</span>
+          </button>
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-tg-text text-lg font-semibold mb-3">⭐ Рейтинг и отзывы</h2>
+        <div className="space-y-3">
+          <button
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
+            style={{
+              backgroundColor: 'var(--tg-theme-secondary-bg-color)',
+            }}
+            onClick={() => {
+              trigger('medium');
+              navigate('/reviews');
+            }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="#f59e0b" stroke="none" className="flex-shrink-0">
+              <path d="M12 2l2.4 7.2H22l-6.2 4.5 2.4 7.3L12 16.5l-6.2 4.5 2.4-7.3L2 9.2h7.6z" />
+            </svg>
+            <span className="flex-1" style={{ color: 'var(--tg-theme-text-color)' }}>Мои отзывы</span>
+            {sellerSummary && sellerSummary.reviews_count > 0 && (
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--tg-theme-button-color)', color: 'var(--tg-theme-button-text-color)' }}>
+                {sellerSummary.reviews_count}
+              </span>
+            )}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: '#94a3b8' }}>
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
           </button>
         </div>
       </section>
