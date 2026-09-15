@@ -67,7 +67,6 @@ export interface CreateListingState {
 }
 
 const defaultFormData: PropertyCreate = {
-  title: '',
   description: '',
   operation: '',
   property_type_id: 0,
@@ -108,9 +107,9 @@ const defaultFormData: PropertyCreate = {
 const stepFields: Record<CreateListingStep, string[]> = {
   1: ['operation', 'property_type_id'],
   2: ['region_id', 'city_id'],
-  3: ['title', 'description', 'price_byn', 'area', 'rooms', 'floor', 'floors_total', 'build_year', 'repair_type', 'has_balcony', 'has_furniture', 'has_elevator', 'has_parking', 'district_id', 'neighborhood_id', 'street_id', 'address'],
+  3: ['description', 'price_byn', 'area', 'rooms', 'floor', 'floors_total', 'build_year', 'repair_type', 'has_balcony', 'has_furniture', 'has_elevator', 'has_parking', 'district_id', 'neighborhood_id', 'street_id', 'address'],
   4: ['contact_name', 'contact_phone'],
-  5: ['title', 'description', 'price_byn', 'area', 'rooms', 'floor', 'floors_total', 'build_year', 'repair_type', 'has_balcony', 'has_furniture', 'has_elevator', 'has_parking', 'district_id', 'neighborhood_id', 'street_id', 'address', 'latitude', 'longitude'],
+  5: ['description', 'price_byn', 'area', 'rooms', 'floor', 'floors_total', 'build_year', 'repair_type', 'has_balcony', 'has_furniture', 'has_elevator', 'has_parking', 'district_id', 'neighborhood_id', 'street_id', 'address', 'latitude', 'longitude'],
   6: [], // Preview step - no required fields
 };
 
@@ -121,7 +120,6 @@ function isPhoneValid(value: string): boolean {
 }
 
 const stepValidationRules: Record<string, (data: PropertyCreate) => string | null> = {
-  title: (data) => data.title.trim().length < 10 ? 'Название должно содержать минимум 10 символов' : data.title.trim().length > 100 ? 'Название не должно превышать 100 символов' : null,
   description: (data) => data.description && data.description.length > 5000 ? 'Описание не должно превышать 5000 символов' : null,
   price_byn: (data) => data.is_negotiable ? null : data.price_byn <= 0 ? 'Укажите цену' : data.price_byn > 100000000 ? 'Цена слишком высокая' : null,
   area: (data) => data.area !== undefined && (data.area <= 0 || data.area > 10000) ? 'Некорректная площадь' : null,
@@ -415,10 +413,7 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
       if (draftId) {
         await api.put(API_ENDPOINTS.properties.update(draftId), backendData);
       } else {
-        const response = await api.post<PropertyShort>(API_ENDPOINTS.properties.create, {
-          ...backendData,
-          title: formData.title || 'Черновик',
-        });
+        const response = await api.post<PropertyShort>(API_ENDPOINTS.properties.create, backendData);
         set({ draftId: response.id });
       }
       set({ isLoading: false });
@@ -432,8 +427,8 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
     try {
       const response = await api.get<PropertyShort>(API_ENDPOINTS.properties.detail(id));
       // Convert PropertyShort (backend contract) back to the wizard's PropertyCreate.
-      // The backend has no title/region on the listing — synthesize a Krisha-style
-      // headline and resolve the city's region through the geography store.
+      // The backend has no title on the listing; resolve the city's region through
+      // the geography store.
       const geo = useGeographyStore.getState();
       if (!geo.loadedAllCities) {
         await geo.fetchAllCities();
@@ -447,16 +442,7 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
       const opType = geo.getOperationTypeById(response.operation_id);
       const operationSlug = (opType ? toOperationKey(opType.name) : null) as OperationType | null;
 
-      const titleParts = [
-        response.type_name,
-        response.rooms_count ? `${response.rooms_count}-комн.` : null,
-        response.total_area ? `${response.total_area} м²` : null,
-        response.city_name,
-      ].filter(Boolean);
-      const draftTitle = titleParts.join(', ') || `Объявление ${response.id}`;
-
       const draftData: PropertyCreate = {
-        title: draftTitle,
         description: response.description || '',
         operation: operationSlug || 'sale',
         property_type_id: response.type_id,

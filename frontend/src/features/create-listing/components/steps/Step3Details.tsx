@@ -195,32 +195,6 @@ export function Step3Details() {
 
   return (
     <div className="p-4 space-y-6">
-      {/* Title */}
-      <section>
-        <h2 style={{ color: '#0f172a', fontSize: '20px', fontWeight: 700, marginBottom: '16px' }}>
-          Название объявления <span style={{ color: '#94a3b8', fontWeight: 400 }}>*</span>
-        </h2>
-        <input
-          type="text"
-          value={formData.title}
-          onChange={(e) => {
-            trigger('selection');
-            updateFormData({ title: e.target.value });
-            clearError('title');
-          }}
-          placeholder="Например: 2-к квартира, 55 м², 5/9 этаж"
-          className="w-full px-4 py-3 rounded-xl text-base outline-none"
-          style={{
-            backgroundColor: '#f1f5f9',
-            border: errors.title ? '2px solid #ef4444' : '1px solid #e2e8f0',
-            color: '#0f172a',
-          }}
-          maxLength={100}
-        />
-        {errors.title && <p className="text-sm mt-1" style={{ color: '#ef4444' }}>{errors.title}</p>}
-        <p className="text-xs mt-1 text-right" style={{ color: '#94a3b8' }}>{formData.title.length}/100</p>
-      </section>
-
       {/* Description */}
       <section>
         <h2 style={{ color: '#0f172a', fontSize: '20px', fontWeight: 700, marginBottom: '16px' }}>Описание</h2>

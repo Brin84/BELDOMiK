@@ -85,6 +85,15 @@ export function Step6Preview() {
   // Find display names
   const propertyType = propertyTypes.find((t) => t.id === formData.property_type_id);
   const operationType = findOperationType(operationTypes, formData.operation);
+
+  // Krisha-стиль: заголовок карточки собираем из данных, не из отдельного поля
+  // «Название объявления» — на бэкенде его нет, он не хранится.
+  const previewTitle = [
+    propertyType?.name,
+    formData.rooms ? `${formData.rooms}-комн.` : null,
+    formData.area ? `${formData.area} м²` : null,
+    formData.address,
+  ].filter(Boolean).join(', ') || 'Новое объявление';
   const region = formData.region_id ? getRegionById(formData.region_id) : null;
   const city = formData.city_id ? getCityById(formData.city_id) : null;
   const district = formData.district_id ? getDistrictById(formData.district_id) : null;
@@ -114,7 +123,7 @@ export function Step6Preview() {
             <div className="flex items-center gap-3">
               <span className="text-3xl">{propertyType ? propertyTypeIcon(propertyType.icon) : '🏠'}</span>
               <div>
-                <h3 className="font-semibold" style={{ color: '#0f172a' }}>{formData.title || 'Без названия'}</h3>
+                <h3 className="font-semibold" style={{ color: '#0f172a' }}>{previewTitle}</h3>
                 <p className="text-sm mt-0.5" style={{ color: '#64748b' }}>
                   {operationType?.name_plural || formData.operation} · {propertyType?.name || 'Недвижимость'}
                 </p>

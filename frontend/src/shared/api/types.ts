@@ -260,7 +260,6 @@ export interface PropertyFilterParams {
 }
 
 export interface PropertyCreate {
-  title: string;
   description?: string;
   /** Тип сделки: '' = ещё не выбран в визарде (валидируется перед подачей). */
   operation: OperationType | '';

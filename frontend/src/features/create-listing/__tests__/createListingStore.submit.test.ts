@@ -35,7 +35,6 @@ const SUBMITTED = { id: 42, status: 'pending_moderation' };
 
 function validFormData() {
   return {
-    title: 'Двухкомнатная квартира в центре Минска',
     description: 'Отличная квартира в хорошем состоянии',
     operation: 'sale' as const,
     property_type_id: 1,
