@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import { useAuthStore } from '@/features/auth';
-import { api, API_ENDPOINTS } from '@/shared/api';
+import { useHaptics } from '@/shared/lib/haptics';
+import { useToast } from '@/shared/ui/Toast';
+import { api, API_ENDPOINTS, ApiError } from '@/shared/api';
 import type { ReviewListResponse } from '@/shared/api/types';
 import { EmptyState, InlineError, ListSkeleton } from '@/shared/ui';
 import { formatDateShort } from '@/shared/lib/format';
@@ -25,7 +28,7 @@ function plural(n: number, one: string, few: string, many: string): string {
   return many;
 }
 
-/** Звёзды 1–5 (как в Барахолке): заполненные ≤ округлённой оценки, пустые — полупрозрачные. */
+/** Звёзды 1–5: заполненные ≤ округлённой оценки, пустые — полупрозрачные. */
 function Stars({ rating, size = 13 }: { rating: number; size?: number }) {
   const filled = Math.round(rating);
   return (
@@ -43,30 +46,58 @@ function Stars({ rating, size = 13 }: { rating: number; size?: number }) {
   );
 }
 
-/** Рейтинг и отзывы о пользователе — по образцу Барахолки: сводка рейтинга +
- * список отзывов (аватар автора, звёзды, текст, дата). Данные приходят одним
- * запросом: GET /users/{id}/reviews → { items, total, summary }. */
+/**
+ * Рейтинг и отзывы — по образцу Барахолки.
+ *
+ * Работает для любого пользователя: ?user=<id> показывает профиль продавца
+ * (со своими рейтингом и отзывами) и даёт кнопку «Оставить отзыв». Без параметра
+ * — СВОЙ профиль (как из меню профиля), где отзыв оставить нельзя (не о себе).
+ *
+ * Данные одним запросом: GET /users/{id}/reviews → { items, total, summary }.
+ * Отзыв — POST /reviews {user_id, rating, text} (1 на пару, апсерт).
+ */
 export function ProfileReviewsPage() {
   const { user, status } = useAuthStore();
   const isAuthenticated = status === 'authenticated' && user;
+  const { trigger } = useHaptics();
+  const { showToast } = useToast();
+  const [searchParams] = useSearchParams();
+
+  // ?user=<id> — просмотр профиля продавца; без параметра — свой профиль.
+  const userIdParam = searchParams.get('user');
+  const targetId = isAuthenticated && user
+    ? (userIdParam ? parseInt(userIdParam, 10) : user.id)
+    : null;
 
   const [data, setData] = useState<ReviewListResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewText, setReviewText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!user) {
+    if (!targetId) {
       setIsLoading(false);
       return;
     }
     let cancelled = false;
+    setIsLoading(true);
     api
-      .get<ReviewListResponse>(API_ENDPOINTS.users.reviews(user.id))
+      .get<ReviewListResponse>(API_ENDPOINTS.users.reviews(targetId))
       .then((res) => {
         if (!cancelled) setData(res);
       })
-      .catch(() => {
-        if (!cancelled) setError('Не удалось загрузить отзывы');
+      .catch((err) => {
+        if (cancelled) return;
+        setError(
+          err instanceof ApiError && err.status === 404
+            ? 'Профиль не найден'
+            : 'Не удалось загрузить отзывы'
+        );
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -74,14 +105,52 @@ export function ProfileReviewsPage() {
     return () => {
       cancelled = true;
     };
-  }, [user]);
+  }, [targetId, reloadKey]);
+
+  const openReview = useCallback(() => {
+    trigger('light');
+    setReviewOpen(true);
+  }, [trigger]);
+
+  const closeReview = () => {
+    if (submitting) return;
+    setReviewOpen(false);
+    setReviewText('');
+    setReviewRating(5);
+  };
+
+  const submitReview = async () => {
+    if (!targetId || submitting) return;
+    trigger('light');
+    setSubmitting(true);
+    try {
+      await api.post(API_ENDPOINTS.reviews.create, {
+        user_id: targetId,
+        rating: reviewRating,
+        text: reviewText.trim() || null,
+      });
+      showToast('Отзыв оставлен', 'success');
+      setReviewOpen(false);
+      setReviewText('');
+      setReviewRating(5);
+      setReloadKey((k) => k + 1);
+    } catch (e) {
+      trigger('error');
+      showToast(
+        e instanceof Error && e.message ? e.message : 'Не удалось оставить отзыв',
+        'warning'
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (!isAuthenticated) {
     return (
       <div className="p-4 space-y-6 pb-20">
         <EmptyState
           title="Войдите, чтобы видеть отзывы"
-          description="Авторизуйтесь через Telegram, чтобы видеть рейтинг и отзывы о ваших сделках"
+          description="Авторизуйтесь через Telegram, чтобы видеть рейтинг и отзывы, а также оставлять их"
           action={{ label: 'Войти', onClick: () => {} }}
         />
       </div>
@@ -90,6 +159,10 @@ export function ProfileReviewsPage() {
 
   const summary = data?.summary;
   const reviews = data?.items ?? [];
+  // Есть ли уже мой отзыв об этом пользователе → кнопка «Изменить отзыв» (апсерт).
+  const hasMyReview = Boolean(
+    user && summary && !summary.is_self && reviews.some((r) => r.author.id === user.id)
+  );
 
   const badges: string[] = [];
   if (summary) {
@@ -159,6 +232,18 @@ export function ProfileReviewsPage() {
                   ))}
                 </div>
               )}
+
+              {/* Кнопка «Оставить отзыв» — только на чужом профиле (себе нельзя) */}
+              {!summary.is_self && (
+                <button
+                  type="button"
+                  onClick={openReview}
+                  className="w-full h-11 rounded-xl text-sm font-bold active:opacity-80 transition-opacity"
+                  style={{ backgroundColor: '#f59e0b', color: '#fff' }}
+                >
+                  {hasMyReview ? 'Изменить отзыв' : '⭐ Оставить отзыв'}
+                </button>
+              )}
             </section>
           )}
 
@@ -210,6 +295,71 @@ export function ProfileReviewsPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* Модалка «Оставить отзыв» (стиль Барахолки: звёзды + комментарий) */}
+      {reviewOpen && summary && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-0 sm:p-4" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+            <button type="button" aria-label="Закрыть" className="absolute inset-0 w-full h-full cursor-pointer border-none bg-transparent" onClick={closeReview} />
+            <div className="relative m-4 p-5 rounded-2xl space-y-4" style={{ backgroundColor: 'var(--tg-theme-bg-color)' }}>
+              <h3 className="text-lg font-bold text-tg-text">Оставить отзыв</h3>
+              <p className="text-xs" style={{ color: '#94a3b8' }}>
+                Оцените продавца {summary.name}
+              </p>
+
+              {/* Выбор оценки */}
+              <div className="flex items-center justify-center gap-2">
+                {STARS.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => { trigger('light'); setReviewRating(s); }}
+                    className="w-10 h-10 flex items-center justify-center active:scale-90 transition-transform"
+                    aria-label={`Оценка ${s}`}
+                  >
+                    <Star
+                      size={34}
+                      strokeWidth={s <= reviewRating ? 0 : 1.4}
+                      fill={s <= reviewRating ? '#f59e0b' : 'none'}
+                      className={s <= reviewRating ? '' : 'opacity-40'}
+                    />
+                  </button>
+                ))}
+              </div>
+
+              <textarea
+                value={reviewText}
+                onChange={(e) => setReviewText(e.target.value)}
+                placeholder="Комментарий (необязательно)"
+                rows={3}
+                maxLength={1000}
+                className="w-full p-3 rounded-xl text-sm resize-none outline-none"
+                style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)', color: 'var(--tg-theme-text-color)' }}
+              />
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={closeReview}
+                  className="flex-1 h-11 rounded-xl text-sm font-semibold"
+                  style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)', color: 'var(--tg-theme-text-color)' }}
+                >
+                  Отмена
+                </button>
+                <button
+                  type="button"
+                  onClick={submitReview}
+                  disabled={submitting}
+                  className="flex-1 h-11 rounded-xl text-sm font-bold disabled:opacity-50"
+                  style={{ backgroundColor: '#f59e0b', color: '#fff' }}
+                >
+                  {submitting ? 'Отправка…' : 'Отправить'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

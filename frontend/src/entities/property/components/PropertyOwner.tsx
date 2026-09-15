@@ -1,4 +1,5 @@
 import { Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import type { PropertyDetail } from '@/shared/api/types';
 import { formatDateShort } from '@/shared/lib/format';
 
@@ -40,6 +41,7 @@ export function PropertyOwner({
   followersCount,
   isOwn,
 }: PropertyOwnerProps) {
+  const navigate = useNavigate();
   const displayName =
     property.contact_name || property.owner_name || 'Частное лицо';
   const displayAgency = property.agency_name;
@@ -100,6 +102,22 @@ export function PropertyOwner({
         ))}
         <span className="seller-card__rating-text">{facts.join(' · ') || 'Нет отзывов'}</span>
       </div>
+
+      {/* Ссылка на профиль отзывов продавца → /reviews?user=<owner_id>,
+          где можно посмотреть отзывы и оставить свой (свой профиль — нельзя). */}
+      {property.owner_id ? (
+        <button
+          type="button"
+          className="seller-card__reviews"
+          onClick={() => navigate(`/reviews?user=${property.owner_id}`)}
+        >
+          Отзывы
+          {reviewsCount > 0 && ` (${reviewsCount})`}
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}>
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+      ) : null}
 
       {/* Кнопка подписки — как в Барахолке: голубая «Подписаться» /
           серая «Подписан» (повторный тап — отписка). */}
