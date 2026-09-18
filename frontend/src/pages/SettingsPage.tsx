@@ -362,42 +362,31 @@ export function SettingsPage() {
 
       {/* ─── Юридические документы ─────────────────────────── */}
       <section className="pt-6 pb-4">
-        <div
-          className="flex items-center justify-center gap-3 text-sm"
-          style={{ color: '#64748b' }}
-        >
+        <div className="flex flex-col items-center gap-2">
           <button
             type="button"
             onClick={() => navigate('/legal?doc=privacy-policy')}
-            className="transition-colors hover:underline"
+            className="text-xs font-medium transition-colors hover:underline"
             style={{ color: '#2171ee' }}
           >
-            Политика
+            Политика конфиденциальности
           </button>
-          <span>•</span>
           <button
             type="button"
             onClick={() => navigate('/legal?doc=terms-of-service')}
-            className="transition-colors hover:underline"
+            className="text-xs font-medium transition-colors hover:underline"
             style={{ color: '#2171ee' }}
           >
-            Соглашение
+            Пользовательское соглашение
           </button>
-          <span>•</span>
           <button
             type="button"
             onClick={() => navigate('/legal?doc=disclaimer')}
-            className="transition-colors hover:underline"
+            className="text-xs font-medium transition-colors hover:underline"
             style={{ color: '#2171ee' }}
           >
-            Отказ
+            Отказ от ответственности
           </button>
-        </div>
-
-        {/* Идентификатор сборки — по нему отличаем «код не работает» от
-            «клиент держит закэшированный старый бандл» при жалобах на фиксы. */}
-        <div className="pt-2 text-center text-xs" style={{ color: '#cbd5e1' }}>
-          build {__BUILD_ID__}
         </div>
       </section>
     </div>
