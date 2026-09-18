@@ -142,4 +142,14 @@ export const API_ENDPOINTS = {
     delete: (id: number) => `/api/v1/reviews/${id}`,
   },
   health: '/health',
+  legal: {
+    privacyPolicy: '/api/v1/legal/privacy-policy',
+    termsOfService: '/api/v1/legal/terms-of-service',
+    cookiePolicy: '/api/v1/legal/cookie-policy',
+    gdpr: '/api/v1/legal/gdpr',
+    privacyByDesign: '/api/v1/legal/privacy-by-design',
+    userRights: '/api/v1/legal/user-rights',
+    disclaimer: '/api/v1/legal/disclaimer',
+    allDocuments: '/api/v1/legal/all',
+  },
 } as const;

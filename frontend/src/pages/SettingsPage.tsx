@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EmptyState } from '@/shared/ui';
+import { Footer } from '@/widgets/layout/Footer';
 import { useAuthStore } from '@/features/auth';
 import { useGeographyStore } from '@/features/geography/geographyStore';
 import { useHaptics, hapticMedium } from '@/shared/lib/haptics';
@@ -360,7 +361,42 @@ export function SettingsPage() {
         </button>
       </section>
 
-      <div className="pt-4 text-center text-sm" style={{ color: '#94a3b8' }}>
+      {/* ─── Юридические документы ─────────────────────────── */}
+      <section className="pt-4">
+        <div
+          className="flex items-center justify-center gap-3 text-sm"
+          style={{ color: '#94a3b8' }}
+        >
+          <button
+            type="button"
+            onClick={() => navigate('/legal?doc=privacy-policy')}
+            className="transition-colors hover:underline"
+            style={{ color: '#2171ee' }}
+          >
+            Политика конфиденциальности
+          </button>
+          <span>•</span>
+          <button
+            type="button"
+            onClick={() => navigate('/legal?doc=terms-of-service')}
+            className="transition-colors hover:underline"
+            style={{ color: '#2171ee' }}
+          >
+            Соглашение
+          </button>
+          <span>•</span>
+          <button
+            type="button"
+            onClick={() => navigate('/legal?doc=disclaimer')}
+            className="transition-colors hover:underline"
+            style={{ color: '#2171ee' }}
+          >
+            Отказ от ответственности
+          </button>
+        </div>
+      </section>
+
+      <div className="pt-2 text-center text-sm" style={{ color: '#94a3b8' }}>
         BELDOMiK 🇧🇾 — настройки по стандарту Kufar
       </div>
 
@@ -369,6 +405,9 @@ export function SettingsPage() {
       <div className="pt-1 pb-2 text-center text-xs" style={{ color: '#cbd5e1' }}>
         build {__BUILD_ID__}
       </div>
+
+      {/* Юридические документы через футер */}
+      <Footer />
     </div>
   );
 }

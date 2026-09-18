@@ -578,6 +578,14 @@ export interface Payment {
 
 export type SubscriptionPlanName = 'free' | 'pro' | 'enterprise';
 
+// ── Legal documents ──────────────────────────────────────────
+
+export interface LegalDocumentResponse {
+  title: string;
+  last_updated: string;
+  content: string;
+}
+
 export interface SubscriptionPlanInfo {
   plan: SubscriptionPlanName;
   label: string;

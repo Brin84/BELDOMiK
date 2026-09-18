@@ -26,6 +26,7 @@ import { ToastProvider } from '@/shared/ui/Toast';
 import { AllBelarusPage } from '@/pages/AllBelarusPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { ProfileReviewsPage } from '@/pages/ProfileReviewsPage';
+import { LegalDocumentsPage } from '@/features/legal/LegalDocumentsPage';
 
 // Lazy load MapPage for code splitting
 const MapPage = lazy(() => import('@/pages/MapPage').then(module => ({ default: module.MapPage })));
@@ -99,6 +100,7 @@ export function App() {
         {/* Ипотечный калькулятор временно отключён от приложения:
             роут /mortgage снят, код сохранён в features/mortgage
             и pages/MortgagePage.tsx для повторного включения. */}
+        <Route path="/legal" element={<LegalDocumentsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AppShell>

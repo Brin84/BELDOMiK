@@ -11,6 +11,7 @@ from app.api.routes import (
     favorites,
     geography,
     internal,
+    legal,
     moderation,
     monetization,
     mortgage,
@@ -48,3 +49,4 @@ api_router.include_router(analytics.router)
 api_router.include_router(mortgage.router)
 api_router.include_router(webhook.router)
 api_router.include_router(internal.router)
+api_router.include_router(legal.router)
