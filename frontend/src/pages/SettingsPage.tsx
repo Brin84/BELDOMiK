@@ -12,7 +12,7 @@ import { ExpandablePicker, type ExpandableOption } from '@/features/create-listi
 
 const BIO_MAX = 2000; // совпадает с валидацией PATCH /auth/me (user_profiles.bio)
 
-/** Компактный переключатель в светлой дизайн-системе (Kufar-тумблеры). */
+/** Компактный переключатель в светлой дизайн-системе. */
 function SettingsSwitch({
   checked,
   onChange,
@@ -362,10 +362,10 @@ export function SettingsPage() {
       </section>
 
       {/* ─── Юридические документы ─────────────────────────── */}
-      <section className="pt-4">
+      <section className="pt-6 pb-4">
         <div
           className="flex items-center justify-center gap-3 text-sm"
-          style={{ color: '#94a3b8' }}
+          style={{ color: '#64748b' }}
         >
           <button
             type="button"
@@ -373,7 +373,7 @@ export function SettingsPage() {
             className="transition-colors hover:underline"
             style={{ color: '#2171ee' }}
           >
-            Политика конфиденциальности
+            Политика
           </button>
           <span>•</span>
           <button
@@ -391,22 +391,17 @@ export function SettingsPage() {
             className="transition-colors hover:underline"
             style={{ color: '#2171ee' }}
           >
-            Отказ от ответственности
+            Отказ
           </button>
+        </div>
+
+        {/* Идентификатор сборки — по нему отличаем «код не работает» от
+            «клиент держит закэшированный старый бандл» при жалобах на фиксы. */}
+        <div className="pt-2 text-center text-xs" style={{ color: '#cbd5e1' }}>
+          build {__BUILD_ID__}
         </div>
       </section>
 
-      <div className="pt-2 text-center text-sm" style={{ color: '#94a3b8' }}>
-        BELDOMiK 🇧🇾 — настройки по стандарту Kufar
-      </div>
-
-      {/* Идентификатор сборки — по нему отличаем «код не работает» от
-          «клиент держит закэшированный старый бандл» при жалобах на фиксы. */}
-      <div className="pt-1 pb-2 text-center text-xs" style={{ color: '#cbd5e1' }}>
-        build {__BUILD_ID__}
-      </div>
-
-      {/* Юридические документы через футер */}
       <Footer />
     </div>
   );
