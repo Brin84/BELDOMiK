@@ -48,6 +48,7 @@ export function CatalogPage() {
     refresh,
     clearError,
     setLocalFavorite,
+    resetFilters,
   } = usePropertiesStore();
   const {
     fetchRegions,
@@ -65,8 +66,10 @@ export function CatalogPage() {
     // Синхронизируем набор избранного на входе: toggleFavorite определяет
     // направление по favoriteIds, и он должен совпадать с is_favorite карточек.
     fetchFavoriteIds();
+    // Сбрасываем фильтры при входе в каталог
+    resetFilters();
     fetchProperties(true);
-  }, [fetchRegions, fetchPropertyTypes, fetchFavoriteIds, fetchProperties]);
+  }, [fetchRegions, fetchPropertyTypes, fetchFavoriteIds, fetchProperties, resetFilters]);
 
   // Автопрокрутка рекламной карусели: слайды едут влево и вправо —
   // на краях ленты направление разворачивается, 3.5s на баннер.
