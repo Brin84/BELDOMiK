@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { EmptyState } from '@/shared/ui';
 import { LegalDocumentResponse } from '@/shared/api/types';
 import { API_ENDPOINTS } from '@/shared/api/endpoints';
+import { buildUrl } from '@/shared/api/client';
 
 interface DocumentLink {
   id: string;
@@ -99,8 +100,9 @@ export function LegalDocumentsPage() {
         throw new Error('Invalid document ID');
       }
 
-      console.log('Endpoint:', endpoint);
-      const response = await fetch(endpoint);
+      const url = buildUrl(endpoint);
+      console.log('Fetching from URL:', url);
+      const response = await fetch(url);
       console.log('Response status:', response.status);
 
       if (!response.ok) {

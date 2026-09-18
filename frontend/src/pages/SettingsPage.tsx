@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EmptyState } from '@/shared/ui';
-import { Footer } from '@/widgets/layout/Footer';
 import { useAuthStore } from '@/features/auth';
 import { useGeographyStore } from '@/features/geography/geographyStore';
 import { useHaptics, hapticMedium } from '@/shared/lib/haptics';
@@ -401,8 +400,6 @@ export function SettingsPage() {
           build {__BUILD_ID__}
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }
