@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { EmptyState } from '@/shared/ui';
 import { LegalDocumentResponse } from '@/shared/api/types';
@@ -80,21 +80,42 @@ export function LegalDocumentsPage() {
   const [documentData, setDocumentData] = useState<LegalDocumentResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Загружаем документ при монтировании если есть selectedDocument из URL
+  useEffect(() => {
+    if (selectedDocument && !documentData) {
+      fetchDocument(selectedDocument);
+    }
+  }, [selectedDocument]);
+
   const fetchDocument = async (docId: string) => {
     setLoading(true);
+    console.log('Fetching document:', docId);
     try {
-      const endpoint = API_ENDPOINTS.legal[docId as keyof typeof API_ENDPOINTS.legal];
-      if (!endpoint) throw new Error('Invalid document ID');
+      // Get the correct endpoint from API_ENDPOINTS
+      const key = docId as keyof typeof API_ENDPOINTS.legal;
+      const endpoint = API_ENDPOINTS.legal[key];
+
+      if (!endpoint) {
+        throw new Error('Invalid document ID');
+      }
+
+      console.log('Endpoint:', endpoint);
       const response = await fetch(endpoint);
-      if (!response.ok) throw new Error('Failed to fetch document');
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch: ${response.status}`);
+      }
+
       const data: LegalDocumentResponse = await response.json();
+      console.log('Received data:', data.title);
       setDocumentData(data);
-    } catch {
-      // Fallback for development without backend
+    } catch (error) {
+      console.error('Error fetching legal document:', error);
       setDocumentData({
-        title: 'Документ',
+        title: 'Ошибка загрузки',
         last_updated: '2026-09-18',
-        content: 'Контент документа загружается с сервера. В текущем режиме отображается заглушка.',
+        content: 'Не удалось загрузить документ. Проверьте подключение к интернету.',
       });
     } finally {
       setLoading(false);
@@ -104,9 +125,8 @@ export function LegalDocumentsPage() {
   const handleDocumentSelect = (docId: string) => {
     setSelectedDocument(docId);
     navigate(`?doc=${docId}`);
-    if (!documentData || documentData.title === 'Документ') {
-      fetchDocument(docId);
-    }
+    // Always fetch new document data when selecting
+    fetchDocument(docId);
   };
 
   if (!selectedDocument) {
