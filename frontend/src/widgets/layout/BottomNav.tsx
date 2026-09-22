@@ -3,6 +3,7 @@ import { Building2, Heart, MessageCircle, Plus, User } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useChatStore } from '@/features/chat';
+import { usePropertiesStore } from '@/features/properties/propertiesStore';
 
 import './BottomNav.css';
 
@@ -56,6 +57,17 @@ export function BottomNav() {
         className={`bottom-nav__item ${active ? 'bottom-nav__item--active' : ''}`}
         style={{ color: active ? '#2171ee' : '#64748b' }}
         aria-current={active ? 'page' : undefined}
+        onClick={() => {
+          // Повторный тап по уже активной вкладке «Каталог» страницу не
+          // перемонтирует, поэтому фильтр категории снимаем здесь: «Каталог»
+          // всегда показывает все объявления. Запрос не дублируем — сбрасываем
+          // только когда фильтр по типу действительно выставлен.
+          if (item.path !== '/catalog' || !active) return;
+          trigger('light');
+          if (usePropertiesStore.getState().filters.type_id !== undefined) {
+            usePropertiesStore.getState().resetFilters();
+          }
+        }}
       >
         <span className="bottom-nav__icon">
           <Icon size={20} strokeWidth={active ? 2.3 : 1.8} />

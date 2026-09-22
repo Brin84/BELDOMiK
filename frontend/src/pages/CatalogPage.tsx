@@ -27,6 +27,7 @@ export function CatalogPage() {
     total,
     filters,
     setOperation,
+    setFilters,
     refresh,
     clearError,
     setLocalFavorite,
@@ -55,26 +56,16 @@ export function CatalogPage() {
     resetFilters();
   }, [fetchRegions, fetchPropertyTypes, fetchFavoriteIds, resetFilters]);
 
-  // Переход на поиск с предзаполненными фильтрами (категория/новостройки).
-  // SearchPage применяет сохранённые фильтры через sessionStorage-механизм
-  // applySavedFilters на монтировании.
-  const navigateWithFilters = useCallback(
-    (filters: Record<string, unknown>) => {
-      trigger('light');
-      sessionStorage.setItem('applySavedFilters', JSON.stringify(filters));
-      navigate('/');
-    },
-    [trigger, navigate]
-  );
-
+  // Категория фильтрует выдачу на месте, не уводя со страницы: редирект
+  // '/' → '/catalog' перемонтировал каталог, и resetFilters() на монтировании
+  // стирал выбранную категорию. Повторный тап по активной категории снимает
+  // фильтр и снова показывает все объявления.
   const handleCategoryClick = useCallback(
     (typeId: number) => {
-      navigateWithFilters({
-        type_id: typeId,
-        operation_id: filters.operation_id,
-      });
+      trigger('light');
+      setFilters({ type_id: filters.type_id === typeId ? undefined : typeId });
     },
-    [navigateWithFilters, filters.operation_id]
+    [trigger, setFilters, filters.type_id]
   );
 
   // If a city filter is already active (e.g. returning from /), make sure
@@ -98,6 +89,33 @@ export function CatalogPage() {
   const currentCity = filters.city_id ? getCityById(filters.city_id) : null;
   const currentOperationId = filters.operation_id ?? 1; // 1 = sale, 2 = rent
   const operationLabel = currentOperationId === 1 ? 'Покупка' : 'Аренда';
+
+  // Активная категория — по type_id в фильтрах. Проверка на undefined нужна:
+  // без неё совпадение с id первой категории подсветило бы её, пока типы
+  // ещё не загружены и все id равны undefined.
+  const activeCategory =
+    filters.type_id === undefined
+      ? undefined
+      : CATEGORIES.find(
+          (category) =>
+            propertyTypes.find((type) => type.category === category.key)?.id ===
+            filters.type_id
+        );
+
+  const categoriesClassName = activeCategory
+    ? 'catalog-categories catalog-categories--filtered'
+    : 'catalog-categories';
+
+  const defaultSectionTitle =
+    currentOperationId === 1
+      ? 'Квартиры и дома на продажу'
+      : 'Квартиры и дома в аренду';
+  const sectionTitle = activeCategory ? activeCategory.title : defaultSectionTitle;
+
+  const cityLabel = currentCity ? currentCity.name : 'все города';
+  const selectionLabel = activeCategory
+    ? activeCategory.title + ', ' + cityLabel + ', ' + operationLabel.toLowerCase()
+    : cityLabel + ', ' + operationLabel.toLowerCase();
 
   const handleFavoriteToggle = useCallback(
     async (propertyId: number) => {
@@ -211,14 +229,16 @@ export function CatalogPage() {
         {error && <InlineError message={error} onDismiss={clearError} />}
 
         {/* CATEGORIES */}
-        <section className="catalog-categories" role="list" aria-label="Категории недвижимости">
+        <section className={categoriesClassName} role="list" aria-label="Категории недвижимости">
           {CATEGORIES.map((category) => {
             const type = propertyTypes.find((t) => t.category === category.key);
+            const isActive = activeCategory?.key === category.key;
             return (
               <CategoryCard
                 key={category.key}
                 title={category.title}
                 image={category.image}
+                active={isActive}
                 onClick={() => {
                   if (type) handleCategoryClick(type.id);
                   else trigger('light');
@@ -237,7 +257,7 @@ export function CatalogPage() {
                 type="button"
                 onClick={() => {
                   trigger('light');
-                  navigateWithFilters({});
+                  resetFilters();
                 }}
                 className="catalog-section__link"
               >
@@ -262,9 +282,7 @@ export function CatalogPage() {
         {/* MAIN LISTINGS */}
         <section className="catalog-section">
           <div className="catalog-section__head">
-            <h2 className="catalog-section__title">
-              {currentOperationId === 1 ? 'Квартиры и дома на продажу' : 'Квартиры и дома в аренду'}
-            </h2>
+            <h2 className="catalog-section__title">{sectionTitle}</h2>
             {total > 0 && (
               <span className="catalog-section__count">{total} объявлений</span>
             )}
@@ -287,7 +305,7 @@ export function CatalogPage() {
                   <>
                     Попробуйте изменить фильтры или расширить поиск.
                     <br />
-                    <span className="text-xs">Выбрано: {currentCity?.name || 'все города'}, {operationLabel.toLowerCase()}</span>
+                    <span className="text-xs">Выбрано: {selectionLabel}</span>
                   </>
                 )
               }

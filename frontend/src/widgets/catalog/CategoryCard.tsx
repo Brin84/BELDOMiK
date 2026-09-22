@@ -31,15 +31,18 @@ interface CategoryCardProps {
   title: string;
   image: string;
   onClick?: () => void;
+  /** Категория выбрана — каталог отфильтрован по ней. */
+  active?: boolean;
 }
 
-export function CategoryCard({ title, image, onClick }: CategoryCardProps) {
+export function CategoryCard({ title, image, onClick, active = false }: CategoryCardProps) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={title}
-      className="category-card"
+      aria-pressed={active}
+      className={`category-card${active ? ' category-card--active' : ''}`}
     >
       <img
         src={image}

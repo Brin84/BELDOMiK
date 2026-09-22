@@ -334,11 +334,22 @@
   background: transparent;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.2s ease;
 }
 
 .category-card:active {
   transform: scale(0.97);
+}
+
+/* Выбранная категория: остальные приглушены, активная подсвечена свечением.
+   Карточка — готовая иллюстрация без рамки, поэтому обводка спорила бы с её
+   собственной формой. */
+.catalog-categories--filtered .category-card:not(.category-card--active) {
+  opacity: 0.45;
+}
+
+.category-card--active .category-card__image {
+  filter: drop-shadow(0 6px 16px rgba(33, 113, 238, 0.55));
 }
 
 .category-card__image {
