@@ -3,45 +3,38 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 /** Карточка рекламного баннера с призывом к действию. */
 interface AdBannerItem {
   id: number;
-  image: string;
   title: string;
   subtitle: string;
   cta: string;
 }
-
-// Альтернативные заглушки с плейсхолдерами
+// Backgrounds are CSS gradients: see .ad-banner__bg in CatalogPage.css.
 const AD_BANNERS: readonly AdBannerItem[] = [
   {
     id: 1,
-    image: 'https://placehold.co/600x200/4c91ff/ffffff?text=Реклама+на+BELDOMiK&font=roboto',
     title: 'Реклама на BELDOMiK',
     subtitle: 'Покажите свой объект тысячам пользователей',
     cta: 'Разместить рекламу',
   },
   {
     id: 2,
-    image: 'https://placehold.co/600x200/2171ee/ffffff?text=Ваше+объявление+здесь&font=roboto',
     title: 'Продвижение объявлений',
     subtitle: 'Больше просмотров - быстрее продажа',
     cta: 'Узнать больше',
   },
   {
     id: 3,
-    image: 'https://placehold.co/600x200/10b981/ffffff?text=Промо+акции&font=roboto',
     title: 'Специальные предложения',
     subtitle: 'Акция для агентств недвижимости',
     cta: 'Подать заявку',
   },
   {
     id: 4,
-    image: 'https://placehold.co/600x200/f59e0b/ffffff?text=BELDOMiK+PRO&font=roboto',
     title: 'PRO подписка',
     subtitle: 'Неограниченное количество объявлений',
     cta: 'Оформить PRO',
   },
   {
     id: 5,
-    image: 'https://placehold.co/600x200/8b5cf6/ffffff?text=Сотрудничество&font=roboto',
     title: 'Партнерская программа',
     subtitle: 'Зарабатывайте с BELDOMiK',
     cta: 'Стать партнером',
@@ -213,7 +206,7 @@ export function AdBanner({ onBannerClick }: AdBannerProps) {
             className="ad-banner__slide"
             onClick={() => handleBannerClick(banner.id)}
           >
-            <img src={banner.image} alt={banner.title} className="ad-banner__image" />
+            <div className={`ad-banner__bg ad-banner__bg--${banner.id}`} aria-hidden="true" />
             <div className="ad-banner__content">
               <h3 className="ad-banner__title">{banner.title}</h3>
               <p className="ad-banner__subtitle">{banner.subtitle}</p>

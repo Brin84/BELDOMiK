@@ -154,11 +154,26 @@
   cursor: grabbing;
 }
 
-.ad-banner__image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+.ad-banner__bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
+}
+
+.ad-banner__bg--2 {
+  background: linear-gradient(135deg, #2171ee 0%, #1d4ed8 100%);
+}
+
+.ad-banner__bg--3 {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.ad-banner__bg--4 {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.ad-banner__bg--5 {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
 }
 
 .ad-banner__content {
