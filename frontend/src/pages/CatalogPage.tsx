@@ -162,7 +162,7 @@ export function CatalogPage() {
           className="catalog-search"
           aria-label="Поиск по каталогу"
         >
-          < size={18} className="catalog-search__icon" />
+          <Search size={18} className="catalog-search__icon" />
           <span className="catalog-search__placeholder">Поиск: город, метро, цена…</span>
         </button>
 
