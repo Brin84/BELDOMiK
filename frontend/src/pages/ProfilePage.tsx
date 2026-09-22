@@ -16,7 +16,11 @@ export function ProfilePage() {
   const { initData } = useTelegram();
   const { trigger } = useHaptics();
   const navigate = useNavigate();
-  const isAuthenticated = status === 'authenticated' && user;
+  // status не персистится (см. authStore.partialize): после перезагрузки
+  // MiniApp он снова 'idle' до завершения refresh(), и профиль успевал
+  // показать «Войдите в профиль» уже авторизованному пользователю.
+  // Признак живой сессии — сохранённый user, а не только status.
+  const isAuthenticated = Boolean(user) && status !== 'error';
 
   const { collections, fetchCollections } = useCollectionsStore();
   const { fetchDashboard } = useAdminStore();
@@ -42,12 +46,6 @@ export function ProfilePage() {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchCollections();
-    }
-  }, [isAuthenticated, fetchCollections]);
-
   // Выход из аккаунта только в «Настройках» (/settings) — здесь намеренно ничего нет.
 
   const handleApplySavedSearch = (filtersJson: string) => {
@@ -66,7 +64,7 @@ export function ProfilePage() {
     navigate('/search');
   };
 
-  if (!isAuthenticated) {
+  if (!user) {
     const isAuthenticating = status === 'authenticating';
     return (
       <div className="p-4 space-y-6 pb-20">

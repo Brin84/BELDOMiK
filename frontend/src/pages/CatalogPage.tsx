@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { ChevronRight, Globe, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '@/app/providers/TelegramProvider';
@@ -9,33 +9,16 @@ import { useFavoritesStore } from '@/features/favorites';
 import { HotPropertyCard } from '@/entities/property';
 import { ListSkeleton, EmptyState, InlineError } from '@/shared/ui';
 import { CATEGORIES, CategoryCard } from '@/widgets/catalog/CategoryCard';
+import { AdBanner } from '@/features/banners/AdBanner';
 
 import beldomikAvatar from '@/assets/beldomik-avatar.webp';
 
 import './CatalogPage/CatalogPage.css';
 
-/** Рекламные слайды карусели: 5 пастельных фонов под «место под рекламу». */
-const AD_BANNER_BG: readonly string[] = [
-  'linear-gradient(135deg, #eef4ff 0%, #dcebff 100%)',
-  'linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%)',
-  'linear-gradient(135deg, #f4f8ff 0%, #e9efff 100%)',
-  'linear-gradient(135deg, #ecfdf5 0%, #d6f5e3 100%)',
-  'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
-];
-
 export function CatalogPage() {
   const { trigger } = useHaptics();
   const { hapticFeedback } = useTelegram();
   const navigate = useNavigate();
-  // Позиция слайда + направление движения. Автоскрол ходит туда-обратно
-  // («влево-вправо»): дошёл до правого края → развернулся, затем к левому.
-  const [adPos, setAdPos] = useState({ index: 0, dir: 1 });
-  // Свайп: горизонтальный сдвиг ленты при перетаскивании пальцем (px).
-  const [dragX, setDragX] = useState<number | null>(null);
-  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
-  // Тач-жест отслеживаем отдельно от мыши: идентификатор пальца + точка старта.
-  const touchIdRef = useRef<number | null>(null);
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const {
     properties,
     hotProperties,
@@ -43,7 +26,6 @@ export function CatalogPage() {
     error,
     total,
     filters,
-    fetchProperties,
     setOperation,
     refresh,
     clearError,
@@ -66,133 +48,21 @@ export function CatalogPage() {
     // Синхронизируем набор избранного на входе: toggleFavorite определяет
     // направление по favoriteIds, и он должен совпадать с is_favorite карточек.
     fetchFavoriteIds();
-    // Сбрасываем фильтры при входе в каталог
+    // Сброс фильтров при входе в каталог. resetFilters() сам вызывает
+    // fetchProperties(true); отдельный вызов здесь давал два параллельных
+    // запроса — первый абортился и сбрасывал isLoading у второго, из-за чего
+    // каталог успевал отрисовать «Объявлений не найдено» вместо списка.
     resetFilters();
-    fetchProperties(true);
-  }, [fetchRegions, fetchPropertyTypes, fetchFavoriteIds, fetchProperties, resetFilters]);
-
-  // Автопрокрутка рекламной карусели: слайды едут влево и вправо —
-  // на краях ленты направление разворачивается, 3.5s на баннер.
-  // Таймер живёт в ref: ручной свайп перезапускает его — автоскрол
-  // «не навязывается», но и не останавливается навсегда.
-  const timerRef = useRef<number>(0);
-  const restartAutoplay = useCallback(() => {
-    window.clearInterval(timerRef.current);
-    timerRef.current = window.setInterval(() => {
-      setAdPos(({ index, dir }) => {
-        const next = index + dir;
-        if (next >= AD_BANNER_BG.length) {
-          return { index: AD_BANNER_BG.length - 2, dir: -1 };
-        }
-        if (next < 0) {
-          return { index: 1, dir: 1 };
-        }
-        return { index: next, dir };
-      });
-    }, 3500);
-  }, []);
-
-  useEffect(() => {
-    restartAutoplay();
-    return () => window.clearInterval(timerRef.current);
-  }, [restartAutoplay]);
-
-  // Ручное переключение слайда (свайп). Направление автоскролла
-  // выравнивается под движение пальца.
-  const advance = useCallback((step: 1 | -1) => {
-    setAdPos(({ index }) => {
-      const next = index + step;
-      if (next >= AD_BANNER_BG.length) {
-        return { index: AD_BANNER_BG.length - 1, dir: -1 };
-      }
-      if (next < 0) {
-        return { index: 0, dir: 1 };
-      }
-      return { index: next, dir: step };
-    });
-  }, []);
-
-  // ----- Свайп пальцем (native touch) + drag мышью -----
-  // Pointer events на части мобильных WebView ведут себя нестабильно
-  // (жест отменяется, пока не установлен захват указателя), поэтому для
-  // тача используем классические touch-события, для мыши — mouse.
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    const t = e.changedTouches[0];
-    if (!t) return;
-    touchIdRef.current = t.identifier;
-    touchStartRef.current = { x: t.clientX, y: t.clientY };
-    setDragX(0);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    const start = touchStartRef.current;
-    if (!start) return;
-    const touch = Array.from(e.touches).find((t) => t.identifier === touchIdRef.current);
-    if (!touch) return;
-    const dx = touch.clientX - start.x;
-    const dy = touch.clientY - start.y;
-    if (Math.abs(dy) > Math.abs(dx)) {
-      // Вертикальный свайп — уступаем скроллу страницы.
-      touchIdRef.current = null;
-      touchStartRef.current = null;
-      setDragX(null);
-      return;
-    }
-    const width = e.currentTarget.clientWidth || 1;
-    const limited = Math.max(-width * 0.4, Math.min(width * 0.4, dx));
-    setDragX(limited);
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-    const start = touchStartRef.current;
-    touchIdRef.current = null;
-    touchStartRef.current = null;
-    setDragX(null);
-    if (!start) return;
-    const t = e.changedTouches[0];
-    const dx = t ? t.clientX - start.x : 0;
-    const width = e.currentTarget.clientWidth || 1;
-    if (dx <= -width * 0.2) advance(1);
-    else if (dx >= width * 0.2) advance(-1);
-    restartAutoplay();
-  };
-
-  // Мышь (desktop/тачпад): pointer-события не навешиваем, чтобы на телефонах
-  // (там touch и pointer приходят вместе) жест не обрабатывался дважды.
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    dragStartRef.current = { x: e.clientX, y: e.clientY };
-    setDragX(0);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const start = dragStartRef.current;
-    if (!start) return;
-    const dx = e.clientX - start.x;
-    const width = e.currentTarget.clientWidth || 1;
-    const limited = Math.max(-width * 0.4, Math.min(width * 0.4, dx));
-    setDragX(limited);
-  };
-
-  const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
-    const start = dragStartRef.current;
-    dragStartRef.current = null;
-    setDragX(null);
-    if (!start) return;
-    const dx = e.clientX - start.x;
-    const width = e.currentTarget.clientWidth || 1;
-    if (dx <= -width * 0.2) advance(1);
-    else if (dx >= width * 0.2) advance(-1);
-    restartAutoplay();
-  };
+  }, [fetchRegions, fetchPropertyTypes, fetchFavoriteIds, resetFilters]);
 
   // Переход на поиск с предзаполненными фильтрами (категория/новостройки).
   // SearchPage применяет сохранённые фильтры через sessionStorage-механизм
-  // applySavedSearchFilters на монтировании.
+  // applySavedFilters на монтировании.
   const navigateWithFilters = useCallback(
     (filters: Record<string, unknown>) => {
       trigger('light');
-      sessionStorage.setItem('applySavedSearchFilters', JSON.stringify(filters));
-      navigate('/search');
+      sessionStorage.setItem('applySavedFilters', JSON.stringify(filters));
+      navigate('/');
     },
     [trigger, navigate]
   );
@@ -207,7 +77,7 @@ export function CatalogPage() {
     [navigateWithFilters, filters.operation_id]
   );
 
-  // If a city filter is already active (e.g. returning from /search), make sure
+  // If a city filter is already active (e.g. returning from /), make sure
   // the city name resolves and the selector can render it.
   useEffect(() => {
     if (filters.city_id) {
@@ -287,52 +157,17 @@ export function CatalogPage() {
           type="button"
           onClick={() => {
             trigger('light');
-            navigate('/search');
+            navigate('/');
           }}
           className="catalog-search"
           aria-label="Поиск по каталогу"
         >
-          <Search size={18} className="catalog-search__icon" />
+          < size={18} className="catalog-search__icon" />
           <span className="catalog-search__placeholder">Поиск: город, метро, цена…</span>
         </button>
 
-        {/* BANNERS — автопрокручивающиеся рекламные баннеры */}
-        <section className="catalog-banner" aria-label="Рекламные баннеры">
-          <div
-            className="catalog-banner__track"
-            style={{
-              transform:
-                dragX === null
-                  ? `translateX(-${adPos.index * 100}%)`
-                  : `translateX(calc(-${adPos.index * 100}% + ${dragX}px))`,
-              transition: dragX === null ? undefined : 'none',
-            }}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onTouchCancel={handleTouchEnd}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-          >
-            {AD_BANNER_BG.map((bg, i) => (
-              <div key={i} className="catalog-banner__slide" style={{ background: bg }}>
-                <span className="catalog-banner__label">Здесь может быть Ваша реклама</span>
-              </div>
-            ))}
-          </div>
-          <div className="catalog-banner__dots">
-            {AD_BANNER_BG.map((_, i) => (
-              <span
-                key={i}
-                className={`catalog-banner__dot${
-                  i === adPos.index ? ' catalog-banner__dot--active' : ''
-                }`}
-              />
-            ))}
-          </div>
-        </section>
+        {/* BANNERS — рекламные баннеры */}
+        <AdBanner />
 
         {/* OPERATION + LOCATION */}
         <div className="catalog-location">

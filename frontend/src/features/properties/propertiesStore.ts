@@ -173,7 +173,12 @@ export const usePropertiesStore = create<PropertiesState>((set, get) => ({
       }
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
-        set({ isLoading: false, isLoadingMore: false });
+        // Отменённый запрос мог быть вытеснен новым: тогда isLoading уже
+        // принадлежит ему, и сбрасывать его нельзя — иначе каталог успевает
+        // отрисовать «Объявлений не найдено», пока актуальный запрос в полёте.
+        if (get().abortController === controller) {
+          set({ isLoading: false, isLoadingMore: false });
+        }
         return; // Ignore aborted requests
       }
       const message = error instanceof Error ? error.message : 'Failed to load properties';
