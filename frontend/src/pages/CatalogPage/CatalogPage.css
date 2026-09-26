@@ -313,49 +313,100 @@
   flex-shrink: 0;
 }
 
-/* ---------- Категории ---------- */
+/* ---------- Категории — квадратные кнопки ---------- */
 
 .catalog-categories {
   margin-top: 14px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  align-items: start;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
 }
 
-/* Кнопка = только иллюстрация. Без тени, рамки, скругления и обрезки —
-   картинка полностью в своём виде, собственная форма её и обрамляет. */
+/* Квадратная кнопка: иконка + подпись. По умолчанию — цвет приложения
+   (белая плитка с синим обрамлением и синей иконкой). */
 .category-card {
-  position: relative;
-  display: block;
-  width: 100%;
-  border: none;
-  padding: 0;
-  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  aspect-ratio: 1 / 1;
+  min-width: 0;
+  padding: 8px 6px;
+  border: 1.5px solid #cfe0fb;
+  border-radius: 14px;
+  background: #fff;
+  color: #2171ee;
   cursor: pointer;
+  box-shadow: 0 4px 14px rgba(33, 113, 238, 0.08);
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease,
+    transform 0.12s ease, box-shadow 0.18s ease;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.15s ease, opacity 0.2s ease;
 }
 
 .category-card:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
-/* Выбранная категория: остальные приглушены, активная подсвечена свечением.
-   Карточка — готовая иллюстрация без рамки, поэтому обводка спорила бы с её
-   собственной формой. */
-.catalog-categories--filtered .category-card:not(.category-card--active) {
-  opacity: 0.45;
+/* Выбранная категория остаётся выбранной: зелёная заливка, белая иконка. */
+.category-card--active {
+  border-color: #16a34a;
+  background: #16a34a;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(22, 163, 74, 0.32);
 }
 
-.category-card--active .category-card__image {
-  filter: drop-shadow(0 6px 16px rgba(33, 113, 238, 0.55));
+.category-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.category-card__image {
-  display: block;
-  width: 100%;
-  height: auto;
+.category-card__title {
+  max-width: 100%;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.15;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Популярные города ---------- */
+
+.catalog-cities {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.city-chip {
+  padding: 7px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 999px;
+  background: #fff;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease,
+    transform 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.city-chip:active {
+  transform: scale(0.96);
+}
+
+/* Выбранный город — как активная категория, зелёная заливка. */
+.city-chip--active {
+  border-color: #16a34a;
+  background: #16a34a;
+  color: #fff;
 }
 
 /* ---------- Ипотека ---------- */

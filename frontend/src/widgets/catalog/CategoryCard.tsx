@@ -1,41 +1,44 @@
-import { Percent } from 'lucide-react';
+import {
+  Building2,
+  Home,
+  LandPlot,
+  Store,
+  Car,
+  TreePine,
+  Percent,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type { PropertyCategory } from '@/shared/api/types';
 import { BynSymbol } from '@/shared/ui';
 
-import apartmentsImg from '@/assets/categories/apartments.webp';
-import housesImg from '@/assets/categories/houses.webp';
-import landImg from '@/assets/categories/land.webp';
-import commercialImg from '@/assets/categories/commercial.webp';
-import garageImg from '@/assets/categories/garage.webp';
-import dachaImg from '@/assets/categories/dacha.webp';
-
-// Карточки категорий — готовые иллюстрации с градиентной подложкой,
-// названием и подписью внутри самой картинки. Текст дублируется в
-// aria-label для доступности и в подпись под карточкой.
+// Квадратные кнопки категорий: иконка + подпись. Функционал прежний —
+// клик фильтрует каталог по type_id, повторный клик по активной снимает
+// фильтр. Активная кнопка заливается зелёным и остаётся выбранной;
+// неактивная — в цвете приложения и выделена обрамлением.
 interface CategoryConfig {
   key: PropertyCategory;
   title: string;
-  image: string;
+  icon: LucideIcon;
 }
 
 export const CATEGORIES: readonly CategoryConfig[] = [
-  { key: 'apartment', title: 'Квартиры', image: apartmentsImg },
-  { key: 'house', title: 'Дома', image: housesImg },
-  { key: 'land', title: 'Земельные участки', image: landImg },
-  { key: 'commercial', title: 'Коммерческая недвижимость', image: commercialImg },
-  { key: 'garage', title: 'Гаражи/машиноместа', image: garageImg },
-  { key: 'dacha', title: 'Дачи', image: dachaImg },
+  { key: 'apartment', title: 'Квартиры', icon: Building2 },
+  { key: 'house', title: 'Дома', icon: Home },
+  { key: 'land', title: 'Участки', icon: LandPlot },
+  { key: 'commercial', title: 'Коммерческая', icon: Store },
+  { key: 'garage', title: 'Гаражи', icon: Car },
+  { key: 'dacha', title: 'Дачи', icon: TreePine },
 ];
 
 interface CategoryCardProps {
   title: string;
-  image: string;
+  icon: LucideIcon;
   onClick?: () => void;
   /** Категория выбрана — каталог отфильтрован по ней. */
   active?: boolean;
 }
 
-export function CategoryCard({ title, image, onClick, active = false }: CategoryCardProps) {
+export function CategoryCard({ title, icon: Icon, onClick, active = false }: CategoryCardProps) {
   return (
     <button
       type="button"
@@ -44,12 +47,10 @@ export function CategoryCard({ title, image, onClick, active = false }: Category
       aria-pressed={active}
       className={`category-card${active ? ' category-card--active' : ''}`}
     >
-      <img
-        src={image}
-        alt={title}
-        loading="lazy"
-        className="category-card__image"
-      />
+      <span className="category-card__icon">
+        <Icon size={22} strokeWidth={2} />
+      </span>
+      <span className="category-card__title">{title}</span>
     </button>
   );
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { ChevronRight, Globe, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '@/app/providers/TelegramProvider';
@@ -14,6 +14,10 @@ import { AdBanner } from '@/features/banners/AdBanner';
 import beldomikAvatar from '@/assets/beldomik-avatar.webp';
 
 import './CatalogPage/CatalogPage.css';
+
+// Популярные города под кнопками категорий. id подставляются из загруженного
+// справочника городов (fetchAllCities) по названию — хардкода идентификаторов нет.
+const POPULAR_CITIES = ['Минск', 'Брест', 'Витебск', 'Гомель', 'Гродно', 'Могилёв'] as const;
 
 export function CatalogPage() {
   const { trigger } = useHaptics();
@@ -38,6 +42,7 @@ export function CatalogPage() {
     fetchAllCities,
     fetchPropertyTypes,
     propertyTypes,
+    cities,
     getCityById,
   } = useGeographyStore();
   const { toggleFavorite, fetchFavoriteIds } = useFavoritesStore();
@@ -46,6 +51,9 @@ export function CatalogPage() {
   useEffect(() => {
     fetchRegions();
     fetchPropertyTypes();
+    // Города нужны для блока популярных городов — тот же кэш, что и шторка
+    // выбора города (guard в store пропускает повторную загрузку).
+    fetchAllCities();
     // Синхронизируем набор избранного на входе: toggleFavorite определяет
     // направление по favoriteIds, и он должен совпадать с is_favorite карточек.
     fetchFavoriteIds();
@@ -54,7 +62,7 @@ export function CatalogPage() {
     // запроса — первый абортился и сбрасывал isLoading у второго, из-за чего
     // каталог успевал отрисовать «Объявлений не найдено» вместо списка.
     resetFilters();
-  }, [fetchRegions, fetchPropertyTypes, fetchFavoriteIds, resetFilters]);
+  }, [fetchRegions, fetchAllCities, fetchPropertyTypes, fetchFavoriteIds, resetFilters]);
 
   // Категория фильтрует выдачу на месте, не уводя со страницы: редирект
   // '/' → '/catalog' перемонтировал каталог, и resetFilters() на монтировании
@@ -66,6 +74,26 @@ export function CatalogPage() {
       setFilters({ type_id: filters.type_id === typeId ? undefined : typeId });
     },
     [trigger, setFilters, filters.type_id]
+  );
+
+  // Популярные города фильтруют по city_id тем же механизмом, что и шторка
+  // выбора города: повторный тап по активному городу снимает фильтр.
+  const handleCityClick = useCallback(
+    (cityId: number) => {
+      trigger('light');
+      setFilters({ city_id: filters.city_id === cityId ? undefined : cityId });
+    },
+    [trigger, setFilters, filters.city_id]
+  );
+
+  // id популярных городов из загруженного справочника. Город, которого нет в
+  // списке (справочник ещё не загружен), просто не рисуем.
+  const popularCities = useMemo(
+    () =>
+      POPULAR_CITIES.map((name) => cities.find((city) => city.name === name)).filter(
+        (city): city is NonNullable<typeof city> => city !== undefined
+      ),
+    [cities]
   );
 
   // If a city filter is already active (e.g. returning from /), make sure
@@ -102,9 +130,7 @@ export function CatalogPage() {
             filters.type_id
         );
 
-  const categoriesClassName = activeCategory
-    ? 'catalog-categories catalog-categories--filtered'
-    : 'catalog-categories';
+  const categoriesClassName = 'catalog-categories';
 
   const defaultSectionTitle =
     currentOperationId === 1
@@ -228,8 +254,8 @@ export function CatalogPage() {
         {/* Error State */}
         {error && <InlineError message={error} onDismiss={clearError} />}
 
-        {/* CATEGORIES */}
-        <section className={categoriesClassName} role="list" aria-label="Категории недвижимости">
+        {/* CATEGORIES — квадратные кнопки с иконками */}
+        <section className={categoriesClassName} aria-label="Категории недвижимости">
           {CATEGORIES.map((category) => {
             const type = propertyTypes.find((t) => t.category === category.key);
             const isActive = activeCategory?.key === category.key;
@@ -237,7 +263,7 @@ export function CatalogPage() {
               <CategoryCard
                 key={category.key}
                 title={category.title}
-                image={category.image}
+                icon={category.icon}
                 active={isActive}
                 onClick={() => {
                   if (type) handleCategoryClick(type.id);
@@ -247,6 +273,26 @@ export function CatalogPage() {
             );
           })}
         </section>
+
+        {/* POPULAR CITIES — популярные города под категориями */}
+        {popularCities.length > 0 && (
+          <section className="catalog-cities" aria-label="Популярные города">
+            {popularCities.map((city) => {
+              const isActive = filters.city_id === city.id;
+              return (
+                <button
+                  key={city.id}
+                  type="button"
+                  onClick={() => handleCityClick(city.id)}
+                  className={`city-chip${isActive ? ' city-chip--active' : ''}`}
+                  aria-pressed={isActive}
+                >
+                  {city.name}
+                </button>
+              );
+            })}
+          </section>
+        )}
 
         {/* HOT OFFERS */}
         {hotProperties.length > 0 && (
