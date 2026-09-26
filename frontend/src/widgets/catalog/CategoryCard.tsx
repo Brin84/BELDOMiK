@@ -1,9 +1,9 @@
 import {
-  Building2,
+  Building,
   Home,
-  LandPlot,
+  Trees,
   Store,
-  Car,
+  Warehouse,
   TreePine,
   Percent,
 } from 'lucide-react';
@@ -14,7 +14,7 @@ import { BynSymbol } from '@/shared/ui';
 // Квадратные кнопки категорий: иконка + подпись. Функционал прежний —
 // клик фильтрует каталог по type_id, повторный клик по активной снимает
 // фильтр. Активная кнопка заливается зелёным и остаётся выбранной;
-// неактивная — в цвете приложения и выделена обрамлением.
+// неактивная — чёрная контурная иконка с чёрным обрамлением.
 interface CategoryConfig {
   key: PropertyCategory;
   title: string;
@@ -22,11 +22,11 @@ interface CategoryConfig {
 }
 
 export const CATEGORIES: readonly CategoryConfig[] = [
-  { key: 'apartment', title: 'Квартиры', icon: Building2 },
+  { key: 'apartment', title: 'Квартиры', icon: Building },
   { key: 'house', title: 'Дома', icon: Home },
-  { key: 'land', title: 'Участки', icon: LandPlot },
+  { key: 'land', title: 'Участки', icon: Trees },
   { key: 'commercial', title: 'Коммерческая', icon: Store },
-  { key: 'garage', title: 'Гаражи', icon: Car },
+  { key: 'garage', title: 'Гаражи', icon: Warehouse },
   { key: 'dacha', title: 'Дачи', icon: TreePine },
 ];
 
@@ -48,7 +48,7 @@ export function CategoryCard({ title, icon: Icon, onClick, active = false }: Cat
       className={`category-card${active ? ' category-card--active' : ''}`}
     >
       <span className="category-card__icon">
-        <Icon size={22} strokeWidth={2} />
+        <Icon size={18} strokeWidth={1.75} />
       </span>
       <span className="category-card__title">{title}</span>
     </button>

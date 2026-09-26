@@ -276,22 +276,25 @@ export function CatalogPage() {
 
         {/* POPULAR CITIES — популярные города под категориями */}
         {popularCities.length > 0 && (
-          <section className="catalog-cities" aria-label="Популярные города">
-            {popularCities.map((city) => {
-              const isActive = filters.city_id === city.id;
-              return (
-                <button
-                  key={city.id}
-                  type="button"
-                  onClick={() => handleCityClick(city.id)}
-                  className={`city-chip${isActive ? ' city-chip--active' : ''}`}
-                  aria-pressed={isActive}
-                >
-                  {city.name}
-                </button>
-              );
-            })}
-          </section>
+          <>
+            <h2 className="catalog-cities-title">Популярные города</h2>
+            <section className="catalog-cities" aria-label="Популярные города">
+              {popularCities.map((city) => {
+                const isActive = filters.city_id === city.id;
+                return (
+                  <button
+                    key={city.id}
+                    type="button"
+                    onClick={() => handleCityClick(city.id)}
+                    className={`city-chip${isActive ? ' city-chip--active' : ''}`}
+                    aria-pressed={isActive}
+                  >
+                    {city.name}
+                  </button>
+                );
+              })}
+            </section>
+          </>
         )}
 
         {/* HOT OFFERS */}
