@@ -335,11 +335,12 @@
   margin: 0 auto;
   width: 100%;
   padding: 6px 4px;
-  border: 1.5px solid #111827;
-  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
   background: #fff;
   color: #111827;
   cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
   transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease,
     transform 0.12s ease;
   -webkit-tap-highlight-color: transparent;
@@ -393,10 +394,11 @@
 /* Прямоугольная кнопка города: чёрное обрамление и чёрный текст. */
 .city-chip {
   padding: 9px 10px;
-  border: 1.5px solid #111827;
-  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
   background: #fff;
   color: #111827;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
   font-size: 13px;
   font-weight: 600;
   text-align: center;
