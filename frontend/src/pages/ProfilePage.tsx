@@ -123,6 +123,8 @@ export function ProfilePage() {
   };
 
   const roleColors = getRoleColors(user.role as UserRole);
+  // Роль-бейдж в шапке для admin/moderator работает как вход в админ-панель.
+  const isAdminOrModerator = user.role === 'admin' || user.role === 'moderator';
 
   return (
     <div className="p-4 space-y-6 pb-20">
@@ -159,15 +161,33 @@ export function ProfilePage() {
             <p className="text-tg-hint text-sm truncate">@{user.username}</p>
           )}
           <div className="flex items-center gap-2 mt-2">
-            <span
-              className="px-2 py-0.5 rounded-full text-xs font-medium"
-              style={{
-                backgroundColor: roleColors.bg,
-                color: roleColors.color,
-              }}
-            >
-              {getRoleLabel(user.role as UserRole)}
-            </span>
+            {isAdminOrModerator ? (
+              <button
+                type="button"
+                className="px-2 py-0.5 rounded-full text-xs font-medium transition-opacity active:opacity-60"
+                style={{
+                  backgroundColor: roleColors.bg,
+                  color: roleColors.color,
+                }}
+                onClick={() => {
+                  trigger('medium');
+                  fetchDashboard();
+                  navigate('/admin');
+                }}
+              >
+                {getRoleLabel(user.role as UserRole)} →
+              </button>
+            ) : (
+              <span
+                className="px-2 py-0.5 rounded-full text-xs font-medium"
+                style={{
+                  backgroundColor: roleColors.bg,
+                  color: roleColors.color,
+                }}
+              >
+                {getRoleLabel(user.role as UserRole)}
+              </span>
+            )}
           </div>
           {/* Рейтинг и соц-метрики (Барахолка-модель): звёздная оценка + счётчики */}
           {sellerSummary && (
