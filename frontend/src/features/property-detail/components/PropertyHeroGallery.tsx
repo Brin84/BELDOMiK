@@ -9,7 +9,7 @@ interface PropertyHeroGalleryProps {
 /** Галерея фотографий с настоящим скроллом (как в Baraholka Apple Беларусь).
  *  Использует CSS scroll-snap для плавного перелистывания.
  *  В обычном режиме: только скролл, стрелок нет.
- *  В полноэкранном режиме: скролл + стрелки + миниатюры внизу. */
+ *  В полноэкранном режиме: только скролл, миниатюры реагируют на скролл, стрелок нет. */
 export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
   const { trigger } = useHaptics();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -17,21 +17,22 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
+  const fullscreenRef = useRef<HTMLDivElement>(null);
   const isScrolling = useRef(false);
 
   const sorted = [...photos].sort((a, b) => a.sort_order - b.sort_order);
   const count = sorted.length;
 
   const goToIndex = useCallback(
-    (index: number) => {
+    (index: number, scrollRef?: React.RefObject<HTMLDivElement>) => {
       if (count <= 1) return;
       trigger('light');
       setCurrentIndex(index);
-      // Делаем scroll к нужной картинке
+      const ref = scrollRef || galleryRef;
       setTimeout(() => {
-        if (galleryRef.current) {
-          galleryRef.current.scrollTo({
-            left: index * galleryRef.current.offsetWidth,
+        if (ref.current) {
+          ref.current.scrollTo({
+            left: index * ref.current.offsetWidth,
             behavior: 'smooth',
           });
         }
@@ -59,7 +60,7 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
     setLoaded(false);
   }, [currentIndex]);
 
-  // Синхронизация currentIndex с scroll позицией
+  // Синхронизация currentIndex с scroll позицией в обычном режиме
   useEffect(() => {
     if (!galleryRef.current || isScrolling.current) return;
     const { offsetWidth } = galleryRef.current;
@@ -69,8 +70,17 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
     }
   }, [currentIndex]);
 
+  // Синхронизация currentIndex с scroll позицией в полноэкранном режиме
+  useEffect(() => {
+    if (!fullscreenRef.current || isScrolling.current) return;
+    const { offsetWidth } = fullscreenRef.current;
+    const scrollIndex = Math.round(fullscreenRef.current.scrollLeft / offsetWidth);
+    if (scrollIndex !== currentIndex) {
+      setCurrentIndex(scrollIndex);
+    }
+  }, [currentIndex]);
+
   const handleScroll = useCallback(() => {
-    if (!galleryRef.current) return;
     isScrolling.current = true;
     setTimeout(() => {
       isScrolling.current = false;
@@ -202,7 +212,7 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
           aria-label="Полноэкранный просмотр фото"
         >
           <div
-            ref={galleryRef}
+            ref={fullscreenRef}
             className="property-fullscreen__track"
             onScroll={handleScroll}
             onClick={handleSwipeClick}
@@ -262,38 +272,6 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
             </div>
           )}
 
-          {/* Стрелки навигации в полноэкранном режиме */}
-          {count > 1 && (
-            <>
-              <button
-                type="button"
-                className="property-fullscreen__arrow property-fullscreen__arrow--prev"
-                aria-label="Предыдущее фото"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goToPrev();
-                }}
-              >
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                className="property-fullscreen__arrow property-fullscreen__arrow--next"
-                aria-label="Следующее фото"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goToNext();
-                }}
-              >
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                  <polyline points="9 6 15 12 9 18" />
-                </svg>
-              </button>
-            </>
-          )}
-
           {/* Миниатюры внизу */}
           {count > 1 && (
             <div className="property-fullscreen__thumbnails" role="tablist" aria-label="Миниатюры фотографий">
@@ -302,7 +280,7 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
                   key={photo.id}
                   onClick={(e) => {
                     e.stopPropagation();
-                    goToIndex(index);
+                    goToIndex(index, fullscreenRef);
                   }}
                   className={`property-fullscreen__thumbnail ${
                     index === currentIndex ? 'property-fullscreen__thumbnail--active' : ''

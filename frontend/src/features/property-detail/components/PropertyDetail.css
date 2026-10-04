@@ -148,38 +148,6 @@
   box-shadow: inset 2px 2px 4px var(--bd-raise-dark), inset -2px -2px 4px var(--bd-raise-light);
 }
 
-.property-fullscreen__arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 50%;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 2;
-  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
-}
-
-.property-fullscreen__arrow:active {
-  box-shadow: inset 2px 2px 4px var(--bd-raise-dark), inset -2px -2px 4px var(--bd-raise-light);
-}
-
-.property-fullscreen__arrow--prev {
-  left: 16px;
-}
-
-.property-fullscreen__arrow--next {
-  right: 16px;
-}
-
 /* Миниатюры в полноэкранном режиме */
 .property-fullscreen__thumbnails {
   position: absolute;

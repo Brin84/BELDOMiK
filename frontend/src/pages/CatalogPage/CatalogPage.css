@@ -41,7 +41,7 @@
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  background-color: var(--bd-bg-base);
+  background: transparent;
   box-shadow: 6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light);
 }
 
@@ -73,7 +73,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: var(--bd-bg-base);
+  background: transparent;
   color: var(--bd-text-secondary);
   font-size: 16px;
   letter-spacing: 0.15em;
