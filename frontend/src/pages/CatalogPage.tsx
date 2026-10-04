@@ -165,7 +165,7 @@ export function CatalogPage() {
   return (
     <div className="catalog-page">
       <main className="catalog-page__inner">
-        {/* HEADER - inside catalog-page__inner for horizontal layout with search */}
+        {/* HEADER - логотип слева, кнопка "Вся Беларусь" справа */}
         <div className="catalog-header">
           <div className="catalog-header__logo">
             <img
@@ -232,18 +232,6 @@ export function CatalogPage() {
               Снять
             </button>
           </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              hapticFeedback?.impactOccurred('light');
-              navigate('/regions');
-            }}
-            className="catalog-city"
-            aria-label="Выбрать область и город"
-          >
-            <Globe size={20} className="catalog-city__icon" />
-          </button>
         </div>
 
         {/* Error State */}

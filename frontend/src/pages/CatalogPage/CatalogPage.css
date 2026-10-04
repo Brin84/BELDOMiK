@@ -18,15 +18,15 @@
   padding: 14px 16px 0;
 }
 
-/* ---------- Шапка (логотип + кнопка "Вся Беларусь") ----------
-   Располагается на одной строке с кнопкой поиска. */
+/* ---------- HEADER: логотип слева, кнопка "Вся Беларусь" справа ----------
+   На одной строке с кнопкой поиска. */
 .catalog-header {
   display: flex;
   align-items: center;
   gap: 16px;
+  margin-top: 16px;
 }
 
-/* Логотип (увеличен) */
 .catalog-header__logo {
   display: flex;
   align-items: center;
@@ -249,20 +249,11 @@
   background: #fff;
 }
 
-/* ---------- Тип сделки + город (Soft UI) ----------
-   Контейнер: вдавленный фон #E0E5EC.
-   Активный таб: выпуклая синяя кнопка с тенью 0 4px 12px rgba(37, 99, 235, 0.3). */
-
-.catalog-location {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 16px;
-}
+/* ---------- Тип сделки (Soft UI) ----------
+   Растянутые кнопки на ширину как у кнопки поиска.
+   Активный таб: выпуклая синяя кнопка как у популярных городов. */
 
 .catalog-operation {
-  flex: 1;
-  min-width: 0;
   display: flex;
   gap: 4px;
   padding: 5px;
@@ -274,7 +265,7 @@
 
 .catalog-operation__btn {
   flex: 1;
-  padding: 9px 12px;
+  padding: 11px 14px;
   border: none;
   border-radius: 14px;
   background: var(--bd-bg-base);
@@ -289,7 +280,7 @@
   transform: translateY(1px);
 }
 
-/* Активный таб — выпуклая синяя кнопка с тенью */
+/* Активный таб — выпуклая синяя кнопка как у популярных городов */
 .catalog-operation__btn--active {
   color: #fff;
   background: var(--bd-accent-primary);
@@ -299,36 +290,6 @@
 .catalog-operation__btn--active:active {
   box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1);
   transform: translateY(1px);
-}
-
-/* ---------- Выбор города ----------
-   Выпуклая Soft UI кнопка. */
-
-.catalog-city {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  align-self: stretch;
-  width: 48px;
-  padding: 0;
-  border-radius: 18px;
-  background-color: var(--bd-bg-base);
-  color: var(--bd-text-secondary);
-  box-shadow: 6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light);
-  cursor: pointer;
-  transition: box-shadow 0.18s ease, transform 0.12s ease;
-}
-
-.catalog-city:active {
-  box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
-    inset -4px -4px 8px var(--bd-raise-light);
-  transform: translateY(1px);
-}
-
-.catalog-city__icon {
-  color: var(--bd-accent-primary);
-  flex-shrink: 0;
 }
 
 /* ---------- Категории — выпуклые Soft UI кнопки ----------
