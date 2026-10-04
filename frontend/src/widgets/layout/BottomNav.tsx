@@ -7,10 +7,9 @@ import { usePropertiesStore } from '@/features/properties/propertiesStore';
 
 import './BottomNav.css';
 
-// Плавающая панель с grid-раскладкой: Каталог · Избранное · «+» · Сообщения · Профиль.
-// Активная вкладка подсвечивается синей плашкой — стиль Baraholka.
-// Поиск вынесен на главную страницу (кнопка над баннерами); отдельной вкладки
-// в нижней навигации больше нет.
+// Плавающая панель в стиле Light Neumorphism: Каталог · Избранное · «+» · Сообщения · Профиль.
+// Активная вкладка подсвечивается синим цветом с вдавленной тенью.
+// Центральная кнопка «+» поднята выше остальных табов.
 interface NavItem {
   path: string;
   label: string;
@@ -69,7 +68,7 @@ export function BottomNav() {
         }}
       >
         <span className="bottom-nav__icon">
-          <Icon size={20} strokeWidth={active ? 2.3 : 1.8} />
+          <Icon size={24} strokeWidth={active ? 2.3 : 1.8} />
           {item.path === '/messages' && (unreadCount ?? 0) > 0 && (
             <span className="bottom-nav__badge">
               {unreadCount > 99 ? '99+' : unreadCount}
@@ -89,7 +88,6 @@ export function BottomNav() {
   return (
     <nav
       className="bottom-nav"
-      style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}
       role="navigation"
       aria-label="Основная навигация"
     >
@@ -102,7 +100,7 @@ export function BottomNav() {
             aria-label={item.label}
             className="bottom-nav__create"
           >
-            <Plus size={26} strokeWidth={2.5} />
+            <Plus size={28} strokeWidth={2.5} />
           </button>
         ) : (
           renderItem(item)

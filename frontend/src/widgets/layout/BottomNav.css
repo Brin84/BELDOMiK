@@ -1,60 +1,123 @@
 /* ============================================================
-   BottomNav — плавающая нижняя навигация (5 вкладок).
-   Стиль Baraholka: светлый, «+» вынесен отдельной круглой кнопкой.
+   BottomNav — плавающая нижняя навигация в стиле Light Neumorphism.
+   Таб-бар «парит» над контентом с выпуклой тенью.
    ============================================================ */
 
-/* Neumorphism: серый (--bd-bg), сильная выпуклая тень сверху — панель
-   «всплывает» из фона. Без рамки и без blur (см. ограничения производительности). */
+/* Плавающая панель с grid-раскладкой: Каталог · Избранное · «+» · Сообщения · Профиль.
+   Позиционирование: bottom 16px (с учётом safe area), скругление 24px.
+   Фон: #E8ECF2 (светлее фона приложения #E0E5EC), выпуклая тень.
+   Центральная кнопка «+» поднята выше на -20px. */
 .bottom-nav {
   position: fixed;
-  bottom: 8px;
+  bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 50;
-  width: calc(100% - 24px);
+  width: calc(100% - 32px);
   max-width: 560px;
+  height: 72px;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  padding: 8px;
+  padding: 0 12px;
   border-radius: 24px;
-  background: var(--bd-bg);
-  box-shadow: 8px 8px 20px var(--bd-raise-dark), -8px -8px 20px var(--bd-raise-light);
+  background-color: #e8ecf2;
+  background-image: linear-gradient(145deg, #f0f4f9 0%, #d1d9e6 100%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 6px 6px 12px #c8cdd5, -6px -6px 12px #ffffff;
 }
 
+/* ---------- Элемент таба ---------- */
+
 .bottom-nav__item {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  padding: 6px 0 4px;
+  gap: 4px;
+  padding: 8px 0;
   border: none;
   border-radius: 16px;
   background: transparent;
   text-decoration: none;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: color 0.18s ease;
+  transition: color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Активный таб — без цветной плашки: выделяется цветом иконо/текста
-   (синий) и лёгкой вдавленной «ямой» под иконкой. Неактивные — серые. */
+.bottom-nav__item:hover {
+  color: #4a5568;
+  transform: scale(1.05);
+}
+
+.bottom-nav__item:active {
+  transform: scale(0.92);
+}
+
+/* Неактивный таб: иконка и текст серо-синие #718096 */
+.bottom-nav__item:not(.bottom-nav__item--active) .bottom-nav__icon svg {
+  color: #718096;
+  transition: color 0.2s ease;
+}
+
+.bottom-nav__item:not(.bottom-nav__item--active) span {
+  color: #718096;
+  transition: color 0.2s ease;
+}
+
+/* ---------- Активный таб (Light Neumorphism стиль) ---------- */
+
 .bottom-nav__item--active {
-  background: transparent;
+  background: #e8ecf2;
+  box-shadow: inset 3px 3px 6px #c8cdd5, inset -3px -3px 6px #ffffff;
 }
 
-/* ---------- Бейдж непрочитанных на вкладке «Сообщения» ---------- */
+.bottom-nav__item--active .bottom-nav__icon svg {
+  color: #2563eb;
+}
+
+.bottom-nav__item--active span {
+  color: #2563eb;
+}
+
+/* Маленькая синяя точка-индикатор под активной иконкой */
+.bottom-nav__item--active .bottom-nav__icon::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: #2563eb;
+  box-shadow: 0 0 4px rgba(37, 99, 235, 0.6);
+}
+
+/* ---------- Иконка таба ---------- */
 
 .bottom-nav__icon {
   position: relative;
   display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.bottom-nav__icon svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2;
+  transition: color 0.2s ease, stroke-width 0.2s ease;
+}
+
+/* ---------- Бейдж непрочитанных на вкладке «Сообщения» ---------- */
 
 .bottom-nav__badge {
   position: absolute;
-  top: -7px;
-  right: -12px;
+  top: -6px;
+  right: -10px;
   min-width: 17px;
   height: 17px;
   padding: 0 4px;
@@ -68,27 +131,50 @@
   box-shadow: 0 2px 6px rgba(255, 59, 48, 0.4);
 }
 
-/* ---------- Кнопка «+» (подать объявление) ---------- */
+/* ---------- Кнопка «+» (подать объявление) ----------
+   Выпуклая круглая кнопка, поднятая выше таб-бара на -20px.
+   Градиент: #3B82F6 → #2563EB, сильная тень. ---------- */
 
 .bottom-nav__create {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   justify-self: center;
   align-self: center;
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   margin-top: -20px;
-  border: 3px solid #ffffff;
   border-radius: 50%;
   color: #ffffff;
-  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
-  box-shadow: 0 6px 18px rgba(33, 113, 238, 0.4);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.5), -4px -4px 8px #ffffff;
   cursor: pointer;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
   -webkit-tap-highlight-color: transparent;
+  z-index: 10;
+}
+
+.bottom-nav__create:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.6), -4px -4px 8px #ffffff;
 }
 
 .bottom-nav__create:active {
   transform: scale(0.94);
+  box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.15), inset -4px -4px 8px rgba(255, 255, 255, 0.4);
+}
+
+.bottom-nav__create svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 2.5;
+}
+
+/* ---------- Safe area для iPhone с «челкой» ---------- */
+
+@media (prefers-safe-area-inset-bottom) {
+  .bottom-nav {
+    margin-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }

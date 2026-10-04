@@ -9,6 +9,7 @@
   color: var(--bd-text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
+  padding-bottom: 110px;
 }
 
 .catalog-page__inner {
