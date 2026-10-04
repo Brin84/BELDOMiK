@@ -204,20 +204,6 @@ export function CatalogPage() {
           <Search size={18} className="catalog-search__icon" />
           <span className="catalog-search__placeholder">Поиск: город, метро, цена…</span>
         </button>
-        {/* SEARCH — вход в поиск с главной страницы (над баннерами).
-            В нижней навигации отдельной вкладки «Поиск» больше нет. */}
-        <button
-          type="button"
-          onClick={() => {
-            trigger('light');
-            navigate('/search');
-          }}
-          className="catalog-search"
-          aria-label="Поиск по каталогу"
-        >
-          <Search size={18} className="catalog-search__icon" />
-          <span className="catalog-search__placeholder">Поиск: город, метро, цена…</span>
-        </button>
 
         {/* BANNERS — рекламные баннеры */}
         <AdBanner />

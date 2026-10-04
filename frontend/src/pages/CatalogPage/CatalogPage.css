@@ -48,7 +48,7 @@
   display: block;
 }
 
-/* Кнопка "Вся Беларусь" - занимает всё оставшееся место */
+/* Кнопка "Вся Беларусь" - выглядит как кнопка поиска */
 .catalog-city-header {
   flex: 1;
   display: flex;
@@ -62,14 +62,15 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light);
+  box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
+    inset -4px -4px 8px var(--bd-raise-light);
   transition: box-shadow 0.18s ease, transform 0.12s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .catalog-city-header:active {
-  box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
-    inset -4px -4px 8px var(--bd-raise-light);
+  box-shadow: inset 3px 3px 6px var(--bd-raise-dark),
+    inset -3px -3px 6px var(--bd-raise-light);
   transform: translateY(1px);
 }
 
