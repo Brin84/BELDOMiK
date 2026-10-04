@@ -7,19 +7,22 @@ interface PropertyHeroGalleryProps {
 }
 
 /** Галерея фотографий с свайпом пальцем для листания.
- *  В обычном режиме: только свайп (стрелок нет).
- *  В полноэкранном режиме: свайп + стрелки + миниатюры внизу. */
+ *  Логика как в Baraholka Apple Беларусь:
+ *  - В обычном режиме: только свайп (стрелок нет), плавная анимация
+ *  - В полноэкранном режиме: свайп + стрелки + миниатюры внизу
+ */
 export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
   const { trigger } = useHaptics();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [swiping, setSwiping] = useState(false);
-  const [swipeDirection, setSwipeDirection] = useState<0 | 1 | -1>(0);
-  const [swipeProgress, setSwipeProgress] = useState(0);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [swipeYOffset, setSwipeYOffset] = useState(0);
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
+  const touchStartTime = useRef(0);
 
   const sorted = [...photos].sort((a, b) => a.sort_order - b.sort_order);
   const count = sorted.length;
@@ -27,25 +30,13 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
   const goToNext = useCallback(() => {
     if (count <= 1) return;
     trigger('light');
-    setSwipeDirection(1);
-    setSwipeProgress(1);
-    setTimeout(() => {
-      setCurrentIndex((p) => (p + 1) % count);
-      setSwipeProgress(0);
-      setSwipeDirection(0);
-    }, 200);
+    setCurrentIndex((p) => (p + 1) % count);
   }, [count, trigger]);
 
   const goToPrev = useCallback(() => {
     if (count <= 1) return;
     trigger('light');
-    setSwipeDirection(-1);
-    setSwipeProgress(-1);
-    setTimeout(() => {
-      setCurrentIndex((p) => (p - 1 + count) % count);
-      setSwipeProgress(0);
-      setSwipeDirection(0);
-    }, 200);
+    setCurrentIndex((p) => (p - 1 + count) % count);
   }, [count, trigger]);
 
   const goToIndex = useCallback(
@@ -60,53 +51,53 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
   useEffect(() => {
     setFailed(false);
     setLoaded(false);
-    setSwipeProgress(0);
-    setSwipeDirection(0);
+    setSwipeOffset(0);
+    setSwipeYOffset(0);
   }, [currentIndex]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (count <= 1) return;
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
+    touchStartTime.current = Date.now();
     setSwiping(true);
+    setSwipeOffset(0);
+    setSwipeYOffset(0);
   }, [count]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (count <= 1 || !swiping) return;
     const diffX = e.touches[0].clientX - touchStartX.current;
     const diffY = e.touches[0].clientY - touchStartY.current;
-    // Если движение в основном горизонтальное — блокируем вертикальную прокрутку
-    if (Math.abs(diffX) > Math.abs(diffY) * 1.5) {
-      e.preventDefault();
-      const progress = Math.max(-1, Math.min(1, diffX / 150));
-      setSwipeProgress(progress);
-      setSwipeDirection(progress > 0 ? 1 : -1);
-    }
+    setSwipeOffset(diffX);
+    setSwipeYOffset(diffY);
   }, [count, swiping]);
 
   const handleTouchEnd = useCallback(
     (e: React.TouchEvent) => {
       if (count <= 1 || !swiping) return;
       setSwiping(false);
-      const diffX = touchStartX.current - e.changedTouches[0].clientX;
-      const diffY = touchStartY.current - e.changedTouches[0].clientY;
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const diffX = touchStartX.current - touchEndX;
+      const diffY = touchStartY.current - touchEndY;
+      const duration = Date.now() - touchStartTime.current;
 
       // Если свайп достаточно значимый — перелистываем
       if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
         if (diffX > 0) goToNext();
         else goToPrev();
-      } else {
-        // Возвращаем в нулевое положение
-        setSwipeProgress(0);
-        setSwipeDirection(0);
       }
+      // Сбрасываем смещение с анимацией
+      setSwipeOffset(0);
+      setSwipeYOffset(0);
     },
     [count, goToNext, goToPrev, swiping]
   );
 
   const handleSwipeClick = useCallback(
     (e: React.MouseEvent) => {
-      if (count <= 1) return;
+      if (count <= 1 || isFullscreen) return;
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
       const clickX = e.clientX - rect.left;
       const width = rect.width;
@@ -116,7 +107,43 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
         goToNext();
       }
     },
-    [count, goToNext, goToPrev]
+    [count, goToNext, goToPrev, isFullscreen]
+  );
+
+  // Обработчик свайпа в полноэкранном режиме
+  const handleFullscreenTouchStart = useCallback((e: React.TouchEvent) => {
+    if (count <= 1) return;
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    touchStartTime.current = Date.now();
+    setSwiping(true);
+    setSwipeOffset(0);
+    setSwipeYOffset(0);
+  }, [count]);
+
+  const handleFullscreenTouchMove = useCallback((e: React.TouchEvent) => {
+    if (count <= 1 || !swiping) return;
+    const diffX = e.touches[0].clientX - touchStartX.current;
+    e.preventDefault();
+    setSwipeOffset(diffX);
+  }, [count, swiping]);
+
+  const handleFullscreenTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (count <= 1 || !swiping) return;
+      setSwiping(false);
+      const touchEndX = e.changedTouches[0].clientX;
+      const diffX = touchStartX.current - touchEndX;
+      const duration = Date.now() - touchStartTime.current;
+
+      // Если свайп достаточно значимый — перелистываем
+      if (Math.abs(diffX) > 50) {
+        if (diffX > 0) goToNext();
+        else goToPrev();
+      }
+      setSwipeOffset(0);
+    },
+    [count, goToNext, goToPrev, swiping]
   );
 
   useEffect(() => {
@@ -163,10 +190,10 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
       );
     }
 
+    // Плавная анимация свайпа через transform
     let transformStyle = '';
-    if (fullscreen && swipeDirection !== 0) {
-      const translateX = swipeProgress * (swipeDirection > 0 ? -100 : 100);
-      transformStyle = `translateX(${translateX}%)`;
+    if (swiping) {
+      transformStyle = `translateX(${swipeOffset}px) translateY(${swipeYOffset}px)`;
     }
 
     return (
@@ -178,7 +205,7 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
           opacity: loaded ? 1 : 0,
           transition: 'opacity 0.25s ease',
           transform: transformStyle,
-          transitionDuration: swipeDirection !== 0 ? '0ms' : '250ms',
+          transitionDuration: swiping ? '0ms' : '300ms cubic-bezier(0.25, 1, 0.5, 1)',
         }}
         onLoad={() => setLoaded(true)}
         onError={() => setFailed(true)}
@@ -194,10 +221,7 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        onClick={() => {
-          trigger('light');
-          setIsFullscreen(true);
-        }}
+        onClick={handleSwipeClick}
         role="button"
         tabIndex={0}
         aria-label={count > 1 ? `Фото ${currentIndex + 1} из ${count}` : 'Фотография объекта'}
@@ -221,10 +245,12 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
       {isFullscreen && (
         <div
           className="property-fullscreen"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onClick={handleSwipeClick}
+          onTouchStart={handleFullscreenTouchStart}
+          onTouchMove={handleFullscreenTouchMove}
+          onTouchEnd={handleFullscreenTouchEnd}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsFullscreen(false);
+          }}
           role="dialog"
           aria-modal="true"
           aria-label="Полноэкранный просмотр фото"
