@@ -37,18 +37,13 @@
   background: transparent;
 }
 
-.catalog-header__brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
+/* Логотип (увеличен) */
 .catalog-header__logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
@@ -57,47 +52,39 @@
 }
 
 .catalog-header__avatar {
-  width: 40px;
-  height: 40px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   object-fit: cover;
   display: block;
 }
 
-.catalog-header__title {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: var(--bd-text-primary);
-}
-
-.catalog-header__subtitle {
-  margin: 2px 0 0 2px;
-  font-size: 13px;
-  color: var(--bd-text-secondary);
-}
-
-.catalog-header__menu {
+/* Кнопка "Вся Беларусь" */
+.catalog-city-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--bd-text-secondary);
-  font-size: 16px;
-  letter-spacing: 0.15em;
-  line-height: 1;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  background-color: var(--bd-bg-base);
+  color: var(--bd-text-primary);
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   box-shadow: 6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light);
   transition: box-shadow 0.18s ease, transform 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.catalog-header__menu:active {
+.catalog-city-header:active {
   box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
     inset -4px -4px 8px var(--bd-raise-light);
   transform: translateY(1px);
+}
+
+.catalog-city-header__icon {
+  color: var(--bd-accent-primary);
+  flex-shrink: 0;
 }
 
 /* ---------- Поиск (вход с главной страницы, над баннерами) ----------

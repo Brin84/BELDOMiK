@@ -167,31 +167,26 @@ export function CatalogPage() {
       {/* HEADER - outside catalog-page__inner to have transparent background */}
       <header className="catalog-header">
         <div className="catalog-header__inner">
-          <div className="catalog-header__brand">
-            <div className="catalog-header__logo">
-              <img
-                src={beldomikAvatar}
-                alt="BELDOMiK"
-                className="catalog-header__avatar"
-                draggable={false}
-              />
-            </div>
-            <div>
-              <h1 className="catalog-header__title" style={{ color: 'var(--bd-text-primary, #2d3748)' }}>BELDOMiK</h1>
-              <p className="catalog-header__subtitle" style={{ color: 'var(--bd-text-secondary, #718096)' }}>Мини-приложение</p>
-            </div>
+          <div className="catalog-header__logo">
+            <img
+              src={beldomikAvatar}
+              alt="BELDOMiK"
+              className="catalog-header__avatar"
+              draggable={false}
+            />
           </div>
 
           <button
             type="button"
             onClick={() => {
               trigger('light');
-              navigate('/profile');
+              navigate('/regions');
             }}
-            aria-label="Меню"
-            className="catalog-header__menu"
+            className="catalog-city-header"
+            aria-label="Вся Беларусь"
           >
-            •••
+            <Globe size={18} className="catalog-city-header__icon" />
+            <span className="catalog-city-header__text">Вся Беларусь</span>
           </button>
         </div>
       </header>
