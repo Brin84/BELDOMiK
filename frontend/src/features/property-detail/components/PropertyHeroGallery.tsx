@@ -52,14 +52,14 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
     goToIndex(newIndex);
   }, [count, currentIndex, trigger, goToIndex]);
 
+  // Сбрасываем состояние ошибки при смене фото
   useEffect(() => {
     setFailed(false);
-    setLoaded(false);
   }, [currentIndex]);
 
   // Синхронизация при скролле в обычном режиме (Gallery)
   useEffect(() => {
-    if (!galleryRef.current || isFullscreen) return;
+    if (!galleryRef.current) return;
 
     const handleGalleryScroll = () => {
       const { offsetWidth, scrollLeft } = galleryRef.current!;
@@ -73,7 +73,7 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
     const ref = galleryRef.current;
     ref.addEventListener('scroll', handleGalleryScroll, { passive: true });
     return () => ref.removeEventListener('scroll', handleGalleryScroll);
-  }, [isFullscreen, currentIndex]);
+  }, []);
 
   // Синхронизация при скролле в полноэкранном режиме (Fullscreen)
   useEffect(() => {
@@ -91,11 +91,9 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
     const ref = fullscreenRef.current;
     ref.addEventListener('scroll', handleFullscreenScroll, { passive: true });
     return () => ref.removeEventListener('scroll', handleFullscreenScroll);
-  }, [isFullscreen, currentIndex]);
+  }, [isFullscreen]);
 
-  const handleScroll = useCallback(() => {
-    // Флаг синхронизации не нужен - слушатели в useEffect сами срабатывают
-  }, []);
+  // handleScroll удалён - слушатели добавляются через useEffect
 
   const handleImageLoad = useCallback(() => {
     setLoaded(true);
@@ -155,7 +153,6 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
       <div
         ref={galleryRef}
         className="property-gallery"
-        onScroll={handleScroll}
         onClick={() => {
           trigger('light');
           setIsFullscreen(true);
@@ -192,9 +189,6 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
                     src={photo.url}
                     alt={`Фото ${index + 1} из ${count}`}
                     className="property-gallery__img"
-                    style={{ opacity: loaded ? 1 : 0 }}
-                    onLoad={handleImageLoad}
-                    onError={handleImageError}
                     loading={index === 0 ? 'eager' : 'lazy'}
                   />
                 )}
@@ -224,7 +218,6 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
           <div
             ref={fullscreenRef}
             className="property-fullscreen__track"
-            onScroll={handleScroll}
             onClick={handleSwipeClick}
           >
             {sorted.map((photo, index) => {
@@ -248,9 +241,6 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
                       src={photo.url}
                       alt={`Фото ${index + 1} из ${count}`}
                       className="property-fullscreen__img"
-                      style={{ opacity: loaded ? 1 : 0 }}
-                      onLoad={handleImageLoad}
-                      onError={handleImageError}
                       loading={index === 0 ? 'eager' : 'lazy'}
                     />
                   )}
