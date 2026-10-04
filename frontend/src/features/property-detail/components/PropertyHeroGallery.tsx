@@ -136,9 +136,19 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
         ref={galleryRef}
         className="property-gallery"
         onScroll={handleScroll}
-        onClick={handleSwipeClick}
-        role="group"
+        onClick={() => {
+          trigger('light');
+          setIsFullscreen(true);
+        }}
+        role="button"
+        tabIndex={0}
         aria-label={`Фото ${currentIndex + 1} из ${count}`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setIsFullscreen(true);
+          }
+        }}
       >
         <div className="property-gallery__track">
           {sorted.map((photo, index) => {
