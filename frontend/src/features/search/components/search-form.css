@@ -1,25 +1,26 @@
 /* ============================================================
-   Поиск — Neumorphism дизайн (стиль BELDOMiK).
-   Светлый фон #E8ECF2, вдавленные/выпуклые элементы.
+   Поиск — Soft UI дизайн (стиль BELDOMiK).
+   Светлый фон #E0E5EC, карточки с double shadows.
    Plain CSS + BEM, только светлая тема.
    ============================================================ */
 
 .search-page {
   min-height: 100vh;
-  background-color: var(--bd-bg);
-  color: var(--bd-text);
+  background-color: var(--bd-bg-base);
+  color: var(--bd-text-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
+  padding-bottom: 90px;
 }
 
 .search-page__inner {
   max-width: 600px;
   margin: 0 auto;
-  padding: 14px 16px max(96px, env(safe-area-inset-bottom, 0px));
+  padding: 14px 16px 90px;
 }
 
 /* ---------- Поисковое поле ----------
-   Вдавленный Neumorphism: фон #E8ECF2, вдавленная тень. */
+   Вдавленный Soft UI: фон #E0E5EC, вдавленная тень. */
 
 .search-sticky {
   position: sticky;
@@ -34,13 +35,13 @@
   height: 50px;
   padding: 0 14px 0 16px;
   border-radius: 18px;
-  background-color: var(--bd-bg);
+  background-color: var(--bd-bg-base);
   box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
     inset -4px -4px 8px var(--bd-raise-light);
 }
 
 .search-field__icon {
-  color: var(--bd-accent);
+  color: var(--bd-accent-primary);
   flex-shrink: 0;
 }
 
@@ -48,7 +49,7 @@
   flex: 1;
   min-width: 0;
   font-size: 16px;
-  color: var(--bd-text);
+  color: var(--bd-text-primary);
 }
 
 .search-field__clear {
@@ -58,8 +59,8 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background-color: var(--bd-bg);
-  color: var(--bd-text-2);
+  background-color: var(--bd-bg-base);
+  color: var(--bd-text-secondary);
   flex-shrink: 0;
   cursor: pointer;
   box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);

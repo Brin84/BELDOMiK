@@ -115,7 +115,7 @@ export function HotPropertyCard({ property, onFavoriteToggle, showTime = false }
         >
           <Heart
             size={15}
-            className={property.is_favorite ? 'fill-rose-500 text-rose-500' : 'text-slate-600'}
+            style={{ color: property.is_favorite ? '#e11d48' : 'var(--bd-text-secondary)' }}
           />
         </button>
       </div>

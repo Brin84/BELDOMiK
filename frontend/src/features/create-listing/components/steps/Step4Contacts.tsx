@@ -13,11 +13,11 @@ export function Step4Contacts() {
   const showPhone = formData.show_phone !== false;
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-6" style={{ backgroundColor: 'var(--bd-bg-base)' }}>
       {/* Имя контактного лица */}
       <section>
-        <h2 style={{ color: '#0f172a', fontSize: '20px', fontWeight: 700, marginBottom: '16px' }}>
-          Имя <span style={{ color: '#94a3b8', fontWeight: 400 }}>*</span>
+        <h2 style={{ color: 'var(--bd-text-primary)', fontSize: '20px', fontWeight: 700, marginBottom: '16px' }}>
+          Имя <span style={{ color: 'var(--bd-text-secondary)', fontWeight: 400 }}>*</span>
         </h2>
         <input
           type="text"
@@ -31,9 +31,10 @@ export function Step4Contacts() {
           maxLength={50}
           className="w-full px-4 py-3 rounded-xl text-base outline-none"
           style={{
-            backgroundColor: '#f1f5f9',
-            border: errors.contact_name ? '2px solid #ef4444' : '1px solid #e2e8f0',
-            color: '#0f172a',
+            backgroundColor: 'var(--bd-bg-base)',
+            border: errors.contact_name ? '2px solid #ef4444' : '1px solid rgba(255,255,255,0.6)',
+            color: 'var(--bd-text-primary)',
+            boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)',
           }}
         />
         {errors.contact_name && (
@@ -43,8 +44,8 @@ export function Step4Contacts() {
 
       {/* Телефон */}
       <section>
-        <h2 style={{ color: '#0f172a', fontSize: '20px', fontWeight: 700, marginBottom: '16px' }}>
-          Телефон <span style={{ color: '#94a3b8', fontWeight: 400 }}>*</span>
+        <h2 style={{ color: 'var(--bd-text-primary)', fontSize: '20px', fontWeight: 700, marginBottom: '16px' }}>
+          Телефон <span style={{ color: 'var(--bd-text-secondary)', fontWeight: 400 }}>*</span>
         </h2>
         <input
           type="tel"
@@ -59,15 +60,16 @@ export function Step4Contacts() {
           maxLength={20}
           className="w-full px-4 py-3 rounded-xl text-base outline-none"
           style={{
-            backgroundColor: '#f1f5f9',
-            border: errors.contact_phone ? '2px solid #ef4444' : '1px solid #e2e8f0',
-            color: '#0f172a',
+            backgroundColor: 'var(--bd-bg-base)',
+            border: errors.contact_phone ? '2px solid #ef4444' : '1px solid rgba(255,255,255,0.6)',
+            color: 'var(--bd-text-primary)',
+            boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)',
           }}
         />
         {errors.contact_phone && (
           <p className="text-sm mt-1" style={{ color: '#ef4444' }}>{errors.contact_phone}</p>
         )}
-        <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>
+        <p className="text-xs mt-1" style={{ color: 'var(--bd-text-secondary)' }}>
           Номер нужен для связи покупателей — он надёжно защищён и не публикуется без вашего согласия.
         </p>
       </section>
@@ -76,22 +78,23 @@ export function Step4Contacts() {
       <section
         className="rounded-2xl p-4"
         style={{
-          backgroundColor: '#ffffff',
-          border: showPhone ? '1px solid #cbd5e1' : '1px solid #e2e8f0',
+          backgroundColor: 'var(--bd-bg-base)',
+          border: showPhone ? '1px solid rgba(255,255,255,0.6)' : '1px solid rgba(255,255,255,0.6)',
+          boxShadow: showPhone ? 'var(--bd-shadow-raised)' : '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
         }}
       >
         <div className="flex items-center gap-3">
           <div className="flex-1 min-w-0">
-            <div className="text-[16px] font-semibold" style={{ color: '#0f172a' }}>
+            <div className="text-[16px] font-semibold" style={{ color: 'var(--bd-text-primary)' }}>
               Показывать номер в объявлении
             </div>
-            <div className="text-[13px] mt-1 leading-snug" style={{ color: '#64748b' }}>
+            <div className="text-[13px] mt-1 leading-snug" style={{ color: 'var(--bd-text-secondary)' }}>
               {showPhone
                 ? 'Номер виден покупателям и сбоку от кнопки «Позвонить»'
                 : 'Номер скрыт — связаться с вами можно через чат Telegram'}
             </div>
           </div>
-          {/* Переключатель (switch) */}
+          {/* Переключатель (switch) в Soft UI */}
           <button
             role="switch"
             aria-checked={showPhone}
@@ -101,7 +104,10 @@ export function Step4Contacts() {
             }}
             className="relative w-[52px] h-8 rounded-full transition-colors flex-shrink-0"
             style={{
-              backgroundColor: showPhone ? '#2171ee' : '#e2e8f0',
+              backgroundColor: showPhone ? 'var(--bd-accent-primary)' : 'var(--bd-bg-base)',
+              boxShadow: showPhone
+                ? 'var(--bd-shadow-raised)'
+                : 'inset 2px 2px 4px var(--bd-raise-dark), inset -2px -2px 4px var(--bd-raise-light)',
             }}
           >
             <span
@@ -109,6 +115,7 @@ export function Step4Contacts() {
               style={{
                 backgroundColor: '#ffffff',
                 left: showPhone ? '24px' : '4px',
+                boxShadow: '3px 3px 6px var(--bd-raise-dark), -3px -3px 6px var(--bd-raise-light)',
               }}
             />
           </button>
@@ -116,8 +123,8 @@ export function Step4Contacts() {
       </section>
 
       {/* Подсказка */}
-      <div className="p-4 rounded-xl" style={{ backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0' }}>
-        <p className="text-sm leading-relaxed" style={{ color: '#64748b' }}>
+      <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--bd-bg-base)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)' }}>
+        <p className="text-sm leading-relaxed" style={{ color: 'var(--bd-text-secondary)' }}>
           Так мы связываем покупателя с продавцом. Телефон не проверяется модерацией
           и не отображается в поиске — только в карточке объявления.
         </p>

@@ -23,7 +23,7 @@ export function PropertyLocation({ property }: PropertyLocationProps) {
 
   return (
     <section className="property-section">
-      <h2 className="property-section__title">Расположение</h2>
+      <h2 className="property-section__title" style={{ color: 'var(--bd-text-primary)' }}>Расположение</h2>
 
       {mapSrc && (
         <div className="property-location__map-wrap">
@@ -39,7 +39,7 @@ export function PropertyLocation({ property }: PropertyLocationProps) {
       )}
 
       {address && (
-        <div className="property-location__address">
+        <div className="property-location__address" style={{ color: 'var(--bd-text-primary)' }}>
           <MapPin size={16} className="property-location__address-icon" />
           <span className="property-location__address-text">{address}</span>
         </div>

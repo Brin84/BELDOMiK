@@ -8,16 +8,15 @@ import type { Region, City, District, Neighborhood, Street } from '@/shared/api/
 type PickerName = 'region' | 'city';
 
 // ── Светлые компактные плитки выбора (район / микрорайон / улица) ──────────
-// Единый стиль дизайна BELDOMiK: белые плитки со светлой рамкой #e2e8f0,
-// выбранная — синяя #2171ee. Без tg-theme-переменных и тёмных рамок.
+// Единый стиль Soft UI: фон #e0e5ec с двойными тенями, выбранная — синяя #2171ee.
 const tileBaseClass =
   'py-2 px-3 rounded-lg text-sm font-medium text-center transition-all active:scale-[0.96]';
 
 const tileStyle = (selected: boolean): React.CSSProperties => ({
-  backgroundColor: selected ? '#2171ee' : '#ffffff',
-  color: selected ? '#ffffff' : '#334155',
-  border: selected ? '1px solid #2171ee' : '1px solid #e2e8f0',
-  boxShadow: selected ? '0 4px 12px rgba(33, 113, 238, 0.3)' : 'none',
+  backgroundColor: selected ? '#2171ee' : 'var(--bd-bg-base)',
+  color: selected ? '#ffffff' : 'var(--bd-text-primary)',
+  border: selected ? '1px solid #2171ee' : '1px solid rgba(255,255,255,0.6)',
+  boxShadow: selected ? 'var(--bd-shadow-raised)' : '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
 });
 
 // Заголовок секции — компактнее прежнего (text-xl → text-base).
@@ -264,7 +263,7 @@ export function Step2Location() {
 
       {/* Address Input */}
       <section>
-        <h2 className={sectionTitleClass}>Точный адрес (дом, корпус, квартира)</h2>
+        <h2 className="text-[var(--bd-text-primary)] text-base font-bold mb-3">Точный адрес (дом, корпус, квартира)</h2>
         <input
           type="text"
           value={formData.address || ''}
@@ -272,14 +271,15 @@ export function Step2Location() {
           placeholder="ул. Ленина, д. 10, кв. 5"
           className="w-full px-4 py-3 rounded-xl text-base"
           style={{
-            backgroundColor: '#ffffff',
-            border: '1px solid #e2e8f0',
-            color: '#0f172a',
+            backgroundColor: 'var(--bd-bg-base)',
+            border: '1px solid rgba(255,255,255,0.6)',
+            color: 'var(--bd-text-primary)',
+            boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)',
           }}
           maxLength={200}
           autoComplete="off"
         />
-        <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>
+        <p className="text-xs mt-1" style={{ color: 'var(--bd-text-secondary)' }}>
           Укажите номер дома, корпуса и квартиры для точного расположения на карте
         </p>
       </section>

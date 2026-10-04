@@ -1,5 +1,5 @@
 /* ============================================================
-   BottomNav — компактная плавающая нижняя навигация.
+   BottomNav — компактная плавающая нижняя навигация (Soft UI).
    Ярко-синяя подсветка активного таба, плавная анимация перехода.
    ============================================================ */
 
@@ -18,8 +18,8 @@
   align-items: center;
   padding: 0 8px;
   border-radius: 28px;
-  background-color: #e8ecf2;
-  box-shadow: 6px 6px 12px #c8cdd5, -6px -6px 12px #ffffff;
+  background-color: var(--bd-bg-base, #e0e5ec);
+  box-shadow: var(--bd-shadow-raised);
 }
 
 /* ---------- Элемент таба (компактный) ---------- */
@@ -47,7 +47,7 @@
   width: 20px;
   height: 20px;
   stroke-width: 2;
-  color: #718096;
+  color: var(--bd-text-secondary, #718096);
   transition: all 0.25s ease-out;
 }
 
@@ -60,17 +60,17 @@
 
 .bottom-nav__item--active {
   background: rgba(37, 99, 235, 0.12);
-  box-shadow: none;
+  box-shadow: inset 3px 3px 6px var(--bd-raise-dark), inset -3px -3px 6px var(--bd-raise-light);
 }
 
 .bottom-nav__item--active .bottom-nav__icon svg {
-  color: #2563eb;
+  color: var(--bd-accent-primary, #2563eb);
   stroke-width: 2.3;
   filter: drop-shadow(0 0 6px rgba(37, 99, 235, 0.4));
 }
 
 .bottom-nav__item--active .bottom-nav__label {
-  color: #2563eb;
+  color: var(--bd-accent-primary, #2563eb);
   display: block;
   font-size: 10px;
   font-weight: 600;
@@ -127,13 +127,13 @@
   height: 16px;
   padding: 0 3px;
   border-radius: 999px;
-  background: #ff3b30;
+  background: var(--bd-accent-primary, #2563eb);
   color: #fff;
   font-size: 9px;
   font-weight: 700;
   line-height: 16px;
   text-align: center;
-  box-shadow: 0 2px 6px rgba(255, 59, 48, 0.4);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
 }
 
 /* ---------- Кнопка «+» (подать объявление) ----------
@@ -149,8 +149,8 @@
   margin-top: -16px;
   border-radius: 50%;
   color: #ffffff;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5), -4px -4px 8px #ffffff;
+  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
+  box-shadow: var(--bd-shadow-raised);
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   -webkit-tap-highlight-color: transparent;
@@ -159,12 +159,12 @@
 
 .bottom-nav__create:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.6), -4px -4px 8px #ffffff;
+  box-shadow: var(--bd-shadow-raised-hover);
 }
 
 .bottom-nav__create:active {
   transform: scale(0.92);
-  box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.15), inset -4px -4px 8px rgba(255, 255, 255, 0.4);
+  box-shadow: var(--bd-shadow-raised-active);
 }
 
 .bottom-nav__create svg {

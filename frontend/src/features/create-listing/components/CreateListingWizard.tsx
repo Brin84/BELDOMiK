@@ -159,13 +159,13 @@ export function CreateListingWizard() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f7f9fc' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bd-bg-base)' }}>
       {/* Header with progress */}
-      <div className="sticky top-0 z-10 p-4 border-b" style={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderWidth: '0.5px' }}>
+      <div className="sticky top-0 z-10 p-4 border-b" style={{ backgroundColor: 'var(--bd-bg-base)', borderColor: 'rgba(255,255,255,0.6)', borderWidth: '0.5px', boxShadow: 'var(--bd-shadow-raised)' }}>
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-[#0f172a] text-xl font-bold">Создание объявления</h1>
+          <h1 className="text-[var(--bd-text-primary)] text-xl font-bold">Создание объявления</h1>
           {error && (
-            <div className="text-red-500 text-sm flex items-center gap-1">
+            <div className="text-[#ef4444] text-sm flex items-center gap-1" style={{ color: '#ef4444' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                 <circle cx="12" cy="12" r="10" />
                 <line x1="15" y1="9" x2="9" y2="15" />
@@ -190,17 +190,20 @@ export function CreateListingWizard() {
                   }
                 }}
                 className={`flex items-center justify-center w-8 h-8 rounded-full transition-all font-medium text-xs ${
-                  step < currentStep ? 'bg-tg-button text-tg-button-text' :
-                  step === currentStep ? 'bg-tg-button text-tg-button-text shadow-md' :
-                  'bg-tg-secondary-bg text-tg-hint'
+                  step < currentStep ? 'bg-[#2563eb] text-white' :
+                  step === currentStep ? 'bg-[#2563eb] text-white shadow-md' :
+                  'bg-[#e0e5ec] text-[#718096]'
                 }`}
                 style={{
                   backgroundColor: step <= currentStep
-                    ? 'var(--tg-theme-button-color)'
-                    : 'var(--tg-theme-secondary-bg-color)',
+                    ? 'var(--bd-accent-primary)'
+                    : 'var(--bd-bg-base)',
                   color: step <= currentStep
-                    ? 'var(--tg-theme-button-text-color)'
-                    : 'var(--tg-theme-hint-color)',
+                    ? '#ffffff'
+                    : 'var(--bd-text-secondary)',
+                  boxShadow: step <= currentStep
+                    ? 'var(--bd-shadow-raised)'
+                    : '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
                 }}
                 disabled={step > currentStep && !validateStep(step as CreateListingStep)}
                 aria-label={`Шаг ${step}`}
@@ -216,8 +219,8 @@ export function CreateListingWizard() {
                   className="flex-1 h-1 rounded transition-colors"
                   style={{
                     backgroundColor: step < currentStep
-                      ? 'var(--tg-theme-button-color)'
-                      : 'var(--tg-theme-hint-color)',
+                      ? 'var(--bd-accent-primary)'
+                      : 'rgba(113, 128, 150, 0.3)',
                     opacity: step < currentStep ? 1 : 0.3,
                   }}
                 />
@@ -227,7 +230,7 @@ export function CreateListingWizard() {
         </div>
 
         {/* Step labels */}
-        <div className="flex justify-between mt-2 text-xs text-tg-hint">
+        <div className="flex justify-between mt-2 text-xs text-[var(--bd-text-secondary)]">
           <span>Сделка</span>
           <span>Локация</span>
           <span>Детали</span>
@@ -237,7 +240,7 @@ export function CreateListingWizard() {
         </div>
 
         {/* Progress bar */}
-        <div className="mt-3 h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}>
+        <div className="mt-3 h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.6)' }}>
           <div
             role="progressbar"
             aria-valuenow={completionPercentage}
@@ -246,7 +249,7 @@ export function CreateListingWizard() {
             aria-label="Прогресс заполнения"
             className="h-full rounded-full transition-all duration-300"
             style={{
-              backgroundColor: 'var(--tg-theme-button-color)',
+              backgroundColor: 'var(--bd-accent-primary)',
               width: `${completionPercentage}%`,
             }}
           />
@@ -264,11 +267,11 @@ export function CreateListingWizard() {
         <div
           className="fixed bottom-0 left-0 right-0 z-40 border-t"
           style={{
-            backgroundColor: '#ffffff',
-            borderColor: '#e2e8f0',
+            backgroundColor: 'var(--bd-bg-base)',
+            borderColor: 'rgba(255,255,255,0.6)',
             borderWidth: '0.5px',
             padding: '12px 16px calc(12px + env(safe-area-inset-bottom, 0px))',
-            boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.04)',
+            boxShadow: 'var(--bd-shadow-raised)',
           }}
         >
           <div className="flex gap-3 max-w-[560px] mx-auto">
@@ -279,7 +282,12 @@ export function CreateListingWizard() {
                   prevStep();
                 }}
                 className="flex-1 py-3.5 rounded-xl font-medium transition-colors active:opacity-80"
-                style={{ backgroundColor: 'transparent', color: '#0f172a', border: '1px solid #e2e8f0' }}
+                style={{
+                  backgroundColor: 'var(--bd-bg-base)',
+                  color: 'var(--bd-text-primary)',
+                  border: '1px solid rgba(255,255,255,0.6)',
+                  boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
+                }}
               >
                 Назад
               </button>
@@ -287,11 +295,11 @@ export function CreateListingWizard() {
             <button
               onClick={handlePrimary}
               disabled={primaryDisabled}
-              className="flex-1 py-3.5 rounded-xl font-semibold transition-colors active:opacity-90 disabled:opacity-60"
+              className="flex-1 py-3.5 rounded-xl font-semibold transition-colors active:opacity-90 disabled:opacity-60 disabled:shadow-none"
               style={{
-                backgroundColor: '#2171ee',
+                background: 'linear-gradient(135deg, #4c91ff 0%, #2171ee 100%)',
                 color: '#ffffff',
-                boxShadow: '0 6px 18px rgba(33, 113, 238, 0.35)',
+                boxShadow: 'var(--bd-shadow-raised)',
               }}
             >
               {primaryLabel}

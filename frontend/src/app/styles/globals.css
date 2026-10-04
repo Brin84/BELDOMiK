@@ -10,25 +10,44 @@
 
   /* ------------------------------------------------------------------
    * BELDOMiK Design Tokens — Soft UI / Neumorphism.
-   * Единый источник правды для светлой «мягкой» темы: все интерактивные
-   * элементы и карточки отсылаются сюда через var(), чтобы не расползаться
-   * хардкодом по BEM-файлам страниц.
+   * Единый источник правды для светлой «мягкой» темы.
    * ---------------------------------------------------------------- */
-  /* Фон приложения — светло-серый; карточки с фото белые поверх него. */
-  --bd-bg: #e8ecf2;
-  --bd-surface: #ffffff;
+  /* Фон приложения — Soft UI #E0E5EC, карточки с таким же фоном. */
+  --bd-bg-base: #e0e5ec;
+  --bd-bg-surface: #e0e5ec;
+  --bd-bg-card: #e0e5ec;
+
   /* Пара цветов для neumorphism-теней: тёмный + светлый блик. */
-  --bd-raise-dark: #c8cdd5;
+  --bd-raise-dark: #b8b9be;
   --bd-raise-light: #ffffff;
-  /* Акцент — ярко-синий (категории, «Позвонить», «Купить/Снять», active-таб). */
-  --bd-accent: #2563eb;
+
+  /* Акцент — ярко-синий. */
+  --bd-accent-primary: #2563eb;
+  --bd-accent-success: #22c55e;
+  --bd-accent-warning: #f59e0b;
   --bd-accent-soft: rgba(37, 99, 235, 0.3);
-  /* Текст: основной / вторичный (контраст на сером фоне не светлее #4A5568
-     для основного; вторичный — приглушённый, для подписей/подсказок). */
-  --bd-text: #1a202c;
-  --bd-text-2: #718096;
-  /* Мягкая внешняя тень контентных карточек (не «вдавленная»). */
-  --bd-shadow-card: 0 8px 24px rgba(149, 157, 165, 0.15);
+
+  /* Текст: основной / вторичный. */
+  --bd-text-primary: #2d3748;
+  --bd-text-secondary: #718096;
+
+  /* Тени (двойные - Soft UI style). */
+  --bd-shadow-raised: 6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light);
+  --bd-shadow-raised-hover: 8px 8px 16px var(--bd-raise-dark), -8px -8px 16px var(--bd-raise-light);
+  --bd-shadow-raised-active: inset 4px 4px 8px var(--bd-raise-dark), inset -4px -4px 8px var(--bd-raise-light);
+  --bd-shadow-inset: inset 4px 4px 8px var(--bd-raise-dark), inset -4px -4px 8px var(--bd-raise-light);
+  --bd-shadow-card: var(--bd-shadow-raised);
+
+  /* Скругления. */
+  --bd-radius-card: 16px;
+  --bd-radius-btn: 12px;
+  --bd-radius-input: 20px;
+  --bd-radius-pill: 24px;
+
+  /* Отступы. */
+  --bd-padding-card: 16px;
+  --bd-padding-btn: 12px 24px;
+  --bd-padding-page-bottom: 90px;
 
   /* ------------------------------------------------------------------
    * Принудительно светлая тема + палитра дизайна BELDOMiK.
@@ -71,10 +90,10 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Страница — светло-серый фон Soft UI, белые/невидимые карточки поверх. */
+/* Страница — Soft UI фон #E0E5EC. Карточки используют тот же фон с тенями. */
 body {
-  background-color: var(--bd-bg);
-  color: var(--bd-text);
+  background-color: var(--bd-bg-base);
+  color: var(--bd-text-primary);
   @apply font-sans antialiased;
   margin: 0;
   min-height: 100vh;
@@ -106,7 +125,7 @@ body {
 }
 
 /* ------------------------------------------------------------------
- * Поисковое поле — вдавленный Neumorphism: серый фон (#E8ECF2),
+ * Поисковое поле — вдавленный Soft UI: фон #E0E5EC,
  * вдавленная тень, скругление 18px. Без белой заливки.
  * Иконка лупы — синяя.
  * ---------------------------------------------------------------- */
@@ -115,9 +134,9 @@ body {
   height: 50px;
   padding: 0 16px;
   border-radius: 18px;
-  background-color: var(--bd-bg);
+  background-color: var(--bd-bg-base);
   border: none;
-  color: var(--bd-text);
+  color: var(--bd-text-primary);
   font-size: 16px;
   font-weight: 500;
   box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
@@ -132,20 +151,20 @@ body {
 }
 
 .search-input::placeholder {
-  color: #94a3b8;
+  color: var(--bd-text-secondary);
 }
 
 /* ------------------------------------------------------------------
- * Единый стиль полей ввода (fallback) — Soft UI: серый (--bd-bg) с
+ * Единый стиль полей ввода (fallback) — Soft UI: фон #E0E5EC с
  * вдавленной тенью. Используется, если не применена .search-input.
  * ---------------------------------------------------------------- */
 input:not([type='range']):not([type='checkbox']):not([type='radio']),
 select,
 textarea {
   border-radius: 14px !important;
-  background-color: var(--bd-bg) !important;
+  background-color: var(--bd-bg-base) !important;
   border: none !important;
-  color: var(--bd-text) !important;
+  color: var(--bd-text-primary) !important;
   box-shadow: inset 2px 2px 5px var(--bd-raise-dark),
     inset -2px -2px 5px var(--bd-raise-light) !important;
 }
@@ -161,7 +180,7 @@ textarea:focus {
 input:not([type='range']):not([type='checkbox']):not([type='radio'])::placeholder,
 select::placeholder,
 textarea::placeholder {
-  color: #94a3b8 !important;
+  color: var(--bd-text-secondary) !important;
 }
 
 input[type='range'] {
@@ -190,33 +209,31 @@ input:-webkit-autofill:focus {
 }
 
 /* ------------------------------------------------------------------
- * Базовая контентная карточка BELDOMiK: белый фон, скругление 20px,
- * мягкая внешняя тень. НЕ «вдавленная» — контраст фото сохраняется.
+ * Базовая контентная карточка BELDOMiK: Soft UI карточка с фоном #E0E5EC,
+ * скругление 16px, двойные тени.
  * ---------------------------------------------------------------- */
 @layer utilities {
   .beldomik-card {
-    background-color: var(--bd-surface);
-    border-radius: 20px;
+    background-color: var(--bd-bg-card);
+    border-radius: var(--bd-radius-card);
     box-shadow: var(--bd-shadow-card);
   }
 }
 
 /* ------------------------------------------------------------------
- * Neumorphism-утилиты. Фон — серый (--bd-bg), поэтому выпуклый элемент
- * при срощении с фоном держится за блик, а не за границу.
- *   .neu-raise — выпуклый (кнопки, категории, чипы, таб-бар)
- *   .neu-press — вдавленный (активные/нажатые состояния, поиск)
- * --bd-bg здесь нужен как цвет заливок: на белых панелях (детальная,
- * шторки) интерактивный элемент «всплывает» из серого.
+ * Soft UI утилиты. Фон — #E0E5EC, карточки с таким же фоном.
+ * Тени: двойные для выпуклого/вдавленного эффекта.
  * ---------------------------------------------------------------- */
 @layer utilities {
+  /* Выпуклый элемент (кнопки, категории, чипы) */
   .neu-raise {
-    background-color: var(--bd-bg);
+    background-color: var(--bd-bg-base);
     box-shadow: 6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light);
   }
 
+  /* Вдавленный элемент (активные/нажатые состояния, поиск) */
   .neu-press {
-    background-color: var(--bd-bg);
+    background-color: var(--bd-bg-base);
     box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
       inset -4px -4px 8px var(--bd-raise-light);
   }
@@ -226,8 +243,7 @@ input:-webkit-autofill:focus {
       inset -2px -2px 5px var(--bd-raise-light);
   }
 
-  /* Вдавленное состояние при нажатии: лёгкое сжатие тени + микро-skew.
-     Актив не меняет фон — только углубляет. */
+  /* Элемент с переходом при нажатии */
   .neu-pressable {
     transition: box-shadow 0.18s ease, transform 0.12s ease;
   }
@@ -239,19 +255,15 @@ input:-webkit-autofill:focus {
 }
 
 /* ------------------------------------------------------------------
- * Текстовый class text-tg-hint генерируется tailwind из
- * var(--tg-theme-hint-color), а hint глобально переопределён на
- * светло-серый #e2e8f0 (для рамок). Чтобы вторичный текст/иконки
- * остались читаемыми — фиксируем их на muted-цвет дизайна #94a3b8.
- * Инлайн style={{ color: 'var(--tg-theme-hint-color)' }} для текста
- * заменён на явный '#94a3b8' по проекту (скриптом/вручную).
+ * Текстовые классы для вторичного текста и рамок — фиксируем
+ * на Soft UI цветах для единообразия.
  * ---------------------------------------------------------------- */
 @layer utilities {
   .text-tg-hint {
-    color: var(--bd-text-2) !important;
+    color: var(--bd-text-secondary) !important;
   }
   .border-tg-hint {
-    border-color: #cbd5e1 !important;
+    border-color: #d1d9e6 !important;
   }
 }
 
@@ -267,7 +279,7 @@ input:-webkit-autofill:focus {
   gap: 10px;
   padding: 8px;
   border-radius: 20px;
-  background: var(--bd-surface);
+  background: var(--bd-bg-card);
   box-shadow: var(--bd-shadow-card);
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.18s ease;
@@ -275,7 +287,7 @@ input:-webkit-autofill:focus {
 
 .hot-card:active {
   transform: scale(0.985);
-  box-shadow: 0 4px 14px rgba(149, 157, 165, 0.2);
+  box-shadow: inset 4px 4px 8px var(--bd-raise-dark), inset -4px -4px 8px var(--bd-raise-light);
 }
 
 .hot-card__photo {
@@ -301,7 +313,7 @@ input:-webkit-autofill:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #94a3b8;
+  color: var(--bd-text-secondary);
   background: #f1f5f9;
 }
 
@@ -315,7 +327,7 @@ input:-webkit-autofill:focus {
   font-size: 11px;
   font-weight: 700;
   color: #fff;
-  background: #4c91ff;
+  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
   box-shadow: 0 3px 8px rgba(33, 113, 238, 0.3);
 }
 
@@ -336,7 +348,7 @@ input:-webkit-autofill:focus {
   font-size: 15px;
   font-weight: 800;
   line-height: 1.25;
-  color: #0f172a;
+  color: var(--bd-text-primary);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -347,7 +359,7 @@ input:-webkit-autofill:focus {
   margin-top: 4px;
   font-size: 13px;
   font-weight: 400;
-  color: #64748b;
+  color: var(--bd-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -359,7 +371,7 @@ input:-webkit-autofill:focus {
   gap: 4px;
   margin-top: 4px;
   font-size: 12px;
-  color: #9aa7b8;
+  color: var(--bd-text-secondary);
   overflow: hidden;
   white-space: nowrap;
 }
@@ -403,7 +415,7 @@ input:-webkit-autofill:focus {
   padding-top: 6px;
   font-size: 17px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--bd-text-primary);
   letter-spacing: -0.3px;
 }
 
@@ -411,5 +423,5 @@ input:-webkit-autofill:focus {
   margin-left: 8px;
   font-size: 11px;
   font-weight: 400;
-  color: #94a3b8;
+  color: var(--bd-text-secondary);
 }

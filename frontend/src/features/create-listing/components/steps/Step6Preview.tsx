@@ -103,9 +103,9 @@ export function Step6Preview() {
   const metroLine = metroStation ? getMetroLineById(metroStation.line_id) : null;
 
   const renderPreviewRow = (label: string, value: React.ReactNode) => (
-    <div className="flex items-start gap-3 py-3 border-b" style={{ borderColor: '#e2e8f0', borderWidth: '0.5px' }}>
-      <div className="w-36 flex-shrink-0 text-sm" style={{ color: '#64748b' }}>{label}</div>
-      <div className="flex-1 text-sm font-medium" style={{ color: '#0f172a' }}>{value}</div>
+    <div className="flex items-start gap-3 py-3 border-b" style={{ borderColor: 'rgba(255,255,255,0.6)', borderWidth: '0.5px' }}>
+      <div className="w-36 flex-shrink-0 text-sm" style={{ color: 'var(--bd-text-secondary)' }}>{label}</div>
+      <div className="flex-1 text-sm font-medium" style={{ color: 'var(--bd-text-primary)' }}>{value}</div>
     </div>
   );
 
@@ -114,24 +114,24 @@ export function Step6Preview() {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-6" style={{ backgroundColor: 'var(--bd-bg-base)' }}>
       <div className="space-y-6">
         {/* Preview Card */}
-        <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}>
+        <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--bd-bg-base)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)' }}>
           {/* Preview Header */}
-          <div className="p-4 border-b" style={{ borderColor: '#e2e8f0', borderWidth: '0.5px' }}>
+          <div className="p-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.6)', borderWidth: '0.5px' }}>
             <div className="flex items-center gap-3">
               <span className="text-3xl">{propertyType ? propertyTypeIcon(propertyType.icon) : '🏠'}</span>
               <div>
-                <h3 className="font-semibold" style={{ color: '#0f172a' }}>{previewTitle}</h3>
-                <p className="text-sm mt-0.5" style={{ color: '#64748b' }}>
+                <h3 className="font-semibold" style={{ color: 'var(--bd-text-primary)' }}>{previewTitle}</h3>
+                <p className="text-sm mt-0.5" style={{ color: 'var(--bd-text-secondary)' }}>
                   {operationType?.name_plural || formData.operation} · {propertyType?.name || 'Недвижимость'}
                 </p>
               </div>
             </div>
-            <div className="mt-3 text-2xl font-bold" style={{ color: '#0f172a' }}>
+            <div className="mt-3 text-2xl font-bold" style={{ color: 'var(--bd-text-primary)' }}>
               {formData.is_negotiable
-                ? <span style={{ color: '#64748b' }}>Договорная</span>
+                ? <span style={{ color: 'var(--bd-text-secondary)' }}>Договорная</span>
                 : formatPrice(formData.price_byn)}
             </div>
           </div>
@@ -155,9 +155,9 @@ export function Step6Preview() {
             {formData.is_new_building && renderPreviewRow('Новостройка', 'Да')}
 
             {/* Location */}
-            <div className="pt-2 border-t" style={{ borderColor: '#e2e8f0', borderWidth: '0.5px' }}>
-              <div className="text-sm mb-2" style={{ color: '#64748b' }}>Адрес</div>
-              <div className="space-y-1 text-sm" style={{ color: '#0f172a' }}>
+            <div className="pt-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.6)', borderWidth: '0.5px' }}>
+              <div className="text-sm mb-2" style={{ color: 'var(--bd-text-secondary)' }}>Адрес</div>
+              <div className="space-y-1 text-sm" style={{ color: 'var(--bd-text-primary)' }}>
                 {region && <div>{region.name}</div>}
                 {city && <div>{city.name}</div>}
                 {district && <div>{district.name}</div>}
@@ -168,38 +168,38 @@ export function Step6Preview() {
             </div>
 
             {/* Features */}
-            <div className="pt-2 border-t" style={{ borderColor: '#e2e8f0', borderWidth: '0.5px' }}>
-              <div className="text-sm mb-2" style={{ color: '#64748b' }}>Дополнительно</div>
+            <div className="pt-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.6)', borderWidth: '0.5px' }}>
+              <div className="text-sm mb-2" style={{ color: 'var(--bd-text-secondary)' }}>Дополнительно</div>
               <div className="flex flex-wrap gap-2">
                 {formData.balcony_count && formData.balcony_count > 0 && (
-                  <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#f1f5f9', color: '#0f172a' }}>🏠 Балкон · {formData.balcony_count}</span>
+                  <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'var(--bd-bg-base)', border: '1px solid rgba(255,255,255,0.6)', color: 'var(--bd-text-primary)', boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)' }}>🏠 Балкон · {formData.balcony_count}</span>
                 )}
                 {formData.loggia_count && formData.loggia_count > 0 && (
-                  <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#f1f5f9', color: '#0f172a' }}>🪟 Лоджия · {formData.loggia_count}</span>
+                  <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'var(--bd-bg-base)', border: '1px solid rgba(255,255,255,0.6)', color: 'var(--bd-text-primary)', boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)' }}>🪟 Лоджия · {formData.loggia_count}</span>
                 )}
-                {formData.is_new_building && <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#f1f5f9', color: '#0f172a' }}>🏗️ Новостройка</span>}
-                {formData.has_furniture && <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#f1f5f9', color: '#0f172a' }}>🛋️ Мебель</span>}
-                {formData.has_elevator && <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#f1f5f9', color: '#0f172a' }}>🛗 Лифт</span>}
-                {formData.has_parking && <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#f1f5f9', color: '#0f172a' }}>🅿️ Парковка</span>}
+                {formData.is_new_building && <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'var(--bd-bg-base)', border: '1px solid rgba(255,255,255,0.6)', color: 'var(--bd-text-primary)', boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)' }}>🏗️ Новостройка</span>}
+                {formData.has_furniture && <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'var(--bd-bg-base)', border: '1px solid rgba(255,255,255,0.6)', color: 'var(--bd-text-primary)', boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)' }}>🛋️ Мебель</span>}
+                {formData.has_elevator && <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'var(--bd-bg-base)', border: '1px solid rgba(255,255,255,0.6)', color: 'var(--bd-text-primary)', boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)' }}>🛗 Лифт</span>}
+                {formData.has_parking && <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'var(--bd-bg-base)', border: '1px solid rgba(255,255,255,0.6)', color: 'var(--bd-text-primary)', boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)' }}>🅿️ Парковка</span>}
                 {!formData.balcony_count && !formData.loggia_count && !formData.is_new_building && !formData.has_furniture && !formData.has_elevator && !formData.has_parking && (
-                  <span className="text-xs" style={{ color: '#64748b' }}>Не указано</span>
+                  <span className="text-xs" style={{ color: 'var(--bd-text-secondary)' }}>Не указано</span>
                 )}
               </div>
             </div>
 
             {/* Contact */}
             {formData.contact_name && (
-              <div className="pt-2 border-t" style={{ borderColor: '#e2e8f0', borderWidth: '0.5px' }}>
-                <div className="text-sm" style={{ color: '#64748b' }}>Контакт</div>
-                <div className="text-sm font-medium mt-1" style={{ color: '#0f172a' }}>{formData.contact_name}</div>
+              <div className="pt-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.6)', borderWidth: '0.5px' }}>
+                <div className="text-sm" style={{ color: 'var(--bd-text-secondary)' }}>Контакт</div>
+                <div className="text-sm font-medium mt-1" style={{ color: 'var(--bd-text-primary)' }}>{formData.contact_name}</div>
               </div>
             )}
 
             {/* Description */}
             {formData.description && (
-              <div className="pt-2 border-t" style={{ borderColor: '#e2e8f0', borderWidth: '0.5px' }}>
-                <div className="text-sm mb-2" style={{ color: '#64748b' }}>Описание</div>
-                <div className="text-sm whitespace-pre-wrap" style={{ color: '#0f172a' }}>{formData.description}</div>
+              <div className="pt-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.6)', borderWidth: '0.5px' }}>
+                <div className="text-sm mb-2" style={{ color: 'var(--bd-text-secondary)' }}>Описание</div>
+                <div className="text-sm whitespace-pre-wrap" style={{ color: 'var(--bd-text-primary)' }}>{formData.description}</div>
               </div>
             )}
           </div>
@@ -207,10 +207,10 @@ export function Step6Preview() {
 
         {/* ── Блок продвижения (Kufar-стиль) ───────────────────────────── */}
         <div>
-          <h3 className="font-semibold text-lg mb-1" style={{ color: '#0f172a' }}>
+          <h3 className="font-semibold text-lg mb-1" style={{ color: 'var(--bd-text-primary)' }}>
             Поднимите объявление в поиске
           </h3>
-          <p className="text-sm mb-3" style={{ color: '#64748b' }}>
+          <p className="text-sm mb-3" style={{ color: 'var(--bd-text-secondary)' }}>
             Выберите продвижение и оплатите после публикации
           </p>
 
@@ -224,11 +224,11 @@ export function Step6Preview() {
                   onClick={() => handlePromoSelect(promo.type)}
                   className="flex-shrink-0 w-[140px] rounded-2xl p-3 text-left transition-all active:scale-[0.97]"
                   style={{
-                    backgroundColor: isSelected ? '#ffffff' : '#f8fafc',
+                    backgroundColor: isSelected ? 'var(--bd-bg-base)' : 'var(--bd-bg-base)',
                     border: isSelected
                       ? `2px solid ${promo.badge_color}`
-                      : '1px solid #e2e8f0',
-                    boxShadow: isSelected ? `0 4px 14px ${promo.badge_color}22` : 'none',
+                      : '1px solid rgba(255,255,255,0.6)',
+                    boxShadow: isSelected ? 'var(--bd-shadow-raised)' : '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
                   }}
                 >
                   {/* Иконка + название */}
@@ -240,8 +240,8 @@ export function Step6Preview() {
                       {promo.icon}
                     </span>
                     <div>
-                      <div className="text-sm font-semibold" style={{ color: '#0f172a' }}>{promo.label}</div>
-                      <div className="text-[11px]" style={{ color: '#64748b' }}>{promo.duration_days} дн.</div>
+                      <div className="text-sm font-semibold" style={{ color: 'var(--bd-text-primary)' }}>{promo.label}</div>
+                      <div className="text-[11px]" style={{ color: 'var(--bd-text-secondary)' }}>{promo.duration_days} дн.</div>
                     </div>
                   </div>
 
@@ -251,7 +251,7 @@ export function Step6Preview() {
                   </div>
 
                   {/* Описание */}
-                  <p className="text-[11px] mt-1 leading-snug" style={{ color: '#64748b' }}>
+                  <p className="text-[11px] mt-1 leading-snug" style={{ color: 'var(--bd-text-secondary)' }}>
                     {promo.description}
                   </p>
 
@@ -279,8 +279,8 @@ export function Step6Preview() {
               <line x1="12" y1="17" x2="12.01" y2="17" />
             </svg>
             <div>
-              <p className="font-medium" style={{ color: '#0f172a' }}>Объявление отправится на модерацию</p>
-              <p className="text-sm mt-1" style={{ color: '#64748b' }}>
+              <p className="font-medium" style={{ color: 'var(--bd-text-primary)' }}>Объявление отправится на модерацию</p>
+              <p className="text-sm mt-1" style={{ color: 'var(--bd-text-secondary)' }}>
                 Автоматическая проверка обычно занимает до нескольких минут.
               </p>
             </div>

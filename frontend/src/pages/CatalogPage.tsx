@@ -177,8 +177,8 @@ export function CatalogPage() {
               />
             </div>
             <div>
-              <h1 className="catalog-header__title">BELDOMiK</h1>
-              <p className="catalog-header__subtitle">Мини-приложение</p>
+              <h1 className="catalog-header__title" style={{ color: 'var(--bd-text-primary, #2d3748)' }}>BELDOMiK</h1>
+              <p className="catalog-header__subtitle" style={{ color: 'var(--bd-text-secondary, #718096)' }}>Мини-приложение</p>
             </div>
           </div>
 
@@ -342,7 +342,7 @@ export function CatalogPage() {
           ) : properties.length === 0 ? (
             <EmptyState
               icon={
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2} className="text-slate-400" style={{ opacity: 0.5 }}>
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2} style={{ color: 'var(--bd-text-secondary)', opacity: 0.5 }}>
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                   <line x1="9" y1="9" x2="15" y2="15" />
                   <line x1="15" y1="9" x2="9" y2="15" />
@@ -354,7 +354,7 @@ export function CatalogPage() {
                   <>
                     Попробуйте изменить фильтры или расширить поиск.
                     <br />
-                    <span className="text-xs">Выбрано: {selectionLabel}</span>
+                    <span className="text-xs" style={{ color: 'var(--bd-text-secondary)' }}>Выбрано: {selectionLabel}</span>
                   </>
                 )
               }
@@ -373,9 +373,9 @@ export function CatalogPage() {
               </div>
 
               {properties.length > 0 && (
-                <p className="py-4 text-center text-sm text-slate-400">
+                <span className="text-center text-sm" style={{ color: 'var(--bd-text-secondary)' }}>
                   Все {total} объявлений загружены
-                </p>
+                </span>
               )}
             </>
           )}

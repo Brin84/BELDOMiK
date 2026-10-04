@@ -54,7 +54,7 @@ function NumberInput({ label, value, onChange, placeholder, min, max, unit, requ
 
   return (
     <div className="flex-1">
-      <label className="block text-sm mb-1" style={{ color: '#64748b' }}>
+      <label className="block text-sm mb-1" style={{ color: 'var(--bd-text-secondary)' }}>
         {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
       </label>
       <input
@@ -66,14 +66,15 @@ function NumberInput({ label, value, onChange, placeholder, min, max, unit, requ
         max={max}
         className="w-full px-4 py-3 rounded-xl text-base outline-none"
         style={{
-          backgroundColor: '#f1f5f9',
-          border: '1px solid #e2e8f0',
-          color: '#0f172a',
+          backgroundColor: 'var(--bd-bg-base)',
+          border: '1px solid rgba(255,255,255,0.6)',
+          color: 'var(--bd-text-primary)',
+          boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)',
         }}
         inputMode="numeric"
       />
       {unit && (
-        <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>{unit}</p>
+        <p className="text-xs mt-1" style={{ color: 'var(--bd-text-secondary)' }}>{unit}</p>
       )}
     </div>
   );
@@ -100,24 +101,32 @@ function Stepper({ label, icon, value, onChange }: StepperProps) {
   return (
     <div className="flex items-center gap-3 px-4 py-3.5">
       <span className="text-2xl leading-none flex-shrink-0">{icon}</span>
-      <span className="min-w-0 flex-1 text-[16px] font-medium" style={{ color: '#0f172a' }}>{label}</span>
+      <span className="min-w-0 flex-1 text-[16px] font-medium" style={{ color: 'var(--bd-text-primary)' }}>{label}</span>
       <button
         type="button"
         onClick={() => setCount(count - 1)}
         className="w-9 h-9 rounded-full flex items-center justify-center text-lg font-semibold transition-colors active:opacity-80"
-        style={{ backgroundColor: count > 0 ? '#e8f0fe' : '#f1f5f9', color: count > 0 ? '#2171ee' : '#94a3b8' }}
+        style={{
+          backgroundColor: count > 0 ? 'rgba(37, 99, 235, 0.12)' : 'var(--bd-bg-base)',
+          color: count > 0 ? 'var(--bd-accent-primary)' : 'var(--bd-text-secondary)',
+          boxShadow: count > 0 ? 'var(--bd-shadow-raised)' : '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)'
+        }}
         aria-label={`Уменьшить: ${label}`}
       >
         −
       </button>
-      <span className="w-6 text-center text-base font-semibold tabular-nums" style={{ color: count > 0 ? '#0f172a' : '#94a3b8' }}>
+      <span className="w-6 text-center text-base font-semibold tabular-nums" style={{ color: count > 0 ? 'var(--bd-text-primary)' : 'var(--bd-text-secondary)' }}>
         {count}
       </span>
       <button
         type="button"
         onClick={() => setCount(count + 1)}
         className="w-9 h-9 rounded-full flex items-center justify-center text-lg font-semibold transition-colors active:opacity-80"
-        style={{ backgroundColor: '#e8f0fe', color: '#2171ee' }}
+        style={{
+          backgroundColor: 'rgba(37, 99, 235, 0.12)',
+          color: 'var(--bd-accent-primary)',
+          boxShadow: 'var(--bd-shadow-raised)'
+        }}
         aria-label={`Увеличить: ${label}`}
       >
         +
@@ -194,10 +203,10 @@ export function Step3Details() {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-6" style={{ backgroundColor: 'var(--bd-bg-base)' }}>
       {/* Description */}
       <section>
-        <h2 style={{ color: '#0f172a', fontSize: '20px', fontWeight: 700, marginBottom: '16px' }}>Описание</h2>
+        <h2 style={{ color: 'var(--bd-text-primary)', fontSize: '20px', fontWeight: 700, marginBottom: '16px' }}>Описание</h2>
         <textarea
           value={formData.description}
           onChange={(e) => {
@@ -209,34 +218,36 @@ export function Step3Details() {
           rows={5}
           className="w-full px-4 py-3 rounded-xl text-base resize-none outline-none"
           style={{
-            backgroundColor: '#f1f5f9',
-            border: errors.description ? '2px solid #ef4444' : '1px solid #e2e8f0',
-            color: '#0f172a',
+            backgroundColor: 'var(--bd-bg-base)',
+            border: errors.description ? '2px solid #ef4444' : '1px solid rgba(255,255,255,0.6)',
+            color: 'var(--bd-text-primary)',
+            boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)',
           }}
           maxLength={5000}
         />
         {errors.description && <p className="text-sm mt-1" style={{ color: '#ef4444' }}>{errors.description}</p>}
-        <p className="text-xs mt-1 text-right" style={{ color: '#94a3b8' }}>{(formData.description || '').length}/5000</p>
+        <p className="text-xs mt-1 text-right" style={{ color: 'var(--bd-text-secondary)' }}>{(formData.description || '').length}/5000</p>
       </section>
 
       {/* Price (Kufar-модель: фикс. цена или «Договорная») */}
       <section>
-        <h2 style={{ color: '#0f172a', fontSize: '20px', fontWeight: 700, marginBottom: '16px' }}>
-          Цена {!formData.is_negotiable && <span style={{ color: '#94a3b8', fontWeight: 400 }}>*</span>}
+        <h2 style={{ color: 'var(--bd-text-primary)', fontSize: '20px', fontWeight: 700, marginBottom: '16px' }}>
+          Цена {!formData.is_negotiable && <span style={{ color: 'var(--bd-text-secondary)', fontWeight: 400 }}>*</span>}
         </h2>
 
         {/* Переключатель «Договорная цена» */}
         <div
           className="rounded-2xl p-4"
           style={{
-            backgroundColor: '#ffffff',
-            border: formData.is_negotiable ? '1px solid #2171ee' : '1px solid #e2e8f0',
+            backgroundColor: 'var(--bd-bg-base)',
+            border: formData.is_negotiable ? '1px solid var(--bd-accent-primary)' : '1px solid rgba(255,255,255,0.6)',
+            boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
           }}
         >
           <div className="flex items-center gap-3">
             <div className="flex-1 min-w-0">
-              <div className="text-[16px] font-semibold" style={{ color: '#0f172a' }}>Договорная цена</div>
-              <div className="text-[13px] mt-1 leading-snug" style={{ color: '#64748b' }}>
+              <div className="text-[16px] font-semibold" style={{ color: 'var(--bd-text-primary)' }}>Договорная цена</div>
+              <div className="text-[13px] mt-1 leading-snug" style={{ color: 'var(--bd-text-secondary)' }}>
                 {formData.is_negotiable
                   ? 'Цена не публикуется — покупатели предложат свою'
                   : 'Укажите цену, или включите переключатель и цена будет скрыта'}
@@ -255,11 +266,20 @@ export function Step3Details() {
                 clearError('price_byn');
               }}
               className="relative w-[52px] h-8 rounded-full transition-colors flex-shrink-0"
-              style={{ backgroundColor: formData.is_negotiable ? '#2171ee' : '#e2e8f0' }}
+              style={{
+                backgroundColor: formData.is_negotiable ? 'var(--bd-accent-primary)' : 'var(--bd-bg-base)',
+                boxShadow: formData.is_negotiable
+                  ? 'var(--bd-shadow-raised)'
+                  : 'inset 2px 2px 4px var(--bd-raise-dark), inset -2px -2px 4px var(--bd-raise-light)'
+              }}
             >
               <span
                 className="absolute top-1 w-6 h-6 rounded-full shadow transition-all"
-                style={{ backgroundColor: '#ffffff', left: formData.is_negotiable ? '24px' : '4px' }}
+                style={{
+                  backgroundColor: '#ffffff',
+                  left: formData.is_negotiable ? '24px' : '4px',
+                  boxShadow: '3px 3px 6px var(--bd-raise-dark), -3px -3px 6px var(--bd-raise-light)'
+                }}
               />
             </button>
           </div>
@@ -269,7 +289,7 @@ export function Step3Details() {
         {!formData.is_negotiable && (
           <div className="grid grid-cols-2 gap-3 mt-3">
             <div className="flex-1">
-              <label className="block text-sm mb-1" style={{ color: '#64748b' }}>Цена в <BynSymbol /> *</label>
+              <label className="block text-sm mb-1" style={{ color: 'var(--bd-text-secondary)' }}>Цена в <BynSymbol /> *</label>
               <input
                 type="number"
                 value={formData.price_byn || ''}
@@ -282,9 +302,10 @@ export function Step3Details() {
                 placeholder="150000"
                 className="w-full px-4 py-3 rounded-xl text-base outline-none"
                 style={{
-                  backgroundColor: '#f1f5f9',
-                  border: errors.price_byn ? '2px solid #ef4444' : '1px solid #e2e8f0',
-                  color: '#0f172a',
+                  backgroundColor: 'var(--bd-bg-base)',
+                  border: errors.price_byn ? '2px solid #ef4444' : '1px solid rgba(255,255,255,0.6)',
+                  color: 'var(--bd-text-primary)',
+                  boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)',
                 }}
                 inputMode="numeric"
                 min="1"
@@ -293,7 +314,7 @@ export function Step3Details() {
               {errors.price_byn && <p className="text-sm mt-1" style={{ color: '#ef4444' }}>{errors.price_byn}</p>}
             </div>
             <div className="flex-1">
-              <label className="block text-sm mb-1" style={{ color: '#64748b' }}>Цена в USD (опционально)</label>
+              <label className="block text-sm mb-1" style={{ color: 'var(--bd-text-secondary)' }}>Цена в USD (опционально)</label>
               <input
                 type="number"
                 value={formData.price_usd || ''}
@@ -305,9 +326,10 @@ export function Step3Details() {
                 placeholder="45000"
                 className="w-full px-4 py-3 rounded-xl text-base outline-none"
                 style={{
-                  backgroundColor: '#f1f5f9',
-                  border: '1px solid #e2e8f0',
-                  color: '#0f172a',
+                  backgroundColor: 'var(--bd-bg-base)',
+                  border: '1px solid rgba(255,255,255,0.6)',
+                  color: 'var(--bd-text-primary)',
+                  boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)',
                 }}
                 inputMode="numeric"
                 min="1"
@@ -320,7 +342,7 @@ export function Step3Details() {
 
       {/* Area, Living area, Kitchen area, Rooms, Floor */}
       <section>
-        <h2 style={{ color: '#0f172a', fontSize: '20px', fontWeight: 700, marginBottom: '16px' }}>Параметры</h2>
+        <h2 style={{ color: 'var(--bd-text-primary)', fontSize: '20px', fontWeight: 700, marginBottom: '16px' }}>Параметры</h2>
         <div className="grid grid-cols-2 gap-3">
           <NumberInput
             label="Общая площадь (м²)"
@@ -447,7 +469,11 @@ export function Step3Details() {
           {formData.metro_station_id && (
             <div
               className="rounded-2xl p-3"
-              style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
+              style={{
+                backgroundColor: 'var(--bd-bg-base)',
+                border: '1px solid rgba(255,255,255,0.6)',
+                boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
+              }}
             >
               <NumberInput
                 label="До метро, м"
@@ -479,9 +505,9 @@ export function Step3Details() {
         <div
           className="rounded-2xl overflow-hidden transition-shadow"
           style={{
-            backgroundColor: '#ffffff',
-            border: openSection === 'features' ? '1px solid #cbd5e1' : '1px solid #e2e8f0',
-            boxShadow: openSection === 'features' ? '0 8px 24px rgba(2, 6, 23, 0.06)' : 'none',
+            backgroundColor: 'var(--bd-bg-base)',
+            border: openSection === 'features' ? '1px solid rgba(255,255,255,0.6)' : '1px solid rgba(255,255,255,0.6)',
+            boxShadow: openSection === 'features' ? 'var(--bd-shadow-raised)' : '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
           }}
         >
           {/* Триггер-строка */}
@@ -492,10 +518,10 @@ export function Step3Details() {
             className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-opacity active:opacity-80"
           >
             <div className="flex-1 min-w-0">
-              <div className="text-[13px] leading-tight" style={{ color: '#94a3b8' }}>Дополнительно</div>
+              <div className="text-[13px] leading-tight" style={{ color: 'var(--bd-text-secondary)' }}>Дополнительно</div>
               <div
                 className="text-[17px] font-semibold truncate mt-0.5"
-                style={{ color: selectedExtrasCount > 0 ? '#0f172a' : '#94a3b8' }}
+                style={{ color: selectedExtrasCount > 0 ? 'var(--bd-text-primary)' : 'var(--bd-text-secondary)' }}
               >
                 {selectedExtrasCount > 0 ? `${selectedExtrasCount} выбрано` : 'Балкон, лоджия, новостройка'}
               </div>
@@ -508,7 +534,7 @@ export function Step3Details() {
               stroke="currentColor"
               strokeWidth={2}
               className={`flex-shrink-0 transition-transform duration-200 ${openSection === 'features' ? 'rotate-180' : ''}`}
-              style={{ color: '#94a3b8' }}
+              style={{ color: 'var(--bd-text-secondary)' }}
               aria-hidden="true"
             >
               <polyline points="6 9 12 15 18 9" />
@@ -522,9 +548,9 @@ export function Step3Details() {
             }`}
           >
             <div className="overflow-hidden min-h-0">
-              <div className="pt-1 pb-2" style={{ borderTop: '1px solid #f1f5f9' }}>
+              <div className="pt-1 pb-2" style={{ borderTop: '1px solid rgba(255,255,255,0.6)' }}>
                 {/* Счётчики балкона и лоджии */}
-                <div style={{ borderBottom: '1px solid #f1f5f9' }}>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.6)' }}>
                   <Stepper
                     label="Балкон"
                     icon="🏠"
@@ -532,7 +558,7 @@ export function Step3Details() {
                     onChange={setBalconyCount}
                   />
                 </div>
-                <div style={{ borderBottom: '1px solid #f1f5f9' }}>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.6)' }}>
                   <Stepper
                     label="Лоджия"
                     icon="🪟"
@@ -554,8 +580,9 @@ export function Step3Details() {
                       }}
                       className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors active:opacity-80"
                       style={{
-                        backgroundColor: checked ? '#e8f0fe' : '#ffffff',
-                        borderBottom: index < EXTRA_FEATURES.length - 1 ? '1px solid #f1f5f9' : 'none',
+                        backgroundColor: checked ? 'rgba(37, 99, 235, 0.12)' : 'var(--bd-bg-base)',
+                        borderBottom: index < EXTRA_FEATURES.length - 1 ? '1px solid rgba(255,255,255,0.6)' : 'none',
+                        boxShadow: checked ? 'var(--bd-shadow-raised)' : '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
                       }}
                       aria-pressed={checked}
                     >
@@ -563,7 +590,7 @@ export function Step3Details() {
                       <span className="min-w-0 flex-1">
                         <span
                           className="block text-[16px] font-medium leading-tight"
-                          style={{ color: checked ? '#2171ee' : '#0f172a' }}
+                          style={{ color: checked ? 'var(--bd-accent-primary)' : 'var(--bd-text-primary)' }}
                         >
                           {label}
                         </span>
@@ -572,8 +599,9 @@ export function Step3Details() {
                       <span
                         className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-md transition-colors"
                         style={{
-                          backgroundColor: checked ? '#2171ee' : '#f1f5f9',
-                          border: checked ? 'none' : '1.5px solid #cbd5e1',
+                          backgroundColor: checked ? 'var(--bd-accent-primary)' : 'var(--bd-bg-base)',
+                          border: checked ? 'none' : '1.5px solid rgba(255,255,255,0.6)',
+                          boxShadow: checked ? 'var(--bd-shadow-raised)' : '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
                         }}
                         aria-hidden="true"
                       >

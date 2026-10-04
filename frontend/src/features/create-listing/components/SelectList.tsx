@@ -51,20 +51,21 @@ export function SelectListRowView<T>({
       aria-pressed={isSelected}
       className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors active:opacity-80"
       style={{
-        backgroundColor: isSelected ? '#e8f0fe' : '#ffffff',
-        borderBottom: showDivider ? '1px solid #f1f5f9' : 'none',
+        backgroundColor: isSelected ? 'rgba(37, 99, 235, 0.12)' : 'var(--bd-bg-base)',
+        borderBottom: showDivider ? '1px solid rgba(255,255,255,0.6)' : 'none',
+        boxShadow: isSelected ? 'var(--bd-shadow-raised)' : '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
       }}
     >
       {row.icon && <span className="text-2xl leading-none flex-shrink-0">{row.icon}</span>}
       <span className="min-w-0 flex-1">
         <span
           className="block text-[16px] font-medium leading-tight truncate"
-          style={{ color: isSelected ? '#2171ee' : '#0f172a' }}
+          style={{ color: isSelected ? 'var(--bd-accent-primary)' : 'var(--bd-text-primary)' }}
         >
           {row.label}
         </span>
         {row.hint && (
-          <span className="block text-xs mt-0.5" style={{ color: '#94a3b8' }}>
+          <span className="block text-xs mt-0.5" style={{ color: 'var(--bd-text-secondary)' }}>
             {row.hint}
           </span>
         )}
@@ -72,7 +73,7 @@ export function SelectListRowView<T>({
       {isSelected && (
         <span
           className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full"
-          style={{ backgroundColor: '#2171ee' }}
+          style={{ backgroundColor: 'var(--bd-accent-primary)' }}
           aria-hidden="true"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth={3}>
@@ -109,10 +110,10 @@ export function SelectList<T>({
   return (
     <div
       className="rounded-2xl overflow-hidden"
-      style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}
+      style={{ backgroundColor: 'var(--bd-bg-base)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)' }}
     >
       {searchable && (
-        <div className="px-3 pt-3 pb-2" style={{ borderBottom: filtered.length > 0 || showClear ? '1px solid #f1f5f9' : 'none' }}>
+        <div className="px-3 pt-3 pb-2" style={{ borderBottom: filtered.length > 0 || showClear ? '1px solid rgba(255,255,255,0.6)' : 'none' }}>
           <div className="relative">
             <svg
               className="absolute left-3.5 top-1/2 -translate-y-1/2"
@@ -122,7 +123,7 @@ export function SelectList<T>({
               fill="none"
               stroke="currentColor"
               strokeWidth={2}
-              style={{ color: '#94a3b8' }}
+              style={{ color: 'var(--bd-text-secondary)' }}
               aria-hidden="true"
             >
               <circle cx="11" cy="11" r="8" />
@@ -135,9 +136,10 @@ export function SelectList<T>({
               placeholder={searchPlaceholder ?? 'Поиск'}
               className="w-full pl-10 pr-3 py-2.5 rounded-xl text-[15px] outline-none"
               style={{
-                backgroundColor: '#f1f5f9',
-                color: '#0f172a',
+                backgroundColor: 'var(--bd-bg-base)',
+                color: 'var(--bd-text-primary)',
                 border: '1px solid transparent',
+                boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)',
               }}
               autoComplete="off"
             />
@@ -166,14 +168,14 @@ export function SelectList<T>({
         ))}
 
         {filtered.length === 0 && !showClear && (
-          <div className="px-4 py-6 text-center text-sm" style={{ color: '#94a3b8' }}>
+          <div className="px-4 py-6 text-center text-sm" style={{ color: 'var(--bd-text-secondary)' }}>
             {searchEmpty ?? emptyText ?? 'Ничего не найдено'}
           </div>
         )}
       </div>
 
       {footer && (
-        <div style={{ borderTop: '1px solid #f1f5f9' }}>
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.6)' }}>
           {footer}
         </div>
       )}

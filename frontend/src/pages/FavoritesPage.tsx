@@ -49,15 +49,17 @@ export function FavoritesPage() {
   }
 
   return (
-    <div className="p-4 space-y-6 pb-24">
-      <div className="flex items-center justify-between">
-        <h1 className="text-tg-text text-2xl font-bold">❤️ Избранное</h1>
-        {total > 0 && (
-          <span className="text-tg-hint text-sm" style={{ color: '#94a3b8' }}>
-            {total} объектов
-          </span>
-        )}
-      </div>
+    <div className="p-4 space-y-6 pb-24" style={{ backgroundColor: 'var(--bd-bg-base, #e0e5ec)', color: 'var(--bd-text-primary, #2d3748)' }}>
+      <NeuCard padding="none">
+        <div className="flex items-center justify-between px-4 py-3">
+          <h1 className="text-xl font-bold">❤️ Избранное</h1>
+          {total > 0 && (
+            <span className="text-sm" style={{ color: 'var(--bd-text-secondary, #718096)' }}>
+              {total} объектов
+            </span>
+          )}
+        </div>
+      </NeuCard>
 
       {/* Error State */}
       {error && <InlineError message={error} onDismiss={clearError} />}
@@ -67,7 +69,7 @@ export function FavoritesPage() {
       ) : favorites.length === 0 ? (
         <EmptyState
           icon={
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2} className="text-tg-hint" style={{ opacity: 0.5 }}>
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2} style={{ color: 'var(--bd-text-secondary)', opacity: 0.5 }}>
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
           }
@@ -95,7 +97,7 @@ export function FavoritesPage() {
           </div>
 
           {favorites.length > 0 && (
-            <p className="text-center text-tg-hint text-sm py-4" style={{ color: '#94a3b8' }}>
+            <p className="text-center text-sm py-4" style={{ color: 'var(--bd-text-secondary, #718096)' }}>
               Все {total} избранных загружены
             </p>
           )}
@@ -103,7 +105,7 @@ export function FavoritesPage() {
       )}
 
       {/* Footer info */}
-      <p className="text-center text-tg-hint text-sm pt-8" style={{ color: '#94a3b8' }}>
+      <p className="text-center text-sm pt-8" style={{ color: 'var(--bd-text-secondary, #718096)' }}>
         BELDOMiK 🇧🇾 — недвижимость Беларуси
       </p>
     </div>

@@ -1,12 +1,12 @@
 /* ============================================================
-   PropertyDetail — Neumorphism дизайн (стиль BELDOMiK).
-   Светлый фон #E8ECF2, мягкие карточки с тенями.
+   PropertyDetail — Soft UI дизайн (стиль BELDOMiK).
+   Светлый фон #E0E5EC, мягкие карточки с double shadows.
    ============================================================ */
 
 .property-page {
   min-height: 100vh;
-  background-color: var(--bd-bg);
-  color: var(--bd-text);
+  background-color: var(--bd-bg-base);
+  color: var(--bd-text-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
   padding-bottom: 90px;
@@ -24,9 +24,10 @@
   width: calc(100% - 32px);
   aspect-ratio: 1 / 1;
   border-radius: 16px;
-  background: #eef1f5;
+  background: var(--bd-bg-base);
   overflow: hidden;
   touch-action: pan-y;
+  box-shadow: inset 3px 3px 6px var(--bd-raise-dark), inset -3px -3px 6px var(--bd-raise-light);
 }
 
 .property-gallery__track {
@@ -65,7 +66,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #94a3b8;
+  color: var(--bd-text-secondary);
 }
 
 .property-gallery__counter {
@@ -75,13 +76,14 @@
   z-index: 2;
   padding: 5px 12px;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.55);
+  background: rgba(37, 99, 235, 0.12);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  color: #fff;
+  color: var(--bd-accent-primary);
   font-size: 13px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark), inset -2px -2px 4px var(--bd-raise-light);
 }
 
 /* Полноэкранный просмотр */
@@ -139,6 +141,11 @@
   justify-content: center;
   cursor: pointer;
   z-index: 2;
+  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
+}
+
+.property-fullscreen__close:active {
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark), inset -2px -2px 4px var(--bd-raise-light);
 }
 
 .property-fullscreen__arrow {
@@ -158,6 +165,11 @@
   justify-content: center;
   cursor: pointer;
   z-index: 2;
+  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
+}
+
+.property-fullscreen__arrow:active {
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark), inset -2px -2px 4px var(--bd-raise-light);
 }
 
 .property-fullscreen__arrow--prev {
@@ -196,13 +208,17 @@
   overflow: hidden;
   background: #000;
   cursor: pointer;
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  transition: transform 0.2s ease;
+  box-shadow: 2px 2px 4px var(--bd-raise-dark), -2px -2px 4px var(--bd-raise-light);
+}
+
+.property-fullscreen__thumbnail:active {
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark), inset -2px -2px 4px var(--bd-raise-light);
 }
 
 .property-fullscreen__thumbnail--active {
-  border-color: #2563eb;
+  border-color: var(--bd-accent-primary);
   transform: scale(1.08);
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4);
 }
 
 .property-fullscreen__thumbnail img {
@@ -220,17 +236,18 @@
   gap: 14px;
 }
 
-/* Универсальная карточка-секция — белый фон с мягкой тенью (Soft UI) */
+/* Универсальная карточка-секция — Soft UI с double shadows */
 .property-section {
-  background-color: var(--bd-surface);
+  background-color: var(--bd-bg-base);
   border-radius: 18px;
   padding: 16px;
+  box-shadow: var(--bd-shadow-raised);
 }
 
 .property-section__title {
   font-size: 18px;
   font-weight: 800;
-  color: var(--bd-text);
+  color: var(--bd-text-primary);
   margin-bottom: 12px;
 }
 
@@ -253,7 +270,7 @@
 .property-info__price {
   font-size: 26px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--bd-text-primary);
   letter-spacing: -0.5px;
   line-height: 1.1;
 }
@@ -262,14 +279,14 @@
   margin-top: 4px;
   font-size: 14px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--bd-text-secondary);
 }
 
 .property-info__subtitle {
   margin-top: 10px;
   font-size: 15px;
   font-weight: 600;
-  color: #334155;
+  color: var(--bd-text-primary);
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -277,7 +294,7 @@
 }
 
 .property-info__subtitle-dot {
-  color: #cbd5e1;
+  color: var(--bd-text-secondary);
 }
 
 .property-info__actions {
@@ -292,26 +309,29 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border: 1px solid #e2e8f0;
   border-radius: 50%;
-  background: #fff;
-  color: #64748b;
+  background: var(--bd-bg-base);
+  color: var(--bd-text-secondary);
   cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease;
+  transition: transform 0.15s ease, color 0.15s ease;
+  box-shadow: 3px 3px 6px var(--bd-raise-dark), -3px -3px 6px var(--bd-raise-light);
 }
 
 .property-info__action:active {
   transform: scale(0.92);
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark), inset -2px -2px 4px var(--bd-raise-light);
+}
+
+.property-info__action:hover {
+  transform: translateY(-1px);
 }
 
 .property-info__action--favorite {
-  color: #64748b;
+  color: var(--bd-text-secondary);
 }
 
 .property-info__action--favorite-active {
   color: #e0245e;
-  border-color: #fecdd3;
-  background: #fff1f2;
 }
 
 /* Бейджи статуса/типа (в subtitle) */
@@ -320,18 +340,18 @@
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
-  background: #eef4ff;
-  color: #2171ee;
+  background: rgba(37, 99, 235, 0.12);
+  color: var(--bd-accent-primary);
 }
 
 .property-badge--green {
-  background: #ecfdf5;
+  background: rgba(5, 150, 105, 0.12);
   color: #059669;
 }
 
 .property-badge--dark {
-  background: rgba(15, 23, 42, 0.75);
-  color: #fff;
+  background: rgba(15, 23, 42, 0.15);
+  color: var(--bd-text-primary);
 }
 
 /* ============================================================
@@ -341,17 +361,16 @@
 .property-location__map {
   width: 100%;
   height: 180px;
-  border: none;
   border-radius: 14px;
   display: block;
-  background: #eef1f5;
+  background: var(--bd-bg-base);
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark), inset -2px -2px 4px var(--bd-raise-light);
 }
 
 .property-location__map-wrap {
   position: relative;
   border-radius: 14px;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
 }
 
 .property-location__address {
@@ -360,17 +379,18 @@
   align-items: flex-start;
   gap: 8px;
   font-size: 14px;
-  color: #334155;
+  color: var(--bd-text-primary);
 }
 
 .property-location__address-icon {
-  color: #2171ee;
+  color: var(--bd-accent-primary);
   flex-shrink: 0;
   margin-top: 1px;
 }
 
 .property-location__address-text {
   line-height: 1.35;
+  color: var(--bd-text-primary);
 }
 
 /* ============================================================
@@ -388,7 +408,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 12px 0;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 .property-rows__row:last-child {
@@ -402,20 +422,20 @@
 
 .property-rows__label {
   font-size: 14px;
-  color: #64748b;
+  color: var(--bd-text-secondary);
   flex-shrink: 0;
 }
 
 .property-rows__value {
   font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--bd-text-primary);
   text-align: right;
   word-break: break-word;
 }
 
 .property-rows__value--muted {
-  color: #64748b;
+  color: var(--bd-text-secondary);
 }
 
 /* ============================================================
@@ -425,7 +445,7 @@
 .property-description__text {
   font-size: 14.5px;
   line-height: 1.55;
-  color: #334155;
+  color: var(--bd-text-primary);
   white-space: pre-wrap;
 }
 
@@ -434,7 +454,7 @@
   padding: 0;
   border: none;
   background: none;
-  color: #2171ee;
+  color: var(--bd-accent-primary);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -468,7 +488,7 @@
   font-size: 20px;
   font-weight: 800;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
+  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
 }
 
 .seller-card__avatar img {
@@ -486,7 +506,7 @@
 .seller-card__name {
   font-size: 16px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--bd-text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -496,13 +516,13 @@
   margin-top: 3px;
   font-size: 13px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--bd-text-secondary);
 }
 
 .seller-card__since {
   margin-top: 3px;
   font-size: 12.5px;
-  color: #94a3b8;
+  color: var(--bd-text-secondary);
 }
 
 .seller-card__rating {
@@ -519,7 +539,7 @@
 }
 
 .seller-card__star--empty {
-  color: #d1d5db;
+  color: var(--bd-text-secondary);
   flex-shrink: 0;
 }
 
@@ -527,7 +547,7 @@
   margin-left: 2px;
   font-size: 13px;
   font-weight: 600;
-  color: #334155;
+  color: var(--bd-text-primary);
 }
 
 /* Ссылка «Отзывы» — ведёт на профиль отзывов продавца (/reviews?user=<id>) */
@@ -539,7 +559,7 @@
   padding: 0;
   border: none;
   background: none;
-  color: #2171ee;
+  color: var(--bd-accent-primary);
   font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
@@ -553,32 +573,31 @@
   margin-top: 14px;
   width: 100%;
   height: 44px;
-  border: none;
   border-radius: 14px;
-  background: #2171ee;
+  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
   color: #fff;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 6px 16px rgba(33, 113, 238, 0.28);
+  box-shadow: var(--bd-shadow-raised);
   transition: transform 0.15s ease;
 }
 
 .seller-card__follow:active {
   transform: scale(0.97);
+  box-shadow: var(--bd-shadow-raised-active);
 }
 
 /* «Подписан» — нейтральная вторичная кнопка; тап повторно отписывает. */
 .seller-card__follow--active {
-  background: #fff;
-  color: #2171ee;
-  border: 1px solid #bfdbfe;
-  box-shadow: none;
+  background: var(--bd-bg-base);
+  color: var(--bd-accent-primary);
+  box-shadow: inset 3px 3px 6px var(--bd-raise-dark), inset -3px -3px 6px var(--bd-raise-light);
 }
 
 /* ============================================================
    Липкий нижний бар «Написать / Позвонить»
-   Плавающая панель с выпуклой тенью (Neumorphism).
+   Плавающая панель с выпуклой тенью (Soft UI).
    ============================================================ */
 
 .property-bottom-bar {
@@ -590,8 +609,8 @@
   display: flex;
   gap: 10px;
   padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
-  background-color: var(--bd-bg);
-  box-shadow: 8px 8px 20px var(--bd-raise-dark), -8px -8px 20px var(--bd-raise-light);
+  background-color: var(--bd-bg-base);
+  box-shadow: var(--bd-shadow-raised);
 }
 
 .property-bottom-bar__btn {
@@ -606,31 +625,28 @@
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
-  transition: box-shadow 0.18s ease, transform 0.12s ease;
+  transition: transform 0.12s ease;
 }
 
 .property-bottom-bar__btn:active {
-  box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1);
   transform: translateY(1px);
 }
 
 .property-bottom-bar__btn--telegram {
-  background-color: #229ed9;
+  background: linear-gradient(135deg, #229ed9 0%, #0d9488 100%);
   color: #fff;
-  box-shadow: 0 6px 16px rgba(34, 158, 217, 0.35);
+  box-shadow: var(--bd-shadow-raised);
 }
 
 .property-bottom-bar__btn--call {
-  background-color: #22c55e;
+  background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
   color: #fff;
-  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
+  box-shadow: var(--bd-shadow-raised);
 }
 
 /* ============================================================
    Лист звонка (bottom sheet).
    Показываем номер + два независимых пути: tel:-анкор и копирование.
-   Нужен, потому что на iOS WebView не отдаёт tel: звонилке, и прямая
-   кнопка была «мёртвой» — см. CallSheet.tsx.
    ============================================================ */
 
 .call-sheet {
@@ -652,7 +668,7 @@
   animation: call-sheet-fade 0.18s ease-out;
 }
 
-/* Плавающая панель в стиле Soft UI: белые карточки с мягкой тенью. */
+/* Плавающая панель в стиле Soft UI: карточки с double shadows. */
 .call-sheet__stack {
   position: relative;
   width: 100%;
@@ -668,8 +684,8 @@
 .call-sheet__cancel-card {
   border-radius: 16px;
   overflow: hidden;
-  background-color: var(--bd-surface);
-  box-shadow: var(--bd-shadow-card);
+  background-color: var(--bd-bg-base);
+  box-shadow: var(--bd-shadow-raised);
 }
 
 /* Номер синим сверху — как ссылка на номер в сообщении канала. */
@@ -679,10 +695,10 @@
   font-size: 21px;
   font-weight: 700;
   letter-spacing: 0.01em;
-  color: var(--bd-accent);
+  color: var(--bd-accent-primary);
   font-variant-numeric: tabular-nums;
   word-break: break-word;
-  border-bottom: 1px solid #eef2f7;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 .call-sheet__menu {
@@ -699,30 +715,31 @@
   padding: 0 16px;
   border: none;
   background: transparent;
-  color: var(--bd-text);
+  color: var(--bd-text-primary);
   font-size: 17px;
   font-weight: 500;
   text-align: left;
   text-decoration: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease;
 }
 
 .call-sheet__item + .call-sheet__item {
-  border-top: 1px solid #eef2f7;
+  border-top: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 .call-sheet__item:active {
-  background: #f1f5f9;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .call-sheet__item svg {
-  color: var(--bd-text-2);
+  color: var(--bd-text-secondary);
   flex-shrink: 0;
 }
 
 .call-sheet__item--call svg {
-  color: #34c759;
+  color: #22c55e;
 }
 
 .call-sheet__hint {
@@ -731,8 +748,8 @@
   text-align: center;
   font-size: 12.5px;
   line-height: 1.4;
-  color: var(--bd-text-2);
-  border-top: 1px solid #eef2f7;
+  color: var(--bd-text-secondary);
+  border-top: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 .call-sheet__cancel {
@@ -740,15 +757,16 @@
   height: 52px;
   border: none;
   background: transparent;
-  color: var(--bd-accent);
+  color: var(--bd-accent-primary);
   font-size: 17px;
   font-weight: 600;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease;
 }
 
 .call-sheet__cancel:active {
-  background: #f1f5f9;
+  background: rgba(37, 99, 235, 0.1);
 }
 
 @keyframes call-sheet-up {

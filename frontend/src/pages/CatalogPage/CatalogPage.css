@@ -1,12 +1,12 @@
 /* ============================================================
-   CatalogPage — Neumorphism дизайн (стиль BELDOMiK).
-   Светлый фон #E8ECF2, выпуклые/вдавленные элементы.
+   CatalogPage — Soft UI дизайн (стиль BELDOMiK).
+   Светлый фон #E0E5EC, двойные тени для выпуклости/вдавленности.
    ============================================================ */
 
 .catalog-page {
   min-height: 100vh;
-  background-color: var(--bd-bg);
-  color: var(--bd-text);
+  background-color: var(--bd-bg-base);
+  color: var(--bd-text-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
   padding-bottom: 90px;
@@ -41,7 +41,7 @@
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  background-color: var(--bd-bg);
+  background-color: var(--bd-bg-base);
   box-shadow: 6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light);
 }
 
@@ -57,13 +57,13 @@
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  color: #0f172a;
+  color: var(--bd-text-primary);
 }
 
 .catalog-header__subtitle {
   margin: 2px 0 0 2px;
   font-size: 13px;
-  color: #9aa7b8;
+  color: var(--bd-text-secondary);
 }
 
 .catalog-header__menu {
@@ -73,8 +73,8 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: var(--bd-bg);
-  color: var(--bd-text-2);
+  background-color: var(--bd-bg-base);
+  color: var(--bd-text-secondary);
   font-size: 16px;
   letter-spacing: 0.15em;
   line-height: 1;
@@ -101,8 +101,8 @@
   width: 100%;
   padding: 11px 14px;
   border-radius: 18px;
-  background-color: var(--bd-bg);
-  color: var(--bd-text);
+  background-color: var(--bd-bg-base);
+  color: var(--bd-text-primary);
   text-align: left;
   cursor: pointer;
   box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
@@ -119,12 +119,12 @@
 
 .catalog-search__icon {
   flex-shrink: 0;
-  color: var(--bd-accent);
+  color: var(--bd-accent-primary);
 }
 
 .catalog-search__placeholder {
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--bd-text-secondary);
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -259,8 +259,8 @@
   background: #fff;
 }
 
-/* ---------- Тип сделки + город (Neumorphism) ----------
-   Контейнер: вдавленный фон #E8ECF2.
+/* ---------- Тип сделки + город (Soft UI) ----------
+   Контейнер: вдавленный фон #E0E5EC.
    Активный таб: выпуклая синяя кнопка с тенью 0 4px 12px rgba(37, 99, 235, 0.3). */
 
 .catalog-location {
@@ -277,7 +277,7 @@
   gap: 4px;
   padding: 5px;
   border-radius: 18px;
-  background-color: var(--bd-bg);
+  background-color: var(--bd-bg-base);
   box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
     inset -4px -4px 8px var(--bd-raise-light);
 }
@@ -287,8 +287,8 @@
   padding: 9px 12px;
   border: none;
   border-radius: 14px;
-  background: var(--bd-bg);
-  color: var(--bd-text-2);
+  background: var(--bd-bg-base);
+  color: var(--bd-text-secondary);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -302,7 +302,7 @@
 /* Активный таб — выпуклая синяя кнопка с тенью */
 .catalog-operation__btn--active {
   color: #fff;
-  background: var(--bd-accent);
+  background: var(--bd-accent-primary);
   box-shadow: 0 4px 12px var(--bd-accent-soft);
 }
 
@@ -312,7 +312,7 @@
 }
 
 /* ---------- Выбор города ----------
-   Выпуклая Neumorphism кнопка. */
+   Выпуклая Soft UI кнопка. */
 
 .catalog-city {
   display: flex;
@@ -323,8 +323,8 @@
   width: 48px;
   padding: 0;
   border-radius: 18px;
-  background-color: var(--bd-bg);
-  color: var(--bd-text-2);
+  background-color: var(--bd-bg-base);
+  color: var(--bd-text-secondary);
   box-shadow: 6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light);
   cursor: pointer;
   transition: box-shadow 0.18s ease, transform 0.12s ease;
@@ -337,12 +337,12 @@
 }
 
 .catalog-city__icon {
-  color: var(--bd-accent);
+  color: var(--bd-accent-primary);
   flex-shrink: 0;
 }
 
-/* ---------- Категории — выпуклые Neumorphism кнопки ----------
-   Фон #E8ECF2, без белых заливок. При нажатии — вдавленные. */
+/* ---------- Категории — выпуклые Soft UI кнопки ----------
+   Фон #E0E5EC, без белых заливок. При нажатии — вдавленные. */
 
 .catalog-categories {
   margin-top: 16px;
@@ -362,8 +362,8 @@
   width: 100%;
   padding: 8px 6px;
   border-radius: 18px;
-  background-color: var(--bd-bg);
-  color: var(--bd-text);
+  background-color: var(--bd-bg-base);
+  color: var(--bd-text-primary);
   cursor: pointer;
   box-shadow: 6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light);
   transition: box-shadow 0.18s ease, transform 0.12s ease;
@@ -379,7 +379,7 @@
 /* Выбранная категория — та же синяя заливка, что у активной кнопки типа сделки */
 .category-card--active {
   color: #fff;
-  background: var(--bd-accent);
+  background: var(--bd-accent-primary);
   box-shadow: 0 4px 12px var(--bd-accent-soft);
 }
 
@@ -412,7 +412,7 @@
   margin-top: 16px;
   font-size: 15px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--bd-text-primary);
 }
 
 .catalog-cities {
@@ -422,13 +422,13 @@
   gap: 8px;
 }
 
-/* Популярные города — выпуклые Neumorphism чипы.
-   Фон #E8ECF2, без белых заливок. При нажатии — вдавленные. */
+/* Популярные города — выпуклые Soft UI чипы.
+   Фон #E0E5EC, без белых заливок. При нажатии — вдавленные. */
 .city-chip {
   padding: 10px 10px;
   border-radius: 12px;
-  background-color: var(--bd-bg);
-  color: var(--bd-text);
+  background-color: var(--bd-bg-base);
+  color: var(--bd-text-primary);
   box-shadow: 6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light);
   font-size: 13px;
   font-weight: 600;
@@ -450,7 +450,7 @@
 /* Выбранный город — синяя заливка как у активной кнопки типа сделки */
 .city-chip--active {
   color: #fff;
-  background: var(--bd-accent);
+  background: var(--bd-accent-primary);
   box-shadow: 0 4px 12px var(--bd-accent-soft);
 }
 
@@ -470,8 +470,8 @@
   min-height: 112px;
   padding: 14px 16px;
   border-radius: 20px;
-  background-color: var(--bd-bg);
-  color: var(--bd-text);
+  background-color: var(--bd-bg-base);
+  color: var(--bd-text-primary);
   cursor: pointer;
   box-shadow: 6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light);
   transition: box-shadow 0.15s ease, transform 0.12s ease;
@@ -505,20 +505,20 @@
 .mortgage-card__title {
   font-size: 16px;
   font-weight: 800;
-  color: #1e293b;
+  color: var(--bd-text-primary);
 }
 
 .mortgage-card__text {
   margin-top: 3px;
   font-size: 12.5px;
   line-height: 1.35;
-  color: #64748b;
+  color: var(--bd-text-secondary);
   max-width: 230px;
 }
 
 .mortgage-card__chevron {
   flex-shrink: 0;
-  color: #94a3b8;
+  color: var(--bd-text-secondary);
 }
 
 .mortgage-card__calc {
@@ -555,7 +555,7 @@
   text-align: right;
   font-size: 16px;
   font-weight: 800;
-  color: #1e293b;
+  color: var(--bd-text-primary);
   letter-spacing: -0.5px;
 }
 
@@ -563,7 +563,7 @@
   display: block;
   font-size: 8px;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--bd-text-secondary);
   letter-spacing: 0;
 }
 
@@ -606,16 +606,16 @@
 .catalog-section__title {
   font-size: 19px;
   font-weight: 800;
-  color: var(--bd-text);
+  color: var(--bd-text-primary);
 }
 
 .catalog-section__count {
   font-size: 13px;
-  color: var(--bd-text-2);
+  color: var(--bd-text-secondary);
 }
 
 /* ---------- Кнопка "Все" ----------
-   Выпуклая Neumorphism кнопка с синим текстом. */
+   Выпуклая Soft UI кнопка с синим текстом. */
 
 .catalog-section__link {
   display: flex;
@@ -623,8 +623,8 @@
   gap: 2px;
   padding: 6px 10px;
   border-radius: 12px;
-  background-color: var(--bd-bg);
-  color: var(--bd-accent);
+  background-color: var(--bd-bg-base);
+  color: var(--bd-accent-primary);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -649,7 +649,7 @@
   padding-bottom: 16px;
   text-align: center;
   font-size: 13px;
-  color: var(--bd-text-2);
+  color: var(--bd-text-secondary);
 }
 
 /* ---------- Горизонтальная карточка объявления ----------

@@ -11,16 +11,17 @@ import {
   formatPriceByn,
   formatPricePerSqm as formatPricePerSqmLib,
 } from '@/shared/lib/format';
+import { NeuCard } from '@/shared/ui/NeuCard';
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
-  DRAFT: { label: 'Черновик', color: '#ff9500', bg: 'rgba(255, 149, 0, 0.1)' },
-  PENDING_MODERATION: { label: 'На модерации', color: '#007aff', bg: 'rgba(0, 122, 255, 0.1)' },
-  PUBLISHED: { label: 'Опубликовано', color: '#34c759', bg: 'rgba(52, 199, 89, 0.1)' },
-  REJECTED: { label: 'Отклонено', color: '#ff3b30', bg: 'rgba(255, 59, 48, 0.1)' },
-  ARCHIVED: { label: 'В архиве', color: '#8e8e93', bg: 'rgba(142, 142, 147, 0.1)' },
-  SOLD: { label: 'Продано', color: '#5856d6', bg: 'rgba(88, 86, 214, 0.1)' },
-  RENTED: { label: 'Сдано', color: '#5856d6', bg: 'rgba(88, 86, 214, 0.1)' },
-  BLOCKED: { label: 'Заблокировано', color: '#ff3b30', bg: 'rgba(255, 59, 48, 0.1)' },
+  DRAFT: { label: 'Черновик', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.12)' },
+  PENDING_MODERATION: { label: 'На модерации', color: '#2563eb', bg: 'rgba(37, 99, 235, 0.12)' },
+  PUBLISHED: { label: 'Опубликовано', color: '#22c55e', bg: 'rgba(34, 197, 94, 0.12)' },
+  REJECTED: { label: 'Отклонено', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.12)' },
+  ARCHIVED: { label: 'В архиве', color: '#6b7280', bg: 'rgba(107, 114, 128, 0.12)' },
+  SOLD: { label: 'Продано', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.12)' },
+  RENTED: { label: 'Сдано', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.12)' },
+  BLOCKED: { label: 'Заблокировано', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.12)' },
 };
 
 const RENOVATION_LABELS: Record<string, string> = {
@@ -265,24 +266,28 @@ export function ComparisonPage() {
   const categories = [...new Set(COMPARISON_ROWS.map(r => r.category))];
 
   return (
-    <div className="p-4 space-y-6 pb-28" style={{ paddingBottom: 'max(28px, env(safe-area-inset-bottom, 0px))' }}>
+    <div className="p-4 space-y-6 pb-90" style={{ backgroundColor: 'var(--bd-bg-base)', color: 'var(--bd-text-primary)' }}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-tg-text text-xl font-bold">Сравнение</h1>
-        <span className="text-tg-hint text-sm">{getSelectedCount()} из 4</span>
-      </div>
+      <NeuCard padding="4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-[var(--bd-text-primary)] text-xl font-bold">Сравнение</h1>
+          <span className="text-[var(--bd-text-secondary)] text-sm">{getSelectedCount()} из 4</span>
+        </div>
+      </NeuCard>
 
       {error && (
-        <div className="p-3 rounded-xl text-sm" style={{ backgroundColor: 'rgba(255, 59, 48, 0.1)', border: '1px solid rgba(255, 59, 48, 0.3)', color: '#ff3b30' }}>
-          {error}
-        </div>
+        <NeuCard padding="4">
+          <div className="p-3 rounded-xl text-sm" style={{ backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#ef4444' }}>
+            {error}
+          </div>
+        </NeuCard>
       )}
 
       <div className="overflow-x-auto">
         <table className="w-full min-w-[600px]" role="table">
           <thead>
             <tr>
-              <th className="p-3 text-left text-tg-hint text-sm font-medium w-48 sticky left-0" style={{ backgroundColor: 'var(--tg-theme-bg-color)', zIndex: 1, borderBottom: '1px solid var(--tg-theme-hint-color)', borderWidth: '0.5px' }}>
+              <th className="p-3 text-left text-[var(--bd-text-secondary)] text-sm font-medium w-48 sticky left-0" style={{ backgroundColor: 'var(--bd-bg-base)', zIndex: 1, borderBottom: '1px solid rgba(255,255,255,0.6)', boxShadow: 'var(--bd-shadow-raised)' }}>
                 Параметр
               </th>
               {displayProperties.map((property) => (
@@ -291,14 +296,17 @@ export function ComparisonPage() {
                   <div className="relative">
                     <button
                       onClick={() => handleViewProperty(property.id)}
-                      className="w-full h-32 rounded-xl overflow-hidden block"
-                      style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}
+                      className="w-full h-32 rounded-xl overflow-hidden block transition-all"
+                      style={{
+                        backgroundColor: 'var(--bd-bg-base)',
+                        boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)'
+                      }}
                     >
                       {property.photos?.[0]?.url ? (
                         <img src={property.photos[0].url} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2} className="text-tg-hint" style={{ opacity: 0.3 }}>
+                          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2} className="text-[var(--bd-text-secondary)]" style={{ opacity: 0.3 }}>
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                             <line x1="9" y1="9" x2="15" y2="15" />
                             <line x1="15" y1="9" x2="9" y2="15" />
@@ -308,8 +316,12 @@ export function ComparisonPage() {
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleRemove(property.id); }}
-                      className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: 'rgba(255, 59, 48, 0.9)', color: 'white' }}
+                      className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all"
+                      style={{
+                        background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                        color: 'white',
+                        boxShadow: 'var(--bd-shadow-raised)'
+                      }}
                       aria-label="Удалить из сравнения"
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
@@ -329,7 +341,7 @@ export function ComparisonPage() {
                 <React.Fragment key={category}>
                   {/* Category header */}
                   <tr>
-                    <td colSpan={displayProperties.length + 1} className="px-3 py-2 text-tg-hint text-xs font-medium uppercase tracking-wider" style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)', borderTop: '1px solid var(--tg-theme-hint-color)', borderWidth: '0.5px' }}>
+                    <td colSpan={displayProperties.length + 1} className="px-3 py-2 text-[var(--bd-text-secondary)] text-xs font-medium uppercase tracking-wider" style={{ backgroundColor: 'var(--bd-bg-base)', borderTop: '1px solid rgba(255,255,255,0.6)', boxShadow: 'var(--bd-shadow-raised)' }}>
                       {category === 'basic' && 'Основное'}
                       {category === 'price' && 'Цена'}
                       {category === 'area' && 'Площади и комнаты'}
@@ -342,11 +354,11 @@ export function ComparisonPage() {
                   {/* Data rows */}
                   {rows.map((row) => (
                     <tr key={row.key}>
-                      <td className="p-3 text-tg-hint text-sm font-medium w-48 sticky left-0" style={{ backgroundColor: 'var(--tg-theme-bg-color)', zIndex: 1, borderBottom: '1px solid var(--tg-theme-hint-color)', borderWidth: '0.5px' }}>
+                      <td className="p-3 text-[var(--bd-text-secondary)] text-sm font-medium w-48 sticky left-0" style={{ backgroundColor: 'var(--bd-bg-base)', zIndex: 1, borderBottom: '1px solid rgba(255,255,255,0.6)', boxShadow: 'var(--bd-shadow-raised)' }}>
                         {row.label}
                       </td>
                       {displayProperties.map((property) => (
-                        <td key={property.id} className="p-3 text-center" style={{ borderBottom: '1px solid var(--tg-theme-hint-color)', borderWidth: '0.5px' }}>
+                        <td key={property.id} className="p-3 text-center" style={{ borderBottom: '1px solid rgba(255,255,255,0.6)' }}>
                           {row.render(property)}
                         </td>
                       ))}
@@ -368,10 +380,11 @@ export function ComparisonPage() {
               clearComparison();
               navigate('/catalog');
             }}
-            className="w-full py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2"
             style={{
-              backgroundColor: 'var(--tg-theme-button-color)',
-              color: 'var(--tg-theme-button-text-color)',
+              background: 'linear-gradient(135deg, #4c91ff 0%, #2171ee 100%)',
+              color: '#ffffff',
+              boxShadow: 'var(--bd-shadow-raised)',
             }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -384,7 +397,7 @@ export function ComparisonPage() {
       )}
 
       {displayProperties.length > 0 && (
-        <p className="text-center text-tg-hint text-sm pt-4" style={{ color: '#94a3b8' }}>
+        <p className="text-center text-[var(--bd-text-secondary)] text-sm pt-4">
           Свайп влево/вправо для просмотра всех колонок
         </p>
       )}

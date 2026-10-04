@@ -11,7 +11,7 @@ import { ExpandablePicker, type ExpandableOption } from '@/features/create-listi
 
 const BIO_MAX = 2000; // совпадает с валидацией PATCH /auth/me (user_profiles.bio)
 
-/** Компактный переключатель в светлой дизайн-системе. */
+/** Компактный переключатель в Soft UI дизайне. */
 function SettingsSwitch({
   checked,
   onChange,
@@ -26,11 +26,17 @@ function SettingsSwitch({
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className="relative w-12 h-7 rounded-full transition-colors flex-shrink-0"
-      style={{ backgroundColor: checked ? '#2171ee' : '#e2e8f0' }}
+      style={{
+        backgroundColor: checked ? 'var(--bd-accent-primary)' : 'var(--bd-bg-base)',
+        boxShadow: checked ? 'var(--bd-shadow-raised)' : 'inset 2px 2px 4px var(--bd-raise-dark), inset -2px -2px 4px var(--bd-raise-light)'
+      }}
     >
       <span
-        className="absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-all"
-        style={{ left: checked ? 'calc(100% - 24px)' : '4px' }}
+        className="absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-all"
+        style={{
+          left: checked ? 'calc(100% - 28px)' : '2px',
+          boxShadow: '3px 3px 6px var(--bd-raise-dark), -3px -3px 6px var(--bd-raise-light)'
+        }}
       />
     </button>
   );
@@ -76,7 +82,7 @@ export function SettingsPage() {
 
   if (!user) {
     return (
-      <div className="p-4 pb-20">
+      <div className="p-4 pb-90" style={{ backgroundColor: 'var(--bd-bg-base)', color: 'var(--bd-text-primary)' }}>
         <EmptyState
           title="Войдите в профиль"
           description="Авторизуйтесь через Telegram, чтобы редактировать настройки"
@@ -165,23 +171,24 @@ export function SettingsPage() {
 
   const inputStyle = {
     width: '100%',
-    backgroundColor: '#f7f9fc',
-    border: '1px solid #e2e8f0',
+    backgroundColor: 'var(--bd-bg-base)',
+    border: 'none',
     borderRadius: 12,
     padding: '10px 12px',
     fontSize: 15,
-    color: '#0f172a',
+    color: 'var(--bd-text-primary)',
     outline: 'none',
+    boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)',
   } as const;
 
   return (
-    <div className="p-4 space-y-6 pb-4">
+    <div className="p-4 space-y-6 pb-90" style={{ backgroundColor: 'var(--bd-bg-base)', color: 'var(--bd-text-primary)' }}>
       {/* Header профиля */}
       <div className="flex items-center gap-4">
-        <div className="relative w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0">
+        <div className="relative w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0" style={{ boxShadow: 'var(--bd-shadow-raised)' }}>
           <div
             className="absolute inset-0 flex items-center justify-center text-xl font-bold"
-            style={{ backgroundColor: '#2171ee', color: '#ffffff' }}
+            style={{ background: 'linear-gradient(135deg, #4c91ff 0%, #2171ee 100%)', color: '#ffffff' }}
           >
             {initials}
           </div>
@@ -196,10 +203,10 @@ export function SettingsPage() {
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <h1 className="text-[17px] font-bold truncate" style={{ color: '#0f172a' }}>
+          <h1 className="text-[17px] font-bold truncate" style={{ color: 'var(--bd-text-primary)' }}>
             {user.first_name || ''} {user.last_name || ''}
           </h1>
-          <p className="text-sm truncate" style={{ color: '#64748b' }}>
+          <p className="text-sm truncate" style={{ color: 'var(--bd-text-secondary)' }}>
             {getRoleLabel(user.role as UserRole)}
           </p>
         </div>
@@ -207,10 +214,10 @@ export function SettingsPage() {
 
       {/* ─── Профиль ─────────────────────────────────────── */}
       <section>
-        <h2 className="text-[15px] font-semibold mb-3" style={{ color: '#0f172a' }}>Профиль</h2>
-        <div className="rounded-2xl overflow-hidden bg-white" style={{ border: '1px solid #e2e8f0' }}>
+        <h2 className="text-[15px] font-semibold mb-3" style={{ color: 'var(--bd-text-primary)' }}>Профиль</h2>
+        <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--bd-bg-base)', boxShadow: 'var(--bd-shadow-raised)' }}>
           <div className="px-4 pt-4 pb-1">
-            <label className="text-xs block mb-1" style={{ color: '#64748b' }}>Имя</label>
+            <label className="text-xs block mb-1" style={{ color: 'var(--bd-text-secondary)' }}>Имя</label>
             <input
               type="text"
               value={firstName}
@@ -223,7 +230,7 @@ export function SettingsPage() {
             />
           </div>
           <div className="px-4 pt-3 pb-1">
-            <label className="text-xs block mb-1" style={{ color: '#64748b' }}>Телефон для связи</label>
+            <label className="text-xs block mb-1" style={{ color: 'var(--bd-text-secondary)' }}>Телефон для связи</label>
             <input
               type="tel"
               value={phone}
@@ -236,7 +243,7 @@ export function SettingsPage() {
             />
           </div>
           <div className="px-4 pt-3 pb-4">
-            <label className="text-xs block mb-1" style={{ color: '#64748b' }}>О себе</label>
+            <label className="text-xs block mb-1" style={{ color: 'var(--bd-text-secondary)' }}>О себе</label>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
@@ -260,9 +267,9 @@ export function SettingsPage() {
 
       {/* ─── Приложение ──────────────────────────────────── */}
       <section>
-        <h2 className="text-[15px] font-semibold mb-3" style={{ color: '#0f172a' }}>Приложение</h2>
+        <h2 className="text-[15px] font-semibold mb-3" style={{ color: 'var(--bd-text-primary)' }}>Приложение</h2>
 
-        <div className="rounded-2xl bg-white overflow-hidden" style={{ border: '1px solid #e2e8f0' }}>
+        <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--bd-bg-base)', boxShadow: 'var(--bd-shadow-raised)' }}>
           {/* Регион по умолчанию */}
           <div className="p-3">
             <ExpandablePicker<number>
@@ -289,7 +296,7 @@ export function SettingsPage() {
                 type="button"
                 onClick={() => saveSettings({ default_city_id: null })}
                 className="text-xs mt-2 px-0"
-                style={{ color: '#2171ee' }}
+                style={{ color: 'var(--bd-accent-primary)' }}
               >
                 Сбросить регион
               </button>
@@ -297,13 +304,13 @@ export function SettingsPage() {
           </div>
 
           {/* Уведомления */}
-          <div className="px-4 py-2" style={{ borderTop: '1px solid #f1f5f9' }}>
+          <div className="px-4 py-2" style={{ borderTop: '1px solid rgba(255,255,255,0.6)' }}>
             <div className="py-3 flex items-center gap-3">
               <div className="flex-1 min-w-0">
-                <div className="text-[15px] font-medium" style={{ color: '#0f172a' }}>
+                <div className="text-[15px] font-medium" style={{ color: 'var(--bd-text-primary)' }}>
                   Снижение цены в избранном
                 </div>
-                <div className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>
+                <div className="text-xs mt-0.5" style={{ color: 'var(--bd-text-secondary)' }}>
                   Уведомление при падении цены на объявление в избранном
                 </div>
               </div>
@@ -312,12 +319,12 @@ export function SettingsPage() {
                 onChange={(v) => saveSettings({ notify_price_drop: v })}
               />
             </div>
-            <div className="py-3 flex items-center gap-3" style={{ borderTop: '1px solid #f1f5f9' }}>
+            <div className="py-3 flex items-center gap-3" style={{ borderTop: '1px solid rgba(255,255,255,0.6)' }}>
               <div className="flex-1 min-w-0">
-                <div className="text-[15px] font-medium" style={{ color: '#0f172a' }}>
+                <div className="text-[15px] font-medium" style={{ color: 'var(--bd-text-primary)' }}>
                   Новые по сохранённым поискам
                 </div>
-                <div className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>
+                <div className="text-xs mt-0.5" style={{ color: 'var(--bd-text-secondary)' }}>
                   Уведомление о новых объявлениях по вашим фильтрам
                 </div>
               </div>
@@ -329,7 +336,7 @@ export function SettingsPage() {
           </div>
 
           {/* Информация */}
-          <div style={{ borderTop: '1px solid #f1f5f9' }}>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.6)' }}>
             {[
               { label: 'Тема оформления', value: 'Светлая' },
               { label: 'Язык интерфейса', value: 'Русский' },
@@ -338,10 +345,10 @@ export function SettingsPage() {
               <div
                 key={row.label}
                 className="px-4 py-3 flex items-center justify-between"
-                style={i === 0 ? undefined : { borderTop: '1px solid #f1f5f9' }}
+                style={i === 0 ? undefined : { borderTop: '1px solid rgba(255,255,255,0.6)' }}
               >
-                <span className="text-[15px]" style={{ color: '#0f172a' }}>{row.label}</span>
-                <span className="text-sm" style={{ color: '#94a3b8' }}>{row.value}</span>
+                <span className="text-[15px]" style={{ color: 'var(--bd-text-primary)' }}>{row.label}</span>
+                <span className="text-sm" style={{ color: 'var(--bd-text-secondary)' }}>{row.value}</span>
               </div>
             ))}
           </div>
@@ -354,7 +361,7 @@ export function SettingsPage() {
           type="button"
           onClick={handleLogout}
           className="w-full py-3 rounded-xl font-semibold transition-opacity active:opacity-80"
-          style={{ backgroundColor: '#fff', border: '1px solid #ff3b30', color: '#ff3b30' }}
+          style={{ backgroundColor: 'var(--bd-bg-base)', border: '1px solid #ef4444', color: '#ef4444', boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)' }}
         >
           Выйти из аккаунта
         </button>
@@ -367,7 +374,7 @@ export function SettingsPage() {
             type="button"
             onClick={() => navigate('/legal?doc=privacy-policy')}
             className="text-xs font-medium transition-colors hover:underline"
-            style={{ color: '#2171ee' }}
+            style={{ color: 'var(--bd-accent-primary)' }}
           >
             Политика конфиденциальности
           </button>
@@ -375,7 +382,7 @@ export function SettingsPage() {
             type="button"
             onClick={() => navigate('/legal?doc=terms-of-service')}
             className="text-xs font-medium transition-colors hover:underline"
-            style={{ color: '#2171ee' }}
+            style={{ color: 'var(--bd-accent-primary)' }}
           >
             Пользовательское соглашение
           </button>
@@ -383,7 +390,7 @@ export function SettingsPage() {
             type="button"
             onClick={() => navigate('/legal?doc=disclaimer')}
             className="text-xs font-medium transition-colors hover:underline"
-            style={{ color: '#2171ee' }}
+            style={{ color: 'var(--bd-accent-primary)' }}
           >
             Отказ от ответственности
           </button>

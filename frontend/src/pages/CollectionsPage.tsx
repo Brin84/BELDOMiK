@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useAuthStore } from '@/features/auth';
 import { useCollectionsStore } from '@/features/collections';
-import { EmptyState, InlineError, ListSkeleton } from '@/shared/ui';
+import { EmptyState, InlineError, ListSkeleton, NeuCard } from '@/shared/ui';
 
 export function CollectionsPage() {
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ export function CollectionsPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="p-4 space-y-6 pb-20">
+      <div className="p-4 space-y-6 pb-20" style={{ backgroundColor: 'var(--bd-bg-base)' }}>
         <EmptyState
           title="Войдите, чтобы увидеть подборки"
           description="Авторизуйтесь через Telegram, чтобы создавать подборки понравившихся объектов"
@@ -52,10 +52,10 @@ export function CollectionsPage() {
   }
 
   return (
-    <div className="p-4 space-y-6 pb-24">
+    <div className="p-4 space-y-6 pb-24" style={{ backgroundColor: 'var(--bd-bg-base)', color: 'var(--bd-text-primary)' }}>
       <div className="flex items-center justify-between">
-        <h1 className="text-tg-text text-2xl font-bold">📁 Подборки</h1>
-        <span className="text-tg-hint text-sm" style={{ color: '#94a3b8' }}>
+        <h1 className="text-[var(--bd-text-primary)] text-2xl font-bold">📁 Подборки</h1>
+        <span className="text-[var(--bd-text-secondary)] text-sm">
           {collections.length} шт.
         </span>
       </div>
@@ -64,59 +64,60 @@ export function CollectionsPage() {
 
       {/* Create form */}
       {showCreate && (
-        <div
-          className="beldomik-card p-4 space-y-3"
-          style={{ border: '1px solid #e2e8f0' }}
-        >
-          <input
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="Название подборки"
-            maxLength={200}
-            className="w-full px-3 py-2.5 rounded-lg outline-none text-base"
-            style={{
-              backgroundColor: 'var(--tg-theme-bg-color)',
-              color: 'var(--tg-theme-text-color)',
-              border: '1px solid var(--tg-theme-hint-color)',
-            }}
-          />
-          <input
-            value={newDescription}
-            onChange={(e) => setNewDescription(e.target.value)}
-            placeholder="Описание (необязательно)"
-            maxLength={2000}
-            className="w-full px-3 py-2.5 rounded-lg outline-none text-base"
-            style={{
-              backgroundColor: 'var(--tg-theme-bg-color)',
-              color: 'var(--tg-theme-text-color)',
-              border: '1px solid var(--tg-theme-hint-color)',
-            }}
-          />
-          <div className="flex gap-2 pt-1">
-            <button
-              onClick={handleCreate}
-              disabled={isSaving || !newName.trim()}
-              className="flex-1 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-50"
+        <NeuCard padding="4">
+          <div className="space-y-3">
+            <input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Название подборки"
+              maxLength={200}
+              className="w-full px-3 py-2.5 rounded-lg outline-none text-base"
               style={{
-                backgroundColor: 'var(--tg-theme-button-color)',
-                color: 'var(--tg-theme-button-text-color)',
+                backgroundColor: 'var(--bd-bg-base)',
+                color: 'var(--bd-text-primary)',
+                boxShadow: 'inset 3px 3px 6px var(--bd-raise-dark), inset -3px -3px 6px var(--bd-raise-light)',
               }}
-            >
-              {isSaving ? 'Создание...' : 'Создать'}
-            </button>
-            <button
-              onClick={() => setShowCreate(false)}
-              className="px-4 py-2.5 rounded-xl font-medium"
+            />
+            <input
+              value={newDescription}
+              onChange={(e) => setNewDescription(e.target.value)}
+              placeholder="Описание (необязательно)"
+              maxLength={2000}
+              className="w-full px-3 py-2.5 rounded-lg outline-none text-base"
               style={{
-                backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                border: '1px solid var(--tg-theme-hint-color)',
-                color: 'var(--tg-theme-text-color)',
+                backgroundColor: 'var(--bd-bg-base)',
+                color: 'var(--bd-text-primary)',
+                boxShadow: 'inset 3px 3px 6px var(--bd-raise-dark), inset -3px -3px 6px var(--bd-raise-light)',
               }}
-            >
-              Отмена
-            </button>
+            />
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={handleCreate}
+                disabled={isSaving || !newName.trim()}
+                className="flex-1 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-50"
+                style={{
+                  background: 'linear-gradient(135deg, #4c91ff 0%, #2171ee 100%)',
+                  color: '#ffffff',
+                  boxShadow: 'var(--bd-shadow-raised)',
+                }}
+              >
+                {isSaving ? 'Создание...' : 'Создать'}
+              </button>
+              <button
+                onClick={() => setShowCreate(false)}
+                className="px-4 py-2.5 rounded-xl font-medium transition-all"
+                style={{
+                  backgroundColor: 'var(--bd-bg-base)',
+                  border: '1px solid rgba(255,255,255,0.6)',
+                  color: 'var(--bd-text-primary)',
+                  boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
+                }}
+              >
+                Отмена
+              </button>
+            </div>
           </div>
-        </div>
+        </NeuCard>
       )}
 
       {isLoading && collections.length === 0 ? (
@@ -133,11 +134,12 @@ export function CollectionsPage() {
           {!showCreate && collections.length > 0 && (
             <button
               onClick={() => { trigger('light'); setShowCreate(true); }}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-medium"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-all"
               style={{
-                backgroundColor: 'var(--tg-theme-secondary-bg-color)',
-                border: '1px dashed var(--tg-theme-hint-color)',
-                color: 'var(--tg-theme-button-color)',
+                backgroundColor: 'var(--bd-bg-base)',
+                border: '1px dashed rgba(113, 128, 150, 0.5)',
+                color: 'var(--bd-text-primary)',
+                boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
               }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -153,24 +155,27 @@ export function CollectionsPage() {
               <button
                 key={collection.id}
                 onClick={() => { trigger('light'); navigate(`/collections/${collection.id}`); }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors"
-                style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all"
+                style={{
+                  backgroundColor: 'var(--bd-bg-base)',
+                  boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)'
+                }}
               >
                 <span className="text-2xl flex-shrink-0">📁</span>
                 <span className="flex-1 min-w-0">
-                  <span className="block font-medium text-sm truncate" style={{ color: 'var(--tg-theme-text-color)' }}>
+                  <span className="block font-medium text-sm truncate" style={{ color: 'var(--bd-text-primary)' }}>
                     {collection.name}
                   </span>
                   {collection.description && (
-                    <span className="block text-xs truncate" style={{ color: '#94a3b8' }}>
+                    <span className="block text-xs truncate" style={{ color: 'var(--bd-text-secondary)' }}>
                       {collection.description}
                     </span>
                   )}
                 </span>
-                <span className="text-xs flex-shrink-0" style={{ color: '#94a3b8' }}>
+                <span className="text-xs flex-shrink-0" style={{ color: 'var(--bd-text-secondary)' }}>
                   {collection.property_count}
                 </span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: '#94a3b8' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--bd-text-secondary)' }}>
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               </button>

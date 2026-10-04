@@ -1,0 +1,52 @@
+/* ============================================================
+   BELDOMiK Design Tokens — Soft UI (Neumorphism)
+   Единый источник правды для всех компонентов.
+   ============================================================ */
+
+:root {
+  /* ------------------------------------------------------------------
+   * Цвета
+   * ---------------------------------------------------------------- */
+  --bd-bg-base: #e0e5ec;
+  --bd-bg-surface: #e0e5ec;
+  --bd-bg-card: #e0e5ec;
+
+  --bd-text-primary: #2d3748;
+  --bd-text-secondary: #718096;
+
+  --bd-accent-primary: #2563eb;
+  --bd-accent-success: #22c55e;
+  --bd-accent-warning: #f59e0b;
+
+  /* ------------------------------------------------------------------
+   * Тени (Double shadow - Soft UI style)
+   * ---------------------------------------------------------------- */
+  --bd-shadow-raised: 6px 6px 12px #b8b9be, -6px -6px 12px #ffffff;
+  --bd-shadow-raised-hover: 8px 8px 16px #b8b9be, -8px -8px 16px #ffffff;
+  --bd-shadow-raised-active: inset 4px 4px 8px #b8b9be, inset -4px -4px 8px #ffffff;
+
+  --bd-shadow-inset: inset 4px 4px 8px #b8b9be, inset -4px -4px 8px #ffffff;
+  --bd-shadow-inset-deep: inset 6px 6px 12px #b8b9be, inset -6px -6px 12px #b8b9be;
+
+  --bd-shadow-card: 6px 6px 12px #b8b9be, -6px -6px 12px #ffffff;
+
+  /* ------------------------------------------------------------------
+   * Скругления
+   * ---------------------------------------------------------------- */
+  --bd-radius-card: 16px;
+  --bd-radius-btn: 12px;
+  --bd-radius-input: 20px;
+  --bd-radius-pill: 24px;
+  --bd-radius-circle: 999px;
+
+  /* ------------------------------------------------------------------
+   * Отступы
+   * ---------------------------------------------------------------- */
+  --bd-padding-card: 16px;
+  --bd-padding-btn: 12px 24px;
+  --bd-padding-page-bottom: 90px;
+}
+
+/* ------------------------------------------------------------------
+ * Утилиты
+ * ---------------------------------------------------------------- */

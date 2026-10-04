@@ -160,7 +160,7 @@ export function PropertyInfoSection({
           type="button"
           onClick={handleComparisonClick}
           className="property-info__action"
-          style={inComparison ? { color: '#2171ee', borderColor: '#bfdbfe', background: '#eff6ff' } : undefined}
+          style={inComparison ? { color: 'var(--bd-accent-primary)', borderColor: 'rgba(37, 99, 235, 0.3)', background: 'rgba(37, 99, 235, 0.1)' } : undefined}
           aria-label={inComparison ? 'Убрать из сравнения' : 'Добавить к сравнению'}
           aria-pressed={inComparison}
         >

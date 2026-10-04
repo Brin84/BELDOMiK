@@ -69,9 +69,9 @@ export function ExpandablePicker<T>({
     <div
       className="rounded-2xl overflow-hidden transition-shadow"
       style={{
-        backgroundColor: '#ffffff',
-        border: open ? '1px solid #cbd5e1' : '1px solid #e2e8f0',
-        boxShadow: open ? '0 8px 24px rgba(2, 6, 23, 0.06)' : 'none',
+        backgroundColor: 'var(--bd-bg-base)',
+        border: open ? '1px solid rgba(255,255,255,0.6)' : '1px solid rgba(255,255,255,0.6)',
+        boxShadow: open ? 'var(--bd-shadow-raised)' : '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
       }}
     >
       {/* Триггер */}
@@ -82,12 +82,12 @@ export function ExpandablePicker<T>({
         className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-opacity active:opacity-80"
       >
         <div className="flex-1 min-w-0">
-          <div className="text-[13px] leading-tight" style={{ color: '#94a3b8' }}>{label}</div>
+          <div className="text-[13px] leading-tight" style={{ color: 'var(--bd-text-secondary)' }}>{label}</div>
           <div className="flex items-center gap-2 mt-0.5">
             {selectedOption?.icon && <span className="text-xl leading-none">{selectedOption.icon}</span>}
             <span
               className="text-[17px] font-semibold truncate"
-              style={{ color: selectedOption ? '#0f172a' : '#94a3b8' }}
+              style={{ color: selectedOption ? 'var(--bd-text-primary)' : 'var(--bd-text-secondary)' }}
             >
               {selectedOption ? selectedOption.title : placeholder}
             </span>
@@ -101,7 +101,7 @@ export function ExpandablePicker<T>({
           stroke="currentColor"
           strokeWidth={2}
           className={`flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-          style={{ color: '#94a3b8' }}
+          style={{ color: 'var(--bd-text-secondary)' }}
           aria-hidden="true"
         >
           <polyline points="6 9 12 15 18 9" />
@@ -115,7 +115,7 @@ export function ExpandablePicker<T>({
         }`}
       >
         <div className="overflow-hidden min-h-0">
-          <div className="pt-1 pb-2" style={{ borderTop: '1px solid #f1f5f9' }}>
+          <div className="pt-1 pb-2" style={{ borderTop: '1px solid rgba(255,255,255,0.6)' }}>
             {/* Поиск */}
             {searchable && (
               <div className="px-3 pb-2">
@@ -128,7 +128,7 @@ export function ExpandablePicker<T>({
                     fill="none"
                     stroke="currentColor"
                     strokeWidth={2}
-                    style={{ color: '#94a3b8' }}
+                    style={{ color: 'var(--bd-text-secondary)' }}
                     aria-hidden="true"
                   >
                     <circle cx="11" cy="11" r="8" />
@@ -141,8 +141,9 @@ export function ExpandablePicker<T>({
                     placeholder={searchPlaceholder}
                     className="w-full pl-9 pr-8 py-2.5 rounded-xl text-sm"
                     style={{
-                      backgroundColor: '#f1f5f9',
-                      color: '#0f172a',
+                      backgroundColor: 'var(--bd-bg-base)',
+                      color: 'var(--bd-text-primary)',
+                      boxShadow: 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)',
                     }}
                     autoComplete="off"
                     maxLength={100}
@@ -154,7 +155,7 @@ export function ExpandablePicker<T>({
                         setQuery('');
                       }}
                       className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full"
-                      style={{ color: '#94a3b8' }}
+                      style={{ color: 'var(--bd-text-secondary)' }}
                       aria-label="Очистить поиск"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
@@ -186,7 +187,7 @@ export function ExpandablePicker<T>({
             {/* Ничего не найдено — кнопка «Добавить» */}
             {noResults && addOption && (
               <div className="px-3 py-3 text-center">
-                <p className="text-xs mb-2" style={{ color: '#94a3b8' }}>
+                <p className="text-xs mb-2" style={{ color: 'var(--bd-text-secondary)' }}>
                   «{query.trim()}» нет в списке
                 </p>
                 <button
@@ -194,8 +195,9 @@ export function ExpandablePicker<T>({
                   disabled={addOption.isAdding}
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-medium text-sm transition-colors active:opacity-80 disabled:opacity-60"
                   style={{
-                    backgroundColor: 'var(--tg-theme-button-color)',
-                    color: 'var(--tg-theme-button-text-color)',
+                    backgroundColor: 'var(--bd-accent-primary)',
+                    color: '#ffffff',
+                    boxShadow: 'var(--bd-shadow-raised)',
                   }}
                 >
                   {addOption.isAdding ? (
@@ -210,7 +212,7 @@ export function ExpandablePicker<T>({
                     <>➕ Добавить «{query.trim()}»</>
                   )}
                 </button>
-                <p className="pt-1.5 text-xs" style={{ color: '#94a3b8' }}>
+                <p className="pt-1.5 text-xs" style={{ color: 'var(--bd-text-secondary)' }}>
                   Деревня добавится в список
                 </p>
               </div>

@@ -81,13 +81,13 @@ export function Step5Photos() {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-6" style={{ backgroundColor: 'var(--bd-bg-base)' }}>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold" style={{ color: '#0f172a' }}>Фотографии</h2>
-            <p className="text-sm mt-1" style={{ color: '#64748b' }}>
+            <h2 className="text-[var(--bd-text-primary)] text-xl font-bold">Фотографии</h2>
+            <p className="text-sm mt-1" style={{ color: 'var(--bd-text-secondary)' }}>
               Первое фото станет обложкой объявления
             </p>
           </div>
@@ -96,8 +96,10 @@ export function Step5Photos() {
             <span
               className="px-3 py-1.5 rounded-full text-sm font-semibold flex-shrink-0"
               style={{
-                backgroundColor: photos.length === MAX_PHOTOS ? '#fee2e2' : '#f1f5f9',
-                color: photos.length === MAX_PHOTOS ? '#dc2626' : '#64748b',
+                backgroundColor: photos.length === MAX_PHOTOS ? 'rgba(239, 68, 68, 0.12)' : 'var(--bd-bg-base)',
+                color: photos.length === MAX_PHOTOS ? '#ef4444' : 'var(--bd-text-secondary)',
+                border: photos.length === MAX_PHOTOS ? '1px solid rgba(255,255,255,0.6)' : 'none',
+                boxShadow: photos.length === MAX_PHOTOS ? 'var(--bd-shadow-raised)' : 'inset 2px 2px 5px var(--bd-raise-dark), inset -2px -2px 5px var(--bd-raise-light)',
               }}
             >
               {photos.length}/{MAX_PHOTOS}
@@ -113,9 +115,10 @@ export function Step5Photos() {
               onClick={openFilePicker}
               className="aspect-square rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-colors active:opacity-80"
               style={{
-                borderColor: '#cbd5e1',
-                backgroundColor: '#f8fafc',
-                color: '#0f172a',
+                borderColor: 'rgba(255,255,255,0.6)',
+                backgroundColor: 'var(--bd-bg-base)',
+                color: 'var(--bd-text-primary)',
+                boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
               }}
             >
               <input
@@ -126,12 +129,12 @@ export function Step5Photos() {
                 onChange={(e) => e.target.files && handleFileSelect(e.target.files)}
                 className="hidden"
               />
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} style={{ color: '#94a3b8' }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} style={{ color: 'var(--bd-text-secondary)' }}>
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
               <span className="text-sm">Добавить фото</span>
-              <span className="text-xs" style={{ color: '#94a3b8' }}>{photos.length}/{MAX_PHOTOS}</span>
+              <span className="text-xs" style={{ color: 'var(--bd-text-secondary)' }}>{photos.length}/{MAX_PHOTOS}</span>
             </button>
           )}
 
@@ -140,7 +143,7 @@ export function Step5Photos() {
             <div
               key={index}
               className="relative aspect-square rounded-2xl overflow-hidden"
-              style={{ backgroundColor: '#e2e8f0' }}
+              style={{ backgroundColor: 'var(--bd-bg-base)', boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)' }}
             >
               <img
                 src={preview}
@@ -155,7 +158,7 @@ export function Step5Photos() {
               <button
                 onClick={() => handleRemovePhoto(index)}
                 className="absolute top-2 right-2 p-1.5 rounded-full flex items-center justify-center transition-colors active:opacity-70"
-                style={{ backgroundColor: 'rgba(255,59,48,0.9)', color: 'white' }}
+                style={{ backgroundColor: 'rgba(255,59,48,0.9)', color: 'white', boxShadow: 'var(--bd-shadow-raised)' }}
                 aria-label="Удалить фото"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
@@ -181,16 +184,16 @@ export function Step5Photos() {
         </div>
 
         {/* Photo Tips */}
-        <div className="p-4 rounded-xl border" style={{ borderColor: '#e2e8f0', borderWidth: '0.5px' }}>
-          <h3 className="font-medium mb-2 flex items-center gap-2" style={{ color: '#0f172a' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: '#2171ee' }}>
+        <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--bd-bg-base)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)' }}>
+          <h3 className="font-medium mb-2 flex items-center gap-2" style={{ color: 'var(--bd-text-primary)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: 'var(--bd-accent-primary)' }}>
               <circle cx="12" cy="12" r="10" />
               <path d="M12 16v-4" />
               <path d="M12 8h.01" />
             </svg>
             Рекомендации для лучших результатов:
           </h3>
-          <ul className="text-sm space-y-1" style={{ color: '#64748b' }}>
+          <ul className="text-sm space-y-1" style={{ color: 'var(--bd-text-secondary)' }}>
             <li>• Первое фото — обложка, выбирайте самое привлекательное</li>
             <li>• Фото интерьера: гостиная, кухня, спальни, санузел</li>
             <li>• Фото внешнего вида: фасад, двор, вид из окна</li>
