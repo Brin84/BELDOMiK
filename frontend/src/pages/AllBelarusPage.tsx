@@ -4,6 +4,7 @@ import { ArrowLeft, Check, ChevronRight, MapPin, Search } from 'lucide-react';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useGeographyStore } from '@/features/geography/geographyStore';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
+import { NeuCard } from '@/shared/ui';
 import type { City, Region } from '@/shared/api/types';
 
 import './AllBelarusPage.css';
@@ -109,10 +110,12 @@ export function AllBelarusPage() {
     <div className="belarus-page">
       <main className="belarus-page__inner">
         {/* Шапка */}
-        <header className="belarus-header">
-          <h1 className="belarus-header__title">Все Беларусь</h1>
-          <p className="belarus-header__subtitle">Выберите область и город</p>
-        </header>
+        <NeuCard padding="none">
+          <div className="belarus-header">
+            <h1 className="belarus-header__title">Все Беларусь</h1>
+            <p className="belarus-header__subtitle">Выберите область и город</p>
+          </div>
+        </NeuCard>
 
         {/* Поиск области/города */}
         <div className="belarus-search">
