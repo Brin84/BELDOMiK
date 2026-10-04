@@ -21,6 +21,22 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
   const currentIndexRef = useRef(currentIndex);
   currentIndexRef.current = currentIndex;
 
+  // Сбрасываем currentIndex при изменении списка фото
+  useEffect(() => {
+    setCurrentIndex(0);
+    currentIndexRef.current = 0;
+  }, [photos.length]);
+
+  // Синхронизация при монтировании - проверяем текущую позицию скролла
+  useEffect(() => {
+    if (!galleryRef.current) return;
+
+    const { offsetWidth, scrollLeft } = galleryRef.current;
+    const scrollIndex = Math.round(scrollLeft / offsetWidth);
+    setCurrentIndex(scrollIndex);
+    currentIndexRef.current = scrollIndex;
+  }, [galleryRef.current]);
+
   const sorted = [...photos].sort((a, b) => a.sort_order - b.sort_order);
   const count = sorted.length;
 
@@ -90,8 +106,14 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
 
     const ref = galleryRef.current;
     ref.addEventListener('scroll', handleGalleryScroll, { passive: true });
+
+    // Синхронизируем сразу при добавлении слушателя
+    const { offsetWidth, scrollLeft } = ref;
+    const scrollIndex = Math.round(scrollLeft / offsetWidth);
+    setCurrentIndex(scrollIndex);
+
     return () => ref.removeEventListener('scroll', handleGalleryScroll);
-  }, []);
+  }, [galleryRef.current]);
 
   // Синхронизация при скролле в полноэкранном режиме (Fullscreen)
   useEffect(() => {
