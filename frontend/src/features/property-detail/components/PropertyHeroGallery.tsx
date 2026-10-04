@@ -35,6 +35,8 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
             left: index * ref.current.offsetWidth,
             behavior: 'smooth',
           });
+          // Сбросить флаг скролла, чтобы миниатюры могли синхронизироваться
+          isScrolling.current = false;
         }
       }, 50);
     },
