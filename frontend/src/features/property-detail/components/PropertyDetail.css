@@ -26,7 +26,7 @@
   border-radius: 16px;
   background: var(--bd-bg-base);
   overflow: hidden;
-  touch-action: pan-y;
+  touch-action: pan-x;
   box-shadow: inset 3px 3px 6px var(--bd-raise-dark), inset -3px -3px 6px var(--bd-raise-light);
 }
 
