@@ -18,23 +18,12 @@
   padding: 14px 16px 0;
 }
 
-/* ---------- Шапка ---------- */
-
+/* ---------- Шапка (логотип + кнопка "Вся Беларусь") ----------
+   Располагается на одной строке с кнопкой поиска. */
 .catalog-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-
-/* Обертка для header элементов - прозрачная, чтобы шапка сливалась с фоном миниапп */
-.catalog-header__inner {
-  max-width: 600px;
-  margin: 0 auto 16px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: transparent;
+  gap: 16px;
 }
 
 /* Логотип (увеличен) */
@@ -59,12 +48,14 @@
   display: block;
 }
 
-/* Кнопка "Вся Беларусь" */
+/* Кнопка "Вся Беларусь" - занимает всё оставшееся место */
 .catalog-city-header {
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 10px 14px;
+  padding: 11px 14px;
   border-radius: 18px;
   background-color: var(--bd-bg-base);
   color: var(--bd-text-primary);

@@ -164,9 +164,9 @@ export function CatalogPage() {
 
   return (
     <div className="catalog-page">
-      {/* HEADER - outside catalog-page__inner to have transparent background */}
-      <header className="catalog-header">
-        <div className="catalog-header__inner">
+      <main className="catalog-page__inner">
+        {/* HEADER - inside catalog-page__inner for horizontal layout with search */}
+        <div className="catalog-header">
           <div className="catalog-header__logo">
             <img
               src={beldomikAvatar}
@@ -189,9 +189,21 @@ export function CatalogPage() {
             <span className="catalog-city-header__text">Вся Беларусь</span>
           </button>
         </div>
-      </header>
 
-      <main className="catalog-page__inner">
+        {/* SEARCH — вход в поиск с главной страницы (над баннерами).
+            В нижней навигации отдельной вкладки «Поиск» больше нет. */}
+        <button
+          type="button"
+          onClick={() => {
+            trigger('light');
+            navigate('/search');
+          }}
+          className="catalog-search"
+          aria-label="Поиск по каталогу"
+        >
+          <Search size={18} className="catalog-search__icon" />
+          <span className="catalog-search__placeholder">Поиск: город, метро, цена…</span>
+        </button>
         {/* SEARCH — вход в поиск с главной страницы (над баннерами).
             В нижней навигации отдельной вкладки «Поиск» больше нет. */}
         <button
