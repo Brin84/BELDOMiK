@@ -17,6 +17,9 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
   const [failed, setFailed] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
   const fullscreenRef = useRef<HTMLDivElement>(null);
+  // useRef для доступа к текущему индексу без dependency cycle
+  const currentIndexRef = useRef(currentIndex);
+  currentIndexRef.current = currentIndex;
 
   const sorted = [...photos].sort((a, b) => a.sort_order - b.sort_order);
   const count = sorted.length;
@@ -40,16 +43,32 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
   const goToNext = useCallback(() => {
     if (count <= 1) return;
     trigger('light');
-    const newIndex = (currentIndex + 1) % count;
+    const newIndex = (currentIndexRef.current + 1) % count;
     goToIndex(newIndex);
-  }, [count, currentIndex, trigger, goToIndex]);
+  }, [count, goToIndex]);
 
   const goToPrev = useCallback(() => {
     if (count <= 1) return;
     trigger('light');
-    const newIndex = (currentIndex - 1 + count) % count;
+    const newIndex = (currentIndexRef.current - 1 + count) % count;
     goToIndex(newIndex);
-  }, [count, currentIndex, trigger, goToIndex]);
+  }, [count, goToIndex]);
+
+  // handleSwipeClick для кликов по треку
+  const handleSwipeClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (count <= 1) return;
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const width = rect.width;
+      if (clickX < width / 3) {
+        goToPrev();
+      } else if (clickX > (width / 3) * 2) {
+        goToNext();
+      }
+    },
+    [count, goToNext, goToPrev]
+  );
 
   // Сбрасываем состояние ошибки при смене фото
   useEffect(() => {
@@ -64,7 +83,7 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
       const { offsetWidth, scrollLeft } = galleryRef.current!;
       const scrollIndex = Math.round(scrollLeft / offsetWidth);
       // Обновляем только если индекс изменился
-      if (scrollIndex !== currentIndex) {
+      if (scrollIndex !== currentIndexRef.current) {
         setCurrentIndex(scrollIndex);
       }
     };
@@ -82,7 +101,7 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
       const { offsetWidth, scrollLeft } = fullscreenRef.current!;
       const scrollIndex = Math.round(scrollLeft / offsetWidth);
       // Обновляем только если индекс изменился
-      if (scrollIndex !== currentIndex) {
+      if (scrollIndex !== currentIndexRef.current) {
         setCurrentIndex(scrollIndex);
       }
     };
@@ -91,23 +110,6 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
     ref.addEventListener('scroll', handleFullscreenScroll, { passive: true });
     return () => ref.removeEventListener('scroll', handleFullscreenScroll);
   }, [isFullscreen]);
-
-  // handleScroll и handleImageLoad/Error удалены - не нужны без opacity
-
-  const handleSwipeClick = useCallback(
-    (e: React.MouseEvent) => {
-      if (count <= 1) return;
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const width = rect.width;
-      if (clickX < width / 3) {
-        goToPrev();
-      } else if (clickX > (width / 3) * 2) {
-        goToNext();
-      }
-    },
-    [count, goToNext, goToPrev]
-  );
 
   useEffect(() => {
     if (!isFullscreen) return;
