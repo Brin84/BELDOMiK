@@ -62,24 +62,22 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
     setLoaded(false);
   }, [currentIndex]);
 
-  // Синхронизация currentIndex с scroll позицией в обычном режиме
+  // Синхронизация при скролле в обычном режиме
   useEffect(() => {
-    if (!galleryRef.current || isScrolling.current) return;
-    const { offsetWidth } = galleryRef.current;
-    const scrollIndex = Math.round(galleryRef.current.scrollLeft / offsetWidth);
-    if (scrollIndex !== currentIndex) {
-      setCurrentIndex(scrollIndex);
-    }
-  }, [currentIndex]);
+    if (!galleryRef.current) return;
 
-  // Синхронизация currentIndex с scroll позицией в полноэкранном режиме
-  useEffect(() => {
-    if (!fullscreenRef.current || isScrolling.current) return;
-    const { offsetWidth } = fullscreenRef.current;
-    const scrollIndex = Math.round(fullscreenRef.current.scrollLeft / offsetWidth);
-    if (scrollIndex !== currentIndex) {
-      setCurrentIndex(scrollIndex);
-    }
+    const handleGalleryScroll = () => {
+      if (isScrolling.current) return;
+      const { offsetWidth, scrollLeft } = galleryRef.current!;
+      const scrollIndex = Math.round(scrollLeft / offsetWidth);
+      if (scrollIndex !== currentIndex) {
+        setCurrentIndex(scrollIndex);
+      }
+    };
+
+    const ref = galleryRef.current;
+    ref.addEventListener('scroll', handleGalleryScroll, { passive: true });
+    return () => ref.removeEventListener('scroll', handleGalleryScroll);
   }, [currentIndex]);
 
   // Синхронизация при скролле в полноэкранном режиме
