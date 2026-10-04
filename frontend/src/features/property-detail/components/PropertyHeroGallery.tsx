@@ -6,98 +6,88 @@ interface PropertyHeroGalleryProps {
   photos: PropertyPhoto[];
 }
 
-/** Галерея фотографий с свайпом пальцем для листания.
- *  Логика как в Baraholka Apple Беларусь:
- *  - В обычном режиме: только свайп (стрелок нет), плавная анимация
- *  - В полноэкранном режиме: свайп + стрелки + миниатюры внизу
- */
+/** Галерея фотографий с настоящим скроллом (как в Baraholka Apple Беларусь).
+ *  Использует CSS scroll-snap для плавного перелистывания.
+ *  В обычном режиме: только скролл, стрелок нет.
+ *  В полноэкранном режиме: скролл + стрелки + миниатюры внизу. */
 export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
   const { trigger } = useHaptics();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [swiping, setSwiping] = useState(false);
-  const [swipeOffset, setSwipeOffset] = useState(0);
-  const [swipeYOffset, setSwipeYOffset] = useState(0);
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
-  const touchStartTime = useRef(0);
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const isScrolling = useRef(false);
 
   const sorted = [...photos].sort((a, b) => a.sort_order - b.sort_order);
   const count = sorted.length;
-
-  const goToNext = useCallback(() => {
-    if (count <= 1) return;
-    trigger('light');
-    setCurrentIndex((p) => (p + 1) % count);
-  }, [count, trigger]);
-
-  const goToPrev = useCallback(() => {
-    if (count <= 1) return;
-    trigger('light');
-    setCurrentIndex((p) => (p - 1 + count) % count);
-  }, [count, trigger]);
 
   const goToIndex = useCallback(
     (index: number) => {
       if (count <= 1) return;
       trigger('light');
       setCurrentIndex(index);
+      // Делаем scroll к нужной картинке
+      setTimeout(() => {
+        if (galleryRef.current) {
+          galleryRef.current.scrollTo({
+            left: index * galleryRef.current.offsetWidth,
+            behavior: 'smooth',
+          });
+        }
+      }, 50);
     },
     [count, trigger]
   );
 
+  const goToNext = useCallback(() => {
+    if (count <= 1) return;
+    trigger('light');
+    const newIndex = (currentIndex + 1) % count;
+    goToIndex(newIndex);
+  }, [count, currentIndex, trigger, goToIndex]);
+
+  const goToPrev = useCallback(() => {
+    if (count <= 1) return;
+    trigger('light');
+    const newIndex = (currentIndex - 1 + count) % count;
+    goToIndex(newIndex);
+  }, [count, currentIndex, trigger, goToIndex]);
+
   useEffect(() => {
     setFailed(false);
     setLoaded(false);
-    setSwipeOffset(0);
-    setSwipeYOffset(0);
   }, [currentIndex]);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (count <= 1) return;
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-    touchStartTime.current = Date.now();
-    setSwiping(true);
-    setSwipeOffset(0);
-    setSwipeYOffset(0);
-  }, [count]);
+  // Синхронизация currentIndex с scroll позицией
+  useEffect(() => {
+    if (!galleryRef.current || isScrolling.current) return;
+    const { offsetWidth } = galleryRef.current;
+    const scrollIndex = Math.round(galleryRef.current.scrollLeft / offsetWidth);
+    if (scrollIndex !== currentIndex) {
+      setCurrentIndex(scrollIndex);
+    }
+  }, [currentIndex]);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (count <= 1 || !swiping) return;
-    const diffX = e.touches[0].clientX - touchStartX.current;
-    const diffY = e.touches[0].clientY - touchStartY.current;
-    setSwipeOffset(diffX);
-    setSwipeYOffset(diffY);
-  }, [count, swiping]);
+  const handleScroll = useCallback(() => {
+    if (!galleryRef.current) return;
+    isScrolling.current = true;
+    setTimeout(() => {
+      isScrolling.current = false;
+    }, 100);
+  }, []);
 
-  const handleTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      if (count <= 1 || !swiping) return;
-      setSwiping(false);
-      const touchEndX = e.changedTouches[0].clientX;
-      const touchEndY = e.changedTouches[0].clientY;
-      const diffX = touchStartX.current - touchEndX;
-      const diffY = touchStartY.current - touchEndY;
-      const duration = Date.now() - touchStartTime.current;
+  const handleImageLoad = useCallback(() => {
+    setLoaded(true);
+  }, []);
 
-      // Если свайп достаточно значимый — перелистываем
-      if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
-        if (diffX > 0) goToNext();
-        else goToPrev();
-      }
-      // Сбрасываем смещение с анимацией
-      setSwipeOffset(0);
-      setSwipeYOffset(0);
-    },
-    [count, goToNext, goToPrev, swiping]
-  );
+  const handleImageError = useCallback(() => {
+    setFailed(true);
+  }, []);
 
   const handleSwipeClick = useCallback(
     (e: React.MouseEvent) => {
-      if (count <= 1 || isFullscreen) return;
+      if (count <= 1) return;
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
       const clickX = e.clientX - rect.left;
       const width = rect.width;
@@ -107,43 +97,7 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
         goToNext();
       }
     },
-    [count, goToNext, goToPrev, isFullscreen]
-  );
-
-  // Обработчик свайпа в полноэкранном режиме
-  const handleFullscreenTouchStart = useCallback((e: React.TouchEvent) => {
-    if (count <= 1) return;
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-    touchStartTime.current = Date.now();
-    setSwiping(true);
-    setSwipeOffset(0);
-    setSwipeYOffset(0);
-  }, [count]);
-
-  const handleFullscreenTouchMove = useCallback((e: React.TouchEvent) => {
-    if (count <= 1 || !swiping) return;
-    const diffX = e.touches[0].clientX - touchStartX.current;
-    e.preventDefault();
-    setSwipeOffset(diffX);
-  }, [count, swiping]);
-
-  const handleFullscreenTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      if (count <= 1 || !swiping) return;
-      setSwiping(false);
-      const touchEndX = e.changedTouches[0].clientX;
-      const diffX = touchStartX.current - touchEndX;
-      const duration = Date.now() - touchStartTime.current;
-
-      // Если свайп достаточно значимый — перелистываем
-      if (Math.abs(diffX) > 50) {
-        if (diffX > 0) goToNext();
-        else goToPrev();
-      }
-      setSwipeOffset(0);
-    },
-    [count, goToNext, goToPrev, swiping]
+    [count, goToNext, goToPrev]
   );
 
   useEffect(() => {
@@ -175,64 +129,49 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
     );
   }
 
-  const current = sorted[currentIndex];
-
-  const renderImage = (fullscreen: boolean) => {
-    if (failed) {
-      return (
-        <div className="property-gallery__placeholder">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2}>
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-            <line x1="9" y1="9" x2="15" y2="15" />
-            <line x1="15" y1="9" x2="9" y2="15" />
-          </svg>
-        </div>
-      );
-    }
-
-    // Плавная анимация свайпа через transform
-    let transformStyle = '';
-    if (swiping) {
-      transformStyle = `translateX(${swipeOffset}px) translateY(${swipeYOffset}px)`;
-    }
-
-    return (
-      <img
-        src={current.url}
-        alt={`Фото ${currentIndex + 1} из ${count}`}
-        className={fullscreen ? 'property-fullscreen__img' : 'property-gallery__img'}
-        style={{
-          opacity: loaded ? 1 : 0,
-          transition: 'opacity 0.25s ease',
-          transform: transformStyle,
-          transitionDuration: swiping ? '0ms' : '300ms cubic-bezier(0.25, 1, 0.5, 1)',
-        }}
-        onLoad={() => setLoaded(true)}
-        onError={() => setFailed(true)}
-      />
-    );
-  };
-
   return (
     <>
-      {/* Обычный режим — только свайп, без стрелок */}
+      {/* Обычный режим — скролл, без стрелок */}
       <div
+        ref={galleryRef}
         className="property-gallery"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        onScroll={handleScroll}
         onClick={handleSwipeClick}
-        role="button"
-        tabIndex={0}
-        aria-label={count > 1 ? `Фото ${currentIndex + 1} из ${count}` : 'Фотография объекта'}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            setIsFullscreen(true);
-          }
-        }}
+        role="group"
+        aria-label={`Фото ${currentIndex + 1} из ${count}`}
       >
-        {renderImage(false)}
+        <div className="property-gallery__track">
+          {sorted.map((photo, index) => {
+            const isActive = index === currentIndex;
+            return (
+              <div
+                key={photo.id}
+                className="property-gallery__slide"
+                aria-hidden={!isActive}
+              >
+                {failed ? (
+                  <div className="property-gallery__placeholder">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2}>
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                      <line x1="9" y1="9" x2="15" y2="15" />
+                      <line x1="15" y1="9" x2="9" y2="15" />
+                    </svg>
+                  </div>
+                ) : (
+                  <img
+                    src={photo.url}
+                    alt={`Фото ${index + 1} из ${count}`}
+                    className="property-gallery__img"
+                    style={{ opacity: loaded ? 1 : 0 }}
+                    onLoad={handleImageLoad}
+                    onError={handleImageError}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
 
         {count > 1 && (
           <div className="property-gallery__counter">
@@ -245,9 +184,6 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
       {isFullscreen && (
         <div
           className="property-fullscreen"
-          onTouchStart={handleFullscreenTouchStart}
-          onTouchMove={handleFullscreenTouchMove}
-          onTouchEnd={handleFullscreenTouchEnd}
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsFullscreen(false);
           }}
@@ -255,7 +191,43 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
           aria-modal="true"
           aria-label="Полноэкранный просмотр фото"
         >
-          {renderImage(true)}
+          <div
+            ref={galleryRef}
+            className="property-fullscreen__track"
+            onScroll={handleScroll}
+            onClick={handleSwipeClick}
+          >
+            {sorted.map((photo, index) => {
+              const isActive = index === currentIndex;
+              return (
+                <div
+                  key={photo.id}
+                  className="property-fullscreen__slide"
+                  aria-hidden={!isActive}
+                >
+                  {failed ? (
+                    <div className="property-gallery__placeholder">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2}>
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <line x1="9" y1="9" x2="15" y2="15" />
+                        <line x1="15" y1="9" x2="9" y2="15" />
+                      </svg>
+                    </div>
+                  ) : (
+                    <img
+                      src={photo.url}
+                      alt={`Фото ${index + 1} из ${count}`}
+                      className="property-fullscreen__img"
+                      style={{ opacity: loaded ? 1 : 0 }}
+                      onLoad={handleImageLoad}
+                      onError={handleImageError}
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
 
           {/* Кнопка закрытия */}
           <button
