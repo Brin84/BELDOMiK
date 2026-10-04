@@ -176,7 +176,7 @@
   overflow: hidden;
   background: #000;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 2px 2px 4px var(--bd-raise-dark), -2px -2px 4px var(--bd-raise-light);
 }
 
@@ -187,6 +187,25 @@
 .property-fullscreen__thumbnail--active {
   border-color: var(--bd-accent-primary);
   transform: scale(1.08);
+}
+
+/* Счётчик в полноэкранном режиме */
+.property-fullscreen__counter {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: var(--bd-accent-primary);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark), inset -2px -2px 4px var(--bd-raise-light);
 }
 
 .property-fullscreen__thumbnail img {
