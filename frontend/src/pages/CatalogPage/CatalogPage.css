@@ -26,6 +26,17 @@
   justify-content: space-between;
 }
 
+/* Обертка для header элементов - прозрачная, чтобы шапка сливалась с фоном миниапп */
+.catalog-header__inner {
+  max-width: 600px;
+  margin: 0 auto 16px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+}
+
 .catalog-header__brand {
   display: flex;
   align-items: center;

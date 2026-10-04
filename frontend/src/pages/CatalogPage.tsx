@@ -164,9 +164,9 @@ export function CatalogPage() {
 
   return (
     <div className="catalog-page">
-      <main className="catalog-page__inner">
-        {/* HEADER */}
-        <header className="catalog-header">
+      {/* HEADER - outside catalog-page__inner to have transparent background */}
+      <header className="catalog-header">
+        <div className="catalog-header__inner">
           <div className="catalog-header__brand">
             <div className="catalog-header__logo">
               <img
@@ -193,15 +193,17 @@ export function CatalogPage() {
           >
             •••
           </button>
-        </header>
+        </div>
+      </header>
 
+      <main className="catalog-page__inner">
         {/* SEARCH — вход в поиск с главной страницы (над баннерами).
             В нижней навигации отдельной вкладки «Поиск» больше нет. */}
         <button
           type="button"
           onClick={() => {
             trigger('light');
-            navigate('/');
+            navigate('/search');
           }}
           className="catalog-search"
           aria-label="Поиск по каталогу"

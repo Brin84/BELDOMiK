@@ -67,9 +67,9 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
     // Force native chrome to light to match the in-app light theme; a dark
     // Telegram client would otherwise leave a dark header/background stripe.
     // Native color APIs accept only a literal hex (no CSS var() — see memory).
-    // #f7f9fc = app background (globals.css body bg).
-    try { webApp.setHeaderColor('#f7f9fc'); } catch { /* older clients */ }
-    try { webApp.setBackgroundColor('#f7f9fc'); } catch { /* older clients */ }
+    // #E0E5EC = app background (var(--bd-bg-base) in globals.css).
+    try { webApp.setHeaderColor('#E0E5EC'); } catch { /* older clients */ }
+    try { webApp.setBackgroundColor('#E0E5EC'); } catch { /* older clients */ }
 
     // Expand to full height
     webApp.expand();
@@ -126,7 +126,7 @@ export function TelegramProvider({ children }: TelegramProviderProps) {
       }
       setColorScheme(webApp.colorScheme || 'light');
       // Keep native chrome matching app bg after a client-side theme switch.
-      try { webApp.setHeaderColor('#f7f9fc'); } catch { /* older clients */ }
+      try { webApp.setHeaderColor('#E0E5EC'); } catch { /* older clients */ }
     };
 
     webApp.onEvent('themeChanged', handleThemeChange);
