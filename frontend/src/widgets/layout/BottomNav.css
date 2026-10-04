@@ -1,6 +1,7 @@
 /* ============================================================
    BottomNav — компактная плавающая нижняя навигация (Soft UI).
-   Ярко-синяя подсветка активного таба, плавная анимация перехода.
+   Ярко-синяя подсветка активного таба с плавным переходом.
+   Центральная кнопка «+» поднята выше остальных табов на -16px.
    ============================================================ */
 
 /* Компактная панель: высота 56px, скругление 28px, отступы 12px.
@@ -35,10 +36,8 @@
   padding: 6px 8px;
   border: none;
   border-radius: 16px;
-  background: transparent;
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.25s ease-out;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -48,7 +47,7 @@
   height: 20px;
   stroke-width: 2;
   color: var(--bd-text-secondary, #718096);
-  transition: all 0.25s ease-out;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Неактивный таб: только иконка, без текста */
@@ -56,10 +55,10 @@
   display: none;
 }
 
-/* ---------- Ярко-синяя подсветка активного таба ---------- */
+/* ---------- Синяя подсветка активного таба ---------- */
 
 .bottom-nav__item--active {
-  background: rgba(37, 99, 235, 0.12);
+  background-color: rgba(37, 99, 235, 0.12);
   box-shadow: inset 3px 3px 6px var(--bd-raise-dark), inset -3px -3px 6px var(--bd-raise-light);
 }
 
@@ -76,19 +75,6 @@
   font-weight: 600;
 }
 
-/* Плавная анимация подложки активного таба (переезд) */
-.bottom-nav__pill {
-  position: absolute;
-  bottom: 4px;
-  left: 8px;
-  height: 32px;
-  border-radius: 16px;
-  background: rgba(37, 99, 235, 0.12);
-  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  pointer-events: none;
-}
-
 /* ---------- Иконка таба ---------- */
 
 .bottom-nav__icon {
@@ -96,7 +82,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.25s ease-out;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Активная иконка увеличивается */

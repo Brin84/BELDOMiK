@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { Building2, Heart, MessageCircle, Plus, User } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
@@ -8,7 +8,7 @@ import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import './BottomNav.css';
 
 // Компактная плавающая панель: Каталог · Избранное · «+» · Сообщения · Профиль.
-// Ярко-синяя подсветка активного таба с плавной анимацией перехода.
+// Ярко-синяя подсветка активного таба без анимации подложки.
 // Центральная кнопка «+» поднята выше остальных табов на -16px.
 interface NavItem {
   path: string;
@@ -45,44 +45,14 @@ export function BottomNav() {
     return () => window.clearInterval(poll);
   }, [fetchUnreadCount]);
 
-  const navRef = useRef<HTMLDivElement>(null);
-  const pillRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<{ [key: string]: HTMLAnchorElement | null }>({});
-
-  // Анимация перехода подложки при смене таба
-  useEffect(() => {
-    if (!navRef.current || !pillRef.current) return;
-
-    // Находим активный таб и вычисляем его позицию
-    const activeItem = Array.from(navRef.current.children).find(
-      (child) => child.classList.contains('bottom-nav__item--active')
-    ) as HTMLElement;
-
-    if (activeItem) {
-      const rect = activeItem.getBoundingClientRect();
-      const navRect = navRef.current.getBoundingClientRect();
-
-      // Вычисляем позицию подложки относительно навигации
-      const left = rect.left - navRect.left + rect.width / 2 - 24; // 24px половина ширины подложки
-      const width = rect.width;
-
-      pillRef.current.style.left = `${left}px`;
-      pillRef.current.style.width = `${width}px`;
-    }
-  }, [location.pathname]);
-
-  const handleTabClick = (item: NavItem) => {
-    // Обновляем позицию подложки сразу после клика
-    if (pillRef.current && navRef.current) {
-      const activeItem = itemRefs.current[item.path];
-      if (activeItem) {
-        const rect = activeItem.getBoundingClientRect();
-        const navRect = navRef.current.getBoundingClientRect();
-        const left = rect.left - navRect.left + rect.width / 2 - 24;
-        const width = rect.width;
-        pillRef.current.style.left = `${left}px`;
-        pillRef.current.style.width = `${width}px`;
-      }
+  const handleTabClick = (path: string) => {
+    // Повторный тап по уже активной вкладке «Каталог» страницу не
+    // перемонтирует, поэтому фильтр категории снимаем здесь: «Каталог»
+    // всегда показывает все объявления.
+    if (path !== '/catalog' || !isPathActive(path, location.pathname)) return;
+    trigger('light');
+    if (usePropertiesStore.getState().filters.type_id !== undefined) {
+      usePropertiesStore.getState().resetFilters();
     }
   };
 
@@ -96,20 +66,7 @@ export function BottomNav() {
         to={item.path}
         className={`bottom-nav__item ${active ? 'bottom-nav__item--active' : ''}`}
         aria-current={active ? 'page' : undefined}
-        ref={(el) => {
-          itemRefs.current[item.path] = el;
-        }}
-        onClick={() => {
-          handleTabClick(item);
-          // Повторный тап по уже активной вкладке «Каталог» страницу не
-          // перемонтирует, поэтому фильтр категории снимаем здесь: «Каталог»
-          // всегда показывает все объявления.
-          if (item.path !== '/catalog' || !active) return;
-          trigger('light');
-          if (usePropertiesStore.getState().filters.type_id !== undefined) {
-            usePropertiesStore.getState().resetFilters();
-          }
-        }}
+        onClick={() => handleTabClick(item.path)}
       >
         <span className="bottom-nav__icon">
           <Icon size={20} strokeWidth={active ? 2.3 : 1.8} />
@@ -131,14 +88,10 @@ export function BottomNav() {
 
   return (
     <nav
-      ref={navRef}
       className="bottom-nav"
       role="navigation"
       aria-label="Основная навигация"
     >
-      {/* Плавающая подложка активного таба для анимации перехода */}
-      <div className="bottom-nav__pill" ref={pillRef} />
-
       {navItems.map((item) =>
         item.path === '/create-listing' ? (
           <button
