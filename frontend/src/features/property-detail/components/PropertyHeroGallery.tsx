@@ -6,9 +6,9 @@ interface PropertyHeroGalleryProps {
   photos: PropertyPhoto[];
 }
 
-/** Полноширинная галерея в стиле Krisha: фото на весь экран по ширине,
- *  счётчик «N / M», стрелки на десктопе, свайп и полноэкранный просмотр.
- *  В полноэкранном режиме внизу — миниатюры всех фото, активное подсвечено. */
+/** Галерея фотографий с свайпом пальцем для листания.
+ *  В обычном режиме: только свайп (стрелок нет).
+ *  В полноэкранном режиме: свайп + стрелки + миниатюры внизу. */
 export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
   const { trigger } = useHaptics();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -20,7 +20,6 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
   const [loaded, setLoaded] = useState(false);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
-  const swipeOffset = useRef(0);
 
   const sorted = [...photos].sort((a, b) => a.sort_order - b.sort_order);
   const count = sorted.length;
@@ -58,7 +57,6 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
     [count, trigger]
   );
 
-  // Сброс состояния при смене фото
   useEffect(() => {
     setFailed(false);
     setLoaded(false);
@@ -67,35 +65,34 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
   }, [currentIndex]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (!isFullscreen || count <= 1) return;
+    if (count <= 1) return;
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
-    swipeOffset.current = 0;
     setSwiping(true);
-  }, [isFullscreen, count]);
+  }, [count]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isFullscreen || count <= 1 || !swiping) return;
+    if (count <= 1 || !swiping) return;
     const diffX = e.touches[0].clientX - touchStartX.current;
     const diffY = e.touches[0].clientY - touchStartY.current;
     // Если движение в основном горизонтальное — блокируем вертикальную прокрутку
-    if (Math.abs(diffX) > Math.abs(diffY)) {
+    if (Math.abs(diffX) > Math.abs(diffY) * 1.5) {
       e.preventDefault();
       const progress = Math.max(-1, Math.min(1, diffX / 150));
       setSwipeProgress(progress);
       setSwipeDirection(progress > 0 ? 1 : -1);
     }
-  }, [isFullscreen, count, swiping]);
+  }, [count, swiping]);
 
   const handleTouchEnd = useCallback(
     (e: React.TouchEvent) => {
-      if (!isFullscreen || count <= 1 || !swiping) return;
+      if (count <= 1 || !swiping) return;
       setSwiping(false);
       const diffX = touchStartX.current - e.changedTouches[0].clientX;
       const diffY = touchStartY.current - e.changedTouches[0].clientY;
 
       // Если свайп достаточно значимый — перелистываем
-      if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 2) {
+      if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
         if (diffX > 0) goToNext();
         else goToPrev();
       } else {
@@ -104,12 +101,12 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
         setSwipeDirection(0);
       }
     },
-    [isFullscreen, count, goToNext, goToPrev, swiping]
+    [count, goToNext, goToPrev, swiping]
   );
 
   const handleSwipeClick = useCallback(
     (e: React.MouseEvent) => {
-      if (!isFullscreen || count <= 1) return;
+      if (count <= 1) return;
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
       const clickX = e.clientX - rect.left;
       const width = rect.width;
@@ -119,7 +116,7 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
         goToNext();
       }
     },
-    [isFullscreen, count, goToNext, goToPrev]
+    [count, goToNext, goToPrev]
   );
 
   useEffect(() => {
@@ -166,7 +163,6 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
       );
     }
 
-    // Анимация свайпа для полноэкранного режима
     let transformStyle = '';
     if (fullscreen && swipeDirection !== 0) {
       const translateX = swipeProgress * (swipeDirection > 0 ? -100 : 100);
@@ -192,7 +188,7 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
 
   return (
     <>
-      {/* Обычный режим */}
+      {/* Обычный режим — только свайп, без стрелок */}
       <div
         className="property-gallery"
         onTouchStart={handleTouchStart}
@@ -218,37 +214,6 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
           <div className="property-gallery__counter">
             {currentIndex + 1} / {count}
           </div>
-        )}
-
-        {count > 1 && (
-          <>
-            <button
-              type="button"
-              className="property-gallery__arrow property-gallery__arrow--prev"
-              aria-label="Предыдущее фото"
-              onClick={(e) => {
-                e.stopPropagation();
-                goToPrev();
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              className="property-gallery__arrow property-gallery__arrow--next"
-              aria-label="Следующее фото"
-              onClick={(e) => {
-                e.stopPropagation();
-                goToNext();
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                <polyline points="9 6 15 12 9 18" />
-              </svg>
-            </button>
-          </>
         )}
       </div>
 
@@ -289,7 +254,7 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
             </div>
           )}
 
-          {/* Стрелки навигации */}
+          {/* Стрелки навигации в полноэкранном режиме */}
           {count > 1 && (
             <>
               <button

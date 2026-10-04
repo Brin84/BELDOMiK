@@ -14,6 +14,7 @@
 
 /* ============================================================
    Галерея — крупное фото со скруглёнными углами.
+   Стрелки только в полноэкранном режиме.
    ============================================================ */
 
 .property-gallery {
@@ -24,6 +25,7 @@
   border-radius: 16px;
   background: #eef1f5;
   overflow: hidden;
+  touch-action: pan-y;
 }
 
 .property-gallery__img {
@@ -56,39 +58,6 @@
   font-size: 13px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-}
-
-.property-gallery__arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(15, 23, 42, 0.45);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.property-gallery:hover .property-gallery__arrow {
-  opacity: 1;
-}
-
-.property-gallery__arrow--prev {
-  left: 12px;
-}
-
-.property-gallery__arrow--next {
-  right: 12px;
 }
 
 /* Полноэкранный просмотр */
