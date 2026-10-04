@@ -18,7 +18,6 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
   const [loaded, setLoaded] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
   const fullscreenRef = useRef<HTMLDivElement>(null);
-  const isScrolling = useRef(false);
 
   const sorted = [...photos].sort((a, b) => a.sort_order - b.sort_order);
   const count = sorted.length;
@@ -29,16 +28,12 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
       trigger('light');
       setCurrentIndex(index);
       const ref = scrollRef || galleryRef;
-      setTimeout(() => {
-        if (ref.current) {
-          ref.current.scrollTo({
-            left: index * ref.current.offsetWidth,
-            behavior: 'smooth',
-          });
-          // Сбросить флаг скролла, чтобы миниатюры могли синхронизироваться
-          isScrolling.current = false;
-        }
-      }, 50);
+      if (ref.current) {
+        ref.current.scrollTo({
+          left: index * ref.current.offsetWidth,
+          behavior: 'smooth',
+        });
+      }
     },
     [count, trigger]
   );
@@ -64,12 +59,12 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
 
   // Синхронизация при скролле в обычном режиме (Gallery)
   useEffect(() => {
-    if (!galleryRef.current) return;
+    if (!galleryRef.current || isFullscreen) return;
 
     const handleGalleryScroll = () => {
-      if (isScrolling.current) return;
       const { offsetWidth, scrollLeft } = galleryRef.current!;
       const scrollIndex = Math.round(scrollLeft / offsetWidth);
+      // Обновляем только если индекс изменился
       if (scrollIndex !== currentIndex) {
         setCurrentIndex(scrollIndex);
       }
@@ -78,16 +73,16 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
     const ref = galleryRef.current;
     ref.addEventListener('scroll', handleGalleryScroll, { passive: true });
     return () => ref.removeEventListener('scroll', handleGalleryScroll);
-  }, []);
+  }, [isFullscreen, currentIndex]);
 
   // Синхронизация при скролле в полноэкранном режиме (Fullscreen)
   useEffect(() => {
     if (!isFullscreen || !fullscreenRef.current) return;
 
     const handleFullscreenScroll = () => {
-      if (isScrolling.current) return;
       const { offsetWidth, scrollLeft } = fullscreenRef.current!;
       const scrollIndex = Math.round(scrollLeft / offsetWidth);
+      // Обновляем только если индекс изменился
       if (scrollIndex !== currentIndex) {
         setCurrentIndex(scrollIndex);
       }
@@ -96,13 +91,10 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
     const ref = fullscreenRef.current;
     ref.addEventListener('scroll', handleFullscreenScroll, { passive: true });
     return () => ref.removeEventListener('scroll', handleFullscreenScroll);
-  }, [isFullscreen]);
+  }, [isFullscreen, currentIndex]);
 
   const handleScroll = useCallback(() => {
-    isScrolling.current = true;
-    setTimeout(() => {
-      isScrolling.current = false;
-    }, 100);
+    // Флаг синхронизации не нужен - слушатели в useEffect сами срабатывают
   }, []);
 
   const handleImageLoad = useCallback(() => {
