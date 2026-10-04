@@ -1,15 +1,13 @@
 /* ============================================================
-   Поиск — новый дизайн (стиль каталога Baraholka/Криша).
-   Светлый фон, белые карточки, лёгкие рамки, синий градиент
-   активных элементов. Plain CSS + BEM, тёмный режим не поддерж.
-   Используется SearchPage, MapPage и компонентами
-   QuickFilters / ActiveFilterChips / SortSelector.
+   Поиск — Neumorphism дизайн (стиль BELDOMiK).
+   Светлый фон #E8ECF2, вдавленные/выпуклые элементы.
+   Plain CSS + BEM, только светлая тема.
    ============================================================ */
 
 .search-page {
   min-height: 100vh;
-  background: #f7f9fc;
-  color: #1e293b;
+  background-color: var(--bd-bg);
+  color: var(--bd-text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
 }
@@ -20,7 +18,8 @@
   padding: 14px 16px max(96px, env(safe-area-inset-bottom, 0px));
 }
 
-/* ---------- Поисковое поле ---------- */
+/* ---------- Поисковое поле ----------
+   Вдавленный Neumorphism: фон #E8ECF2, вдавленная тень. */
 
 .search-sticky {
   position: sticky;
@@ -34,14 +33,14 @@
   gap: 10px;
   height: 50px;
   padding: 0 14px 0 16px;
-  border: 1px solid #e2e8f0;
   border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  background-color: var(--bd-bg);
+  box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
+    inset -4px -4px 8px var(--bd-raise-light);
 }
 
 .search-field__icon {
-  color: #a0aec0;
+  color: var(--bd-accent);
   flex-shrink: 0;
 }
 
@@ -49,7 +48,7 @@
   flex: 1;
   min-width: 0;
   font-size: 16px;
-  color: #1e293b;
+  color: var(--bd-text);
 }
 
 .search-field__clear {
@@ -58,53 +57,66 @@
   justify-content: center;
   width: 26px;
   height: 26px;
-  border: none;
   border-radius: 50%;
-  background: #f1f5f9;
-  color: #94a3b8;
+  background-color: var(--bd-bg);
+  color: var(--bd-text-2);
   flex-shrink: 0;
   cursor: pointer;
-  transition: background 0.15s ease;
+  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
+  transition: box-shadow 0.15s ease, transform 0.12s ease;
 }
 
 .search-field__clear:active {
-  background: #e2e8f0;
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark),
+    inset -2px -2px 4px var(--bd-raise-light);
+  transform: translateY(1px);
 }
 
-/* ---------- Тип сделки ---------- */
+/* ---------- Тип сделки ----------
+   Контейнер вдавленный, кнопки выпуклые. */
 
 .search-operation {
   display: flex;
   gap: 4px;
   padding: 5px;
   margin-top: 12px;
-  border: 1px solid #e2e8f0;
   border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  background-color: var(--bd-bg);
+  box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
+    inset -4px -4px 8px var(--bd-raise-light);
 }
 
 .search-operation__btn {
   flex: 1;
   padding: 9px 12px;
-  border: none;
   border-radius: 14px;
-  background: transparent;
-  color: #64748b;
+  background-color: var(--bd-bg);
+  color: var(--bd-text-2);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: box-shadow 0.18s ease, color 0.18s ease, transform 0.12s ease;
   font-family: inherit;
+  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
+}
+
+.search-operation__btn:active {
+  transform: translateY(1px);
 }
 
 .search-operation__btn--active {
   color: #fff;
-  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
-  box-shadow: 0 3px 10px rgba(33, 113, 238, 0.3);
+  background-color: var(--bd-accent);
+  box-shadow: 0 4px 12px var(--bd-accent-soft);
 }
 
-/* ---------- Строка-выбор (локация, тип) ---------- */
+.search-operation__btn--active:active {
+  box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(1px);
+}
+
+/* ---------- Строка-выбор (локация, тип) ----------
+   Вдавленный Neumorphism: фон #E8ECF2. */
 
 .search-row {
   display: flex;
@@ -114,21 +126,23 @@
   width: 100%;
   margin-top: 12px;
   padding: 14px 16px;
-  border: 1px solid #e2e8f0;
   border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  background-color: var(--bd-bg);
+  color: var(--bd-text);
   cursor: pointer;
   text-align: left;
   font-size: 15px;
   font-weight: 600;
-  color: #334155;
   font-family: inherit;
-  transition: box-shadow 0.15s ease;
+  box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
+    inset -4px -4px 8px var(--bd-raise-light);
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
 }
 
 .search-row:active {
-  transform: scale(0.99);
+  box-shadow: inset 3px 3px 6px var(--bd-raise-dark),
+    inset -3px -3px 6px var(--bd-raise-light);
+  transform: translateY(1px);
 }
 
 .search-row__label {
@@ -143,20 +157,21 @@
 }
 
 .search-row__label--muted {
-  color: #64748b;
+  color: var(--bd-text-2);
 }
 
 .search-row__icon {
-  color: #4c91ff;
+  color: var(--bd-accent);
   flex-shrink: 0;
 }
 
 .search-row__chevron {
-  color: #a0aec0;
+  color: var(--bd-text-2);
   flex-shrink: 0;
 }
 
-/* ---------- Быстрые фильтры ---------- */
+/* ---------- Быстрые фильтры ----------
+   Выпуклые Neumorphism чипы. */
 
 .qf {
   display: flex;
@@ -179,12 +194,20 @@
   height: 44px;
   padding: 0 16px;
   border-radius: 14px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background-color: var(--bd-bg);
+  color: var(--bd-text);
   font-size: 14px;
   font-weight: 600;
-  color: #334155;
   cursor: pointer;
+  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
+}
+
+.qf__select:active,
+.qf__chip:active {
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark),
+    inset -2px -2px 4px var(--bd-raise-light);
+  transform: translateY(1px);
 }
 
 .qf__select {
@@ -193,7 +216,7 @@
 }
 
 .qf__more {
-  color: #4c91ff;
+  color: var(--bd-accent);
 }
 
 .qf__field {
@@ -204,12 +227,12 @@
   height: 44px;
   padding: 0 10px;
   border-radius: 14px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background-color: var(--bd-bg);
+  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
 }
 
 .qf__field-dash {
-  color: #94a3b8;
+  color: var(--bd-text-2);
   font-size: 13px;
 }
 
@@ -217,8 +240,10 @@
   width: 56px;
   font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--bd-text);
   text-align: center;
+  background: transparent;
+  border: none;
 }
 
 .qf__input--wide {
@@ -226,11 +251,12 @@
 }
 
 .qf__input::placeholder {
-  color: #a0aec0;
+  color: var(--bd-text-2);
   font-weight: 500;
 }
 
-/* ---------- Активные фильтры ---------- */
+/* ---------- Активные фильтры ----------
+   Выпуклые синие чипы с тенью. */
 
 .acf {
   display: flex;
@@ -244,15 +270,14 @@
   align-items: center;
   gap: 6px;
   padding: 7px 12px;
-  border: none;
   border-radius: 999px;
-  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
+  background-color: var(--bd-accent);
   color: #fff;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: box-shadow 0.15s ease;
-  box-shadow: 0 3px 10px rgba(33, 113, 238, 0.25);
+  box-shadow: 0 4px 12px var(--bd-accent-soft);
+  transition: box-shadow 0.15s ease, transform 0.12s ease;
 }
 
 .acf__chip svg {
@@ -260,7 +285,13 @@
   opacity: 0.9;
 }
 
-/* ---------- Сохранить поиск ---------- */
+.acf__chip:active {
+  box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(1px);
+}
+
+/* ---------- Сохранить поиск ----------
+   Выпуклая Neumorphism кнопка. */
 
 .search-save {
   display: flex;
@@ -270,20 +301,21 @@
   width: 100%;
   margin-top: 14px;
   padding: 14px 16px;
-  border: 1px solid #e2e8f0;
   border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  background-color: var(--bd-bg);
+  color: var(--bd-text);
   font-size: 15px;
   font-weight: 600;
-  color: #334155;
   cursor: pointer;
   font-family: inherit;
-  transition: box-shadow 0.15s ease;
+  box-shadow: 6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light);
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
 }
 
 .search-save:active {
-  transform: scale(0.99);
+  box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
+    inset -4px -4px 8px var(--bd-raise-light);
+  transform: translateY(1px);
 }
 
 /* ---------- Метапанель: счётчик + сортировка ---------- */
@@ -299,28 +331,37 @@
 .search-meta__count {
   font-size: 16px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--bd-text);
 }
+
+/* ---------- Сортировка ----------
+   Выпуклая Neumorphism кнопка. */
 
 .search-sort {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 9px 14px;
-  border: 1px solid #e2e8f0;
   border-radius: 14px;
-  background: #fff;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  background-color: var(--bd-bg);
+  color: var(--bd-text);
   font-size: 13px;
   font-weight: 600;
-  color: #334155;
   cursor: pointer;
   font-family: inherit;
+  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
+}
+
+.search-sort:active {
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark),
+    inset -2px -2px 4px var(--bd-raise-light);
+  transform: translateY(1px);
 }
 
 .search-sort__icon,
 .search-sort__chevron {
-  color: #a0aec0;
+  color: var(--bd-text-2);
   flex-shrink: 0;
 }
 
@@ -332,7 +373,8 @@
   white-space: nowrap;
 }
 
-/* ---------- Шторка сортировки ---------- */
+/* ---------- Шторка сортировки ----------
+   Белая карточка с мягкой тенью (Soft UI). */
 
 .sort-sheet {
   position: fixed;
@@ -341,8 +383,8 @@
   right: 0;
   z-index: 50;
   border-radius: 26px 26px 0 0;
-  background: #fff;
-  box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.18);
+  background-color: var(--bd-surface);
+  box-shadow: var(--bd-shadow-card);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -362,7 +404,7 @@
 .sort-sheet__title {
   font-size: 17px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--bd-text);
 }
 
 .sort-sheet__body {
@@ -376,25 +418,32 @@
   width: 100%;
   margin-top: 10px;
   padding: 14px 16px;
-  border: 1px solid #e2e8f0;
   border-radius: 16px;
-  background: #fff;
-  color: #334155;
+  background-color: var(--bd-bg);
+  color: var(--bd-text);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
   text-align: left;
+  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
+}
+
+.sort-sheet__option:active {
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark),
+    inset -2px -2px 4px var(--bd-raise-light);
+  transform: translateY(1px);
 }
 
 .sort-sheet__option--active {
   color: #fff;
-  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
-  border-color: transparent;
-  box-shadow: 0 6px 16px rgba(33, 113, 238, 0.25);
+  background-color: var(--bd-accent);
+  box-shadow: 0 4px 12px var(--bd-accent-soft);
 }
 
-/* ---------- Шторка «Все фильтры» (FilterBottomSheet) ---------- */
+/* ---------- Шторка «Все фильтры» (FilterBottomSheet) ----------
+   Белая карточка с мягкой тенью (Soft UI). */
 
 .fbs {
   position: fixed;
@@ -404,8 +453,8 @@
   z-index: 50;
   max-height: 85vh;
   border-radius: 26px 26px 0 0;
-  background: #fff;
-  box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.18);
+  background-color: var(--bd-surface);
+  box-shadow: var(--bd-shadow-card);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -428,7 +477,7 @@
 .fbs__title {
   font-size: 17px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--bd-text);
 }
 
 .fbs__close {
@@ -437,16 +486,18 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: none;
   border-radius: 10px;
-  background: #f1f5f9;
-  color: #64748b;
+  background-color: var(--bd-bg);
+  color: var(--bd-text-2);
   cursor: pointer;
-  transition: background 0.15s ease;
+  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
 }
 
 .fbs__close:active {
-  background: #e2e8f0;
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark),
+    inset -2px -2px 4px var(--bd-raise-light);
+  transform: translateY(1px);
 }
 
 .fbs__body {
@@ -467,7 +518,7 @@
   margin-bottom: 10px;
   font-size: 15px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--bd-text);
 }
 
 .fbs__label {
@@ -475,7 +526,7 @@
   margin-bottom: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--bd-text-2);
 }
 
 .fbs__chips {
@@ -486,23 +537,28 @@
 
 .fbs__chip {
   padding: 9px 16px;
-  border: 1px solid #e2e8f0;
   border-radius: 14px;
-  background: #fff;
-  color: #334155;
+  background-color: var(--bd-bg);
+  color: var(--bd-text);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
   white-space: nowrap;
-  transition: all 0.2s ease;
+  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
+}
+
+.fbs__chip:active {
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark),
+    inset -2px -2px 4px var(--bd-raise-light);
+  transform: translateY(1px);
 }
 
 .fbs__chip--active {
   color: #fff;
-  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
-  border-color: transparent;
-  box-shadow: 0 4px 12px rgba(33, 113, 238, 0.25);
+  background-color: var(--bd-accent);
+  box-shadow: 0 4px 12px var(--bd-accent-soft);
 }
 
 .fbs__pair {
@@ -520,12 +576,13 @@
   align-items: center;
   height: 46px;
   padding: 0 14px;
-  border: 1px solid #e2e8f0;
   border-radius: 14px;
-  background: #fff;
+  background-color: var(--bd-bg);
+  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
 }
 
-/* ---- Строка-тоггл (bool-фильтры: без посредников, новостройки) ---- */
+/* ---- Строка-тоггл (bool-фильтры: без посредников, новостройки) ----
+   Выпуклые Neumorphism кнопки. */
 
 .fbs__row {
   display: flex;
@@ -534,21 +591,26 @@
   gap: 10px;
   width: 100%;
   padding: 14px 16px;
-  border: 1px solid #e2e8f0;
   border-radius: 16px;
-  background: #fff;
-  color: #334155;
+  background-color: var(--bd-bg);
+  color: var(--bd-text);
   cursor: pointer;
   text-align: left;
   font-family: inherit;
-  transition: all 0.2s ease;
+  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
+}
+
+.fbs__row:active {
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark),
+    inset -2px -2px 4px var(--bd-raise-light);
+  transform: translateY(1px);
 }
 
 .fbs__row--active {
   color: #fff;
-  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
-  border-color: transparent;
-  box-shadow: 0 4px 12px rgba(33, 113, 238, 0.25);
+  background-color: var(--bd-accent);
+  box-shadow: 0 4px 12px var(--bd-accent-soft);
 }
 
 .fbs__row-main {
@@ -561,7 +623,8 @@
   opacity: 0.75;
 }
 
-/* ---- Сетка bool-фильтров (дополнительно) ---- */
+/* ---- Сетка bool-фильтров (дополнительно) ----
+   Выпуклые Neumorphism кнопки в сетке. */
 
 .fbs__grid {
   display: grid;
@@ -575,29 +638,31 @@
   align-items: center;
   gap: 6px;
   padding: 14px 10px;
-  border: 1px solid #e2e8f0;
   border-radius: 16px;
-  background: #fff;
-  color: #334155;
+  background-color: var(--bd-bg);
+  color: var(--bd-text);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.2s ease;
+  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
+}
+
+.fbs__cell:active {
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark),
+    inset -2px -2px 4px var(--bd-raise-light);
+  transform: translateY(1px);
 }
 
 .fbs__cell--active {
   color: #fff;
-  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
-  border-color: transparent;
-  box-shadow: 0 4px 12px rgba(33, 113, 238, 0.25);
+  background-color: var(--bd-accent);
+  box-shadow: 0 4px 12px var(--bd-accent-soft);
 }
 
-.fbs__cell-icon {
-  font-size: 22px;
-}
-
-/* ---- Подвал: сброс / применить ---- */
+/* ---- Подвал: сброс / применить ----
+   Выпуклые Neumorphism кнопки. */
 
 .fbs__footer {
   display: flex;
@@ -615,24 +680,30 @@
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.2s ease;
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
 }
 
 .fbs__btn--reset {
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  color: #334155;
+  background-color: var(--bd-bg);
+  color: var(--bd-text);
+  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
 }
 
 .fbs__btn--reset:active {
-  background: #f1f5f9;
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark),
+    inset -2px -2px 4px var(--bd-raise-light);
+  transform: translateY(1px);
 }
 
 .fbs__btn--apply {
-  border: none;
-  background: linear-gradient(135deg, #4c91ff 0%, #2171ee 100%);
+  background-color: var(--bd-accent);
   color: #fff;
-  box-shadow: 0 6px 16px rgba(33, 113, 238, 0.3);
+  box-shadow: 0 4px 12px var(--bd-accent-soft);
+}
+
+.fbs__btn--apply:active {
+  box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(1px);
 }
 
 /* ---------- Подвал ---------- */
@@ -641,7 +712,7 @@
   text-align: center;
   padding: 16px 0;
   font-size: 13px;
-  color: #94a3b8;
+  color: var(--bd-text-2);
 }
 
 .search-footer {
@@ -649,45 +720,5 @@
   padding-bottom: 16px;
   text-align: center;
   font-size: 13px;
-  color: #9aa7b8;
-}
-
-/* ------------------------------------------------------------
-   Переопределение глобального «input/select» (!important).
-   Внутри pill-контейнеров убираем фон/рамку/скругление, чтобы
-   не было внутреннего обрамления. Селектор специально выше по
-   специфичности, чем глобальный (input:not(...):not(...):not(...)).
-   ------------------------------------------------------------ */
-
-.search-field input:not([type='range']):not([type='checkbox']):not([type='radio']),
-.qf input:not([type='range']):not([type='checkbox']):not([type='radio']) {
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
-
-.search-field input:not([type='range']):not([type='checkbox']):not([type='radio']):focus,
-.qf input:not([type='range']):not([type='checkbox']):not([type='radio']):focus,
-.fbs__field input:not([type='range']):not([type='checkbox']):not([type='radio']):focus {
-  border: none !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  background: transparent !important;
-}
-
-.search-field input:not([type='range']):not([type='checkbox']):not([type='radio'])::placeholder,
-.qf input:not([type='range']):not([type='checkbox']):not([type='radio'])::placeholder,
-.fbs__field input:not([type='range']):not([type='checkbox']):not([type='radio'])::placeholder {
-  color: #a0aec0 !important;
-}
-
-.fbs__field input:not([type='range']):not([type='checkbox']):not([type='radio']) {
-  width: 100%;
-  font-size: 15px;
-  color: #1e293b;
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
+  color: var(--bd-text-2);
 }

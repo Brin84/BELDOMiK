@@ -9,6 +9,28 @@
   --safe-right: env(safe-area-inset-right, 0px);
 
   /* ------------------------------------------------------------------
+   * BELDOMiK Design Tokens — Soft UI / Neumorphism.
+   * Единый источник правды для светлой «мягкой» темы: все интерактивные
+   * элементы и карточки отсылаются сюда через var(), чтобы не расползаться
+   * хардкодом по BEM-файлам страниц.
+   * ---------------------------------------------------------------- */
+  /* Фон приложения — светло-серый; карточки с фото белые поверх него. */
+  --bd-bg: #e8ecf2;
+  --bd-surface: #ffffff;
+  /* Пара цветов для neumorphism-теней: тёмный + светлый блик. */
+  --bd-raise-dark: #c8cdd5;
+  --bd-raise-light: #ffffff;
+  /* Акцент — ярко-синий (категории, «Позвонить», «Купить/Снять», active-таб). */
+  --bd-accent: #2563eb;
+  --bd-accent-soft: rgba(37, 99, 235, 0.3);
+  /* Текст: основной / вторичный (контраст на сером фоне не светлее #4A5568
+     для основного; вторичный — приглушённый, для подписей/подсказок). */
+  --bd-text: #1a202c;
+  --bd-text-2: #718096;
+  /* Мягкая внешняя тень контентных карточек (не «вдавленная»). */
+  --bd-shadow-card: 0 8px 24px rgba(149, 157, 165, 0.15);
+
+  /* ------------------------------------------------------------------
    * Принудительно светлая тема + палитра дизайна BELDOMiK.
    * Telegram (ThemeProvider) пишет --tg-theme-* inline на <html>, поэтому
    * перекрыть его inline-стиль можно только !important.
@@ -49,10 +71,11 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Страница — светло-голубой фон, белые карточки поверх. */
+/* Страница — светло-серый фон Soft UI, белые/невидимые карточки поверх. */
 body {
-  background-color: #f7f9fc;
-  @apply text-tg-text font-sans antialiased;
+  background-color: var(--bd-bg);
+  color: var(--bd-text);
+  @apply font-sans antialiased;
   margin: 0;
   min-height: 100vh;
   min-height: 100dvh;
@@ -83,26 +106,56 @@ body {
 }
 
 /* ------------------------------------------------------------------
- * Единый стиль полей ввода — как на главной (каталог): белый фон,
- * светлая рамка #e2e8f0, скругление 14px, без синего обрамления
- * при фокусе. Перекрывает инлайн-стили компонентов (tg-темы),
- * чтобы дизайн был одинаковым по всему проекту.
+ * Поисковое поле — вдавленный Neumorphism: серый фон (#E8ECF2),
+ * вдавленная тень, скругление 18px. Без белой заливки.
+ * Иконка лупы — синяя.
+ * ---------------------------------------------------------------- */
+.search-input {
+  width: 100%;
+  height: 50px;
+  padding: 0 16px;
+  border-radius: 18px;
+  background-color: var(--bd-bg);
+  border: none;
+  color: var(--bd-text);
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
+    inset -4px -4px 8px var(--bd-raise-light);
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
+}
+
+.search-input:focus {
+  box-shadow: inset 3px 3px 6px var(--bd-raise-dark),
+    inset -3px -3px 6px var(--bd-raise-light);
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: #94a3b8;
+}
+
+/* ------------------------------------------------------------------
+ * Единый стиль полей ввода (fallback) — Soft UI: серый (--bd-bg) с
+ * вдавленной тенью. Используется, если не применена .search-input.
  * ---------------------------------------------------------------- */
 input:not([type='range']):not([type='checkbox']):not([type='radio']),
 select,
 textarea {
   border-radius: 14px !important;
-  background-color: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  color: #1e293b !important;
-  box-shadow: none !important;
+  background-color: var(--bd-bg) !important;
+  border: none !important;
+  color: var(--bd-text) !important;
+  box-shadow: inset 2px 2px 5px var(--bd-raise-dark),
+    inset -2px -2px 5px var(--bd-raise-light) !important;
 }
 
 input:not([type='range']):not([type='checkbox']):not([type='radio']):focus,
 select:focus,
 textarea:focus {
-  border-color: #cbd5e1 !important;
-  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.25) !important;
+  box-shadow: inset 3px 3px 7px var(--bd-raise-dark),
+    inset -3px -3px 7px var(--bd-raise-light) !important;
+  outline: none !important;
 }
 
 input:not([type='range']):not([type='checkbox']):not([type='radio'])::placeholder,
@@ -137,15 +190,51 @@ input:-webkit-autofill:focus {
 }
 
 /* ------------------------------------------------------------------
- * Базовая белая карточка дизайна BELDOMiK: крупное скругление 26px,
- * мягкая растекающаяся тень. Используется карточками объявлений,
- * категориями и секциями на белом.
+ * Базовая контентная карточка BELDOMiK: белый фон, скругление 20px,
+ * мягкая внешняя тень. НЕ «вдавленная» — контраст фото сохраняется.
  * ---------------------------------------------------------------- */
 @layer utilities {
   .beldomik-card {
-    background-color: #ffffff;
-    border-radius: 26px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    background-color: var(--bd-surface);
+    border-radius: 20px;
+    box-shadow: var(--bd-shadow-card);
+  }
+}
+
+/* ------------------------------------------------------------------
+ * Neumorphism-утилиты. Фон — серый (--bd-bg), поэтому выпуклый элемент
+ * при срощении с фоном держится за блик, а не за границу.
+ *   .neu-raise — выпуклый (кнопки, категории, чипы, таб-бар)
+ *   .neu-press — вдавленный (активные/нажатые состояния, поиск)
+ * --bd-bg здесь нужен как цвет заливок: на белых панелях (детальная,
+ * шторки) интерактивный элемент «всплывает» из серого.
+ * ---------------------------------------------------------------- */
+@layer utilities {
+  .neu-raise {
+    background-color: var(--bd-bg);
+    box-shadow: 6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light);
+  }
+
+  .neu-press {
+    background-color: var(--bd-bg);
+    box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
+      inset -4px -4px 8px var(--bd-raise-light);
+  }
+
+  .neu-press--soft {
+    box-shadow: inset 2px 2px 5px var(--bd-raise-dark),
+      inset -2px -2px 5px var(--bd-raise-light);
+  }
+
+  /* Вдавленное состояние при нажатии: лёгкое сжатие тени + микро-skew.
+     Актив не меняет фон — только углубляет. */
+  .neu-pressable {
+    transition: box-shadow 0.18s ease, transform 0.12s ease;
+  }
+  .neu-pressable:active {
+    box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
+      inset -4px -4px 8px var(--bd-raise-light);
+    transform: translateY(1px);
   }
 }
 
@@ -159,7 +248,7 @@ input:-webkit-autofill:focus {
  * ---------------------------------------------------------------- */
 @layer utilities {
   .text-tg-hint {
-    color: #94a3b8 !important;
+    color: var(--bd-text-2) !important;
   }
   .border-tg-hint {
     border-color: #cbd5e1 !important;
@@ -177,15 +266,16 @@ input:-webkit-autofill:focus {
   display: flex;
   gap: 10px;
   padding: 8px;
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  border-radius: 20px;
+  background: var(--bd-surface);
+  box-shadow: var(--bd-shadow-card);
   cursor: pointer;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.18s ease;
 }
 
 .hot-card:active {
-  transform: scale(0.98);
+  transform: scale(0.985);
+  box-shadow: 0 4px 14px rgba(149, 157, 165, 0.2);
 }
 
 .hot-card__photo {
@@ -280,6 +370,9 @@ input:-webkit-autofill:focus {
   white-space: nowrap;
 }
 
+/* Иконка избранного в углу фото — единственный крупный blur в интерфейсе.
+   Круг 30px — площадь мала, backdrop-filter не влияет на FPS. На фото
+   даёт эффект «стеклянной иконки», как на референсе Soft UI. */
 .hot-card__fav {
   position: absolute;
   top: 6px;
@@ -292,9 +385,17 @@ input:-webkit-autofill:focus {
   height: 30px;
   border: none;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
   cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.hot-card__fav:active {
+  background: rgba(255, 255, 255, 0.75);
+  transform: scale(0.94);
 }
 
 .hot-card__price {

@@ -1,30 +1,26 @@
 /* ============================================================
-   PropertyDetail — дизайн по эталону Krisha.kz.
-   Plain CSS + BEM. Только светлая тема (как каталог).
-   Структура: полноширинная галерея → цена/действия → тип·площадь
-   → расположение (карта) → параметры → дополнительно → описание
-   → карточка продавца → липкий нижний бар «Написать / Позвонить».
+   PropertyDetail — Neumorphism дизайн (стиль BELDOMiK).
+   Светлый фон #E8ECF2, мягкие карточки с тенями.
    ============================================================ */
 
 .property-page {
   min-height: 100vh;
-  background: #f7f9fc;
-  color: #1e293b;
+  background-color: var(--bd-bg);
+  color: var(--bd-text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
-  padding-bottom: 92px; /* место под липкий нижний бар */
+  padding-bottom: 92px;
 }
 
 /* ============================================================
-   Галерея — крупное фото со скруглёнными углами и боковыми
-   отступами (экрану + отступы, чтобы скругление было видно).
+   Галерея — крупное фото со скруглёнными углами.
    ============================================================ */
 
 .property-gallery {
   position: relative;
   margin: 12px 16px 4px;
   width: calc(100% - 32px);
-  aspect-ratio: 1 / 1; /* квадрат — заметно крупнее прежнего 4/3 */
+  aspect-ratio: 1 / 1;
   border-radius: 16px;
   background: #eef1f5;
   overflow: hidden;
@@ -156,7 +152,7 @@
   right: 16px;
 }
 
-/* Контейнер контента под галереей (единый боковой отступ) */
+/* Контейнер контента под галереей */
 .property-page__content {
   padding: 18px 16px 0;
   display: flex;
@@ -164,19 +160,17 @@
   gap: 14px;
 }
 
-/* Универсальная белая карточка-секция */
+/* Универсальная карточка-секция — белый фон с мягкой тенью (Soft UI) */
 .property-section {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background-color: var(--bd-surface);
   border-radius: 18px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
   padding: 16px;
 }
 
 .property-section__title {
   font-size: 18px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--bd-text);
   margin-bottom: 12px;
 }
 
@@ -524,6 +518,7 @@
 
 /* ============================================================
    Липкий нижний бар «Написать / Позвонить»
+   Плавающая панель с выпуклой тенью (Neumorphism).
    ============================================================ */
 
 .property-bottom-bar {
@@ -535,11 +530,8 @@
   display: flex;
   gap: 10px;
   padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid #eef1f5;
-  box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.08);
+  background-color: var(--bd-bg);
+  box-shadow: 8px 8px 20px var(--bd-raise-dark), -8px -8px 20px var(--bd-raise-light);
 }
 
 .property-bottom-bar__btn {
@@ -549,29 +541,29 @@
   justify-content: center;
   gap: 8px;
   height: 50px;
-  border: none;
   border-radius: 16px;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
-  transition: transform 0.15s ease;
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
 }
 
 .property-bottom-bar__btn:active {
-  transform: scale(0.97);
+  box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(1px);
 }
 
 .property-bottom-bar__btn--telegram {
-  background: #229ed9;
+  background-color: #229ed9;
   color: #fff;
   box-shadow: 0 6px 16px rgba(34, 158, 217, 0.35);
 }
 
 .property-bottom-bar__btn--call {
-  background: #34c759;
+  background-color: #22c55e;
   color: #fff;
-  box-shadow: 0 6px 16px rgba(52, 199, 89, 0.35);
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
 }
 
 /* ============================================================
@@ -600,8 +592,7 @@
   animation: call-sheet-fade 0.18s ease-out;
 }
 
-/* Плавающая панель в светлом стиле BELDOMiK: белые «карточки» как у
-   iOS-меню, но в светлой палитре — боковые отступы, скруглённые углы. */
+/* Плавающая панель в стиле Soft UI: белые карточки с мягкой тенью. */
 .call-sheet__stack {
   position: relative;
   width: 100%;
@@ -617,8 +608,8 @@
 .call-sheet__cancel-card {
   border-radius: 16px;
   overflow: hidden;
-  background: #fff;
-  box-shadow: 0 10px 32px rgba(15, 23, 42, 0.14);
+  background-color: var(--bd-surface);
+  box-shadow: var(--bd-shadow-card);
 }
 
 /* Номер синим сверху — как ссылка на номер в сообщении канала. */
@@ -628,7 +619,7 @@
   font-size: 21px;
   font-weight: 700;
   letter-spacing: 0.01em;
-  color: #2171ee;
+  color: var(--bd-accent);
   font-variant-numeric: tabular-nums;
   word-break: break-word;
   border-bottom: 1px solid #eef2f7;
@@ -648,7 +639,7 @@
   padding: 0 16px;
   border: none;
   background: transparent;
-  color: #0f172a;
+  color: var(--bd-text);
   font-size: 17px;
   font-weight: 500;
   text-align: left;
@@ -666,7 +657,7 @@
 }
 
 .call-sheet__item svg {
-  color: #64748b;
+  color: var(--bd-text-2);
   flex-shrink: 0;
 }
 
@@ -680,7 +671,7 @@
   text-align: center;
   font-size: 12.5px;
   line-height: 1.4;
-  color: #94a3b8;
+  color: var(--bd-text-2);
   border-top: 1px solid #eef2f7;
 }
 
@@ -689,7 +680,7 @@
   height: 52px;
   border: none;
   background: transparent;
-  color: #2171ee;
+  color: var(--bd-accent);
   font-size: 17px;
   font-weight: 600;
   cursor: pointer;

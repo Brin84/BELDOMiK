@@ -55,7 +55,6 @@ export function BottomNav() {
         key={item.path}
         to={item.path}
         className={`bottom-nav__item ${active ? 'bottom-nav__item--active' : ''}`}
-        style={{ color: active ? '#2171ee' : '#64748b' }}
         aria-current={active ? 'page' : undefined}
         onClick={() => {
           // Повторный тап по уже активной вкладке «Каталог» страницу не

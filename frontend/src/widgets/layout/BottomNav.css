@@ -3,6 +3,8 @@
    Стиль Baraholka: светлый, «+» вынесен отдельной круглой кнопкой.
    ============================================================ */
 
+/* Neumorphism: серый (--bd-bg), сильная выпуклая тень сверху — панель
+   «всплывает» из фона. Без рамки и без blur (см. ограничения производительности). */
 .bottom-nav {
   position: fixed;
   bottom: 8px;
@@ -13,13 +15,10 @@
   max-width: 560px;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  padding: 6px;
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 12px 38px rgba(0, 0, 0, 0.12);
+  padding: 8px;
+  border-radius: 24px;
+  background: var(--bd-bg);
+  box-shadow: 8px 8px 20px var(--bd-raise-dark), -8px -8px 20px var(--bd-raise-light);
 }
 
 .bottom-nav__item {
@@ -36,10 +35,13 @@
   font-size: 10px;
   font-weight: 600;
   cursor: pointer;
+  transition: color 0.18s ease;
 }
 
+/* Активный таб — без цветной плашки: выделяется цветом иконо/текста
+   (синий) и лёгкой вдавленной «ямой» под иконкой. Неактивные — серые. */
 .bottom-nav__item--active {
-  background: #eef4ff;
+  background: transparent;
 }
 
 /* ---------- Бейдж непрочитанных на вкладке «Сообщения» ---------- */
