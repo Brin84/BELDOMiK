@@ -64,7 +64,7 @@ export function CollectionsPage() {
 
       {/* Create form */}
       {showCreate && (
-        <NeuCard padding="4">
+        <NeuCard padding="large">
           <div className="space-y-3">
             <input
               value={newName}

@@ -3,7 +3,7 @@ import { useHaptics } from '@/shared/lib/haptics';
 import { useAuthStore } from '@/features/auth';
 import { useFavoritesStore } from '@/features/favorites';
 import { PropertyCard } from '@/entities/property';
-import { ListSkeleton, EmptyState, InlineError } from '@/shared/ui';
+import { ListSkeleton, EmptyState, InlineError, NeuCard } from '@/shared/ui';
 
 export function FavoritesPage() {
   const { trigger } = useHaptics();

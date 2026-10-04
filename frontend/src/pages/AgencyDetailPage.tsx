@@ -24,7 +24,7 @@ export function AgencyDetailPage() {
   if (isLoadingDetail && !agencyDetail) {
     return (
       <div className="p-4 space-y-4 pb-24" style={{ backgroundColor: 'var(--bd-bg-base)' }}>
-        <NeuCard padding="4">
+        <NeuCard padding="large">
           <div className="h-6 w-1/2 rounded animate-pulse" style={{ backgroundColor: 'rgba(184, 185, 190, 0.3)' }} />
         </NeuCard>
         <ListSkeleton count={3} />
