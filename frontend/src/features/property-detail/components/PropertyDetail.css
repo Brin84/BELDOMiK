@@ -152,6 +152,50 @@
   right: 16px;
 }
 
+/* Миниатюры в полноэкранном режиме */
+.property-fullscreen__thumbnails {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 8px;
+  padding: 0 12px;
+  justify-content: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.property-fullscreen__thumbnails::-webkit-scrollbar {
+  display: none;
+}
+
+.property-fullscreen__thumbnail {
+  position: relative;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.property-fullscreen__thumbnail--active {
+  border-color: #2563eb;
+  transform: scale(1.08);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4);
+}
+
+.property-fullscreen__thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 /* Контейнер контента под галереей */
 .property-page__content {
   padding: 18px 16px 0;
