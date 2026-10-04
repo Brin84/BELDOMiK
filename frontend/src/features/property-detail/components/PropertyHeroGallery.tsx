@@ -15,7 +15,6 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [loaded, setLoaded] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
   const fullscreenRef = useRef<HTMLDivElement>(null);
 
@@ -93,15 +92,7 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
     return () => ref.removeEventListener('scroll', handleFullscreenScroll);
   }, [isFullscreen]);
 
-  // handleScroll удалён - слушатели добавляются через useEffect
-
-  const handleImageLoad = useCallback(() => {
-    setLoaded(true);
-  }, []);
-
-  const handleImageError = useCallback(() => {
-    setFailed(true);
-  }, []);
+  // handleScroll и handleImageLoad/Error удалены - не нужны без opacity
 
   const handleSwipeClick = useCallback(
     (e: React.MouseEvent) => {
