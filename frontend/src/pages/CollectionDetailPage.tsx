@@ -154,7 +154,7 @@ export function CollectionDetailPage() {
       </div>
 
       {showDeleteConfirm && !editing && (
-        <NeuCard padding="4">
+        <NeuCard padding="large">
           <div className="p-3 rounded-xl text-sm" style={{ backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#ef4444' }}>
             Удалить подборку «{current.name}»? Нажмите на корзину ещё раз для подтверждения.
           </div>

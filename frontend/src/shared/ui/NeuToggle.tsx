@@ -1,5 +1,3 @@
-import { ReactNode } from 'react';
-
 interface NeuToggleProps {
   activeIndex: number;
   options: { label: string; value: number }[];

@@ -268,7 +268,7 @@ export function ComparisonPage() {
   return (
     <div className="p-4 space-y-6 pb-90" style={{ backgroundColor: 'var(--bd-bg-base)', color: 'var(--bd-text-primary)' }}>
       {/* Header */}
-      <NeuCard padding="4">
+      <NeuCard padding="large">
         <div className="flex items-center justify-between">
           <h1 className="text-[var(--bd-text-primary)] text-xl font-bold">Сравнение</h1>
           <span className="text-[var(--bd-text-secondary)] text-sm">{getSelectedCount()} из 4</span>
@@ -276,7 +276,7 @@ export function ComparisonPage() {
       </NeuCard>
 
       {error && (
-        <NeuCard padding="4">
+        <NeuCard padding="large">
           <div className="p-3 rounded-xl text-sm" style={{ backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#ef4444' }}>
             {error}
           </div>
