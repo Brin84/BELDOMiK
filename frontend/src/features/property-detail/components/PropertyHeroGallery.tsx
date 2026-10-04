@@ -62,9 +62,9 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
     setLoaded(false);
   }, [currentIndex]);
 
-  // Синхронизация при скролле в обычном режиме
+  // Синхронизация при скролле в обычном режиме (Gallery)
   useEffect(() => {
-    if (!galleryRef.current) return;
+    if (!galleryRef.current || isFullscreen) return;
 
     const handleGalleryScroll = () => {
       if (isScrolling.current) return;
@@ -78,11 +78,11 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
     const ref = galleryRef.current;
     ref.addEventListener('scroll', handleGalleryScroll, { passive: true });
     return () => ref.removeEventListener('scroll', handleGalleryScroll);
-  }, [currentIndex]);
+  }, [isFullscreen]);
 
-  // Синхронизация при скролле в полноэкранном режиме
+  // Синхронизация при скролле в полноэкранном режиме (Fullscreen)
   useEffect(() => {
-    if (!isFullscreen || !fullscreenRef.current) return;
+    if (!fullscreenRef.current) return;
 
     const handleFullscreenScroll = () => {
       if (isScrolling.current) return;
@@ -96,7 +96,7 @@ export function PropertyHeroGallery({ photos }: PropertyHeroGalleryProps) {
     const ref = fullscreenRef.current;
     ref.addEventListener('scroll', handleFullscreenScroll, { passive: true });
     return () => ref.removeEventListener('scroll', handleFullscreenScroll);
-  }, [isFullscreen, currentIndex]);
+  }, []);
 
   const handleScroll = useCallback(() => {
     isScrolling.current = true;
