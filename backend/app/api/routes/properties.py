@@ -38,7 +38,6 @@ def list_properties(
     page_size: int = Query(200, ge=1, le=500),
     type_id: int | None = Query(None, description="Property type ID (e.g. квартира, дом)"),
     operation_id: int | None = Query(None, description="Operation ID (buy/sell/rent)"),
-    q: str | None = Query(None, description="Free-text search (address/description/location)"),
     city_id: int | None = Query(None),
     district_id: int | None = Query(None),
     neighborhood_id: int | None = Query(None),
@@ -78,7 +77,6 @@ def list_properties(
     filters = PropertyFilter(
         type_id=type_id,
         operation_id=operation_id,
-        q=q,
         city_id=city_id,
         district_id=district_id,
         neighborhood_id=neighborhood_id,

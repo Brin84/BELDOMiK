@@ -345,7 +345,6 @@ class PropertyFilterParams(BaseSchema):
     street_id: int | None = None
     type_id: int | None = None
     operation_id: int | None = None
-    q: str | None = None  # free-text search (address/description/location)
     rooms_count: int | None = None
     floor_min: int | None = None
     floor_max: int | None = None
