@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
-import { Building2, MapPin, Search } from 'lucide-react';
+import { Building2, MapPin } from 'lucide-react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
-import { useDebounce } from '@/shared/lib/hooks';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useGeographyStore } from '@/features/geography/geographyStore';
 import { useFavoritesStore } from '@/features/favorites';
@@ -74,8 +73,6 @@ export function MapPage() {
   const [isGeolocationLoading, setIsGeolocationLoading] = useState(false);
   const [geolocationError, setGeolocationError] = useState<string | null>(null);
   const [filterBottomSheetOpen, setFilterBottomSheetOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
 
   // Load geography data on mount
   useEffect(() => {
@@ -160,17 +157,9 @@ export function MapPage() {
     [trigger, setFilters]
   );
 
-  // Handle search query change (pending backend support)
-  useEffect(() => {
-    if (debouncedSearchQuery !== undefined) {
-      // TODO: Backend doesn't currently support text search parameter
-    }
-  }, [debouncedSearchQuery]);
-
   // Reset all filters
   const handleResetAll = useCallback(() => {
     trigger('medium');
-    setSearchQuery('');
     resetFilters();
   }, [trigger, resetFilters]);
 
@@ -428,38 +417,6 @@ export function MapPage() {
       {viewMode === 'list' && (
         <div className="map-list">
           <div className="map-list__inner">
-            {/* Search Bar */}
-            <div className="search-sticky">
-              <div className="search-field">
-                <Search size={20} className="search-field__icon" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Что ищете?"
-                  className="search-field__input"
-                  inputMode="search"
-                  autoComplete="off"
-                  aria-label="Поиск недвижимости"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => {
-                      trigger('light');
-                      setSearchQuery('');
-                    }}
-                    className="search-field__clear"
-                    aria-label="Очистить поиск"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                      <line x1="18" y1="6" x2="6" y2="18" />
-                      <line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            </div>
-
             {/* Operation Toggle */}
             <div className="search-operation" role="group" aria-label="Тип сделки">
               {OPERATION_OPTIONS.map((op) => (
@@ -558,25 +515,15 @@ export function MapPage() {
                     <line x1="4" y1="4" x2="7.5" y2="7.5" />
                   </svg>
                 }
-                title={searchQuery ? 'Ничего не найдено' : 'Настройте фильтры для поиска'}
+                title="Ничего не найдено"
                 description={
-                  searchQuery
-                    ? (
-                      <>
-                        По запросу «{searchQuery}» результатов нет.
-                        <br />
-                        Попробуйте изменить фильтры или поисковый запрос.
-                      </>
-                    )
-                    : (
-                      <>
-                        Выберите параметры поиска и начните подбор недвижимости.
-                        <br />
-                        <span className="text-xs">
-                          {currentCity?.name || currentRegion?.name || 'Все Беларусь'}, {filters.operation_id === 1 ? 'покупка' : 'аренда'}
-                        </span>
-                      </>
-                    )
+                  (
+                    <>
+                      По выбранным фильтрам результатов нет.
+                      <br />
+                      Попробуйте изменить параметры поиска.
+                    </>
+                  )
                 }
                 action={error ? { label: 'Повторить', onClick: handleRetry } : undefined}
               />

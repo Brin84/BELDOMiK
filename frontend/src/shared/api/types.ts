@@ -253,8 +253,6 @@ export interface PropertyFilterParams {
   operation_id?: number;
   type_id?: number;
 
-  q?: string;
-
   region_id?: number;
   city_id?: number;
   district_id?: number;

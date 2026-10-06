@@ -48,7 +48,7 @@ describe('buildUrl', () => {
       writable: true,
     });
 
-    const url = buildUrl('/api/v1/properties', { city_id: null, q: undefined, page: 1 });
+    const url = buildUrl('/api/v1/properties', { city_id: null, page: 1 });
     expect(url).toBe('https://app.example.com/api/v1/properties?page=1');
   });
 });

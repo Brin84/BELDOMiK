@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, MapPin, Search } from 'lucide-react';
+import { Building2, MapPin } from 'lucide-react';
 import { useHaptics } from '@/shared/lib/haptics';
-import { useDebounce } from '@/shared/lib/hooks';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useGeographyStore } from '@/features/geography/geographyStore';
 import { useFavoritesStore } from '@/features/favorites';
@@ -58,8 +57,6 @@ export function SearchPage() {
   } = useGeographyStore();
 
   // Local state for UI
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
   const [filterBottomSheetOpen, setFilterBottomSheetOpen] = useState(false);
   const [saveSearchModalOpen, setSaveSearchModalOpen] = useState(false);
 
@@ -71,7 +68,6 @@ export function SearchPage() {
     if (savedFilters) {
       try {
         const filtersObj = JSON.parse(savedFilters);
-        if (typeof filtersObj.q === 'string') setSearchQuery(filtersObj.q);
         setFilters(filtersObj);
         trigger('selection');
       } catch {
@@ -85,7 +81,6 @@ export function SearchPage() {
       try {
         const savedSearch = JSON.parse(editSavedSearch);
         const filtersObj = JSON.parse(savedSearch.filters_json);
-        if (typeof filtersObj.q === 'string') setSearchQuery(filtersObj.q);
         setFilters(filtersObj);
         setSaveSearchModalOpen(true);
         trigger('selection');
@@ -184,18 +179,9 @@ export function SearchPage() {
     [trigger, setFilters]
   );
 
-  // Handle search query change — debounced ILINE text search over
-  // address/description/location (the backend 'q' parameter).
-  useEffect(() => {
-    const q = debouncedSearchQuery ? debouncedSearchQuery.trim() : undefined;
-    if (filters.q === q) return; // already in sync, avoid redundant requests
-    setFilters({ q });
-  }, [debouncedSearchQuery, setFilters, filters.q]);
-
   // Reset all filters
   const handleResetAll = useCallback(() => {
     trigger('medium');
-    setSearchQuery('');
     resetFilters();
   }, [trigger, resetFilters]);
 
@@ -267,8 +253,6 @@ export function SearchPage() {
           return `Год от ${value}`;
         case 'build_year_max':
           return `Год до ${value}`;
-        case 'q':
-          return `Поиск: «${value}»`;
         case 'renovation':
           return `Ремонт: ${value}`;
         case 'furniture':
@@ -343,38 +327,6 @@ export function SearchPage() {
   return (
     <div className="search-page">
       <main className="search-page__inner">
-      {/* Search Bar */}
-      <div className="search-sticky">
-        <div className="search-field">
-          <Search size={20} className="search-field__icon" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Что ищете?"
-            className="search-field__input"
-            inputMode="search"
-            autoComplete="off"
-            aria-label="Поиск недвижимости"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => {
-                trigger('light');
-                setSearchQuery('');
-              }}
-              className="search-field__clear"
-              aria-label="Очистить поиск"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          )}
-        </div>
-      </div>
-
       {/* Operation Toggle */}
       <div className="search-operation" role="group" aria-label="Тип сделки">
         {OPERATION_OPTIONS.map((op) => (
@@ -488,25 +440,15 @@ export function SearchPage() {
               <line x1="4" y1="4" x2="7.5" y2="7.5" />
             </svg>
           }
-          title={searchQuery ? 'Ничего не найдено' : 'Настройте фильтры для поиска'}
+          title="Ничего не найдено"
           description={
-            searchQuery
-              ? (
-                <>
-                  По запросу «{searchQuery}» результатов нет.
-                  <br />
-                  Попробуйте изменить фильтры или поисковый запрос.
-                </>
-              )
-              : (
-                <>
-                  Выберите параметры поиска и начните подбор недвижимости.
-                  <br />
-                  <span className="text-xs">
-                    {currentCity?.name || currentRegion?.name || 'Все Беларусь'}, {filters.operation_id === 1 ? 'покупка' : 'аренда'}
-                  </span>
-                </>
-              )
+            (
+              <>
+                По выбранным фильтрам результатов нет.
+                <br />
+                Попробуйте изменить параметры поиска.
+              </>
+            )
           }
           action={error ? { label: 'Повторить', onClick: handleRetry } : undefined}
         />

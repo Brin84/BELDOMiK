@@ -181,35 +181,6 @@ class TestPropertiesList:
         data = resp.json()
         assert [p["id"] for p in data["items"]] == [property_seed["a"]]
 
-    def test_q_search_by_address(self, client: TestClient, property_seed):
-        # Free-text search matches address (ILINE over joined fields).
-        resp = client.get("/api/v1/properties", params={"q": "Test Address 250000"})
-        assert resp.status_code == 200, resp.text
-        data = resp.json()
-        assert [p["id"] for p in data["items"]] == [property_seed["a"]]
-
-    def test_q_search_by_city(self, client: TestClient, property_seed):
-        # City.name is joined, so the same text matches location names.
-        # NOTE: SQLite lower() is ASCII-only, so the Cyrillic query must match
-        # the stored case here; on Postgres ILIKE handles Cyrillic properly.
-        resp = client.get("/api/v1/properties", params={"q": "Минск"})
-        assert resp.status_code == 200, resp.text
-        data = resp.json()
-        # All published properties are in Минск
-        assert len(data["items"]) == 3
-
-    def test_q_search_no_results(self, client: TestClient, property_seed):
-        resp = client.get("/api/v1/properties", params={"q": "несуществующий_текст"})
-        assert resp.status_code == 200, resp.text
-        assert resp.json()["items"] == []
-        assert resp.json()["total"] == 0
-
-    def test_q_search_escapes_wildcards(self, client: TestClient, property_seed):
-        # '%' in the query must not expand to everything; it is escaped.
-        resp = client.get("/api/v1/properties", params={"q": "%"})
-        assert resp.status_code == 200, resp.text
-        assert resp.json()["total"] == 0
-
     def test_is_direct_only(self, client: TestClient, property_seed):
         # «Без посредников»: C (agency_id) is filtered out, owners A and B remain.
         resp = client.get("/api/v1/properties", params={"is_direct_only": True})
