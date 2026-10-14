@@ -5,7 +5,11 @@ WORKDIR /build
 
 # Install dependencies (layer cache) — npm (lockfile present in repo)
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci
+RUN npm ci --no-audit --no-fund \
+    --fetch-retries=5 \
+    --fetch-retry-mintimeout=20000 \
+    --fetch-retry-maxtimeout=120000 \
+    --fetch-timeout=300000
 
 # Build frontend
 COPY frontend/ ./
