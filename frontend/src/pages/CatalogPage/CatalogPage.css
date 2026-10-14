@@ -280,15 +280,17 @@
   transform: translateY(1px);
 }
 
-/* Активный таб — выпуклая синяя кнопка как у популярных городов */
+/* Активный таб — выпуклая кнопка со синим текстом (как в поиске). */
 .catalog-operation__btn--active {
-  color: #fff;
-  background: var(--bd-accent-primary);
-  box-shadow: 0 4px 12px var(--bd-accent-soft);
+  color: var(--bd-accent-primary);
+  background: var(--bd-bg-base);
+  box-shadow: 4px 4px 8px var(--bd-raise-dark),
+    -4px -4px 8px var(--bd-raise-light);
 }
 
 .catalog-operation__btn--active:active {
-  box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 2px 2px 4px var(--bd-raise-dark),
+    inset -2px -2px 4px var(--bd-raise-light);
   transform: translateY(1px);
 }
 

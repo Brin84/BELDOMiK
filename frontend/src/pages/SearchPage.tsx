@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Building2, MapPin } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 import { useHaptics } from '@/shared/lib/haptics';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { useGeographyStore } from '@/features/geography/geographyStore';
@@ -13,14 +12,8 @@ import { formatPriceByn, formatArea } from '@/shared/lib/format';
 import type { PropertyFilterParams } from '@/shared/api/types';
 import '@/features/search/components/search-form.css';
 
-const OPERATION_OPTIONS = [
-  { id: 1, label: 'Купить' },
-  { id: 2, label: 'Снять' },
-];
-
 export function SearchPage() {
   const { trigger } = useHaptics();
-  const navigate = useNavigate();
   const {
     properties,
     isLoading,
@@ -29,7 +22,6 @@ export function SearchPage() {
     filters,
     setFilters,
     resetFilters,
-    setOperation,
     refresh,
     clearError,
     setLocalFavorite,
@@ -122,15 +114,6 @@ export function SearchPage() {
       setFilters(newFilters);
     },
     [setFilters]
-  );
-
-  // Handle operation change
-  const handleOperationChange = useCallback(
-    (operationId: number | undefined) => {
-      trigger('selection');
-      setOperation(operationId);
-    },
-    [trigger, setOperation]
   );
 
   // Handle rooms change
@@ -320,47 +303,9 @@ export function SearchPage() {
     refresh();
   }, [clearError, refresh]);
 
-  // Current location display
-  const currentCity = filters.city_id ? getCityById(filters.city_id) : null;
-  const currentRegion = filters.region_id ? regions.find((r) => r.id === filters.region_id) : null;
-
   return (
     <div className="search-page">
       <main className="search-page__inner">
-      {/* Operation Toggle */}
-      <div className="search-operation" role="group" aria-label="Тип сделки">
-        {OPERATION_OPTIONS.map((op) => (
-          <button
-            key={op.id}
-            onClick={() => handleOperationChange(op.id)}
-            className={`search-operation__btn ${
-              filters.operation_id === op.id ? 'search-operation__btn--active' : ''
-            }`}
-            aria-pressed={filters.operation_id === op.id}
-          >
-            {op.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Location Selector */}
-      <button
-        onClick={() => {
-          trigger('light');
-          navigate('/regions');
-        }}
-        className="search-row"
-        aria-label="Выбрать область и город"
-      >
-        <span className="search-row__label">
-          <MapPin size={18} className="search-row__icon" />
-          {currentCity?.name || currentRegion?.name || 'Все Беларусь'}
-        </span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="search-row__chevron">
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </button>
-
       {/* Property Type Selector */}
       {propertyTypes.length > 0 && (
         <button

@@ -62,8 +62,8 @@
   transform: translateY(1px);
 }
 
-/* ---------- Строка-выбор (локация, тип) ----------
-   Вдавленный Neumorphism: фон #E8ECF2. */
+/* ---------- Строка-выбор (тип недвижимости) ----------
+   Выпуклая Soft UI кнопка (как «Профиль и настройки»). */
 
 .search-row {
   display: flex;
@@ -74,21 +74,21 @@
   margin-top: 12px;
   padding: 14px 16px;
   border-radius: 18px;
-  background-color: var(--bd-bg);
-  color: var(--bd-text);
+  background-color: var(--bd-bg-base);
+  color: var(--bd-text-primary);
   cursor: pointer;
   text-align: left;
   font-size: 15px;
   font-weight: 600;
   font-family: inherit;
-  box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
-    inset -4px -4px 8px var(--bd-raise-light);
+  box-shadow: 6px 6px 12px var(--bd-raise-dark),
+    -6px -6px 12px var(--bd-raise-light);
   transition: box-shadow 0.18s ease, transform 0.12s ease;
 }
 
 .search-row:active {
-  box-shadow: inset 3px 3px 6px var(--bd-raise-dark),
-    inset -3px -3px 6px var(--bd-raise-light);
+  box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
+    inset -4px -4px 8px var(--bd-raise-light);
   transform: translateY(1px);
 }
 
