@@ -127,6 +127,7 @@
 .ad-banner {
   position: relative;
   margin-top: 16px;
+  margin-bottom: 14px;
   overflow: hidden;
   border-radius: 20px;
 }
