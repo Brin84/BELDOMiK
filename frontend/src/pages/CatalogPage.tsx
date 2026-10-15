@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo } from 'react';
-import { ChevronRight, Globe, Search } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ChevronRight, Globe, Sliders } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
@@ -10,6 +10,8 @@ import { HotPropertyCard } from '@/entities/property';
 import { ListSkeleton, EmptyState, InlineError } from '@/shared/ui';
 import { CATEGORIES, CategoryCard } from '@/widgets/catalog/CategoryCard';
 import { AdBanner } from '@/features/banners/AdBanner';
+import { FilterBottomSheet } from '@/features/search/components';
+import { RENOVATION_TYPES } from '@/features/search/renovation';
 
 import beldomikAvatar from '@/assets/beldomik-avatar.webp';
 
@@ -85,6 +87,18 @@ export function CatalogPage() {
     },
     [trigger, setFilters, filters.city_id]
   );
+
+  // Активные фильтры + шторка «Все фильтры» прямо на главной.
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  const hasActiveFilters = useMemo(() => {
+    return Object.entries(filters).some(([key, value]) => {
+      if (['page', 'page_size', 'sort_by', 'sort_order', 'with_photos_only', 'is_favorite_only'].includes(key)) {
+        return false;
+      }
+      return value !== undefined && value !== null && value !== '';
+    });
+  }, [filters]);
 
   // id популярных городов из загруженного справочника. Город, которого нет в
   // списке (справочник ещё не загружен), просто не рисуем.
@@ -190,19 +204,19 @@ export function CatalogPage() {
           </button>
         </div>
 
-        {/* SEARCH — вход в поиск с главной страницы (над баннерами).
-            В нижней навигации отдельной вкладки «Поиск» больше нет. */}
+        {/* ВСЕ ФИЛЬТРЫ ПОИСКА — открывает шторку фильтров прямо на главной.
+            Заменяет старую кнопку «Поиск», чтобы не было лишних переходов. */}
         <button
           type="button"
           onClick={() => {
             trigger('light');
-            navigate('/search');
+            setFilterOpen(true);
           }}
           className="catalog-search"
-          aria-label="Поиск по каталогу"
+          aria-label="Все фильтры поиска"
         >
-          <Search size={18} className="catalog-search__icon" />
-          <span className="catalog-search__placeholder">Поиск: город, метро, цена…</span>
+          <Sliders size={18} className="catalog-search__icon" />
+          <span className="catalog-search__placeholder">Все фильтры поиска</span>
         </button>
 
         {/* BANNERS — рекламные баннеры */}
@@ -368,6 +382,18 @@ export function CatalogPage() {
         <p className="catalog-footer">
           BELDOMiK 🇧🇾 — недвижимость Беларуси
         </p>
+
+        {/* ВСЕ ФИЛЬТРЫ ПОИСКА — шторка прямо на каталоге */}
+        <FilterBottomSheet
+          isOpen={filterOpen}
+          onClose={() => setFilterOpen(false)}
+          filters={filters}
+          onFiltersChange={setFilters}
+          propertyTypes={propertyTypes.map((t) => ({ id: t.id, name: t.name }))}
+          renovationTypes={[...RENOVATION_TYPES]}
+          onReset={resetFilters}
+          hasActiveFilters={hasActiveFilters}
+        />
       </main>
     </div>
   );

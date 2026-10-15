@@ -10,6 +10,7 @@ import { FilterBottomSheet, ActiveFilterChips, SortSelector, QuickFilters } from
 import { SavedSearchForm } from '@/features/saved-searches/components';
 import { formatPriceByn, formatArea } from '@/shared/lib/format';
 import type { PropertyFilterParams } from '@/shared/api/types';
+import { RENOVATION_TYPES } from '@/features/search/renovation';
 import '@/features/search/components/search-form.css';
 
 export function SearchPage() {
@@ -269,11 +270,8 @@ export function SearchPage() {
     });
   }, [filters]);
 
-  // Extract unique renovation types from property types or use common ones
-  const renovationTypes = useMemo(() => {
-    // These would ideally come from backend, using common values for now
-    return ['Без ремонта', 'Косметический', 'Евроремонт', 'Дизайнерский', 'Требует ремонта'];
-  }, []);
+  // Renovation types — shared constant with the catalog filter button.
+  const renovationTypes = [...RENOVATION_TYPES];
 
   // Transform property types for filter UI
   const propertyTypesForFilter = useMemo(() => {

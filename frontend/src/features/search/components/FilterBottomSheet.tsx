@@ -124,9 +124,6 @@ export function FilterBottomSheet({
       aria-modal="true"
       aria-labelledby="filter-bottom-sheet-title"
     >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/50 transition-opacity" style={{ opacity: 1 }} aria-hidden="true" />
-
       {/* Bottom Sheet */}
       <div className="fbs">
         {/* Handle */}
