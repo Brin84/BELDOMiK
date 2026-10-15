@@ -46,6 +46,20 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     root.classList.add(effectiveScheme);
     root.setAttribute('data-theme', effectiveScheme);
 
+    // Set Telegram header color for unified solid look in dark theme.
+    // In dark mode use a solid dark color; in light/system let Telegram decide.
+    if (effectiveScheme === 'dark') {
+      // Solid dark background — same as --bd-bg-base in dark theme
+      const darkHeader = '#1e2130';
+      try {
+        (window as unknown as Record<string, unknown>).Telegram?.WebApp?.setHeaderColor(darkHeader);
+      } catch {}
+    } else {
+      try {
+        (window as unknown as Record<string, unknown>).Telegram?.WebApp?.setHeaderColor('bg_color');
+      } catch {}
+    }
+
     // Apply viewport stable height for fixed positioning
     if (viewportStableHeight) {
       root.style.setProperty('--tg-viewport-stable-height', `${viewportStableHeight}px`);
