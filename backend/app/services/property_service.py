@@ -541,6 +541,12 @@ class PropertyService:
             setattr(property_obj, field, value)
 
         property_obj.updated_at = datetime.now(UTC)
+
+        # При редактировании опубликованного объявления — отправляем на повторную
+        # модерацию (Kufar-модель: правка → pending → published/rejected).
+        if property_obj.status == PropertyStatus.PUBLISHED:
+            property_obj.status = PropertyStatus.PENDING_MODERATION
+
         db.commit()
         db.refresh(property_obj)
         return property_obj
@@ -609,7 +615,7 @@ class PropertyService:
         property_obj = db.query(Property).filter(Property.id == property_id).first()
         if not property_obj or property_obj.owner_id != user_id:
             return None
-        if property_obj.status not in (PropertyStatus.DRAFT, PropertyStatus.REJECTED):
+        if property_obj.status not in (PropertyStatus.DRAFT, PropertyStatus.REJECTED, PropertyStatus.PENDING_MODERATION):
             return None
 
         # Последний шанс получить координаты перед публикацией: покрывает как
