@@ -114,7 +114,7 @@ export function ProfilePage() {
       {/* Profile Header */}
       <NeuCard padding="none">
         <div className="flex items-center gap-4 px-4 py-3">
-          <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 shadow-[6px_6px_12px_#b8b9be,-6px_-6px_12px_#ffffff]">
+          <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0" style={{ boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)' }}>
             {/* Fallback: initials */}
             <div
               className="absolute inset-0 flex items-center justify-center text-2xl font-bold"
@@ -189,7 +189,7 @@ export function ProfilePage() {
 
       {/* Menu Sections */}
       <section>
-        <h2 className="text-[var(--bd-text-primary)] text-lg font-semibold mb-3">Мои объявления</h2>
+        <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--bd-text-primary)' }}>Мои объявления</h2>
         <div className="space-y-3">
           <button
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
@@ -209,7 +209,7 @@ export function ProfilePage() {
             </svg>
             <span className="flex-1" style={{ color: 'var(--bd-text-primary)' }}>Все мои объявления</span>
             {myListingsCount !== null && myListingsCount > 0 && (
-              <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(37, 99, 235, 0.12)', color: '#2563eb' }}>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--bd-accent-soft)', color: 'var(--bd-accent-primary)' }}>
                 {myListingsCount}
               </span>
             )}
@@ -221,7 +221,7 @@ export function ProfilePage() {
       </section>
 
       <section>
-        <h2 className="text-[var(--bd-text-primary)] text-lg font-semibold mb-3">⭐ Рейтинг и отзывы</h2>
+        <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--bd-text-primary)' }}>⭐ Рейтинг и отзывы</h2>
         <div className="space-y-3">
           <button
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
@@ -239,7 +239,7 @@ export function ProfilePage() {
             </svg>
             <span className="flex-1" style={{ color: 'var(--bd-text-primary)' }}>Мои отзывы</span>
             {sellerSummary && sellerSummary.reviews_count > 0 && (
-              <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(37, 99, 235, 0.12)', color: '#2563eb' }}>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--bd-accent-soft)', color: 'var(--bd-accent-primary)' }}>
                 {sellerSummary.reviews_count}
               </span>
             )}
@@ -251,7 +251,7 @@ export function ProfilePage() {
       </section>
 
       <section>
-        <h2 className="text-[var(--bd-text-primary)] text-lg font-semibold mb-3">🏢 Агентство</h2>
+        <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--bd-text-primary)' }}>🏢 Агентство</h2>
         <div className="space-y-3">
           <button
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
@@ -291,7 +291,7 @@ export function ProfilePage() {
       </section>
 
       <section>
-        <h2 className="text-[var(--bd-text-primary)] text-lg font-semibold mb-3">Настройки приложения</h2>
+        <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--bd-text-primary)' }}>Настройки приложения</h2>
         <div className="space-y-3">
           <button
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
@@ -317,7 +317,7 @@ export function ProfilePage() {
       </section>
 
       <section>
-        <h2 className="text-[var(--bd-text-primary)] text-lg font-semibold mb-3">Избранное и поиск</h2>
+        <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--bd-text-primary)' }}>Избранное и поиск</h2>
         <div className="space-y-3">
           <button
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
@@ -342,7 +342,7 @@ export function ProfilePage() {
       </section>
 
       <section>
-        <h2 className="text-[var(--bd-text-primary)] text-lg font-semibold mb-3">📁 Подборки</h2>
+        <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--bd-text-primary)' }}>📁 Подборки</h2>
         <div className="space-y-3">
           <button
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
@@ -360,7 +360,7 @@ export function ProfilePage() {
             </svg>
             <span className="flex-1" style={{ color: 'var(--bd-text-primary)' }}>Все подборки</span>
             {collections.length > 0 && (
-              <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(37, 99, 235, 0.12)', color: '#2563eb' }}>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--bd-accent-soft)', color: 'var(--bd-accent-primary)' }}>
                 {collections.length}
               </span>
             )}
@@ -372,7 +372,7 @@ export function ProfilePage() {
       </section>
 
       <section>
-        <h2 className="text-[var(--bd-text-primary)] text-lg font-bold px-1">📅 Записи на осмотр</h2>
+        <h2 className="text-lg font-bold px-1" style={{ color: 'var(--bd-text-primary)' }}>📅 Записи на осмотр</h2>
         <div className="space-y-3">
           <button
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
@@ -421,7 +421,7 @@ export function ProfilePage() {
       </section>
 
       <section>
-        <h2 className="text-[var(--bd-text-primary)] text-lg font-bold px-1">Поддержка</h2>
+        <h2 className="text-lg font-bold px-1" style={{ color: 'var(--bd-text-primary)' }}>Поддержка</h2>
         <div className="space-y-3">
           <button
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"

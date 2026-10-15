@@ -526,8 +526,7 @@
   padding: 0 14px;
   border-radius: 14px;
   background-color: var(--bd-bg-base);
-  box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
-    inset -4px -4px 8px var(--bd-raise-light);
+  box-shadow: none;
 }
 
 /* ---- Строка-тоггл (bool-фильтры: без посредников, новостройки) ----

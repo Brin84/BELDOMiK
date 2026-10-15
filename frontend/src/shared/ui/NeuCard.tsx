@@ -16,7 +16,7 @@ export function NeuCard({ children, className = '', padding = 'medium' }: NeuCar
 
   return (
     <div
-      className={`rounded-xl bg-[#e0e5ec] shadow-[6px_6px_12px_#b8b9be,-6px_-6px_12px_#ffffff] ${paddingClass} ${className}`}
+      className={`rounded-xl ${paddingClass} ${className}`}
       style={{
         backgroundColor: 'var(--bd-bg-card, #e0e5ec)',
         boxShadow: 'var(--bd-shadow-card)',
