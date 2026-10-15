@@ -180,8 +180,6 @@ export function Step3Details() {
 
   // Категории, где показываем поля квартиры
   const isApartmentLike = propertyCategory === 'apartment';
-  // Категории, где показываем этаж/этажность
-  const isBuilding = propertyCategory === 'apartment' || propertyCategory === 'house';
   // Категории, где показываем метро
   const hasMetro = isApartmentLike || propertyCategory === 'house';
   // Категории с балконами/лоджиями
