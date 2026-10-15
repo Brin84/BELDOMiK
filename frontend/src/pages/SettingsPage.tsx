@@ -11,6 +11,12 @@ import { ExpandablePicker, type ExpandableOption } from '@/features/create-listi
 
 const BIO_MAX = 2000; // совпадает с валидацией PATCH /auth/me (user_profiles.bio)
 
+const THEME_OPTIONS = [
+  { value: 'system', label: 'Системная', icon: '⚙️' },
+  { value: 'light', label: 'Светлая', icon: '☀️' },
+  { value: 'dark', label: 'Тёмная', icon: '🌙' },
+];
+
 /** Компактный переключатель в Soft UI дизайне. */
 function SettingsSwitch({
   checked,
@@ -61,6 +67,7 @@ export function SettingsPage() {
   const { cities, fetchAllCities } = useGeographyStore();
   const [openPicker, setOpenPicker] = useState(false);
   const [addingCity, setAddingCity] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
 
   // Форма профиля синхронизируется при загрузке/обновлении пользователя.
   const [firstName, setFirstName] = useState('');
@@ -162,6 +169,9 @@ export function SettingsPage() {
       trigger('error');
     }
   };
+
+  const currentTheme = user.settings?.theme ?? 'system';
+  const themeLabel = THEME_OPTIONS.find(t => t.value === currentTheme)?.label ?? 'Системная';
 
   const handleLogout = () => {
     hapticMedium();
@@ -338,20 +348,67 @@ export function SettingsPage() {
           {/* Информация */}
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.6)' }}>
             {[
-              { label: 'Тема оформления', value: 'Светлая' },
               { label: 'Язык интерфейса', value: 'Русский' },
               { label: 'Версия приложения', value: 'v0.1.0' },
             ].map((row, i) => (
               <div
                 key={row.label}
                 className="px-4 py-3 flex items-center justify-between"
-                style={i === 0 ? undefined : { borderTop: '1px solid rgba(255,255,255,0.6)' }}
+                style={i === 0 ? { borderTop: '1px solid rgba(255,255,255,0.6)' } : undefined}
               >
                 <span className="text-[15px]" style={{ color: 'var(--bd-text-primary)' }}>{row.label}</span>
                 <span className="text-sm" style={{ color: 'var(--bd-text-secondary)' }}>{row.value}</span>
               </div>
             ))}
-          </div>
+            {/* Тема оформления */}
+            <button
+              type="button"
+              className="w-full px-4 py-3 flex items-center justify-between text-left"
+              style={{ borderTop: '1px solid rgba(255,255,255,0.6)', backgroundColor: 'var(--bd-bg-base)' }}
+              onClick={() => {
+                trigger('light');
+                setThemeOpen(!themeOpen);
+              }}
+            >
+              <span className="text-[15px]" style={{ color: 'var(--bd-text-primary)' }}>Тема оформления</span>
+              <span className="flex items-center gap-1 text-sm" style={{ color: 'var(--bd-accent-primary)' }}>
+                {themeLabel}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: 'var(--bd-accent-primary)' }}>
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </span>
+            </button>
+            {themeOpen && (
+              <div className="px-4 pb-3" style={{ borderTop: '1px solid rgba(255,255,255,0.6)' }}>
+                <div className="flex flex-col gap-2 pt-3">
+                  {THEME_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all"
+                      style={{
+                        backgroundColor: currentTheme === opt.value ? 'rgba(37, 99, 235, 0.12)' : 'var(--bd-bg-base)',
+                        boxShadow: currentTheme === opt.value ? 'inset 2px 2px 4px var(--bd-raise-dark), inset -2px -2px 4px var(--bd-raise-light)' : '3px 3px 6px var(--bd-raise-dark), -3px -3px 6px var(--bd-raise-light)',
+                        color: currentTheme === opt.value ? 'var(--bd-accent-primary)' : 'var(--bd-text-primary)',
+                      }}
+                      onClick={() => {
+                        trigger('selection');
+                        saveSettings({ theme: opt.value });
+                        setThemeOpen(false);
+                      }}
+                    >
+                      <span className="text-lg">{opt.icon}</span>
+                      <span className="text-sm font-medium">{opt.label}</span>
+                      {currentTheme === opt.value && (
+                        <svg className="ml-auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} style={{ color: 'var(--bd-accent-primary)' }}>
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
         </div>
       </section>
 

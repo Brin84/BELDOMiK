@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, ReactNode } from 'react';
 import { useTelegram } from './TelegramProvider';
+import { useAuthStore } from '@/features/auth';
 
 interface ThemeContextValue {
   colorScheme: 'light' | 'dark';
@@ -21,7 +22,11 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const { themeParams, colorScheme, viewportStableHeight, contentSafeAreaInset } = useTelegram();
+  const { themeParams, colorScheme: tgColorScheme, viewportStableHeight, contentSafeAreaInset } = useTelegram();
+  const userTheme = useAuthStore((s) => s.user?.settings?.theme);
+
+  // user setting overrides Telegram scheme only when explicitly set
+  const effectiveScheme = userTheme && userTheme !== 'system' ? userTheme : tgColorScheme;
 
   useEffect(() => {
     const root = document.documentElement;
@@ -36,9 +41,10 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
       });
     }
 
-    // Apply color scheme
+    // Apply color scheme — both class (legacy) and data-attribute (for CSS [data-theme])
     root.classList.remove('light', 'dark');
-    root.classList.add(colorScheme);
+    root.classList.add(effectiveScheme);
+    root.setAttribute('data-theme', effectiveScheme);
 
     // Apply viewport stable height for fixed positioning
     if (viewportStableHeight) {
@@ -52,10 +58,10 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
       root.style.setProperty('--safe-left', `${contentSafeAreaInset.left}px`);
       root.style.setProperty('--safe-right', `${contentSafeAreaInset.right}px`);
     }
-  }, [themeParams, colorScheme, viewportStableHeight, contentSafeAreaInset]);
+  }, [themeParams, effectiveScheme, viewportStableHeight, contentSafeAreaInset]);
 
   const value: ThemeContextValue = {
-    colorScheme,
+    colorScheme: effectiveScheme as 'light' | 'dark',
     themeParams,
   };
 

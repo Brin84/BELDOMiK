@@ -5,7 +5,6 @@ import { EmptyState, NeuCard } from '@/shared/ui';
 import { useAuthStore } from '@/features/auth';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useNavigate } from 'react-router-dom';
-import { SavedSearchList } from '@/features/saved-searches/components';
 import { useCollectionsStore } from '@/features/collections';
 import { useAdminStore } from '@/features/admin';
 import { api, API_ENDPOINTS } from '@/shared/api';
@@ -47,22 +46,6 @@ export function ProfilePage() {
   }, [user]);
 
   // Выход из аккаунта только в «Настройках» (/settings) — здесь намеренно ничего нет.
-
-  const handleApplySavedSearch = (filtersJson: string) => {
-    trigger('selection');
-    // Navigate to search page with filters applied
-    // We'll encode the filters in the URL or use sessionStorage
-    sessionStorage.setItem('applySavedSearchFilters', filtersJson);
-    navigate('/search');
-  };
-
-  const handleEditSavedSearch = (savedSearch: { id: number; name: string | null; filters_json: string; notify_frequency: string }) => {
-    trigger('light');
-    // For now, we'll navigate to search page with the filters pre-filled
-    // A more complete implementation would open a modal
-    sessionStorage.setItem('editSavedSearch', JSON.stringify(savedSearch));
-    navigate('/search');
-  };
 
   if (!user) {
     const isAuthenticating = status === 'authenticating';
@@ -233,24 +216,6 @@ export function ProfilePage() {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--bd-text-secondary)' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>
-          </button>
-          <button
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
-            style={{
-              backgroundColor: 'var(--bd-bg-base)',
-              boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
-              border: '2px dashed rgba(113, 128, 150, 0.5)',
-            }}
-            onClick={() => {
-              trigger('medium');
-              navigate('/create-listing');
-            }}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--bd-accent-primary)' }}>
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            <span style={{ color: 'var(--bd-accent-primary)' }}>Создать объявление</span>
           </button>
         </div>
       </section>
@@ -431,16 +396,7 @@ export function ProfilePage() {
         </div>
       </section>
 
-      <section>
-        <h2 className="text-[var(--bd-text-primary)] text-lg font-bold px-1">🔔 Сохранённые поиски</h2>
-        <SavedSearchList
-          onApplySearch={handleApplySavedSearch}
-          onEditSearch={handleEditSavedSearch}
-        />
-      </section>
-
-      <section>
-        <h2 className="text-[var(--bd-text-primary)] text-lg font-bold px-1">Сервисы</h2>
+      {/* Сервисы */}
         <div className="space-y-3">
           <button
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
@@ -456,24 +412,6 @@ export function ProfilePage() {
               <line x1="4" y1="10" x2="4" y2="20" />
             </svg>
             <span style={{ color: 'var(--bd-text-primary)' }}>Сравнение объявлений</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--bd-text-secondary)' }}>
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-          <button
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-left"
-            style={{ backgroundColor: 'var(--bd-bg-base)', boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)' }}
-            onClick={() => {
-              trigger('light');
-              navigate('/analytics');
-            }}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--bd-text-secondary)' }}>
-              <line x1="18" y1="20" x2="18" y2="10" />
-              <line x1="12" y1="20" x2="12" y2="4" />
-              <line x1="6" y1="20" x2="6" y2="14" />
-            </svg>
-            <span style={{ color: 'var(--bd-text-primary)' }}>Аналитика рынка</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="ml-auto flex-shrink-0" style={{ color: 'var(--bd-text-secondary)' }}>
               <polyline points="9 18 15 12 9 6" />
             </svg>

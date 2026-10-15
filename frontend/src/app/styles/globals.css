@@ -80,9 +80,57 @@
   --tg-theme-destructive-text-color: #dc2626 !important;
 }
 
+/* ============================================================
+ * Dark theme — Soft UI / Neumorphism на тёмном фоне.
+ * ============================================================ */
+[data-theme="dark"] {
+  --bd-bg-base: #1e2130;
+  --bd-bg-surface: #1e2130;
+  --bd-bg-card: #1e2130;
+
+  --bd-raise-dark: #141620;
+  --bd-raise-light: #282c42;
+
+  --bd-accent-primary: #4c91ff;
+  --bd-accent-success: #34d399;
+  --bd-accent-warning: #fbbf24;
+  --bd-accent-soft: rgba(76, 145, 255, 0.3);
+
+  --bd-text-primary: #e2e8f0;
+  --bd-text-secondary: #94a3b8;
+
+  --bd-shadow-raised: 6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light);
+  --bd-shadow-raised-hover: 8px 8px 16px var(--bd-raise-dark), -8px -8px 16px var(--bd-raise-light);
+  --bd-shadow-raised-active: inset 4px 4px 8px var(--bd-raise-dark), inset -4px -4px 8px var(--bd-raise-light);
+  --bd-shadow-inset: inset 4px 4px 8px var(--bd-raise-dark), inset -4px -4px 8px var(--bd-raise-light);
+  --bd-shadow-card: var(--bd-shadow-raised);
+
+  --tg-theme-bg-color: #1e2130 !important;
+  --tg-theme-secondary-bg-color: #282c42 !important;
+  --tg-theme-tertiary-bg-color: #141620 !important;
+  --tg-theme-section-bg-color: #282c42 !important;
+  --tg-theme-card-bg-color: #282c42 !important;
+  --tg-theme-header-bg-color: #282c42 !important;
+  --tg-theme-bottom-bar-bg-color: #1e2130 !important;
+  --tg-theme-text-color: #e2e8f0 !important;
+  --tg-theme-hint-color: #94a3b8 !important;
+  --tg-theme-section-header-text-color: #94a3b8 !important;
+  --tg-theme-subtitle-text-color: #94a3b8 !important;
+  --tg-theme-link-color: #4c91ff !important;
+  --tg-theme-accent-text-color: #4c91ff !important;
+  --tg-theme-button-color: #4c91ff !important;
+  --tg-theme-button-text-color: #ffffff !important;
+  --tg-theme-destructive-color: #f87171 !important;
+  --tg-theme-destructive-text-color: #fca5a5 !important;
+}
+
 /* Нативные контролы (скроллбары, дата-инпуты) — тоже светлые. */
 html {
   color-scheme: light;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 html {
