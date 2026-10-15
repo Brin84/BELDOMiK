@@ -360,6 +360,7 @@ export function SettingsPage() {
                 <span className="text-sm" style={{ color: 'var(--bd-text-secondary)' }}>{row.value}</span>
               </div>
             ))}
+          </div>
             {/* Тема оформления */}
             <button
               type="button"
