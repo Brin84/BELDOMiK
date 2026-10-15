@@ -102,6 +102,22 @@ const defaultFormData: PropertyCreate = {
   contact_name: '',
   contact_phone: '',
   show_phone: true,
+  // ── Дом / участок ──────────────────────────────────────────
+  land_area: undefined,
+  house_area: undefined,
+  house_type: undefined,
+  // ── Участок ────────────────────────────────────────────────
+  cadastral_number: undefined,
+  land_category: undefined,
+  // ── Гараж / машиноместо ────────────────────────────────────
+  garage_type: undefined,
+  garage_area: undefined,
+  is_heated: false,
+  // ── Коммерческая недвижимость ──────────────────────────────
+  commercial_purpose: undefined,
+  utility_area: undefined,
+  has_warehouse: false,
+  has_office: false,
 };
 
 const stepFields: Record<CreateListingStep, string[]> = {
@@ -301,6 +317,22 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
         show_phone: formData.show_phone !== false,
         photos: [], // Photos uploaded separately
         features: [],
+        // ── Дом / участок ─────────────────────────────────────
+        land_area: formData.land_area,
+        house_area: formData.house_area,
+        house_type: formData.house_type,
+        // ── Участок ─────────────────────────────────────────────
+        cadastral_number: formData.cadastral_number,
+        land_category: formData.land_category,
+        // ── Гараж / машиноместо ─────────────────────────────────
+        garage_type: formData.garage_type,
+        garage_area: formData.garage_area,
+        is_heated: formData.is_heated || false,
+        // ── Коммерческая недвижимость ───────────────────────────
+        commercial_purpose: formData.commercial_purpose,
+        utility_area: formData.utility_area,
+        has_warehouse: formData.has_warehouse || false,
+        has_office: formData.has_office || false,
       };
 
       // Свежая подача из визарда (без черновика): сначала создаём объявление
@@ -408,6 +440,22 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
         show_phone: formData.show_phone !== false,
         photos: [],
         features: [],
+        // ── Дом / участок ─────────────────────────────────────
+        land_area: formData.land_area,
+        house_area: formData.house_area,
+        house_type: formData.house_type,
+        // ── Участок ─────────────────────────────────────────────
+        cadastral_number: formData.cadastral_number,
+        land_category: formData.land_category,
+        // ── Гараж / машиноместо ─────────────────────────────────
+        garage_type: formData.garage_type,
+        garage_area: formData.garage_area,
+        is_heated: formData.is_heated || false,
+        // ── Коммерческая недвижимость ───────────────────────────
+        commercial_purpose: formData.commercial_purpose,
+        utility_area: formData.utility_area,
+        has_warehouse: formData.has_warehouse || false,
+        has_office: formData.has_office || false,
       };
 
       if (draftId) {
@@ -479,6 +527,22 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
         kitchen_area: response.kitchen_area ?? undefined,
         loggia_count: response.loggia_count ?? undefined,
         is_new_building: response.is_new_building || false,
+        // ── Дом / участок ─────────────────────────────────────
+        land_area: (response as any).land_area ?? undefined,
+        house_area: (response as any).house_area ?? undefined,
+        house_type: (response as any).house_type ?? undefined,
+        // ── Участок ─────────────────────────────────────────────
+        cadastral_number: (response as any).cadastral_number ?? undefined,
+        land_category: (response as any).land_category ?? undefined,
+        // ── Гараж / машиноместо ─────────────────────────────────
+        garage_type: (response as any).garage_type ?? undefined,
+        garage_area: (response as any).garage_area ?? undefined,
+        is_heated: (response as any).is_heated ?? false,
+        // ── Коммерческая недвижимость ───────────────────────────
+        commercial_purpose: (response as any).commercial_purpose ?? undefined,
+        utility_area: (response as any).utility_area ?? undefined,
+        has_warehouse: (response as any).has_warehouse ?? false,
+        has_office: (response as any).has_office ?? false,
       };
       set({ formData: draftData, draftId: id, currentStep: 1, isLoading: false });
     } catch (error) {

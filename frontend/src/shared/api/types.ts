@@ -133,6 +133,22 @@ export interface PropertyShort {
   agency_id: number | null;
   is_promoted: boolean;
   promotion_type: string | null;
+  // ── Дом / участок ──────────────────────────────────────────
+  land_area: number | null;
+  house_area: number | null;
+  house_type: string | null;
+  // ── Участок ────────────────────────────────────────────────
+  cadastral_number: string | null;
+  land_category: string | null;
+  // ── Гараж / машиноместо ────────────────────────────────────
+  garage_type: string | null;
+  garage_area: number | null;
+  is_heated: boolean;
+  // ── Коммерческая недвижимость ──────────────────────────────
+  commercial_purpose: string | null;
+  utility_area: number | null;
+  has_warehouse: boolean;
+  has_office: boolean;
 }
 
 export interface PropertyPhoto {
@@ -352,6 +368,26 @@ export interface PropertyCreate {
   contact_name?: string;
   contact_phone?: string;
   show_phone?: boolean;
+
+  // ── Дом / участок ──────────────────────────────────────────
+  land_area?: number;      // площадь участка в сотках
+  house_area?: number;      // площадь дома м²
+  house_type?: string;      // тип дома
+
+  // ── Участок ────────────────────────────────────────────────
+  cadastral_number?: string;  // кадастровый номер
+  land_category?: string;     // категория земли
+
+  // ── Гараж / машиноместо ────────────────────────────────────
+  garage_type?: string;    // тип гаража
+  garage_area?: number;    // площадь м²
+  is_heated?: boolean;     // отапливаемый
+
+  // ── Коммерческая недвижимость ──────────────────────────────
+  commercial_purpose?: string;  // назначение
+  utility_area?: number;        // подсобные м²
+  has_warehouse?: boolean;      // склад
+  has_office?: boolean;         // офис
 }
 
 export interface PropertyUpdate extends Partial<PropertyCreate> {}

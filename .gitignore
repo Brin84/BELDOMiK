@@ -1,70 +1,24 @@
-# Python
+# Кэш Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
+
+# Виртуальные окружения
 venv/
-env/
-ENV/
-.venv
+.venv/
 
-# Environment
-.env
-.env.local
-.env.*.local
-
-# IDE
+# PyCharm
 .idea/
-.vscode/
-*.swp
-*.swo
-*~
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-logs/
-
-# Database
-*.sqlite
-*.db
-
-# Testing
-.coverage
-htmlcov/
-.pytest_cache/
-.tox/
-
-# Build
-dist/
+# Сборка
 build/
+dist/
 *.egg-info/
 
-# Node
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+# Тесты и покрытие
+.pytest_cache/
+.coverage
+htmlcov/
 
-# Frontend build
-frontend/dist/
-frontend/.vite/
-
-# Docker
-.docker/
-
-# Alembic
-# Migration files MUST be tracked in git — they are copied into the container
-# (backend/Dockerfile COPY backend/alembic ./alembic) and applied on startup
-# via `alembic upgrade head`. Ignoring them would silently skip schema changes.
-backend/alembic/versions/*.pyc
-
-# Misc
-*.pem
-.vercel
-.netlify
+# ОС
+Thumbs.db
+.DS_Store

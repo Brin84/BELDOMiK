@@ -126,6 +126,26 @@ class PropertyBase(BaseSchema):
     # «Договорная цена» (price_byn=0 при is_negotiable=True)
     is_negotiable: bool = False
 
+    # ── Дом / участок ──────────────────────────────────────────
+    land_area: float | None = None  # площадь участка в сотках
+    house_area: float | None = None  # площадь дома
+    house_type: str | None = None  # тип дома
+
+    # ── Участок ────────────────────────────────────────────────
+    cadastral_number: str | None = None  # кадастровый номер
+    land_category: str | None = None  # категория земли
+
+    # ── Гараж / машиноместо ────────────────────────────────────
+    garage_type: str | None = None  # тип гаража
+    garage_area: float | None = None  # площадь
+    is_heated: bool = False  # отапливаемый
+
+    # ── Коммерческая недвижимость ──────────────────────────────
+    commercial_purpose: str | None = None  # назначение
+    utility_area: float | None = None  # коммунальные / подсобные
+    has_warehouse: bool = False  # склад
+    has_office: bool = False  # офис
+
     @field_validator("renovation")
     @classmethod
     def _norm_renovation(cls, v: str | RenovationType | None) -> RenovationType | None:
@@ -173,6 +193,22 @@ class PropertyUpdate(BaseSchema):
     contact_phone: str | None = None
     show_phone: bool | None = None
     is_negotiable: bool | None = None
+    # ── Дом / участок ──────────────────────────────────────────
+    land_area: float | None = None
+    house_area: float | None = None
+    house_type: str | None = None
+    # ── Участок ────────────────────────────────────────────────
+    cadastral_number: str | None = None
+    land_category: str | None = None
+    # ── Гараж / машиноместо ────────────────────────────────────
+    garage_type: str | None = None
+    garage_area: float | None = None
+    is_heated: bool | None = None
+    # ── Коммерческая недвижимость ──────────────────────────────
+    commercial_purpose: str | None = None
+    utility_area: float | None = None
+    has_warehouse: bool | None = None
+    has_office: bool | None = None
 
     @field_validator("renovation")
     @classmethod
@@ -241,6 +277,22 @@ class PropertyShortRead(BaseSchema):
     agency_id: int | None = None
     is_promoted: bool = False
     promotion_type: str | None = None
+    # ── Дом / участок ──────────────────────────────────────────
+    land_area: float | None = None
+    house_area: float | None = None
+    house_type: str | None = None
+    # ── Участок ────────────────────────────────────────────────
+    cadastral_number: str | None = None
+    land_category: str | None = None
+    # ── Гараж / машиноместо ────────────────────────────────────
+    garage_type: str | None = None
+    garage_area: float | None = None
+    is_heated: bool = False
+    # ── Коммерческая недвижимость ──────────────────────────────
+    commercial_purpose: str | None = None
+    utility_area: float | None = None
+    has_warehouse: bool = False
+    has_office: bool = False
 
 
 class PropertyRead(PropertyShortRead):
@@ -258,14 +310,6 @@ class PropertyRead(PropertyShortRead):
     agency_name: str | None = None
     agency_logo_url: str | None = None
     is_verified: bool = False
-    features: list[PropertyFeatureRead] = []
-    price_history: list[PropertyPriceRead] = []
-    published_at: datetime | None = None
-    # Contact info of the owner, populated from the User relation in the detail
-    # route (not set on the ORM model). Used by the frontend to render a
-    # "Связаться с продавцом" action.
-    owner_username: str | None = None
-    owner_phone: str | None = None
     # Карточка продавца (Барахолка-модель): рейтинг, подписки, аватар.
     # Вычисляется в detail-роуте через social_service.user_summary.
     owner_avatar_url: str | None = None

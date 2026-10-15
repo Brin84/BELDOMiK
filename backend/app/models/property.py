@@ -78,6 +78,38 @@ class Property(Base):
     kitchen_area = Column(Float, nullable=True)
     rooms_count = Column(Integer, nullable=True)
 
+    # ── Дом / участок ──────────────────────────────────────────
+    # land_area: площадь участка в сотках (для house, land, dacha)
+    land_area = Column(Float, nullable=True)
+    # house_area: площадь дома отдельно (для house, dacha)
+    house_area = Column(Float, nullable=True)
+    # house_type: тип дома (для house, dacha)
+    house_type = Column(String(100), nullable=True)
+
+    # ── Участок ────────────────────────────────────────────────
+    # cadastral_number: кадастровый номер (для land)
+    cadastral_number = Column(String(100), nullable=True)
+    # land_category: категория земли (для land)
+    land_category = Column(String(100), nullable=True)
+
+    # ── Гараж / машиноместо ─────────────────────────────────────
+    # garage_type: тип гаража/стоянки (для garage)
+    garage_type = Column(String(100), nullable=True)
+    # garage_area: площадь гаража/места (для garage)
+    garage_area = Column(Float, nullable=True)
+    # is_heated: отапливаемый (для garage)
+    is_heated = Column(Boolean, default=False, nullable=False)
+
+    # ── Коммерческая недвижимость ──────────────────────────────
+    # commercial_purpose: назначение коммерческого объекта
+    commercial_purpose = Column(String(100), nullable=True)
+    # utility_area: коммунальные услуги / подсобные помещения
+    utility_area = Column(Float, nullable=True)
+    # has_warehouse: наличие склада
+    has_warehouse = Column(Boolean, default=False, nullable=False)
+    # has_office: наличие офисных помещений
+    has_office = Column(Boolean, default=False, nullable=False)
+
     # Features
     renovation = Column(Enum(RenovationType), nullable=True, default=RenovationType.NONE)
     furniture = Column(Boolean, default=False, nullable=False)
