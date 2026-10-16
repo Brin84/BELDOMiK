@@ -179,6 +179,20 @@
     inset -4px -4px 8px var(--bd-raise-light);
 }
 
+.qf__field input {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.qf__field input::placeholder {
+  color: var(--bd-text-secondary);
+  font-weight: 500;
+}
+
 .qf__field-dash {
   color: var(--bd-text-secondary);
   font-size: 13px;
@@ -526,7 +540,26 @@
   padding: 0 14px;
   border-radius: 14px;
   background-color: var(--bd-bg-base);
-  box-shadow: none;
+  box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
+    inset -4px -4px 8px var(--bd-raise-light);
+}
+
+.fbs__field input {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--bd-text-primary);
+}
+
+.fbs__field input::placeholder {
+  color: var(--bd-text-secondary);
+  font-weight: 500;
 }
 
 /* ---- Строка-тоггл (bool-фильтры: без посредников, новостройки) ----
