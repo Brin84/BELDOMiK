@@ -21,6 +21,7 @@ from app.api.routes import (
     reviews,
     saved_searches,
     search,
+    support,
     users,
     viewings,
     webhook,
@@ -50,3 +51,4 @@ api_router.include_router(mortgage.router)
 api_router.include_router(webhook.router)
 api_router.include_router(internal.router)
 api_router.include_router(legal.router)
+api_router.include_router(support.router)

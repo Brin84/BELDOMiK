@@ -236,15 +236,15 @@ class NotificationService:
 
     @staticmethod
     async def post_channel_welcome() -> bool:
-        """Приветственное сообщение в промо-канал (best-effort)."""
+        """Приветственное сообщение в промо-канал с фото (best-effort)."""
         chat_id = NotificationService.channel_chat_id()
         if not chat_id:
             logger.warning("Приветствие в канал: CHANNEL_URL не настроен")
             return False
 
-        text = (
+        caption = (
             "🎉 <b>BELDOMiK</b> — недвижимость Беларуси 🇧🇾\n\n"
-            "В этом канале публикуются все новые объявления:\n"  # noqa: RUF001
+            "В этом канале публикуются все новые объявления:\n"
             "🏢 Квартиры и дома\n"
             "🌍 Земельные участки\n"
             "🏪 Коммерческая недвижимость\n\n"
@@ -258,8 +258,27 @@ class NotificationService:
                 }],
             ]
         }
+
+        # Пробуем отправить с фото; при ошибке — текст без фото.
+        photo_url = getattr(settings, "CHANNEL_WELCOME_PHOTO_URL", None) or None
+        if photo_url:
+            try:
+                result = await NotificationService.send_photo(
+                    chat_id, photo_url, caption, keyboard
+                )
+                if result.get("ok"):
+                    return True
+                logger.warning(
+                    "Канал: sendPhoto не удался (%s), дублируем текстом",
+                    result.get("error_code"),
+                )
+            except Exception:
+                logger.warning(
+                    "Канал: sendPhoto упал, дублируем текстом", exc_info=True
+                )
+
         return await NotificationService.send_telegram_message(
-            chat_id, text, reply_markup=keyboard
+            chat_id, caption, reply_markup=keyboard
         )
 
     @staticmethod

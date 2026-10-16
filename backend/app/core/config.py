@@ -36,6 +36,11 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = Field(default="", validation_alias="FRONTEND_URL")
     BACKEND_PUBLIC_URL: str = Field(default="", validation_alias="BACKEND_PUBLIC_URL")
     CHANNEL_URL: str = Field(default="", validation_alias="CHANNEL_URL")
+    # Публичный URL изображения для приветственного поста в канале.
+    # Если пусто — отправляется только текстовое сообщение.
+    CHANNEL_WELCOME_PHOTO_URL: str = Field(
+        default="", validation_alias="CHANNEL_WELCOME_PHOTO_URL"
+    )
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"

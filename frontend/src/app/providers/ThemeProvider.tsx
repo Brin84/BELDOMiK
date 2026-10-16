@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, ReactNode } from 'react';
 import { useTelegram } from './TelegramProvider';
 import { useAuthStore } from '@/features/auth';
+import WebApp from '@twa-dev/sdk';
 
 interface ThemeContextValue {
   colorScheme: 'light' | 'dark';
@@ -51,13 +52,9 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     if (effectiveScheme === 'dark') {
       // Solid dark background — same as --bd-bg-base in dark theme
       const darkHeader = '#1e2130';
-      try {
-        (window as unknown as Record<string, unknown>).Telegram?.WebApp?.setHeaderColor(darkHeader);
-      } catch {}
+      try { WebApp.setHeaderColor(darkHeader); } catch {}
     } else {
-      try {
-        (window as unknown as Record<string, unknown>).Telegram?.WebApp?.setHeaderColor('bg_color');
-      } catch {}
+      try { WebApp.setHeaderColor('#E0E5EC'); } catch {}
     }
 
     // Apply viewport stable height for fixed positioning

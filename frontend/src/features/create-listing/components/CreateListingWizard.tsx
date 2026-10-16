@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useTelegram } from '@/app/providers/TelegramProvider';
@@ -10,6 +10,7 @@ import { Step3Details } from './steps/Step3Details';
 import { Step4Contacts } from './steps/Step4Contacts';
 import { Step5Photos } from './steps/Step5Photos';
 import { Step6Preview } from './steps/Step6Preview';
+import { PublishedSuccess } from './PublishedSuccess';
 import { EmptyState } from '@/shared/ui';
 import { useKeyboardVisible } from '@/shared/lib/useKeyboardVisible';
 
@@ -19,6 +20,7 @@ export function CreateListingWizard() {
   const { user, status } = useAuthStore();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [showSuccess, setShowSuccess] = useState(false);
   const {
     currentStep,
     setStep,
@@ -102,7 +104,7 @@ export function CreateListingWizard() {
     if (result) {
       trigger('success');
       reset();
-      navigate('/profile');
+      setShowSuccess(true);
     } else {
       trigger('error');
     }
@@ -160,6 +162,7 @@ export function CreateListingWizard() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bd-bg-base)' }}>
+      {showSuccess && <PublishedSuccess onClose={() => setShowSuccess(false)} />}
       {/* Header with progress */}
       <div className="sticky top-0 z-10 p-4 border-b" style={{ backgroundColor: 'var(--bd-bg-base)', borderColor: 'rgba(255,255,255,0.6)', borderWidth: '0.5px', boxShadow: 'var(--bd-shadow-raised)' }}>
         <div className="flex items-center justify-between mb-3">

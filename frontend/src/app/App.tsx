@@ -27,6 +27,7 @@ import { AllBelarusPage } from '@/pages/AllBelarusPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { ProfileReviewsPage } from '@/pages/ProfileReviewsPage';
 import { LegalDocumentsPage } from '@/features/legal/LegalDocumentsPage';
+import { SupportPage } from '@/pages/SupportPage';
 
 // Lazy load MapPage for code splitting
 const MapPage = lazy(() => import('@/pages/MapPage').then(module => ({ default: module.MapPage })));
@@ -82,6 +83,7 @@ export function App() {
         <Route path="/favorites" element={<FavoritesPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/support" element={<SupportPage />} />
         <Route path="/reviews" element={<ProfileReviewsPage />} />
         <Route path="/create-listing" element={<CreateListingPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />

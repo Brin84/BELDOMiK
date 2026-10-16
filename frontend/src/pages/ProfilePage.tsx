@@ -428,7 +428,7 @@ export function ProfilePage() {
             style={{ backgroundColor: 'var(--bd-bg-base)', boxShadow: '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)' }}
             onClick={() => {
               trigger('light');
-              window.open('https://t.me/beldomik_bot', '_blank', 'noopener,noreferrer');
+              navigate('/support');
             }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="flex-shrink-0" style={{ color: 'var(--bd-text-secondary)' }}>
