@@ -1,24 +1,33 @@
-# Кэш Python
+﻿# Python
 __pycache__/
 *.py[cod]
+*.egg-info/
 
-# Виртуальные окружения
+# Virtual environments
 venv/
 .venv/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
 
 # PyCharm
 .idea/
 
-# Сборка
+# Build artifacts
 build/
 dist/
-*.egg-info/
 
-# Тесты и покрытие
+# Tests and coverage
 .pytest_cache/
 .coverage
 htmlcov/
 
-# ОС
+# OS
 Thumbs.db
 .DS_Store
+
+# Frontend
+frontend/node_modules/
+frontend/dist/

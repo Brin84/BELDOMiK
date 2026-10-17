@@ -91,25 +91,54 @@ class NotificationService:
     @staticmethod
     async def send_photo(
         chat_id: int | str,
-        photo_url: str,
-        caption: str,
+        photo_url: str | None = None,
+        caption: str = "",
         reply_markup: dict | None = None,
+        photo_path: str | None = None,
     ) -> dict:
-        """Send a photo by public URL to a chat (returns raw Bot API response)."""
+        """Send a photo to a chat (returns raw Bot API response).
+
+        Supports both public URL and local file upload.
+        If photo_path is provided, uploads the file via multipart/form-data.
+        Otherwise uses photo_url.
+        """
         if not settings.TELEGRAM_BOT_TOKEN:
             return {"ok": False, "error_code": "no_token"}
         url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendPhoto"
-        payload = {
-            "chat_id": chat_id,
-            "photo": photo_url,
-            "caption": caption,
-            "parse_mode": "HTML",
-        }
-        if reply_markup:
-            payload["reply_markup"] = reply_markup
+
         async with httpx.AsyncClient(timeout=20.0) as client:
-            resp = await client.post(url, json=payload)
-            return resp.json()
+            if photo_path:
+                # Upload local file via multipart
+                try:
+                    with open(photo_path, "rb") as photo_file:
+                        files = {"photo": ("photo.jpg", photo_file, "image/jpeg")}
+                        data = {
+                            "chat_id": str(chat_id),
+                            "caption": caption,
+                            "parse_mode": "HTML",
+                        }
+                        if reply_markup:
+                            import json
+                            data["reply_markup"] = json.dumps(reply_markup)
+                        resp = await client.post(url, data=data, files=files)
+                        return resp.json()
+                except Exception as e:
+                    logger.exception("Failed to upload photo from file", extra={"path": photo_path})
+                    return {"ok": False, "error_code": "file_upload_failed", "error": str(e)}
+            elif photo_url:
+                # Use public URL
+                payload = {
+                    "chat_id": chat_id,
+                    "photo": photo_url,
+                    "caption": caption,
+                    "parse_mode": "HTML",
+                }
+                if reply_markup:
+                    payload["reply_markup"] = reply_markup
+                resp = await client.post(url, json=payload)
+                return resp.json()
+            else:
+                return {"ok": False, "error_code": "no_photo"}
 
     @staticmethod
     def build_channel_caption(
@@ -203,7 +232,10 @@ class NotificationService:
             if photo_url:
                 try:
                     result = await NotificationService.send_photo(
-                        chat_id, photo_url, caption, keyboard
+                        chat_id,
+                        photo_url=photo_url,
+                        caption=caption,
+                        reply_markup=keyboard,
                     )
                 except Exception:
                     logger.warning(
@@ -260,11 +292,18 @@ class NotificationService:
         }
 
         # Пробуем отправить с фото; при ошибке — текст без фото.
+        # Поддерживается как публичный URL, так и локальный файл.
         photo_url = getattr(settings, "CHANNEL_WELCOME_PHOTO_URL", None) or None
-        if photo_url:
+        photo_path = getattr(settings, "CHANNEL_WELCOME_PHOTO_PATH", None) or None
+
+        if photo_path or photo_url:
             try:
                 result = await NotificationService.send_photo(
-                    chat_id, photo_url, caption, keyboard
+                    chat_id,
+                    photo_url=photo_url,
+                    caption=caption,
+                    reply_markup=keyboard,
+                    photo_path=photo_path,
                 )
                 if result.get("ok"):
                     return True

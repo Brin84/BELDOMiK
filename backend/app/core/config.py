@@ -41,6 +41,11 @@ class Settings(BaseSettings):
     CHANNEL_WELCOME_PHOTO_URL: str = Field(
         default="", validation_alias="CHANNEL_WELCOME_PHOTO_URL"
     )
+    # Локальный путь к файлу изображения для приветственного поста в канале.
+    # Приоритет выше, чем у CHANNEL_WELCOME_PHOTO_URL.
+    CHANNEL_WELCOME_PHOTO_PATH: str = Field(
+        default="", validation_alias="CHANNEL_WELCOME_PHOTO_PATH"
+    )
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
