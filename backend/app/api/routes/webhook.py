@@ -49,6 +49,8 @@ async def process_telegram_update(db: Session, update: dict):
         await handle_message(db, update["message"])
     elif "callback_query" in update:
         await handle_callback_query(db, update["callback_query"])
+    elif "my_chat_member" in update:
+        await handle_my_chat_member_update(db, update["my_chat_member"])
     elif "chat_member" in update:
         await handle_chat_member_update(db, update["chat_member"])
     # Add more handlers as needed (inline_query, channel_post, etc.)
@@ -119,25 +121,32 @@ async def handle_callback_query(db: Session, callback_query: dict):
     pass
 
 
-async def handle_chat_member_update(db: Session, chat_member_update: dict):
-    """Пригласили бота в канал → отправляем приветствие в канал."""
+async def handle_my_chat_member_update(db: Session, my_chat_member_update: dict):
+    """Бота добавили/удалили в чат/канал → отправляем приветствие если это канал."""
     from app.services.notification_service import NotificationService
 
-    new_member = chat_member_update.get("new_chat_member", {})
-    user = new_member.get("user", {})
-    # Реагируем только если «участник» — это сам бот и статус стал admin/creator
-    if not user.get("is_bot"):
+    new_member = my_chat_member_update.get("new_chat_member", {})
+    old_member = my_chat_member_update.get("old_chat_member", {})
+    bot_user = my_chat_member_update.get("from", {})
+
+    if not bot_user.get("is_bot"):
         return
     if new_member.get("status") not in ("administrator", "creator"):
         return
+    if old_member and old_member.get("status") == new_member.get("status"):
+        return
 
-    # Проверяем, что канал совпадает с ожидаемым CHANNEL_URL
-    chat = chat_member_update.get("chat", {})
+    chat = my_chat_member_update.get("chat", {})
     expected = NotificationService.channel_chat_id()
     if expected and chat.get("username") and f"@{chat['username']}" != expected:
         return
 
     await NotificationService.post_channel_welcome()
+
+
+async def handle_chat_member_update(db: Session, chat_member_update: dict):
+    """Обычный участник изменил статус (не бот)."""
+    pass
 
 
 @router.get("/set")
@@ -155,7 +164,7 @@ async def set_webhook():
     payload = {
         "url": webhook_url,
         "secret_token": secret_token,
-        "allowed_updates": ["message", "callback_query", "chat_member", "channel_post"],
+        "allowed_updates": ["message", "callback_query", "my_chat_member", "chat_member", "channel_post"],
         "drop_pending_updates": True,
     }
 
