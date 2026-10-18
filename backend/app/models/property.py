@@ -199,6 +199,9 @@ class Property(Base):
     promotions = relationship(
         "Promotion", back_populates="property", cascade="all, delete-orphan"
     )
+    payments = relationship(
+        "Payment", back_populates="property", cascade="all, delete-orphan"
+    )
     reports = relationship(
         "Report", back_populates="property", cascade="all, delete-orphan"
     )

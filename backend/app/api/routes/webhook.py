@@ -1,4 +1,4 @@
-"""Telegram Bot Webhook routes."""
+"""Webhook routes: Telegram + Payments."""
 import asyncio
 from contextlib import suppress
 
@@ -9,7 +9,13 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_db
 from app.core.config import settings
+from app.models.monetization import Payment
+from app.services.monetization_service import MonetizationService
+from app.services.payments.factory import get_payment_provider
 from app.services.telegram_auth import TelegramAuthService
+
+import logging
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/webhook", tags=["Webhook"])
 
@@ -227,3 +233,55 @@ async def webhook_info():
         )
         resp.raise_for_status()
         return resp.json()
+
+
+# ── Payment provider webhooks ──────────────────────────────────────
+
+@router.post("/yookassa")
+async def yookassa_webhook(request: Request, db: Session = Depends(get_db)):
+    """Handle YooKassa payment webhook."""
+    body = await request.json()
+    provider = get_payment_provider("yookassa")
+    parsed = provider.parse_webhook(body, dict(request.headers))
+    if not parsed:
+        return {"ok": True}  # Ignore non-payment events
+
+    payment_id = parsed.get("payment_id")
+    if not payment_id:
+        return {"ok": True}
+
+    payment = db.query(Payment).filter(Payment.id == payment_id).first()
+    if not payment:
+        return {"ok": True}
+
+    if parsed["status"] == "succeeded":
+        try:
+            MonetizationService.confirm_payment(db, payment_id, payment.user)
+        except Exception:
+            logger.exception("YooKassa confirm failed for payment %s", payment_id)
+    return {"ok": True}
+
+
+@router.post("/ipay")
+async def ipay_webhook(request: Request, db: Session = Depends(get_db)):
+    """Handle IPay payment webhook."""
+    body = await request.json()
+    provider = get_payment_provider("ipay")
+    parsed = provider.parse_webhook(body, dict(request.headers))
+    if not parsed:
+        return {"ok": True}
+
+    payment_id = parsed.get("payment_id")
+    if not payment_id:
+        return {"ok": True}
+
+    payment = db.query(Payment).filter(Payment.id == payment_id).first()
+    if not payment:
+        return {"ok": True}
+
+    if parsed["status"] == "paid":
+        try:
+            MonetizationService.confirm_payment(db, payment_id, payment.user)
+        except Exception:
+            logger.exception("IPay confirm failed for payment %s", payment_id)
+    return {"ok": True}

@@ -43,3 +43,9 @@ class SuccessResponse(BaseSchema):
 
 class MessageResponse(BaseSchema):
     message: str
+
+
+class BroadcastRequest(BaseSchema):
+    text: str
+    photo_url: str | None = None
+    with_button: bool = True

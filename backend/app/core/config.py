@@ -141,8 +141,18 @@ class Settings(BaseSettings):
     SCHEDULER_SECRET: str = Field(default="", validation_alias="SCHEDULER_SECRET")
 
     # Payments
-    # Payment provider: "mock" (dev, auto-confirm) or "telegram_stars" (future).
+    # Payment provider: "mock" (dev, auto-confirm), "yookassa", "ipay", or "telegram_stars" (future).
     PAYMENT_PROVIDER: str = Field(default="mock", validation_alias="PAYMENT_PROVIDER")
+
+    # YooKassa
+    YOOKASSA_SHOP_ID: str = Field(default="", validation_alias="YOOKASSA_SHOP_ID")
+    YOOKASSA_SECRET_KEY: str = Field(default="", validation_alias="YOOKASSA_SECRET_KEY")
+
+    # IPay (Belarus)
+    IPAY_ACCOUNT_ID: str = Field(default="", validation_alias="IPAY_ACCOUNT_ID")
+    IPAY_SECRET_KEY: str = Field(default="", validation_alias="IPAY_SECRET_KEY")
+    IPAY_API_URL: str = Field(default="https://api.ipay.by", validation_alias="IPAY_API_URL")
+    IPAY_TEST_MODE: bool = Field(default=False, validation_alias="IPAY_TEST_MODE")
 
 
 @lru_cache

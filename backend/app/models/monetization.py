@@ -42,6 +42,7 @@ class Promotion(Base):
 
     # Relationships
     property = relationship("Property", back_populates="promotions")
+    payment = relationship("Payment", back_populates="promotion")
 
 
 class SubscriptionPlan(StrEnum):
@@ -73,6 +74,9 @@ class Subscription(Base):
     has_team = Column(Boolean, default=False, nullable=False)
     team_size = Column(Integer, default=1, nullable=False)
 
+    # Relationships
+    payment = relationship("Payment", back_populates="subscription")
+
 
 class PaymentStatus(StrEnum):
     PENDING = "pending"
@@ -103,5 +107,13 @@ class Payment(Base):
     payment_link = Column(String(500), nullable=True)
     description = Column(Text, nullable=True)
     metadata_json = Column(Text, nullable=True)
+    provider_data = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     completed_at = Column(DateTime, nullable=True)
+
+    # Relationships
+    user = relationship("User", back_populates="payments")
+    agency = relationship("Agency", back_populates="payments")
+    property = relationship("Property", back_populates="payments")
+    promotion = relationship("Promotion", back_populates="payment")
+    subscription = relationship("Subscription", back_populates="payment")

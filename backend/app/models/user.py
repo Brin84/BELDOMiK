@@ -66,6 +66,7 @@ class User(Base):
     )
     property_views = relationship("PropertyView", back_populates="user")
     property_contacts = relationship("PropertyContact", back_populates="user")
+    payments = relationship("Payment", back_populates="user")
 
 
 class UserProfile(Base):
@@ -133,6 +134,7 @@ class Agency(Base):
     members_profiles = relationship("UserProfile", back_populates="agency")
     members = relationship("AgencyMember", back_populates="agency", cascade="all, delete-orphan")
     properties = relationship("Property", back_populates="agency")
+    payments = relationship("Payment", back_populates="agency")
 
 
 class AgencyMember(Base):
