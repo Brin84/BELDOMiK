@@ -185,7 +185,10 @@ async def handle_chat_member_update(db: Session, chat_member_update: dict):
         or settings.BACKEND_PUBLIC_URL
     ).rstrip("/") + "/"
 
-    keyboard_rows = [[{"text": "🏠 Открыть BELDOMiK", "web_app": {"url": webapp_url}}]]
+    keyboard_rows = [
+        [{"text": "🏠 Открыть BELDOMiK", "web_app": {"url": webapp_url}}],
+        [{"text": "📱 Открыть в Telegram", "url": NotificationService.miniapp_deep_link()}],
+    ]
 
     await NotificationService.send_telegram_message(
         chat_id=user_id,
