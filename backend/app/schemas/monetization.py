@@ -9,11 +9,15 @@ class PromotionCatalogItem(BaseSchema):
     """Static promotion product from the catalog."""
     type: str
     label: str
-    percentage: float
+    base_price_byn: float
     duration_days: int
     priority: int
     badge_color: str
     features: list[str]
+    # Optional: calculated price for a specific property price
+    calculated_price_byn: int | None = None
+    # Optional: price range across all brackets [min, max]
+    price_range_byn: list[int] | None = None
 
 
 class PromotionRead(BaseSchema):

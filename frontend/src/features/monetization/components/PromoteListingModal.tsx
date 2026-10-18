@@ -8,12 +8,13 @@ import { BynSymbol } from '@/shared/ui/BynSymbol';
 
 interface PromoteListingModalProps {
   propertyId: number;
+  propertyPriceByn: number;
   isOpen: boolean;
   onClose: () => void;
   onPromoted?: () => void;
 }
 
-export function PromoteListingModal({ propertyId, isOpen, onClose, onPromoted }: PromoteListingModalProps) {
+export function PromoteListingModal({ propertyId, propertyPriceByn, isOpen, onClose, onPromoted }: PromoteListingModalProps) {
   const { trigger } = useHaptics();
   const { backButton } = useTelegram();
   const { showToast } = useToast();
@@ -29,8 +30,8 @@ export function PromoteListingModal({ propertyId, isOpen, onClose, onPromoted }:
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen) fetchPromotions();
-  }, [isOpen, fetchPromotions]);
+    if (isOpen) fetchPromotions(propertyPriceByn);
+  }, [isOpen, fetchPromotions, propertyPriceByn]);
 
   // Telegram BackButton — modal takes over while open
   useEffect(() => {
@@ -137,7 +138,25 @@ export function PromoteListingModal({ propertyId, isOpen, onClose, onPromoted }:
                     <span className="text-tg-text font-semibold" style={{ color: p.badge_color }}>
                       {p.label}
                     </span>
-                    <span className="text-tg-text font-bold">{p.percentage}% от цены</span>
+                    <span className="text-tg-text font-bold">
+                      {p.calculated_price_byn !== undefined
+                        ? (
+                          <>
+                            {p.calculated_price_byn} <BynSymbol />
+                          </>
+                        )
+                        : p.price_range_byn
+                        ? (
+                          <>
+                            от {p.price_range_byn[0]} до {p.price_range_byn[1]} <BynSymbol />
+                          </>
+                        )
+                        : (
+                          <>
+                            {p.base_price_byn} <BynSymbol />
+                          </>
+                        )}
+                    </span>
                   </div>
                   <div className="text-tg-hint text-xs mt-1">{p.duration_days} дн.</div>
                   <ul className="text-tg-hint text-xs mt-2 space-y-0.5">

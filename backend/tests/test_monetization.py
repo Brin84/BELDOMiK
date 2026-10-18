@@ -75,8 +75,9 @@ class TestPromotionCatalog:
         assert len(items) == 5
         types = {i["type"] for i in items}
         assert types == {"top", "vip", "bump_up", "highlight", "pin"}
-        assert all("percentage" in i and i["percentage"] > 0 for i in items)
+        assert all("base_price_byn" in i and i["base_price_byn"] > 0 for i in items)
         assert all(i["duration_days"] > 0 for i in items)
+        assert all("price_range_byn" in i and len(i["price_range_byn"]) == 2 for i in items)
 
     def test_plans(self, client: TestClient):
         resp = client.get("/api/v1/monetization/plans")
@@ -98,8 +99,8 @@ class TestPromoteFlow:
         assert resp.status_code == 200, resp.text
         checkout = resp.json()
         assert checkout["provider"] == "mock"
-        # Property price is 120000 BYN, TOP is 0.5% = 600 BYN
-        assert checkout["amount_byn"] == 600
+        # Property price is 120000 BYN, TOP base=1.2, bracket multiplier=7.5 -> 9 BYN
+        assert checkout["amount_byn"] == 9
         payment_id = checkout["payment_id"]
 
         # Confirm payment -> payment succeeded, promotion active
@@ -117,7 +118,7 @@ class TestPromoteFlow:
         assert len(promos) == 1
         assert promos[0]["type"] == "top"
         assert promos[0]["status"] == "active"
-        assert promos[0]["price_byn"] == 600
+        assert promos[0]["price_byn"] == 9
 
     def test_promote_requires_auth(self, client: TestClient, property_: Property):
         resp = client.post(

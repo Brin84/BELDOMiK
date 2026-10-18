@@ -61,20 +61,28 @@ class MonetizationService:
 
     # ---------------------------------------------------------------- promotions
     @staticmethod
-    def get_available_promotions() -> list[dict[str, Any]]:
-        """Return the static promotion catalog."""
-        return [
-            {
+    def get_available_promotions(property_price_byn: int | None = None) -> list[dict[str, Any]]:
+        """Return the static promotion catalog with bracket-based pricing.
+        
+        If property_price_byn is provided, includes calculated_price_byn for that property.
+        Always includes base_price_byn and price_range_byn for UI.
+        """
+        result = []
+        for p in get_catalog():
+            item = {
                 "type": p.type.value,
                 "label": p.label,
-                "percentage": p.percentage,
+                "base_price_byn": p.base_price_byn,
                 "duration_days": p.duration_days,
                 "priority": p.priority,
                 "badge_color": p.badge_color,
                 "features": p.features,
+                "price_range_byn": list(p.get_price_range()),
             }
-            for p in get_catalog()
-        ]
+            if property_price_byn is not None:
+                item["calculated_price_byn"] = p.calculate_price(property_price_byn)
+            result.append(item)
+        return result
 
     @staticmethod
     def promote_property(

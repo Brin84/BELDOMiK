@@ -565,11 +565,15 @@ export type PromotionTypeName =
 export interface Promotion {
   type: PromotionTypeName;
   label: string;
-  percentage: number;
+  base_price_byn: number;
   duration_days: number;
   priority: number;
   badge_color: string;
   features: string[];
+  // Optional: pre-calculated price for a specific property (if provided by backend)
+  calculated_price_byn?: number;
+  // Optional: min/max price range across all brackets
+  price_range_byn?: [number, number];
 }
 
 /** Applied promotion record on a property. */

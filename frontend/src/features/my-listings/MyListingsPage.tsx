@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/authStore';
@@ -33,7 +33,7 @@ const OPERATION_LABELS: Record<string, string> = {
   rent: 'Аренда',
 };
 
-function formatPrice(price: number): ReactNode {
+function formatPrice(price: number) {
   return formatPriceByn(price);
 }
 
@@ -198,7 +198,7 @@ export function MyListingsPage() {
     isLoading: true,
     error: null,
   });
-  const [promoteTarget, setPromoteTarget] = useState<number | null>(null);
+  const [promoteTarget, setPromoteTarget] = useState<{ id: number; priceByn: number } | null>(null);
 
   const isAuthenticated = status === 'authenticated' && user;
   const isAdmin = user?.role === 'admin';
@@ -334,7 +334,7 @@ export function MyListingsPage() {
               onEdit={() => handleEdit(property.id)}
               onDelete={() => handleDelete(property.id)}
               onArchive={() => handleArchive(property.id)}
-              onPromote={() => setPromoteTarget(property.id)}
+              onPromote={() => setPromoteTarget({ id: property.id, priceByn: property.price_byn ?? 0 })}
               isAdmin={isAdmin}
             />
           ))}
@@ -342,7 +342,8 @@ export function MyListingsPage() {
       )}
 
       <PromoteListingModal
-        propertyId={promoteTarget ?? 0}
+        propertyId={promoteTarget?.id ?? 0}
+        propertyPriceByn={promoteTarget?.priceByn ?? 0}
         isOpen={promoteTarget !== null}
         onClose={() => setPromoteTarget(null)}
       />

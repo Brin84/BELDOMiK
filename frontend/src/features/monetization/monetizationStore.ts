@@ -26,7 +26,7 @@ interface MonetizationState {
   isLoadingHistory: boolean;
 
   // Actions
-  fetchPromotions: () => Promise<void>;
+  fetchPromotions: (propertyPriceByn?: number) => Promise<void>;
   fetchPlans: () => Promise<void>;
   fetchPropertyPromotions: (propertyId: number) => Promise<void>;
   promoteProperty: (propertyId: number, promotionType: string) => Promise<PaymentCheckout>;
@@ -48,10 +48,11 @@ export const useMonetizationStore = create<MonetizationState>((set) => ({
   paymentsTotal: 0,
   isLoadingHistory: false,
 
-  fetchPromotions: async () => {
+  fetchPromotions: async (propertyPriceByn?: number) => {
     set({ isLoadingCatalog: true });
     try {
-      const promotions = await api.get<Promotion[]>(API_ENDPOINTS.monetization.promotions);
+      const params = propertyPriceByn ? { property_price_byn: propertyPriceByn } : undefined;
+      const promotions = await api.get<Promotion[]>(API_ENDPOINTS.monetization.promotions, params);
       set({ promotions, isLoadingCatalog: false });
     } catch {
       set({ isLoadingCatalog: false });
