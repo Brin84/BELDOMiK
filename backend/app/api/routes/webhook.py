@@ -235,6 +235,18 @@ async def webhook_info():
         return resp.json()
 
 
+@router.post("/pin-welcome")
+async def pin_channel_welcome(db: Session = Depends(get_db)):
+    """Manually create/update pinned welcome message in channel.
+    
+    Use this if bot was already admin before the feature was deployed.
+    """
+    from app.services.notification_service import NotificationService
+    
+    success = await NotificationService.post_and_pin_channel_welcome()
+    return {"ok": success, "message": "Pinned welcome created/updated" if success else "Failed: check CHANNEL_URL and bot admin rights"}
+
+
 # ── Payment provider webhooks ──────────────────────────────────────
 
 @router.post("/yookassa")
