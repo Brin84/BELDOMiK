@@ -9,7 +9,7 @@ class PromotionCatalogItem(BaseSchema):
     """Static promotion product from the catalog."""
     type: str
     label: str
-    price_byn: int
+    percentage: float
     duration_days: int
     priority: int
     badge_color: str

@@ -67,7 +67,7 @@ class MonetizationService:
             {
                 "type": p.type.value,
                 "label": p.label,
-                "price_byn": p.price_byn,
+                "percentage": p.percentage,
                 "duration_days": p.duration_days,
                 "priority": p.priority,
                 "badge_color": p.badge_color,
@@ -88,6 +88,15 @@ class MonetizationService:
         product = get_product(promotion_type)
         if not product:
             raise ValueError("Неизвестный тип продвижения")
+
+        # Get current property price
+        current_price = prop.prices[0] if prop.prices else None
+        if not current_price or not current_price.price_byn:
+            raise ValueError("У объявления нет цены")
+        property_price_byn = current_price.price_byn
+
+        # Calculate promotion price dynamically
+        promotion_price_byn = product.calculate_price(property_price_byn)
 
         now = datetime.now(UTC)
         expires_at = now + timedelta(days=product.duration_days)
@@ -111,7 +120,7 @@ class MonetizationService:
             type=product.type,
             started_at=now,
             expires_at=expires_at,
-            price_byn=product.price_byn,
+            price_byn=promotion_price_byn,
             status=PromotionStatus.PENDING,
         )
         db.add(promotion)
@@ -121,7 +130,7 @@ class MonetizationService:
             user_id=user.id,
             property_id=property_id,
             promotion_id=promotion.id,
-            amount_byn=product.price_byn,
+            amount_byn=promotion_price_byn,
             status=PaymentStatus.PENDING,
             description=f"Продвижение «{product.label}»",
         )

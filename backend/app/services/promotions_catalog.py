@@ -1,8 +1,9 @@
-"""Static catalog of property promotions.
+"""Static catalog of property promotions (Kufar-style percentage-based pricing).
 
 The promotion *types* (top/vip/bump_up/highlight/pin) are a fixed product
-catalog with a price, duration and priority. Applying one creates a row in
+catalog with a percentage, duration and priority. Applying one creates a row in
 the `promotions` table (the applied record) linked to a property.
+Actual price = property_price_byn * percentage / 100 (rounded to int).
 
 Priorities drive both the badge shown on a card and any "promoted first"
 ordering in the feed.
@@ -18,18 +19,22 @@ from app.models.monetization import PromotionType
 class PromotionProduct:
     type: PromotionType
     label: str
-    price_byn: int
+    percentage: float  # процент от цены объявления (например, 0.5 = 0.5%)
     duration_days: int
     priority: int
     badge_color: str
     features: list[str]
+
+    def calculate_price(self, property_price_byn: int) -> int:
+        """Calculate price in BYN for a given property price."""
+        return max(1, int(round(property_price_byn * self.percentage / 100)))
 
 
 CATALOG: dict[PromotionType, PromotionProduct] = {
     PromotionType.TOP: PromotionProduct(
         type=PromotionType.TOP,
         label="Топ",
-        price_byn=49,
+        percentage=0.5,   # 0.5% от цены объявления
         duration_days=7,
         priority=100,
         badge_color="#ff9500",
@@ -38,7 +43,7 @@ CATALOG: dict[PromotionType, PromotionProduct] = {
     PromotionType.VIP: PromotionProduct(
         type=PromotionType.VIP,
         label="VIP",
-        price_byn=99,
+        percentage=1.0,   # 1% от цены объявления
         duration_days=7,
         priority=200,
         badge_color="#af52de",
@@ -47,7 +52,7 @@ CATALOG: dict[PromotionType, PromotionProduct] = {
     PromotionType.BUMP_UP: PromotionProduct(
         type=PromotionType.BUMP_UP,
         label="Поднять",
-        price_byn=15,
+        percentage=0.2,   # 0.2% от цены объявления
         duration_days=1,
         priority=50,
         badge_color="#34c759",
@@ -56,7 +61,7 @@ CATALOG: dict[PromotionType, PromotionProduct] = {
     PromotionType.HIGHLIGHT: PromotionProduct(
         type=PromotionType.HIGHLIGHT,
         label="Выделить",
-        price_byn=29,
+        percentage=0.3,   # 0.3% от цены объявления
         duration_days=3,
         priority=70,
         badge_color="#007aff",
@@ -65,7 +70,7 @@ CATALOG: dict[PromotionType, PromotionProduct] = {
     PromotionType.PIN: PromotionProduct(
         type=PromotionType.PIN,
         label="Закрепить",
-        price_byn=129,
+        percentage=1.5,   # 1.5% от цены объявления
         duration_days=7,
         priority=300,
         badge_color="#ff2d55",
