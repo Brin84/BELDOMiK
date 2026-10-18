@@ -44,7 +44,8 @@ COPY --from=frontend-builder /build/dist /app/frontend/dist
 RUN mkdir -p /app/uploads && chmod +x /app/entrypoint.sh
 
 # Healthcheck (Cloud Run uses /api/health)
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+# Increased start-period to allow time for migrations and server startup
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:${PORT:-8080}/api/health || exit 1
 
 EXPOSE 8080
