@@ -13,6 +13,8 @@ from app.models.user import User
 from app.schemas.user import UserRead
 from app.services.moderation_service import _publish_to_channel
 from app.services.notification_service import NotificationService
+from app.services.promotion_brackets import get_brackets, PriceBracket, calculate_promo_price
+from app.services.promotions_catalog import get_catalog
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -512,3 +514,159 @@ async def post_listing_to_channel(
     if success:
         return ChannelWelcomeResponse(success=True, message=f"Объявление {property_id} опубликовано в канале")
     raise HTTPException(status_code=502, detail="Не удалось опубликовать объявление в канал")
+
+
+# ── Promotion Brackets Management ───────────────────────────────
+
+
+class BracketItem(BaseModel):
+    min_price_byn: int
+    max_price_byn: int | None
+    multiplier: float
+    label: str
+
+
+class BracketUpdate(BaseModel):
+    min_price_byn: int
+    max_price_byn: int | None
+    multiplier: float
+    label: str
+
+
+class BasePriceItem(BaseModel):
+    type: str
+    label: str
+    base_price_byn: float
+    duration_days: int
+    priority: int
+    badge_color: str
+    features: list[str]
+
+
+class BasePriceUpdate(BaseModel):
+    base_price_byn: float
+    duration_days: int | None = None
+    priority: int | None = None
+    badge_color: str | None = None
+    features: list[str] | None = None
+
+
+@router.get("/promotion/brackets", response_model=list[BracketItem])
+def get_promotion_brackets(
+    _admin: User = Depends(get_admin_user),
+):
+    """Get all price brackets for promotion pricing."""
+    brackets = get_brackets()
+    return [
+        BracketItem(
+            min_price_byn=b.min_price_byn,
+            max_price_byn=b.max_price_byn,
+            multiplier=b.multiplier,
+            label=b.label,
+        )
+        for b in brackets
+    ]
+
+
+@router.post("/promotion/brackets", response_model=BracketItem)
+def create_promotion_bracket(
+    data: BracketUpdate,
+    _admin: User = Depends(get_admin_user),
+):
+    """Create a new price bracket (admin only - updates in-memory, persist via settings/DB in future)."""
+    # TODO: Persist to DB/settings
+    # For now, brackets are in-memory only
+    raise HTTPException(status_code=501, detail="Persisting brackets not implemented yet. Edit promotion_brackets.py directly.")
+
+
+@router.patch("/promotion/brackets/{index}", response_model=BracketItem)
+def update_promotion_bracket(
+    index: int,
+    data: BracketUpdate,
+    _admin: User = Depends(get_admin_user),
+):
+    """Update a price bracket by index (admin only - in-memory only for now)."""
+    raise HTTPException(status_code=501, detail="Persisting brackets not implemented yet. Edit promotion_brackets.py directly.")
+
+
+@router.delete("/promotion/brackets/{index}")
+def delete_promotion_bracket(
+    index: int,
+    _admin: User = Depends(get_admin_user),
+):
+    """Delete a price bracket (admin only - in-memory only for now)."""
+    raise HTTPException(status_code=501, detail="Persisting brackets not implemented yet. Edit promotion_brackets.py directly.")
+
+
+# ── Promotion Base Prices Management ────────────────────────────
+
+
+@router.get("/promotion/base-prices", response_model=list[BasePriceItem])
+def get_promotion_base_prices(
+    _admin: User = Depends(get_admin_user),
+):
+    """Get all promotion base prices."""
+    catalog = get_catalog()
+    return [
+        BasePriceItem(
+            type=p.type.value,
+            label=p.label,
+            base_price_byn=p.base_price_byn,
+            duration_days=p.duration_days,
+            priority=p.priority,
+            badge_color=p.badge_color,
+            features=p.features,
+        )
+        for p in catalog
+    ]
+
+
+@router.patch("/promotion/base-prices/{promotion_type}", response_model=BasePriceItem)
+def update_promotion_base_price(
+    promotion_type: str,
+    data: BasePriceUpdate,
+    _admin: User = Depends(get_admin_user),
+):
+    """Update base price for a promotion type (admin only - in-memory only for now)."""
+    raise HTTPException(status_code=501, detail="Persisting base prices not implemented yet. Edit promotions_catalog.py directly.")
+
+
+# ── Promotion Pricing Preview ───────────────────────────────────
+
+
+class PricingPreviewRequest(BaseModel):
+    property_price_byn: int
+
+
+class PricingPreviewResponse(BaseModel):
+    promotion_type: str
+    label: str
+    base_price_byn: float
+    calculated_price_byn: int
+    bracket_label: str
+    bracket_multiplier: float
+
+
+@router.post("/promotion/pricing-preview", response_model=list[PricingPreviewResponse])
+def preview_promotion_pricing(
+    data: PricingPreviewRequest,
+    _admin: User = Depends(get_admin_user),
+):
+    """Preview promotion prices for a given property price."""
+    from app.services.promotion_brackets import find_bracket, calculate_promo_price
+    from app.services.promotions_catalog import get_catalog
+
+    bracket = find_bracket(data.property_price_byn)
+    catalog = get_catalog()
+
+    return [
+        PricingPreviewResponse(
+            promotion_type=p.type.value,
+            label=p.label,
+            base_price_byn=p.base_price_byn,
+            calculated_price_byn=calculate_promo_price(p.base_price_byn, data.property_price_byn),
+            bracket_label=bracket.label,
+            bracket_multiplier=bracket.multiplier,
+        )
+        for p in catalog
+    ]
