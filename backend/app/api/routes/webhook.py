@@ -141,60 +141,14 @@ async def handle_my_chat_member_update(db: Session, my_chat_member_update: dict)
     if expected and chat.get("username") and f"@{chat['username']}" != expected:
         return
 
-    await NotificationService.post_channel_welcome()
+    await NotificationService.post_and_pin_channel_welcome()
 
 
 async def handle_chat_member_update(db: Session, chat_member_update: dict):
-    """Новый участник присоединился к каналу — отправляем приветствие в DM."""
-    from app.services.notification_service import NotificationService
-
-    chat = chat_member_update.get("chat", {})
-    new_member = chat_member_update.get("new_chat_member", {})
-    old_member = chat_member_update.get("old_chat_member", {})
-
-    if new_member.get("status") != "member":
-        return
-    if old_member and old_member.get("status") == new_member.get("status"):
-        return
-
-    expected = NotificationService.channel_chat_id()
-    if expected and chat.get("username") and f"@{chat['username']}" != expected:
-        return
-
-    user = new_member.get("user", {})
-    if user.get("is_bot"):
-        return
-
-    user_id = user.get("id")
-    first_name = user.get("first_name", "")
-    username = user.get("username", "")
-
-    welcome_text = (
-        f"👋 Привет{', ' + first_name if first_name else ''}!\n\n"
-        f"Добро пожаловать в <b>BELDOMiK</b> — маркетплейс недвижимости Беларуси.\n\n"
-        f"🔍 Ищи квартиры, дома, земли и коммерческие помещения\n"
-        f"📍 Удобный поиск по карте и каталогу\n"
-        f"❤️ Сохраняй понравившиеся в избранное\n"
-        f"⚖️ Сравнивай варианты рядом\n\n"
-        f"Нажми кнопку ниже, чтобы открыть приложение:"
-    )
-
-    webapp_url = (
-        settings.TELEGRAM_WEBAPP_URL
-        or settings.FRONTEND_URL
-        or settings.BACKEND_PUBLIC_URL
-    ).rstrip("/") + "/"
-
-    keyboard_rows = [
-        [{"text": "🏠 Открыть BELDOMiK", "web_app": {"url": webapp_url}}],
-        [{"text": "📱 Открыть в Telegram", "url": NotificationService.miniapp_deep_link()}],
-    ]
-
-    await NotificationService.send_telegram_message(
-        chat_id=user_id,
-        text=welcome_text,
-        reply_markup={"inline_keyboard": keyboard_rows},
-    )
+    """Новый участник присоединился к каналу — ничего не делаем.
+    Приветствие показывается через закреплённый пост в канале.
+    """
+    return
 
 
 @router.get("/set")

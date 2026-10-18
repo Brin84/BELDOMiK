@@ -322,6 +322,72 @@ class NotificationService:
         )
 
     @staticmethod
+    async def post_and_pin_channel_welcome() -> bool:
+        """Создаёт/обновляет закреплённое приветственное сообщение в канале.
+        
+        Использует sendMessage + pinChatMessage. Если сообщение уже закреплено —
+        удаляет старое и закрепляет новое (best-effort).
+        """
+        chat_id = NotificationService.channel_chat_id()
+        if not chat_id:
+            logger.warning("Закрепление приветствия: CHANNEL_URL не настроен")
+            return False
+
+        caption = (
+            "🎉 <b>BELDOMiK</b> — недвижимость Беларуси 🇧🇾\n\n"
+            "В этом канале публикуются все новые объявления:\n"
+            "🏢 Квартиры и дома\n"
+            "🌍 Земельные участки\n"
+            "🏪 Коммерческая недвижимость\n\n"
+            "🔔 Включите уведомления, чтобы не пропустить свежие варианты!\n\n"
+            "👇 Нажмите кнопку ниже, чтобы открыть приложение:"
+        )
+        keyboard = {
+            "inline_keyboard": [
+                [{
+                    "text": "🏠 Открыть BELDOMiK",
+                    "url": NotificationService.miniapp_deep_link(),
+                }],
+            ]
+        }
+
+        # 1. Отправляем новое сообщение
+        if not settings.TELEGRAM_BOT_TOKEN:
+            return False
+
+        url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendMessage"
+        payload = {
+            "chat_id": chat_id,
+            "text": caption,
+            "parse_mode": "HTML",
+            "reply_markup": keyboard,
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.post(url, json=payload)
+                resp.raise_for_status()
+                result = resp.json()
+                if not result.get("ok"):
+                    logger.error("Не удалось отправить приветствие: %s", result)
+                    return False
+                message_id = result["result"]["message_id"]
+        except Exception:
+            logger.exception("Ошибка отправки приветствия в канал")
+            return False
+
+        # 2. Закрепляем (unpin не обязателен — pinChatMessage сам заменит)
+        pin_url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/pinChatMessage"
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                pin_resp = await client.post(pin_url, json={"chat_id": chat_id, "message_id": message_id, "disable_notification": True})
+                pin_resp.raise_for_status()
+                return pin_resp.json().get("ok", False)
+        except Exception:
+            logger.exception("Ошибка закрепления приветствия в канал")
+            return False
+
+    @staticmethod
     def format_property_notification(
         property_obj: Property, price_byn: int, price_usd: int | None
     ) -> tuple[str, dict]:
