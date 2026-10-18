@@ -565,7 +565,7 @@ export type PromotionTypeName =
 export interface Promotion {
   type: PromotionTypeName;
   label: string;
-  price_byn: number;
+  percentage: number;
   duration_days: number;
   priority: number;
   badge_color: string;

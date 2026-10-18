@@ -4,6 +4,7 @@ import { useHaptics } from '@/shared/lib/haptics';
 import { backHandlerBlocked } from '@/shared/lib/backButton';
 import { useMonetizationStore } from '@/features/monetization';
 import { useToast } from '@/shared/ui/Toast';
+import { BynSymbol } from '@/shared/ui/BynSymbol';
 
 interface PromoteListingModalProps {
   propertyId: number;
@@ -136,7 +137,7 @@ export function PromoteListingModal({ propertyId, isOpen, onClose, onPromoted }:
                     <span className="text-tg-text font-semibold" style={{ color: p.badge_color }}>
                       {p.label}
                     </span>
-                    <span className="text-tg-text font-bold">{p.price_byn} ₽</span>
+                    <span className="text-tg-text font-bold">{p.percentage}% от цены</span>
                   </div>
                   <div className="text-tg-hint text-xs mt-1">{p.duration_days} дн.</div>
                   <ul className="text-tg-hint text-xs mt-2 space-y-0.5">
@@ -162,7 +163,9 @@ export function PromoteListingModal({ propertyId, isOpen, onClose, onPromoted }:
           ) : (
             <div className="text-center py-4 space-y-4">
               <div>
-                <p className="text-tg-text font-bold text-2xl">{checkout.amount_byn} ₽</p>
+                <p className="text-tg-text font-bold text-2xl">
+                  {checkout.amount_byn} <BynSymbol />
+                </p>
                 <p className="text-tg-hint text-sm mt-1">Оплата (тестовый режим)</p>
               </div>
               <button
@@ -174,7 +177,11 @@ export function PromoteListingModal({ propertyId, isOpen, onClose, onPromoted }:
                   color: 'var(--tg-theme-button-text-color)',
                 }}
               >
-                {isLoading ? 'Оплата…' : `Оплатить ${checkout.amount_byn} ₽ (тест)`}
+                {isLoading ? 'Оплата…' : (
+                  <>
+                    Оплатить {checkout.amount_byn} <BynSymbol /> (тест)
+                  </>
+                )}
               </button>
               <button
                 onClick={() => setCheckout(null)}
