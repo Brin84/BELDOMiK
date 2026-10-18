@@ -2,7 +2,7 @@
 from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, Enum, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from app.db.base import Base
@@ -117,3 +117,38 @@ class Payment(Base):
     property = relationship("Property", back_populates="payments")
     promotion = relationship("Promotion", back_populates="payment")
     subscription = relationship("Subscription", back_populates="payment")
+
+
+# ── Promotion Pricing (Brackets & Base Prices) ───────────────────
+
+
+class PromotionPriceBracket(Base):
+    """Price bracket for promotion pricing (Kufar-style)."""
+    __tablename__ = "promotion_price_brackets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    min_price_byn = Column(Integer, nullable=False)
+    max_price_byn = Column(Integer, nullable=True)
+    multiplier = Column(Float, nullable=False)
+    label = Column(String(50), nullable=False)
+    sort_order = Column(Integer, default=0, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
+class PromotionBasePrice(Base):
+    """Base price for a promotion type (for cheapest bracket)."""
+    __tablename__ = "promotion_base_prices"
+
+    id = Column(Integer, primary_key=True, index=True)
+    promotion_type = Column(Enum(PromotionType), nullable=False, unique=True, index=True)
+    label = Column(String(100), nullable=False)
+    base_price_byn = Column(Float, nullable=False)
+    duration_days = Column(Integer, nullable=False)
+    priority = Column(Integer, nullable=False)
+    badge_color = Column(String(20), nullable=False)
+    features = Column(Text, nullable=False)  # JSON array
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

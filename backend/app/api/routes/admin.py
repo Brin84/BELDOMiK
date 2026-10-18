@@ -13,8 +13,10 @@ from app.models.user import User
 from app.schemas.user import UserRead
 from app.services.moderation_service import _publish_to_channel
 from app.services.notification_service import NotificationService
-from app.services.promotion_brackets import get_brackets, PriceBracket, calculate_promo_price
-from app.services.promotions_catalog import get_catalog
+from app.services.promotion_brackets import get_brackets, find_bracket, calculate_promo_price, get_base_prices, get_base_price
+from app.services.promotions_catalog import get_catalog, get_product
+from app.models.monetization import PromotionPriceBracket, PromotionBasePrice, PromotionType
+import json
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -553,10 +555,11 @@ class BasePriceUpdate(BaseModel):
 
 @router.get("/promotion/brackets", response_model=list[BracketItem])
 def get_promotion_brackets(
+    db: Session = Depends(get_db),
     _admin: User = Depends(get_admin_user),
 ):
     """Get all price brackets for promotion pricing."""
-    brackets = get_brackets()
+    brackets = get_brackets(db)
     return [
         BracketItem(
             min_price_byn=b.min_price_byn,
@@ -571,31 +574,84 @@ def get_promotion_brackets(
 @router.post("/promotion/brackets", response_model=BracketItem)
 def create_promotion_bracket(
     data: BracketUpdate,
+    db: Session = Depends(get_db),
     _admin: User = Depends(get_admin_user),
 ):
-    """Create a new price bracket (admin only - updates in-memory, persist via settings/DB in future)."""
-    # TODO: Persist to DB/settings
-    # For now, brackets are in-memory only
-    raise HTTPException(status_code=501, detail="Persisting brackets not implemented yet. Edit promotion_brackets.py directly.")
+    """Create a new price bracket."""
+    # Check if bracket with same range exists
+    existing = db.query(PromotionPriceBracket).filter(
+        PromotionPriceBracket.min_price_byn == data.min_price_byn,
+        PromotionPriceBracket.max_price_byn == data.max_price_byn
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Bracket with this range already exists")
+    
+    # Get next sort_order
+    max_order = db.query(PromotionPriceBracket.sort_order).order_by(PromotionPriceBracket.sort_order.desc()).first()
+    next_order = (max_order[0] + 1) if max_order else 0
+    
+    bracket = PromotionPriceBracket(
+        min_price_byn=data.min_price_byn,
+        max_price_byn=data.max_price_byn,
+        multiplier=data.multiplier,
+        label=data.label,
+        sort_order=next_order,
+        is_active=True,
+    )
+    db.add(bracket)
+    db.commit()
+    db.refresh(bracket)
+    
+    return BracketItem(
+        min_price_byn=bracket.min_price_byn,
+        max_price_byn=bracket.max_price_byn,
+        multiplier=bracket.multiplier,
+        label=bracket.label,
+    )
 
 
-@router.patch("/promotion/brackets/{index}", response_model=BracketItem)
+@router.patch("/promotion/brackets/{bracket_id}", response_model=BracketItem)
 def update_promotion_bracket(
-    index: int,
+    bracket_id: int,
     data: BracketUpdate,
+    db: Session = Depends(get_db),
     _admin: User = Depends(get_admin_user),
 ):
-    """Update a price bracket by index (admin only - in-memory only for now)."""
-    raise HTTPException(status_code=501, detail="Persisting brackets not implemented yet. Edit promotion_brackets.py directly.")
+    """Update a price bracket by ID."""
+    bracket = db.query(PromotionPriceBracket).filter(PromotionPriceBracket.id == bracket_id).first()
+    if not bracket:
+        raise HTTPException(status_code=404, detail="Bracket not found")
+    
+    bracket.min_price_byn = data.min_price_byn
+    bracket.max_price_byn = data.max_price_byn
+    bracket.multiplier = data.multiplier
+    bracket.label = data.label
+    db.commit()
+    db.refresh(bracket)
+    
+    return BracketItem(
+        min_price_byn=bracket.min_price_byn,
+        max_price_byn=bracket.max_price_byn,
+        multiplier=bracket.multiplier,
+        label=bracket.label,
+    )
 
 
-@router.delete("/promotion/brackets/{index}")
+@router.delete("/promotion/brackets/{bracket_id}")
 def delete_promotion_bracket(
-    index: int,
+    bracket_id: int,
+    db: Session = Depends(get_db),
     _admin: User = Depends(get_admin_user),
 ):
-    """Delete a price bracket (admin only - in-memory only for now)."""
-    raise HTTPException(status_code=501, detail="Persisting brackets not implemented yet. Edit promotion_brackets.py directly.")
+    """Delete a price bracket."""
+    bracket = db.query(PromotionPriceBracket).filter(PromotionPriceBracket.id == bracket_id).first()
+    if not bracket:
+        raise HTTPException(status_code=404, detail="Bracket not found")
+    
+    db.delete(bracket)
+    db.commit()
+    
+    return {"message": "Bracket deleted"}
 
 
 # ── Promotion Base Prices Management ────────────────────────────
@@ -603,32 +659,75 @@ def delete_promotion_bracket(
 
 @router.get("/promotion/base-prices", response_model=list[BasePriceItem])
 def get_promotion_base_prices(
+    db: Session = Depends(get_db),
     _admin: User = Depends(get_admin_user),
 ):
     """Get all promotion base prices."""
-    catalog = get_catalog()
-    return [
-        BasePriceItem(
-            type=p.type.value,
-            label=p.label,
-            base_price_byn=p.base_price_byn,
-            duration_days=p.duration_days,
-            priority=p.priority,
-            badge_color=p.badge_color,
-            features=p.features,
-        )
-        for p in catalog
-    ]
+    base_prices = get_base_prices(db)
+    result = []
+    for bp in base_prices.values():
+        result.append(BasePriceItem(
+            type=bp.promotion_type,
+            label=bp.label,
+            base_price_byn=bp.base_price_byn,
+            duration_days=bp.duration_days,
+            priority=bp.priority,
+            badge_color=bp.badge_color,
+            features=eval(bp.features) if bp.features else [],
+        ))
+    return result
 
 
 @router.patch("/promotion/base-prices/{promotion_type}", response_model=BasePriceItem)
 def update_promotion_base_price(
     promotion_type: str,
     data: BasePriceUpdate,
+    db: Session = Depends(get_db),
     _admin: User = Depends(get_admin_user),
 ):
-    """Update base price for a promotion type (admin only - in-memory only for now)."""
-    raise HTTPException(status_code=501, detail="Persisting base prices not implemented yet. Edit promotions_catalog.py directly.")
+    """Update base price for a promotion type."""
+    try:
+        ptype = PromotionType(promotion_type)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid promotion type")
+    
+    base_price = get_base_price(db, promotion_type)
+    if not base_price:
+        # Create new
+        base_price = PromotionBasePrice(
+            promotion_type=ptype,
+            label=data.features[0] if data.features else promotion_type.capitalize(),
+            base_price_byn=data.base_price_byn or 0,
+            duration_days=data.duration_days or 7,
+            priority=100,
+            badge_color=data.badge_color or "#ff9500",
+            features=json.dumps(data.features) if data.features else "[]",
+        )
+        db.add(base_price)
+    else:
+        if data.base_price_byn is not None:
+            base_price.base_price_byn = data.base_price_byn
+        if data.duration_days is not None:
+            base_price.duration_days = data.duration_days
+        if data.priority is not None:
+            base_price.priority = data.priority
+        if data.badge_color is not None:
+            base_price.badge_color = data.badge_color
+        if data.features is not None:
+            base_price.features = json.dumps(data.features)
+    
+    db.commit()
+    db.refresh(base_price)
+    
+    return BasePriceItem(
+        type=base_price.promotion_type,
+        label=base_price.label,
+        base_price_byn=base_price.base_price_byn,
+        duration_days=base_price.duration_days,
+        priority=base_price.priority,
+        badge_color=base_price.badge_color,
+        features=eval(base_price.features) if base_price.features else [],
+    )
 
 
 # ── Promotion Pricing Preview ───────────────────────────────────
@@ -650,21 +749,19 @@ class PricingPreviewResponse(BaseModel):
 @router.post("/promotion/pricing-preview", response_model=list[PricingPreviewResponse])
 def preview_promotion_pricing(
     data: PricingPreviewRequest,
+    db: Session = Depends(get_db),
     _admin: User = Depends(get_admin_user),
 ):
     """Preview promotion prices for a given property price."""
-    from app.services.promotion_brackets import find_bracket, calculate_promo_price
-    from app.services.promotions_catalog import get_catalog
-
-    bracket = find_bracket(data.property_price_byn)
-    catalog = get_catalog()
+    bracket = find_bracket(db, data.property_price_byn)
+    catalog = get_catalog(db)
 
     return [
         PricingPreviewResponse(
             promotion_type=p.type.value,
             label=p.label,
             base_price_byn=p.base_price_byn,
-            calculated_price_byn=calculate_promo_price(p.base_price_byn, data.property_price_byn),
+            calculated_price_byn=calculate_promo_price(db, p.base_price_byn, data.property_price_byn),
             bracket_label=bracket.label,
             bracket_multiplier=bracket.multiplier,
         )

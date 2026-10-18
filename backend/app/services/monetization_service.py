@@ -61,14 +61,14 @@ class MonetizationService:
 
     # ---------------------------------------------------------------- promotions
     @staticmethod
-    def get_available_promotions(property_price_byn: int | None = None) -> list[dict[str, Any]]:
-        """Return the static promotion catalog with bracket-based pricing.
+    def get_available_promotions(db: Session, property_price_byn: int | None = None) -> list[dict[str, Any]]:
+        """Return the promotion catalog with bracket-based pricing.
         
         If property_price_byn is provided, includes calculated_price_byn for that property.
         Always includes base_price_byn and price_range_byn for UI.
         """
         result = []
-        for p in get_catalog():
+        for p in get_catalog(db):
             item = {
                 "type": p.type.value,
                 "label": p.label,
@@ -77,10 +77,10 @@ class MonetizationService:
                 "priority": p.priority,
                 "badge_color": p.badge_color,
                 "features": p.features,
-                "price_range_byn": list(p.get_price_range()),
+                "price_range_byn": list(p.get_price_range(db)),
             }
             if property_price_byn is not None:
-                item["calculated_price_byn"] = p.calculate_price(property_price_byn)
+                item["calculated_price_byn"] = p.calculate_price(db, property_price_byn)
             result.append(item)
         return result
 
@@ -93,7 +93,7 @@ class MonetizationService:
         if not prop or prop.owner_id != user.id:
             raise ValueError("Объявление не найдено или не принадлежит вам")
 
-        product = get_product(promotion_type)
+        product = get_product(db, promotion_type)
         if not product:
             raise ValueError("Неизвестный тип продвижения")
 
@@ -104,7 +104,7 @@ class MonetizationService:
         property_price_byn = current_price.price_byn
 
         # Calculate promotion price dynamically
-        promotion_price_byn = product.calculate_price(property_price_byn)
+        promotion_price_byn = product.calculate_price(db, property_price_byn)
 
         now = datetime.now(UTC)
         expires_at = now + timedelta(days=product.duration_days)
@@ -228,7 +228,7 @@ class MonetizationService:
         if not promotion:
             return
         now = datetime.now(UTC)
-        product = get_product(promotion.type)
+        product = get_product(db, promotion.type)
         if product:
             promotion.expires_at = now + timedelta(days=product.duration_days)
         promotion.started_at = now

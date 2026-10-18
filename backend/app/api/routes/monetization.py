@@ -23,12 +23,12 @@ router = APIRouter(prefix="/monetization", tags=["Monetization"])
 
 # ── Promotion catalog (public) ───────────────────────────────────
 @router.get("/promotions", response_model=list[PromotionCatalogItem])
-def get_promotions_catalog(property_price_byn: int | None = None):
-    """Return the static promotion catalog with bracket-based pricing.
+def get_promotions_catalog(property_price_byn: int | None = None, db: Session = Depends(get_db)):
+    """Return the promotion catalog with bracket-based pricing.
     
     Optionally provide property_price_byn to get calculated prices for a specific property.
     """
-    items = MonetizationService.get_available_promotions(property_price_byn)
+    items = MonetizationService.get_available_promotions(db, property_price_byn)
     return [PromotionCatalogItem(**item) for item in items]
 
 

@@ -68,7 +68,7 @@ def property_(db_session: Session, owner: User, seed_test_data) -> Property:
 
 
 class TestPromotionCatalog:
-    def test_promotions_catalog(self, client: TestClient):
+    def test_promotions_catalog(self, client: TestClient, seed_test_data):
         resp = client.get("/api/v1/monetization/promotions")
         assert resp.status_code == 200
         items = resp.json()

@@ -90,6 +90,7 @@ def seed_test_data():
         MetroStation,
         Region,
     )
+    from app.models.monetization import PromotionBasePrice, PromotionPriceBracket, PromotionType
     from app.models.property_types import OperationType, PropertyType
 
     session = TestingSessionLocal()
@@ -181,6 +182,73 @@ def seed_test_data():
     session.add_all(operation_types)
     session.commit()
 
+    # Promotion price brackets
+    brackets = [
+        PromotionPriceBracket(min_price_byn=0, max_price_byn=100, multiplier=1.0, label="Базовый", sort_order=0, is_active=True),
+        PromotionPriceBracket(min_price_byn=101, max_price_byn=1000, multiplier=2.0, label="Низкий", sort_order=1, is_active=True),
+        PromotionPriceBracket(min_price_byn=1001, max_price_byn=10000, multiplier=3.5, label="Средний", sort_order=2, is_active=True),
+        PromotionPriceBracket(min_price_byn=10001, max_price_byn=50000, multiplier=5.5, label="Высокий", sort_order=3, is_active=True),
+        PromotionPriceBracket(min_price_byn=50001, max_price_byn=None, multiplier=7.5, label="Премиум", sort_order=4, is_active=True),
+    ]
+    session.add_all(brackets)
+    session.commit()
+
+    # Promotion base prices
+    base_prices = [
+        PromotionBasePrice(
+            promotion_type=PromotionType.TOP,
+            label="Топ",
+            base_price_byn=1.2,
+            duration_days=7,
+            priority=100,
+            badge_color="#ff9500",
+            features='["Показ вверху выдачи на 7 дней", "Повышенная заметность"]',
+            is_active=True,
+        ),
+        PromotionBasePrice(
+            promotion_type=PromotionType.VIP,
+            label="VIP",
+            base_price_byn=2.5,
+            duration_days=7,
+            priority=200,
+            badge_color="#af52de",
+            features='["Максимальная заметность на 7 дней", "Особая VIP-метка"]',
+            is_active=True,
+        ),
+        PromotionBasePrice(
+            promotion_type=PromotionType.BUMP_UP,
+            label="Поднять",
+            base_price_byn=0.3,
+            duration_days=1,
+            priority=50,
+            badge_color="#34c759",
+            features='["Поднятие в выдаче на 1 день"]',
+            is_active=True,
+        ),
+        PromotionBasePrice(
+            promotion_type=PromotionType.HIGHLIGHT,
+            label="Выделить",
+            base_price_byn=0.5,
+            duration_days=3,
+            priority=70,
+            badge_color="#007aff",
+            features='["Подсветка объявления на 3 дня"]',
+            is_active=True,
+        ),
+        PromotionBasePrice(
+            promotion_type=PromotionType.PIN,
+            label="Закрепить",
+            base_price_byn=3.0,
+            duration_days=7,
+            priority=300,
+            badge_color="#ff2d55",
+            features='["Закрепление объявления на 7 дней"]',
+            is_active=True,
+        ),
+    ]
+    session.add_all(base_prices)
+    session.commit()
+
     session.close()
 
     yield
@@ -194,5 +262,7 @@ def seed_test_data():
     session.query(Region).delete()
     session.query(PropertyType).delete()
     session.query(OperationType).delete()
+    session.query(PromotionBasePrice).delete()
+    session.query(PromotionPriceBracket).delete()
     session.commit()
     session.close()

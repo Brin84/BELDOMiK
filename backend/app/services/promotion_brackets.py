@@ -1,4 +1,4 @@
-"""Bracket-based promotion pricing (Kufar-style).
+"""Bracket-based promotion pricing (Kufar-style) with database persistence.
 
 Price brackets for property listings with multipliers for promotion base prices.
 Based on analysis of Kufar's pricing model.
@@ -8,7 +8,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from app.core.config import settings
+from sqlalchemy.orm import Session
+
+from app.models.monetization import PromotionPriceBracket, PromotionBasePrice
 
 
 @dataclass(frozen=True)
@@ -18,36 +20,42 @@ class PriceBracket:
     max_price_byn: Optional[int]  # None = no upper limit
     multiplier: float
     label: str
+    sort_order: int
+    is_active: bool
 
 
-# Default brackets (can be overridden via settings)
-DEFAULT_BRACKETS: list[PriceBracket] = [
-    PriceBracket(0, 100, 1.0, "Базовый"),
-    PriceBracket(101, 1_000, 2.0, "Низкий"),
-    PriceBracket(1_001, 10_000, 3.5, "Средний"),
-    PriceBracket(10_001, 50_000, 5.5, "Высокий"),
-    PriceBracket(50_001, None, 7.5, "Премиум"),
-]
+def get_brackets(db: Session) -> list[PriceBracket]:
+    """Get active price brackets from database, ordered by sort_order."""
+    brackets = db.query(PromotionPriceBracket).filter(
+        PromotionPriceBracket.is_active == True
+    ).order_by(PromotionPriceBracket.sort_order).all()
+    
+    return [
+        PriceBracket(
+            min_price_byn=b.min_price_byn,
+            max_price_byn=b.max_price_byn,
+            multiplier=b.multiplier,
+            label=b.label,
+            sort_order=b.sort_order,
+            is_active=b.is_active,
+        )
+        for b in brackets
+    ]
 
 
-def get_brackets() -> list[PriceBracket]:
-    """Get price brackets from settings or use defaults."""
-    # TODO: Could load from settings/DB for admin configurability
-    return DEFAULT_BRACKETS
-
-
-def find_bracket(property_price_byn: int) -> PriceBracket:
+def find_bracket(db: Session, property_price_byn: int) -> PriceBracket:
     """Find the bracket for a given property price."""
-    brackets = get_brackets()
+    brackets = get_brackets(db)
     for bracket in brackets:
         if property_price_byn >= bracket.min_price_byn:
             if bracket.max_price_byn is None or property_price_byn <= bracket.max_price_byn:
                 return bracket
     # Fallback to highest bracket
-    return brackets[-1]
+    return brackets[-1] if brackets else PriceBracket(0, None, 1.0, "Базовый", 0, True)
 
 
 def calculate_promo_price(
+    db: Session,
     base_price_byn: float,
     property_price_byn: int
 ) -> int:
@@ -60,6 +68,22 @@ def calculate_promo_price(
     Returns:
         Final promotion price in BYN (rounded, minimum 1 BYN)
     """
-    bracket = find_bracket(property_price_byn)
+    bracket = find_bracket(db, property_price_byn)
     price = base_price_byn * bracket.multiplier
     return max(1, int(round(price)))
+
+
+def get_base_prices(db: Session) -> dict[str, PromotionBasePrice]:
+    """Get all active base prices keyed by promotion_type."""
+    prices = db.query(PromotionBasePrice).filter(
+        PromotionBasePrice.is_active == True
+    ).all()
+    return {p.promotion_type: p for p in prices}
+
+
+def get_base_price(db: Session, promotion_type: str) -> PromotionBasePrice | None:
+    """Get base price for a specific promotion type."""
+    return db.query(PromotionBasePrice).filter(
+        PromotionBasePrice.promotion_type == promotion_type,
+        PromotionBasePrice.is_active == True
+    ).first()
