@@ -144,6 +144,12 @@ class Settings(BaseSettings):
     # Payment provider: "mock" (dev, auto-confirm), "yookassa", "ipay", or "telegram_stars" (future).
     PAYMENT_PROVIDER: str = Field(default="mock", validation_alias="PAYMENT_PROVIDER")
 
+    # Монетизация (продвижение объявлений, подписки PRO/Enterprise).
+    # False = платные услуги не принимаются: эндпоинты монетизации отдают 404,
+    # квоты подписки не применяются. Код и модели остаются на месте, чтобы
+    # включить услуги одним флагом после регистрации ИП/самозанятого.
+    MONETIZATION_ENABLED: bool = Field(default=False, validation_alias="MONETIZATION_ENABLED")
+
     # YooKassa
     YOOKASSA_SHOP_ID: str = Field(default="", validation_alias="YOOKASSA_SHOP_ID")
     YOOKASSA_SECRET_KEY: str = Field(default="", validation_alias="YOOKASSA_SECRET_KEY")

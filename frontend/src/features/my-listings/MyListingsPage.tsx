@@ -9,6 +9,7 @@ import { buildPropertyTitle } from '@/shared/lib/propertyTitle';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { PromoteListingModal } from '@/features/monetization/components/PromoteListingModal';
+import { MONETIZATION_ENABLED } from '@/shared/lib/featureFlags';
 
 interface MyListingsState {
   properties: PropertyShort[];
@@ -131,17 +132,19 @@ function PropertyCard({ property, onClick, onEdit, onDelete, onArchive, onPromot
         >
           Редактировать
         </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); trigger('light'); onPromote(); }}
-          className="px-3 py-1.5 rounded-lg text-xs font-medium flex-shrink-0"
-          style={{
-            backgroundColor: 'rgba(255, 149, 0, 0.12)',
-            color: '#ff9500',
-            border: '1px solid rgba(255, 149, 0, 0.35)',
-          }}
-        >
-          ⭐ Продвинуть
-        </button>
+        {MONETIZATION_ENABLED && (
+          <button
+            onClick={(e) => { e.stopPropagation(); trigger('light'); onPromote(); }}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium flex-shrink-0"
+            style={{
+              backgroundColor: 'rgba(255, 149, 0, 0.12)',
+              color: '#ff9500',
+              border: '1px solid rgba(255, 149, 0, 0.35)',
+            }}
+          >
+            ⭐ Продвинуть
+          </button>
+        )}
         {!isAdmin && property.status === 'published' && (
           <button
             onClick={(e) => { e.stopPropagation(); trigger('medium'); onArchive(); }}
@@ -341,12 +344,14 @@ export function MyListingsPage() {
         </div>
       )}
 
-      <PromoteListingModal
-        propertyId={promoteTarget?.id ?? 0}
-        propertyPriceByn={promoteTarget?.priceByn ?? 0}
-        isOpen={promoteTarget !== null}
-        onClose={() => setPromoteTarget(null)}
-      />
+      {MONETIZATION_ENABLED && (
+        <PromoteListingModal
+          propertyId={promoteTarget?.id ?? 0}
+          propertyPriceByn={promoteTarget?.priceByn ?? 0}
+          isOpen={promoteTarget !== null}
+          onClose={() => setPromoteTarget(null)}
+        />
+      )}
     </div>
   );
 }

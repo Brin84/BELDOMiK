@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user, get_db
+from app.core.config import settings
 from app.models.user import User
 from app.schemas.common import PaginatedResponse
 from app.schemas.monetization import (
@@ -18,7 +19,23 @@ from app.schemas.monetization import (
 from app.services.monetization_service import MonetizationService, SUBSCRIPTION_PLANS
 from app.services.payments.base import PaymentCheckout
 
-router = APIRouter(prefix="/monetization", tags=["Monetization"])
+
+def require_monetization_enabled() -> None:
+    """Reject monetization calls while paid services are switched off.
+
+    Платные услуги (продвижение, подписки) не принимаются, пока не зарегистрирован
+    ИП/самозанятость и не установлен MONETIZATION_ENABLED=true. Код и модели
+    остаются на месте — эндпоинты включаются одним флагом.
+    """
+    if not settings.MONETIZATION_ENABLED:
+        raise HTTPException(status_code=404, detail="Платные услуги временно недоступны")
+
+
+router = APIRouter(
+    prefix="/monetization",
+    tags=["Monetization"],
+    dependencies=[Depends(require_monetization_enabled)],
+)
 
 
 # ── Promotion catalog (public) ───────────────────────────────────

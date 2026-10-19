@@ -6,6 +6,7 @@ import { useAuthStore } from '@/features/auth';
 import { useToast } from '@/shared/ui/Toast';
 import { EmptyState, InlineError } from '@/shared/ui';
 import type { AgencyCreate } from '@/shared/api/types';
+import { MONETIZATION_ENABLED } from '@/shared/lib/featureFlags';
 
 export function MyAgencyPage() {
   const { trigger } = useHaptics();
@@ -127,13 +128,15 @@ export function MyAgencyPage() {
     <div className="p-4 space-y-4 pb-24">
       <div className="flex items-center justify-between">
         <h1 className="text-tg-text text-xl font-bold">🏢 Моё агентство</h1>
-        <button
-          onClick={() => { trigger('light'); navigate('/subscription'); }}
-          className="px-3 py-1.5 rounded-lg text-xs font-medium"
-          style={{ backgroundColor: 'rgba(175, 82, 222, 0.12)', color: '#af52de', border: '1px solid rgba(175, 82, 222, 0.35)' }}
-        >
-          💎 Подписка
-        </button>
+        {MONETIZATION_ENABLED && (
+          <button
+            onClick={() => { trigger('light'); navigate('/subscription'); }}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium"
+            style={{ backgroundColor: 'rgba(175, 82, 222, 0.12)', color: '#af52de', border: '1px solid rgba(175, 82, 222, 0.35)' }}
+          >
+            💎 Подписка
+          </button>
+        )}
       </div>
 
       {error && <InlineError message={error} onDismiss={clearError} />}

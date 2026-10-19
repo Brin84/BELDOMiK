@@ -5,6 +5,7 @@ import { formatPriceByn } from '@/shared/lib/format';
 import { findOperationType } from '@/shared/lib/operationKey';
 import { propertyTypeIcon } from '@/shared/lib/propertyTypeIcon';
 import type { PromotionTypeName } from '@/shared/api/types';
+import { MONETIZATION_ENABLED } from '@/shared/lib/featureFlags';
 
 // Каталог продвижений — статический, идентичен backend promotions_catalog.py.
 // Ordered by priority (lowest first).
@@ -206,69 +207,71 @@ export function Step6Preview() {
         </div>
 
         {/* ── Блок продвижения (Kufar-стиль) ───────────────────────────── */}
-        <div>
-          <h3 className="font-semibold text-lg mb-1" style={{ color: 'var(--bd-text-primary)' }}>
-            Поднимите объявление в поиске
-          </h3>
-          <p className="text-sm mb-3" style={{ color: 'var(--bd-text-secondary)' }}>
-            Выберите продвижение и оплатите после публикации
-          </p>
+        {MONETIZATION_ENABLED && (
+          <div>
+            <h3 className="font-semibold text-lg mb-1" style={{ color: 'var(--bd-text-primary)' }}>
+              Поднимите объявление в поиске
+            </h3>
+            <p className="text-sm mb-3" style={{ color: 'var(--bd-text-secondary)' }}>
+              Выберите продвижение и оплатите после публикации
+            </p>
 
-          {/* Горизонтальный скролл с карточками продвижений */}
-          <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            {PROMOTIONS.map((promo) => {
-              const isSelected = selectedPromotion === promo.type;
-              return (
-                <button
-                  key={promo.type}
-                  onClick={() => handlePromoSelect(promo.type)}
-                  className="flex-shrink-0 w-[140px] rounded-2xl p-3 text-left transition-all active:scale-[0.97]"
-                  style={{
-                    backgroundColor: isSelected ? 'var(--bd-bg-base)' : 'var(--bd-bg-base)',
-                    border: isSelected
-                      ? `2px solid ${promo.badge_color}`
-                      : '1px solid rgba(255,255,255,0.6)',
-                    boxShadow: isSelected ? 'var(--bd-shadow-raised)' : '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
-                  }}
-                >
-                  {/* Иконка + название */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <span
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-sm"
-                      style={{ backgroundColor: `${promo.badge_color}18`, color: promo.badge_color }}
-                    >
-                      {promo.icon}
-                    </span>
-                    <div>
-                      <div className="text-sm font-semibold" style={{ color: 'var(--bd-text-primary)' }}>{promo.label}</div>
-                      <div className="text-[11px]" style={{ color: 'var(--bd-text-secondary)' }}>{promo.duration_days} дн.</div>
+            {/* Горизонтальный скролл с карточками продвижений */}
+            <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {PROMOTIONS.map((promo) => {
+                const isSelected = selectedPromotion === promo.type;
+                return (
+                  <button
+                    key={promo.type}
+                    onClick={() => handlePromoSelect(promo.type)}
+                    className="flex-shrink-0 w-[140px] rounded-2xl p-3 text-left transition-all active:scale-[0.97]"
+                    style={{
+                      backgroundColor: isSelected ? 'var(--bd-bg-base)' : 'var(--bd-bg-base)',
+                      border: isSelected
+                        ? `2px solid ${promo.badge_color}`
+                        : '1px solid rgba(255,255,255,0.6)',
+                      boxShadow: isSelected ? 'var(--bd-shadow-raised)' : '6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light)',
+                    }}
+                  >
+                    {/* Иконка + название */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <span
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm"
+                        style={{ backgroundColor: `${promo.badge_color}18`, color: promo.badge_color }}
+                      >
+                        {promo.icon}
+                      </span>
+                      <div>
+                        <div className="text-sm font-semibold" style={{ color: 'var(--bd-text-primary)' }}>{promo.label}</div>
+                        <div className="text-[11px]" style={{ color: 'var(--bd-text-secondary)' }}>{promo.duration_days} дн.</div>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Цена */}
-                  <div className="text-lg font-bold" style={{ color: promo.badge_color }}>
-                    {formatPriceByn(promo.price_byn)}
-                  </div>
-
-                  {/* Описание */}
-                  <p className="text-[11px] mt-1 leading-snug" style={{ color: 'var(--bd-text-secondary)' }}>
-                    {promo.description}
-                  </p>
-
-                  {/* Выбрано */}
-                  {isSelected && (
-                    <div
-                      className="mt-2 text-[11px] font-medium text-center py-1 rounded-full"
-                      style={{ backgroundColor: `${promo.badge_color}14`, color: promo.badge_color }}
-                    >
-                      ✓ Выбрано
+                    {/* Цена */}
+                    <div className="text-lg font-bold" style={{ color: promo.badge_color }}>
+                      {formatPriceByn(promo.price_byn)}
                     </div>
-                  )}
-                </button>
-              );
-            })}
+
+                    {/* Описание */}
+                    <p className="text-[11px] mt-1 leading-snug" style={{ color: 'var(--bd-text-secondary)' }}>
+                      {promo.description}
+                    </p>
+
+                    {/* Выбрано */}
+                    {isSelected && (
+                      <div
+                        className="mt-2 text-[11px] font-medium text-center py-1 rounded-full"
+                        style={{ backgroundColor: `${promo.badge_color}14`, color: promo.badge_color }}
+                      >
+                        ✓ Выбрано
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Status Notice */}
         <div className="p-4 rounded-xl" style={{ backgroundColor: 'rgba(255, 149, 0, 0.08)', border: '1px solid rgba(255, 149, 0, 0.25)' }}>

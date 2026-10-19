@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { MONETIZATION_ENABLED } from '@/shared/lib/featureFlags';
 
 /** Карточка рекламного баннера с призывом к действию. */
 interface AdBannerItem {
@@ -179,6 +180,10 @@ export function AdBanner({ onBannerClick }: AdBannerProps) {
   const handleBannerClick = (bannerId: number) => {
     onBannerClick?.(bannerId);
   };
+
+  // Платные услуги (реклама, продвижение, PRO-подписка) не запущены —
+  // баннеры рекламного характера скрыты до включения монетизации.
+  if (!MONETIZATION_ENABLED) return null;
 
   return (
     <section className="ad-banner" aria-label="Рекламные баннеры">

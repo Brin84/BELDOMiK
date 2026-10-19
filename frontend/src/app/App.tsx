@@ -23,6 +23,7 @@ import { AgencyDetailPage } from '@/pages/AgencyDetailPage';
 import { MyAgencyPage } from '@/pages/MyAgencyPage';
 import { SubscriptionPage } from '@/pages/SubscriptionPage';
 import { ToastProvider } from '@/shared/ui/Toast';
+import { MONETIZATION_ENABLED } from '@/shared/lib/featureFlags';
 import { AllBelarusPage } from '@/pages/AllBelarusPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { ProfileReviewsPage } from '@/pages/ProfileReviewsPage';
@@ -96,7 +97,11 @@ export function App() {
         <Route path="/agencies" element={<AgencyCatalogPage />} />
         <Route path="/agencies/me" element={<MyAgencyPage />} />
         <Route path="/agencies/:id" element={<AgencyDetailPage />} />
-        <Route path="/subscription" element={<SubscriptionPage />} />
+        {/* Подписка PRO/Enterprise — платная услуга. Пока монетизация выключена
+            (нет ИП/самозанятого), маршрут скрыт, но страница и код сохранены. */}
+        {MONETIZATION_ENABLED && (
+          <Route path="/subscription" element={<SubscriptionPage />} />
+        )}
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/comparison" element={<ComparisonPage />} />
         {/* Ипотечный калькулятор временно отключён от приложения:

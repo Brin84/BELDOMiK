@@ -10,6 +10,11 @@ os.environ["DATABASE_MAX_OVERFLOW"] = "0"
 # Geocoding ходит в сеть (Nominatim, 1 req/s) — в общем прогоне тестов выключен;
 # включается точечно в test_geocoding.py через monkeypatch на settings.
 os.environ["GEOCODING_ENABLED"] = "false"
+# Платные услуги в проде выключены (нет ИП/самозанятого), но код монетизации
+# должен оставаться покрытым тестами. Поэтому в тестовом окружении флаг
+# включаем, а поведение «выключено» проверяется точечно в
+# tests/test_monetization_flag.py через monkeypatch.
+os.environ["MONETIZATION_ENABLED"] = "true"
 
 import pytest
 from fastapi.testclient import TestClient

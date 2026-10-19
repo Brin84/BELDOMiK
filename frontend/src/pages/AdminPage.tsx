@@ -9,6 +9,7 @@ import type { UserRole, PropertyStatus } from '@/shared/api';
 import { BynSymbol } from '@/shared/ui';
 import { API_ENDPOINTS } from '@/shared/api/endpoints';
 import { api } from '@/shared/api/client';
+import { MONETIZATION_ENABLED } from '@/shared/lib/featureFlags';
 
 type AdminTab = 'dashboard' | 'users' | 'properties' | 'reports' | 'promotions';
 
@@ -967,12 +968,16 @@ export function AdminPage() {
   );
 
   // ── Tabs ──────────────────────────────────────────────────
+  // Вкладка «Продвижения» скрыта, пока монетизация выключена: цены брекетов и
+  // базовые цены задаются вручную, а платные услуги пока не принимаются.
   const tabs: { key: AdminTab; label: string; icon: string; badge?: number }[] = [
     { key: 'dashboard', label: 'Обзор', icon: '📊' },
     { key: 'users', label: 'Люди', icon: '👥' },
     { key: 'properties', label: 'Объявления', icon: '🏠', badge: dashboard?.pending_properties },
     { key: 'reports', label: 'Жалобы', icon: '⚠️', badge: dashboard?.open_reports },
-    { key: 'promotions', label: 'Продвижения', icon: '⭐' },
+    ...(MONETIZATION_ENABLED
+      ? [{ key: 'promotions' as AdminTab, label: 'Продвижения', icon: '⭐' }]
+      : []),
   ];
 
   return (
@@ -1033,7 +1038,7 @@ export function AdminPage() {
         {activeTab === 'users' && renderUsers()}
         {activeTab === 'properties' && renderProperties()}
         {activeTab === 'reports' && renderReports()}
-        {activeTab === 'promotions' && renderPromotions()}
+        {MONETIZATION_ENABLED && activeTab === 'promotions' && renderPromotions()}
       </div>
     </div>
   );

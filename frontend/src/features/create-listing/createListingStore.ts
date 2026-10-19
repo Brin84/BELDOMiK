@@ -3,6 +3,7 @@ import { api, API_ENDPOINTS } from '@/shared/api';
 import type { PropertyCreate, PropertyShort, OperationType, PromotionTypeName, PaymentCheckout } from '@/shared/api/types';
 import { useGeographyStore } from '@/features/geography/geographyStore';
 import { toOperationKey } from '@/shared/lib/operationKey';
+import { MONETIZATION_ENABLED } from '@/shared/lib/featureFlags';
 
 export type CreateListingStep = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -377,7 +378,8 @@ export const useCreateListingStore = create<CreateListingState>((set, get) => ({
       // Kufar-монетизация: продвижение, выбранное на превью, оплачиваем сразу
       // после публикации (мок-провайдер подтверждает мгновенно). Ошибка здесь
       // не откатывает публикацию — услугу можно оплатить из «Мои объявления».
-      const promo = get().selectedPromotion;
+      // Пока монетизация выключена, услуга не выбирается и оплата не создаётся.
+      const promo = MONETIZATION_ENABLED ? get().selectedPromotion : null;
       if (response.status === 'published' && promo) {
         try {
           const checkout = await api.post<PaymentCheckout>(

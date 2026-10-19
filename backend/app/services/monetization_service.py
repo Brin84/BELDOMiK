@@ -185,7 +185,7 @@ class MonetizationService:
         for property_id, ptype in rows:
             # Keep the highest-priority type if multiple are active.
             current = result.get(property_id)
-            if current is None or _priority(ptype) > _priority(current):
+            if current is None or _priority(db, ptype) > _priority(db, current):
                 result[property_id] = ptype.value if hasattr(ptype, "value") else str(ptype)
         return result
 
@@ -361,6 +361,9 @@ class MonetizationService:
     @staticmethod
     def enforce_property_quota(db: Session, user: User) -> None:
         """Raise ValueError if the user's agency has hit its listing cap."""
+        # Монетизация выключена — платных тарифов нет, ограничивать нечем.
+        if not settings.MONETIZATION_ENABLED:
+            return
         agency = (
             db.query(AgencyMember)
             .filter(AgencyMember.user_id == user.id)
@@ -413,6 +416,9 @@ class MonetizationService:
         limit = settings.MAX_ACTIVE_LISTINGS_PER_USER
         if limit <= 0 or user.role == "admin":
             return
+        if not settings.MONETIZATION_ENABLED:
+            # Платные тарифы не запущены — лимит «в обмен на подписку» не применяем.
+            return
         member = db.query(AgencyMember).filter(AgencyMember.user_id == user.id).first()
         if member:
             return  # квота агентства уже проверяется при создании
@@ -434,6 +440,6 @@ class MonetizationService:
             )
 
 
-def _priority(promotion_type: PromotionType | str) -> int:
-    product = get_product(promotion_type)
+def _priority(db: Session, promotion_type: PromotionType | str) -> int:
+    product = get_product(db, promotion_type)
     return product.priority if product else 0

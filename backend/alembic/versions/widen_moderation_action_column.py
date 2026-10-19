@@ -8,7 +8,8 @@ from alembic import op
 import sqlalchemy as sa
 
 revision = "widen_moderation_action_column"
-down_revision = "add_promotion_brackets_base_prices"  # set correct parent after checking alembic history if needed
+# Родитель — add_promotion_brackets_base_prices.py (его revision id: add_promo_brackets_prices).
+down_revision = "add_promo_brackets_prices"
 branch_labels = None
 depends_on = None
 
