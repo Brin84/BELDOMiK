@@ -43,24 +43,32 @@ export function Step2Location() {
     addCity,
   } = useGeographyStore();
 
-  // Определяем, относится ли объявление к гаражу / машиноместу —
-  // для них неуместно спрашивать «номер дома, корпуса и квартиры».
+  // Определяем, относится ли объявление к типу без квартир —
+  // для домов / участков / дач / гаражей неуместно спрашивать «номер квартиры».
   const currentType = propertyTypes.find((t) => t.id === formData.property_type_id);
   const typeName = (currentType?.name ?? '').toLowerCase();
-  const isGarageLike =
+  const isWithoutApartment =
     typeName.includes('гараж') ||
     typeName.includes('машиномест') ||
-    typeName.includes('parking') ||
-    typeName.includes('garage');
+    typeName.includes('паркинг') ||
+    typeName.includes('дом') ||
+    typeName.includes('дач') ||
+    typeName.includes('земел') ||
+    typeName.includes('участок') ||
+    typeName.includes('house') ||
+    typeName.includes('land') ||
+    typeName.includes('dacha') ||
+    typeName.includes('garage') ||
+    typeName.includes('parking');
 
-  const addressTitle = isGarageLike
-    ? 'Точный адрес (ГСК, ряд, номер)'
+  const addressTitle = isWithoutApartment
+    ? 'Точный адрес (улица, номер дома, корпус)'
     : 'Точный адрес (дом, корпус, квартира)';
-  const addressPlaceholder = isGarageLike
-    ? 'ГСК «Восток», ряд 5, бокс 12'
+  const addressPlaceholder = isWithoutApartment
+    ? 'ул. Ленина, д. 10'
     : 'ул. Ленина, д. 10, кв. 5';
-  const addressHint = isGarageLike
-    ? 'Укажите название ГСК, номер ряда и бокса для точного расположения на карте'
+  const addressHint = isWithoutApartment
+    ? 'Укажите название улицы и номер дома для точного расположения на карте'
     : 'Укажите номер дома, корпуса и квартиры для точного расположения на карте';
 
   // Load regions on mount
