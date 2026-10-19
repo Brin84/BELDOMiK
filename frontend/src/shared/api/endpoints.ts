@@ -131,6 +131,13 @@ export const API_ENDPOINTS = {
     resolveReport: (id: number) => `/api/v1/admin/reports/${id}/resolve`,
     channelPostListing: (id: number) => `/api/v1/admin/telegram/post-listing/${id}`,
     channelWelcome: '/api/v1/admin/telegram/channel-welcome',
+    promotion: {
+      brackets: '/api/v1/admin/promotion/brackets',
+      bracket: (id: number) => `/api/v1/admin/promotion/brackets/${id}`,
+      basePrices: '/api/v1/admin/promotion/base-prices',
+      basePrice: (type: string) => `/api/v1/admin/promotion/base-prices/${type}`,
+      pricingPreview: '/api/v1/admin/promotion/pricing-preview',
+    },
   },
   users: {
     summary: (id: number) => `/api/v1/users/${id}`,

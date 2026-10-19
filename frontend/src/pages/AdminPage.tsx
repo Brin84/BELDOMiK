@@ -7,8 +7,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAdminStore } from '@/features/admin';
 import type { UserRole, PropertyStatus } from '@/shared/api';
 import { BynSymbol } from '@/shared/ui';
+import { API_ENDPOINTS } from '@/shared/api/endpoints';
+import { api } from '@/shared/api/client';
 
-type AdminTab = 'dashboard' | 'users' | 'properties' | 'reports';
+type AdminTab = 'dashboard' | 'users' | 'properties' | 'reports' | 'promotions';
 
 const ROLE_LABELS: Record<UserRole, string> = {
   admin: '👑 Админ',
@@ -99,6 +101,294 @@ export function AdminPage() {
   const formatDate = (d: string) => {
     const date = new Date(d);
     return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+
+  // ── Promotions state ─────────────────────────────────────────
+  const [brackets, setBrackets] = useState<any[]>([]);
+  const [basePrices, setBasePrices] = useState<any[]>([]);
+  const [promotionsLoading, setPromotionsLoading] = useState(true);
+  const [previewPrice, setPreviewPrice] = useState<string>('100000');
+  const [preview, setPreview] = useState<any[]>([]);
+  const [saving, setSaving] = useState<string | null>(null);
+
+  const loadPromotionsData = async () => {
+    setPromotionsLoading(true);
+    try {
+      const [bracketsRes, basePricesRes] = await Promise.all([
+        api.get<any[]>(API_ENDPOINTS.admin.promotion.brackets),
+        api.get<any[]>(API_ENDPOINTS.admin.promotion.basePrices),
+      ]);
+      setBrackets(bracketsRes);
+      setBasePrices(basePricesRes);
+    } catch (err) {
+      console.error('Failed to load promotions data:', err);
+      showToast('Ошибка загрузки данных', 'error');
+    } finally {
+      setPromotionsLoading(false);
+    }
+  };
+
+  const previewPricing = async () => {
+    try {
+      const res = await api.post<any[]>(API_ENDPOINTS.admin.promotion.pricingPreview, {
+        property_price_byn: parseInt(previewPrice) || 0,
+      });
+      setPreview(res);
+    } catch (err) {
+      console.error('Failed to preview pricing:', err);
+      showToast('Ошибка расчёта', 'error');
+    }
+  };
+
+  const updateBracket = async (bracket: any) => {
+    setSaving(bracket.id);
+    try {
+      await api.patch(`${API_ENDPOINTS.admin.promotion.brackets}/${bracket.id}`, bracket);
+      showToast('Брекет обновлён', 'success');
+    } catch (err) {
+      console.error('Failed to update bracket:', err);
+      showToast('Ошибка сохранения', 'error');
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const updateBasePrice = async (item: any) => {
+    setSaving(item.type);
+    try {
+      await api.patch(API_ENDPOINTS.admin.promotion.basePrice(item.type), {
+        base_price_byn: item.base_price_byn,
+        duration_days: item.duration_days,
+        priority: item.priority,
+        badge_color: item.badge_color,
+        features: item.features,
+      });
+      showToast('Базовая цена обновлена', 'success');
+    } catch (err) {
+      console.error('Failed to update base price:', err);
+      showToast('Ошибка сохранения', 'error');
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'promotions') {
+      loadPromotionsData();
+    }
+  }, [activeTab]);
+
+  // ── Promotions Tab ──────────────────────────────────────────
+  const renderPromotions = () => {
+    if (promotionsLoading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-tg-hint text-sm">Загрузка...</div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {/* Price Brackets */}
+        <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}>
+          <h3 className="text-tg-text font-bold mb-3">📊 Ценовые брекеты (мультипликаторы)</h3>
+          <div className="space-y-2">
+            {brackets.map((b) => (
+              <div
+                key={b.id || b.min_price_byn}
+                className="flex items-center gap-2 p-2 rounded-lg"
+                style={{ backgroundColor: 'var(--tg-theme-bg-color)' }}
+              >
+                <input
+                  type="number"
+                  value={b.min_price_byn}
+                  onChange={(e) => setBrackets(brackets.map(x => x.min_price_byn === b.min_price_byn ? { ...x, min_price_byn: parseInt(e.target.value) || 0 } : x))}
+                  className="w-20 px-2 py-1 rounded text-sm"
+                  style={{ backgroundColor: 'var(--tg-theme-bg-color)', color: 'var(--tg-theme-text-color)', border: '1px solid var(--tg-theme-hint-color)' }}
+                />
+                <span className="text-tg-hint text-sm">—</span>
+                <input
+                  type="number"
+                  value={b.max_price_byn ?? ''}
+                  onChange={(e) => setBrackets(brackets.map(x => x.min_price_byn === b.min_price_byn ? { ...x, max_price_byn: e.target.value ? parseInt(e.target.value) : null } : x))}
+                  className="w-20 px-2 py-1 rounded text-sm"
+                  placeholder="∞"
+                  style={{ backgroundColor: 'var(--tg-theme-bg-color)', color: 'var(--tg-theme-text-color)', border: '1px solid var(--tg-theme-hint-color)' }}
+                />
+                <span className="text-tg-hint text-sm">×</span>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={b.multiplier}
+                  onChange={(e) => setBrackets(brackets.map(x => x.min_price_byn === b.min_price_byn ? { ...x, multiplier: parseFloat(e.target.value) || 1 } : x))}
+                  className="w-16 px-2 py-1 rounded text-sm"
+                  style={{ backgroundColor: 'var(--tg-theme-bg-color)', color: 'var(--tg-theme-text-color)', border: '1px solid var(--tg-theme-hint-color)' }}
+                />
+                <input
+                  type="text"
+                  value={b.label}
+                  onChange={(e) => setBrackets(brackets.map(x => x.min_price_byn === b.min_price_byn ? { ...x, label: e.target.value } : x))}
+                  className="flex-1 px-2 py-1 rounded text-sm"
+                  style={{ backgroundColor: 'var(--tg-theme-bg-color)', color: 'var(--tg-theme-text-color)', border: '1px solid var(--tg-theme-hint-color)' }}
+                />
+                <button
+                  onClick={() => updateBracket(b)}
+                  disabled={saving === b.id}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium"
+                  style={{
+                    backgroundColor: 'var(--tg-theme-button-color)',
+                    color: 'var(--tg-theme-button-text-color)',
+                    opacity: saving === b.id ? 0.6 : 1,
+                  }}
+                >
+                  {saving === b.id ? '⏳' : '💾'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Base Prices */}
+        <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}>
+          <h3 className="text-tg-text font-bold mb-3">💰 Базовые цены продвижений</h3>
+          <div className="space-y-2">
+            {basePrices.map((bp) => (
+              <div
+                key={bp.type}
+                className="flex flex-col gap-2 p-3 rounded-lg"
+                style={{ backgroundColor: 'var(--tg-theme-bg-color)', border: `2px solid ${bp.badge_color}` }}
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+                    style={{ backgroundColor: bp.badge_color, color: '#fff' }}
+                  >
+                    {bp.type.charAt(0).toUpperCase()}
+                  </span>
+                  <span className="font-medium text-sm" style={{ color: 'var(--tg-theme-text-color)' }}>
+                    {bp.label} ({bp.type})
+                  </span>
+                  <span className="text-tg-hint text-xs">Приоритет: {bp.priority}</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <input
+                    type="number"
+                    step="0.1"
+                    placeholder="Базовая цена"
+                    value={bp.base_price_byn}
+                    onChange={(e) => setBasePrices(basePrices.map(x => x.type === bp.type ? { ...x, base_price_byn: parseFloat(e.target.value) || 0 } : x))}
+                    className="w-28 px-2 py-1 rounded text-sm"
+                    style={{ backgroundColor: 'var(--tg-theme-bg-color)', color: 'var(--tg-theme-text-color)', border: '1px solid var(--tg-theme-hint-color)' }}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Дни"
+                    value={bp.duration_days}
+                    onChange={(e) => setBasePrices(basePrices.map(x => x.type === bp.type ? { ...x, duration_days: parseInt(e.target.value) || 7 } : x))}
+                    className="w-16 px-2 py-1 rounded text-sm"
+                    style={{ backgroundColor: 'var(--tg-theme-bg-color)', color: 'var(--tg-theme-text-color)', border: '1px solid var(--tg-theme-hint-color)' }}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Приоритет"
+                    value={bp.priority}
+                    onChange={(e) => setBasePrices(basePrices.map(x => x.type === bp.type ? { ...x, priority: parseInt(e.target.value) || 0 } : x))}
+                    className="w-20 px-2 py-1 rounded text-sm"
+                    style={{ backgroundColor: 'var(--tg-theme-bg-color)', color: 'var(--tg-theme-text-color)', border: '1px solid var(--tg-theme-hint-color)' }}
+                  />
+                  <input
+                    type="color"
+                    value={bp.badge_color}
+                    onChange={(e) => setBasePrices(basePrices.map(x => x.type === bp.type ? { ...x, badge_color: e.target.value } : x))}
+                    className="w-10 h-10 rounded"
+                    style={{ border: 'none', cursor: 'pointer' }}
+                  />
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {bp.features.map((f: string, i: number) => (
+                    <input
+                      key={i}
+                      type="text"
+                      value={f}
+                      onChange={(e) => setBasePrices(basePrices.map(x => x.type === bp.type ? { ...x, features: x.features.map((ff: string, ii: number) => ii === i ? e.target.value : ff) } : x))}
+                      className="flex-1 min-w-[150px] px-2 py-1 rounded text-xs"
+                      style={{ backgroundColor: 'var(--tg-theme-bg-color)', color: 'var(--tg-theme-text-color)', border: '1px solid var(--tg-theme-hint-color)' }}
+                    />
+                  ))}
+                </div>
+                <button
+                  onClick={() => updateBasePrice(bp)}
+                  disabled={saving === bp.type}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium self-end"
+                  style={{
+                    backgroundColor: bp.badge_color,
+                    color: '#fff',
+                    opacity: saving === bp.type ? 0.6 : 1,
+                  }}
+                >
+                  {saving === bp.type ? '⏳ Сохранение...' : '💾 Сохранить'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Pricing Preview */}
+        <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--tg-theme-secondary-bg-color)' }}>
+          <h3 className="text-tg-text font-bold mb-3">🔮 Предпросмотр цен</h3>
+          <div className="flex gap-2 mb-3">
+            <input
+              type="number"
+              placeholder="Цена недвижимости (BYN)"
+              value={previewPrice}
+              onChange={(e) => setPreviewPrice(e.target.value)}
+              className="flex-1 px-3 py-2 rounded-xl text-sm"
+              style={{
+                backgroundColor: 'var(--tg-theme-bg-color)',
+                color: 'var(--tg-theme-text-color)',
+                border: '1px solid var(--tg-theme-hint-color)',
+                outline: 'none',
+              }}
+            />
+            <button
+              onClick={previewPricing}
+              className="px-4 py-2 rounded-xl text-sm font-medium"
+              style={{
+                backgroundColor: 'var(--tg-theme-button-color)',
+                color: 'var(--tg-theme-button-text-color)',
+              }}
+            >
+              Рассчитать
+            </button>
+          </div>
+
+          {preview.length > 0 && (
+            <div className="space-y-2">
+              {preview.map((p) => (
+                <div
+                  key={p.promotion_type}
+                  className="flex items-center justify-between p-2 rounded-lg"
+                  style={{ backgroundColor: 'var(--tg-theme-bg-color)', borderLeft: `4px solid ${p.bracket_label ? '#007aff' : 'transparent'}` }}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm" style={{ color: 'var(--tg-theme-text-color)' }}>
+                      {p.label}
+                    </span>
+                    <span className="text-tg-hint text-xs">
+                      Брекет: {p.bracket_label} (×{p.bracket_multiplier})
+                    </span>
+                  </div>
+                  <div className="text-tg-text font-bold">
+                    {p.calculated_price_byn} <BynSymbol />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   // ── Access check ──────────────────────────────────────────
@@ -682,6 +972,7 @@ export function AdminPage() {
     { key: 'users', label: 'Люди', icon: '👥' },
     { key: 'properties', label: 'Объявления', icon: '🏠', badge: dashboard?.pending_properties },
     { key: 'reports', label: 'Жалобы', icon: '⚠️', badge: dashboard?.open_reports },
+    { key: 'promotions', label: 'Продвижения', icon: '⭐' },
   ];
 
   return (
@@ -742,6 +1033,7 @@ export function AdminPage() {
         {activeTab === 'users' && renderUsers()}
         {activeTab === 'properties' && renderProperties()}
         {activeTab === 'reports' && renderReports()}
+        {activeTab === 'promotions' && renderPromotions()}
       </div>
     </div>
   );
