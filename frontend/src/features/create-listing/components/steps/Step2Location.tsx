@@ -34,6 +34,7 @@ export function Step2Location() {
     districts,
     neighborhoods,
     streets,
+    propertyTypes,
     fetchRegions,
     fetchCities,
     fetchDistricts,
@@ -41,6 +42,26 @@ export function Step2Location() {
     fetchStreets,
     addCity,
   } = useGeographyStore();
+
+  // Определяем, относится ли объявление к гаражу / машиноместу —
+  // для них неуместно спрашивать «номер дома, корпуса и квартиры».
+  const currentType = propertyTypes.find((t) => t.id === formData.property_type_id);
+  const typeName = (currentType?.name ?? '').toLowerCase();
+  const isGarageLike =
+    typeName.includes('гараж') ||
+    typeName.includes('машиномест') ||
+    typeName.includes('parking') ||
+    typeName.includes('garage');
+
+  const addressTitle = isGarageLike
+    ? 'Точный адрес (ГСК, ряд, номер)'
+    : 'Точный адрес (дом, корпус, квартира)';
+  const addressPlaceholder = isGarageLike
+    ? 'ГСК «Восток», ряд 5, бокс 12'
+    : 'ул. Ленина, д. 10, кв. 5';
+  const addressHint = isGarageLike
+    ? 'Укажите название ГСК, номер ряда и бокса для точного расположения на карте'
+    : 'Укажите номер дома, корпуса и квартиры для точного расположения на карте';
 
   // Load regions on mount
   useEffect(() => {
@@ -263,12 +284,12 @@ export function Step2Location() {
 
       {/* Address Input */}
       <section>
-        <h2 className="text-[var(--bd-text-primary)] text-base font-bold mb-3">Точный адрес (дом, корпус, квартира)</h2>
+        <h2 className="text-[var(--bd-text-primary)] text-base font-bold mb-3">{addressTitle}</h2>
         <input
           type="text"
           value={formData.address || ''}
           onChange={(e) => updateFormData({ address: e.target.value })}
-          placeholder="ул. Ленина, д. 10, кв. 5"
+          placeholder={addressPlaceholder}
           className="w-full px-4 py-3 rounded-xl text-base"
           style={{
             backgroundColor: 'var(--bd-bg-base)',
@@ -280,7 +301,7 @@ export function Step2Location() {
           autoComplete="off"
         />
         <p className="text-xs mt-1" style={{ color: 'var(--bd-text-secondary)' }}>
-          Укажите номер дома, корпуса и квартиры для точного расположения на карте
+          {addressHint}
         </p>
       </section>
     </div>
