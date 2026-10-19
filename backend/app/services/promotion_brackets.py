@@ -10,7 +10,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from app.models.monetization import PromotionPriceBracket, PromotionBasePrice
+from app.models.monetization import PromotionPriceBracket, PromotionBasePrice, PromotionType
 
 
 @dataclass(frozen=True)

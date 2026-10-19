@@ -249,7 +249,7 @@ def list_properties(
     q = db.query(Property).outerjoin(Property.city).outerjoin(Property.owner)
 
     if status:
-        q = q.filter(Property.status == status)
+        q = q.filter(Property.status == PropertyStatus(status))
     if city_id:
         q = q.filter(Property.city_id == city_id)
     if search:
@@ -312,7 +312,7 @@ def update_property_status(
         raise HTTPException(status_code=404, detail="Property not found")
 
     old_status = prop.status.value if hasattr(prop.status, "value") else str(prop.status)
-    prop.status = data.status
+    prop.status = PropertyStatus(data.status)
 
     if data.status == "published":
         prop.published_at = datetime.now(UTC)

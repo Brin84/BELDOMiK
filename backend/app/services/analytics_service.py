@@ -6,7 +6,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.geography import City
-from app.models.property import Property, PropertyPrice, PropertyView
+from app.models.property import Property, PropertyPrice, PropertyStatus, PropertyView
 from app.models.property_types import PropertyType
 
 
@@ -17,23 +17,23 @@ class AnalyticsService:
     def get_market_overview(db: Session) -> dict[str, Any]:
         """Get overall market statistics."""
         total_properties = db.query(func.count(Property.id)).filter(
-            Property.status == "published"
+            Property.status == PropertyStatus.PUBLISHED
         ).scalar() or 0
 
         for_sale = db.query(func.count(Property.id)).filter(
-            Property.status == "published",
+            Property.status == PropertyStatus.PUBLISHED,
             Property.operation_id == 1,  # buy
         ).scalar() or 0
 
         for_rent = db.query(func.count(Property.id)).filter(
-            Property.status == "published",
+            Property.status == PropertyStatus.PUBLISHED,
             Property.operation_id == 2,  # rent
         ).scalar() or 0
 
         avg_price = db.query(func.avg(PropertyPrice.price_byn)).join(
             Property, Property.id == PropertyPrice.property_id
         ).filter(
-            Property.status == "published",
+            Property.status == PropertyStatus.PUBLISHED,
             PropertyPrice.is_current == True,
         ).scalar() or 0
 
@@ -60,7 +60,7 @@ class AnalyticsService:
             .join(Property, Property.city_id == City.id)
             .outerjoin(PropertyPrice, PropertyPrice.property_id == Property.id)
             .filter(
-                Property.status == "published",
+                Property.status == PropertyStatus.PUBLISHED,
                 PropertyPrice.is_current == True,
             )
         )
@@ -102,7 +102,7 @@ class AnalyticsService:
             .outerjoin(PropertyType, PropertyType.id == Property.type_id)
             .outerjoin(City, City.id == Property.city_id)
             .filter(
-                Property.status == "published",
+                Property.status == PropertyStatus.PUBLISHED,
                 PropertyView.viewed_at >= cutoff,
             )
             .group_by(
@@ -155,7 +155,7 @@ class AnalyticsService:
             )
             .join(Property, Property.id == PropertyPrice.property_id)
             .filter(
-                Property.status == "published",
+                Property.status == PropertyStatus.PUBLISHED,
                 PropertyPrice.is_current == True,
             )
         )
@@ -185,7 +185,7 @@ class AnalyticsService:
                 func.count(Property.id).label("count"),
             )
             .join(Property, Property.type_id == PropertyType.id)
-            .filter(Property.status == "published")
+            .filter(Property.status == PropertyStatus.PUBLISHED)
             .group_by(PropertyType.id, PropertyType.name)
             .all()
         )

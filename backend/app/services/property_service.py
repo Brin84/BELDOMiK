@@ -500,9 +500,15 @@ class PropertyService:
             items.append(item)
 
         # Annotate promoted properties (one query across the page).
-        promoted = MonetizationService.active_promotion_types(
-            db, [item.id for item in items]
-        )
+        # Wrapped in try/except: if monetization tables don't exist yet (fresh DB)
+        # or any DB error, we still want to return the property list.
+        promoted: dict[int, str] = {}
+        try:
+            promoted = MonetizationService.active_promotion_types(
+                db, [item.id for item in items]
+            )
+        except Exception:
+            logger.exception("Failed to load promotion types for property list")
         for item in items:
             ptype = promoted.get(item.id)
             if ptype:

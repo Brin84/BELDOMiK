@@ -4,7 +4,7 @@ from typing import Any
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.models.property import Property, PropertyPrice
+from app.models.property import Property, PropertyPrice, PropertyStatus
 
 
 class PriceService:
@@ -44,7 +44,7 @@ class PriceService:
                 Property.city_id == property_obj.city_id,
                 Property.type_id == property_obj.type_id,
                 Property.operation_id == property_obj.operation_id,
-                Property.status == "published",
+                Property.status == PropertyStatus.PUBLISHED,
                 Property.id != property_id,
                 PropertyPrice.is_current == True,
             )
@@ -67,7 +67,7 @@ class PriceService:
                 Property.city_id == property_obj.city_id,
                 Property.type_id == property_obj.type_id,
                 Property.operation_id == property_obj.operation_id,
-                Property.status == "published",
+                Property.status == PropertyStatus.PUBLISHED,
                 Property.id != property_id,
                 PropertyPrice.is_current == True,
             )
@@ -123,7 +123,7 @@ class PriceService:
                 func.count(Property.id).label("count"),
             )
             .join(Property, Property.id == PropertyPrice.property_id)
-            .filter(Property.status == "published", PropertyPrice.is_current == True)
+            .filter(Property.status == PropertyStatus.PUBLISHED, PropertyPrice.is_current == True)
         )
         if city_id:
             query = query.filter(Property.city_id == city_id)

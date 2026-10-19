@@ -5,7 +5,7 @@ from sqlalchemy import and_, exists, func
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.geography import City
-from app.models.property import Favorite, Property, PropertyPhoto, PropertyPrice
+from app.models.property import Favorite, Property, PropertyPhoto, PropertyPrice, PropertyStatus
 from app.models.property_types import OperationType, PropertyType
 
 
@@ -57,7 +57,7 @@ class SearchService:
             .join(PropertyType, PropertyType.id == Property.type_id)
             .join(OperationType, OperationType.id == Property.operation_id)
             .filter(
-                Property.status == "published",
+                Property.status == PropertyStatus.PUBLISHED,
                 Property.lat.isnot(None),
                 Property.lng.isnot(None),
                 Property.lat.between(lat_min, lat_max),
