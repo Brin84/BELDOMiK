@@ -118,7 +118,7 @@ export function PromoteListingModal({ propertyId, propertyPriceByn, isOpen, onCl
           <p className="text-tg-hint text-sm mt-1">Повысьте заметность в выдаче</p>
         </div>
 
-        <div className="px-4 pb-6 space-y-3">
+        <div className="px-4 pb-20 space-y-3">
           {!checkout ? (
             <>
               {promotions.map((p) => (
