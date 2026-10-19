@@ -7,7 +7,7 @@ import { usePropertiesStore } from '@/features/properties/propertiesStore';
 import { NeuCard } from '@/shared/ui';
 import type { City, Region } from '@/shared/api/types';
 
-import './AllBelarusPage.css';
+import '@/shared/ui/picker/picker.css';
 
 /**
  * Вкладка «Все Беларусь» — выбор области и города в стиле проекта
@@ -107,25 +107,27 @@ export function AllBelarusPage() {
   };
 
   return (
-    <div className="belarus-page">
-      <main className="belarus-page__inner">
+    <div className="picker-screen picker-screen--inline">
+      <main className="picker-screen__inner">
         {/* Шапка */}
         <NeuCard padding="none">
-          <div className="belarus-header">
-            <h1 className="belarus-header__title">Все Беларусь</h1>
-            <p className="belarus-header__subtitle">Выберите область и город</p>
+          <div className="picker-header">
+            <div className="picker-header__text">
+              <h1 className="picker-header__title">Все Беларусь</h1>
+              <p className="picker-header__subtitle">Выберите область и город</p>
+            </div>
           </div>
         </NeuCard>
 
         {/* Поиск области/города */}
-        <div className="belarus-search">
-          <Search size={20} className="belarus-search__icon" />
+        <div className="picker-search">
+          <Search size={20} className="picker-search__icon" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={drillRegion ? 'Поиск города' : 'Поиск области или города'}
-            className="belarus-search__input"
+            className="picker-search__input"
             autoComplete="off"
             enterKeyHint="search"
             aria-label="Поиск населённого пункта"
@@ -134,7 +136,7 @@ export function AllBelarusPage() {
             <button
               type="button"
               onClick={clearQuery}
-              className="belarus-search__clear"
+              className="picker-search__clear"
               aria-label="Очистить поиск"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
@@ -148,7 +150,7 @@ export function AllBelarusPage() {
         {drillRegion ? (
           <>
             {/* Шапка дрилл-дауна: назад к списку областей */}
-            <div className="belarus-drill-head">
+            <div className="picker-drill-head">
               <button
                 type="button"
                 onClick={() => {
@@ -156,31 +158,31 @@ export function AllBelarusPage() {
                   setDrillRegion(null);
                   setQuery('');
                 }}
-                className="belarus-drill-head__back"
+                className="picker-drill-head__back"
                 aria-label="Назад к списку областей"
               >
                 <ArrowLeft size={20} strokeWidth={2.5} />
               </button>
-              <h2 className="belarus-drill-head__title">{drillRegion.name}</h2>
+              <h2 className="picker-drill-head__title">{drillRegion.name}</h2>
             </div>
 
             {/* Выбор всей области целиком */}
             <button
               type="button"
               onClick={() => selectRegion(drillRegion)}
-              className={`belarus-row ${filters.region_id === drillRegion.id ? 'belarus-row--active' : ''}`}
+              className={`picker-row ${filters.region_id === drillRegion.id ? 'picker-row--active' : ''}`}
               aria-pressed={filters.region_id === drillRegion.id}
             >
-              <span className="belarus-row__label">
-                <MapPin size={18} className="belarus-row__pin" />
+              <span className="picker-row__label">
+                <MapPin size={18} className="picker-row__icon" />
                 Вся область
               </span>
               {filters.region_id === drillRegion.id && <Check size={20} strokeWidth={2.5} />}
             </button>
 
-            <h3 className="belarus-section__title">Города и деревни</h3>
+            <h3 className="picker-section__title">Города и деревни</h3>
             {drillCities.length === 0 && trimmedQuery.length > 0 ? (
-              <p className="belarus-empty">«{trimmedQuery}» нет в области «{drillRegion.name}»</p>
+              <p className="picker-empty">«{trimmedQuery}» нет в области «{drillRegion.name}»</p>
             ) : (
               drillCities.map((city) => {
                 const isSelected = filters.city_id === city.id;
@@ -189,14 +191,14 @@ export function AllBelarusPage() {
                     key={city.id}
                     type="button"
                     onClick={() => selectCity(city)}
-                    className={`belarus-row ${isSelected ? 'belarus-row--active' : ''}`}
+                    className={`picker-row ${isSelected ? 'picker-row--active' : ''}`}
                     aria-pressed={isSelected}
                   >
-                    <span className="belarus-row__label">{city.name}</span>
+                    <span className="picker-row__label">{city.name}</span>
                     {isSelected ? (
                       <Check size={20} strokeWidth={2.5} />
                     ) : (
-                      <ChevronRight size={18} className="belarus-row__chevron" />
+                      <ChevronRight size={18} className="picker-row__chevron" />
                     )}
                   </button>
                 );
@@ -209,17 +211,17 @@ export function AllBelarusPage() {
             <button
               type="button"
               onClick={selectAll}
-              className={`belarus-row ${noLocationActive ? 'belarus-row--active' : ''}`}
+              className={`picker-row ${noLocationActive ? 'picker-row--active' : ''}`}
               aria-pressed={noLocationActive}
             >
-              <span className="belarus-row__label">
-                <MapPin size={18} className="belarus-row__pin" />
+              <span className="picker-row__label">
+                <MapPin size={18} className="picker-row__icon" />
                 Вся Беларусь
               </span>
               {noLocationActive && <Check size={20} strokeWidth={2.5} />}
             </button>
 
-            <h3 className="belarus-section__title">Области</h3>
+            <h3 className="picker-section__title">Области</h3>
             {filteredRegions.map((region) => {
               const count = regionCityCount.get(region.id) ?? 0;
               const isActive = regionActive(region);
@@ -232,13 +234,13 @@ export function AllBelarusPage() {
                     setDrillRegion(region);
                     setQuery('');
                   }}
-                  className={`belarus-row ${isActive ? 'belarus-row--active' : ''}`}
+                  className={`picker-row ${isActive ? 'picker-row--active' : ''}`}
                   aria-pressed={isActive}
                 >
-                  <span className="belarus-row__label">{region.name}</span>
-                  <span className="belarus-row__meta">
-                    {count > 0 && <span className="belarus-row__count">{count}</span>}
-                    <ChevronRight size={18} className="belarus-row__chevron" />
+                  <span className="picker-row__label">{region.name}</span>
+                  <span className="picker-row__meta">
+                    {count > 0 && <span className="picker-row__count">{count}</span>}
+                    <ChevronRight size={18} className="picker-row__chevron" />
                   </span>
                 </button>
               );
@@ -247,7 +249,7 @@ export function AllBelarusPage() {
             {/* Прямые совпадения городов по запросу */}
             {fullCityMatches.length > 0 && (
               <>
-                <h3 className="belarus-section__title">Города</h3>
+                <h3 className="picker-section__title">Города</h3>
                 {fullCityMatches.map((city) => {
                   const isSelected = filters.city_id === city.id;
                   const regionName = city.region_id != null ? regionNameById.get(city.region_id) : undefined;
@@ -256,19 +258,19 @@ export function AllBelarusPage() {
                       key={city.id}
                       type="button"
                       onClick={() => selectCity(city)}
-                      className={`belarus-row ${isSelected ? 'belarus-row--active' : ''}`}
+                      className={`picker-row ${isSelected ? 'picker-row--active' : ''}`}
                       aria-pressed={isSelected}
                     >
-                      <span className="belarus-row__label">
+                      <span className="picker-row__label">
                         {city.name}
                         {regionName && (
-                          <span className="belarus-row__sub">{regionName}</span>
+                          <span className="picker-row__sub">{regionName}</span>
                         )}
                       </span>
                       {isSelected ? (
                         <Check size={20} strokeWidth={2.5} />
                       ) : (
-                        <ChevronRight size={18} className="belarus-row__chevron" />
+                        <ChevronRight size={18} className="picker-row__chevron" />
                       )}
                     </button>
                   );

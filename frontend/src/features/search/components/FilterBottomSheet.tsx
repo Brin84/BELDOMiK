@@ -1,8 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { ChevronRight } from 'lucide-react';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { useHaptics } from '@/shared/lib/haptics';
-import { backHandlerBlocked } from '@/shared/lib/backButton';
-import type { PropertyFilterParams } from '@/shared/api/types';
+import { backHandlerBlocked, pickerOverlayOpen } from '@/shared/lib/backButton';
+import { PropertyTypePicker } from './PropertyTypePicker';
+import { RenovationPicker } from './RenovationPicker';
+import type { PropertyFilterParams, PropertyType } from '@/shared/api/types';
 import './search-form.css';
 
 interface FilterBottomSheetProps {
@@ -10,7 +13,7 @@ interface FilterBottomSheetProps {
   onClose: () => void;
   filters: PropertyFilterParams;
   onFiltersChange: (filters: Partial<PropertyFilterParams>) => void;
-  propertyTypes: Array<{ id: number; name: string }>;
+  propertyTypes: PropertyType[];
   renovationTypes: string[];
   onReset: () => void;
   hasActiveFilters: boolean;
@@ -29,6 +32,10 @@ export function FilterBottomSheet({
   const { trigger } = useHaptics();
   const { backButton } = useTelegram();
 
+  // Полноэкранные выборы (тип недвижимости / ремонт) поверх шторки.
+  const [typePickerOpen, setTypePickerOpen] = useState(false);
+  const [renovationPickerOpen, setRenovationPickerOpen] = useState(false);
+
   // Handle back button in Telegram — modal takes over, blocks AppShell's handler
   useEffect(() => {
     if (!isOpen) return;
@@ -38,6 +45,9 @@ export function FilterBottomSheet({
       backHandlerBlocked.current = true;
       backButton.show();
       const handleBack = () => {
+        // Пока открыт полноэкранный выбор, «Назад» закрывает его — шторка
+        // остаётся открытой. Обработчик выбора снимает флаг pickerOverlayOpen.
+        if (pickerOverlayOpen.current) return;
         trigger('light');
         onClose();
       };
@@ -114,7 +124,32 @@ export function FilterBottomSheet({
     onFiltersChange({ renovation });
   };
 
+  const selectedType = propertyTypes.find((t) => t.id === filters.type_id);
+  const selectedRenovation = filters.renovation;
+
   const sectionTitle = (text: string) => <h3 className="fbs__title-sm">{text}</h3>;
+
+  // Строка-селектор, открывающая полноэкранный выбор (в стиле «Вся Беларусь»).
+  const pickerRow = (
+    label: string,
+    value: string | undefined,
+    onClick: () => void,
+  ) => (
+    <button
+      type="button"
+      onClick={onClick}
+      className="fbs__row"
+      aria-haspopup="dialog"
+    >
+      <span className="fbs__row-main">{label}</span>
+      <span className="fbs__row-select">
+        <span className={`fbs__row-value ${value ? '' : 'fbs__row-value--muted'}`}>
+          {value || 'Любой'}
+        </span>
+        <ChevronRight size={18} className="fbs__row-chevron" />
+      </span>
+    </button>
+  );
 
   return (
     <div
@@ -151,29 +186,18 @@ export function FilterBottomSheet({
 
         {/* Content */}
         <div className="fbs__body">
-          {/* Property Type */}
+          {/* Property Type — открывает полноэкранный выбор в стиле «Вся Беларусь» */}
           {propertyTypes.length > 0 && (
             <section className="fbs__section fbs__section--first">
               {sectionTitle('Тип недвижимости')}
-              <div className="fbs__chips">
-                <button
-                  onClick={() => handleTypeChange(undefined)}
-                  className={`fbs__chip ${filters.type_id === undefined ? 'fbs__chip--active' : ''}`}
-                  aria-pressed={filters.type_id === undefined}
-                >
-                  Любой
-                </button>
-                {propertyTypes.map((type) => (
-                  <button
-                    key={type.id}
-                    onClick={() => handleTypeChange(type.id)}
-                    className={`fbs__chip ${filters.type_id === type.id ? 'fbs__chip--active' : ''}`}
-                    aria-pressed={filters.type_id === type.id}
-                  >
-                    {type.name}
-                  </button>
-                ))}
-              </div>
+              {pickerRow(
+                'Тип недвижимости',
+                selectedType?.name,
+                () => {
+                  trigger('light');
+                  setTypePickerOpen(true);
+                },
+              )}
             </section>
           )}
 
@@ -406,29 +430,18 @@ export function FilterBottomSheet({
             </div>
           </section>
 
-          {/* Renovation */}
+          {/* Renovation — открывает полноэкранный выбор в стиле «Вся Беларусь» */}
           {renovationTypes.length > 0 && (
             <section className="fbs__section">
               {sectionTitle('Ремонт')}
-              <div className="fbs__chips">
-                <button
-                  onClick={() => handleRenovationChange(undefined)}
-                  className={`fbs__chip ${filters.renovation === undefined ? 'fbs__chip--active' : ''}`}
-                  aria-pressed={filters.renovation === undefined}
-                >
-                  Любой
-                </button>
-                {renovationTypes.map((renovation) => (
-                  <button
-                    key={renovation}
-                    onClick={() => handleRenovationChange(renovation)}
-                    className={`fbs__chip ${filters.renovation === renovation ? 'fbs__chip--active' : ''}`}
-                    aria-pressed={filters.renovation === renovation}
-                  >
-                    {renovation}
-                  </button>
-                ))}
-              </div>
+              {pickerRow(
+                'Ремонт',
+                selectedRenovation,
+                () => {
+                  trigger('light');
+                  setRenovationPickerOpen(true);
+                },
+              )}
             </section>
           )}
 
@@ -500,6 +513,22 @@ export function FilterBottomSheet({
           </div>
         </div>
       </div>
+
+      {/* Полноэкранные выборы поверх шторки (portal в body) */}
+      <PropertyTypePicker
+        isOpen={typePickerOpen}
+        onClose={() => setTypePickerOpen(false)}
+        selectedTypeId={filters.type_id}
+        propertyTypes={propertyTypes}
+        onSelect={handleTypeChange}
+      />
+      <RenovationPicker
+        isOpen={renovationPickerOpen}
+        onClose={() => setRenovationPickerOpen(false)}
+        selected={selectedRenovation}
+        renovationTypes={renovationTypes}
+        onSelect={handleRenovationChange}
+      />
     </div>
   );
 }

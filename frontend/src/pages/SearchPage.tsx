@@ -6,7 +6,7 @@ import { useGeographyStore } from '@/features/geography/geographyStore';
 import { useFavoritesStore } from '@/features/favorites';
 import { PropertyCard } from '@/entities/property';
 import { ListSkeleton, EmptyState, InlineError } from '@/shared/ui';
-import { FilterBottomSheet, ActiveFilterChips, SortSelector, QuickFilters } from '@/features/search/components';
+import { FilterBottomSheet, ActiveFilterChips, SortSelector, QuickFilters, PropertyTypePicker } from '@/features/search/components';
 import { SavedSearchForm } from '@/features/saved-searches/components';
 import { formatPriceByn, formatArea } from '@/shared/lib/format';
 import type { PropertyFilterParams } from '@/shared/api/types';
@@ -52,6 +52,9 @@ export function SearchPage() {
   // Local state for UI
   const [filterBottomSheetOpen, setFilterBottomSheetOpen] = useState(false);
   const [saveSearchModalOpen, setSaveSearchModalOpen] = useState(false);
+  // Выбор типа недвижимости — отдельный полноэкранный экран (как города
+  // в «Вся Беларусь»), а не позиция внутри шторки «Все фильтры».
+  const [typePickerOpen, setTypePickerOpen] = useState(false);
 
   // Apply saved search filters from sessionStorage on mount
   useEffect(() => {
@@ -273,11 +276,6 @@ export function SearchPage() {
   // Renovation types — shared constant with the catalog filter button.
   const renovationTypes = [...RENOVATION_TYPES];
 
-  // Transform property types for filter UI
-  const propertyTypesForFilter = useMemo(() => {
-    return propertyTypes.map((t) => ({ id: t.id, name: t.name }));
-  }, [propertyTypes]);
-
   // Handle favorite toggle
   const handleFavoriteToggle = useCallback(
     async (propertyId: number, _isFavorite: boolean) => {
@@ -309,7 +307,7 @@ export function SearchPage() {
         <button
           onClick={() => {
             trigger('light');
-            setFilterBottomSheetOpen(true);
+            setTypePickerOpen(true);
           }}
           className="search-row"
           aria-haspopup="dialog"
@@ -415,13 +413,25 @@ export function SearchPage() {
         </>
       )}
 
+      {/* Выбор типа недвижимости — полноэкранный экран */}
+      <PropertyTypePicker
+        isOpen={typePickerOpen}
+        onClose={() => setTypePickerOpen(false)}
+        selectedTypeId={filters.type_id}
+        propertyTypes={propertyTypes}
+        onSelect={(typeId) => {
+          trigger('selection');
+          setFilters({ type_id: typeId });
+        }}
+      />
+
       {/* Filter Bottom Sheet */}
       <FilterBottomSheet
         isOpen={filterBottomSheetOpen}
         onClose={() => setFilterBottomSheetOpen(false)}
         filters={filters}
         onFiltersChange={updateFilters}
-        propertyTypes={propertyTypesForFilter}
+        propertyTypes={propertyTypes}
         renovationTypes={renovationTypes}
         onReset={handleResetAll}
         hasActiveFilters={hasActiveFilters}

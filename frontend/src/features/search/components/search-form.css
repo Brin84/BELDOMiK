@@ -604,6 +604,36 @@
   opacity: 0.75;
 }
 
+/* ---- Строка-селектор (тип недвижимости, ремонт) ----
+   Открывает полноэкранный выбор в стиле «Вся Беларусь». */
+
+.fbs__row-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex-shrink: 0;
+  max-width: 55%;
+}
+
+.fbs__row-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--bd-accent-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fbs__row-value--muted {
+  color: var(--bd-text-secondary);
+}
+
+.fbs__row-chevron {
+  color: var(--bd-text-secondary);
+  flex-shrink: 0;
+}
+
 /* ---- Сетка bool-фильтров (дополнительно) ----
    Выпуклые Neumorphism кнопки в сетке. */
 

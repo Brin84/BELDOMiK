@@ -1,47 +1,100 @@
 /* ============================================================
-   Все Беларусь — Soft UI дизайн (стиль BELDOMiK).
+   Общие стили выбора (Soft UI, стиль BELDOMiK).
+
+   Один источник правды для всех экранов выбора:
+   - «Вся Беларусь» (страница областей/городов);
+   - полноэкранный выбор типа недвижимости и ремонта
+     из шторки «Все фильтры».
+
    Светлый фон #E0E5EC, двойные тени для выпуклости/вдавленности.
    ============================================================ */
 
-.belarus-page {
-  min-height: 100vh;
+/* ---------- Экран выбора ---------- */
+
+/* Полноэкранный оверлей поверх шторки/страницы. */
+.picker-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background-color: var(--bd-bg-base);
   color: var(--bd-text-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Вариант для обычной страницы (скроллится вместе с контентом). */
+.picker-screen--inline {
+  position: static;
+  min-height: 100vh;
+  overflow: visible;
   padding-bottom: 90px;
 }
 
-.belarus-page__inner {
+.picker-screen__inner {
   max-width: 600px;
   margin: 0 auto;
   padding: 14px 16px 0;
 }
 
+.picker-screen--overlay .picker-screen__inner {
+  padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+}
+
 /* ---------- Шапка ---------- */
 
-.belarus-header {
+.picker-header {
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
   padding: 16px;
 }
 
-.belarus-header__title {
+.picker-header__text {
+  min-width: 0;
+}
+
+.picker-header__title {
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.5px;
   color: var(--bd-text-primary);
 }
 
-.belarus-header__subtitle {
+.picker-header__subtitle {
   margin: 2px 0 0 2px;
   font-size: 13px;
   color: var(--bd-text-secondary);
 }
 
+.picker-header__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 12px;
+  background-color: var(--bd-bg-base);
+  color: var(--bd-text-secondary);
+  cursor: pointer;
+  box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.picker-header__close:active {
+  box-shadow: inset 3px 3px 6px var(--bd-raise-dark),
+    inset -3px -3px 6px var(--bd-raise-light);
+  transform: translateY(1px);
+}
+
 /* ---------- Поиск ---------- */
 
-.belarus-search {
+.picker-search {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -59,18 +112,18 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.belarus-search:active {
+.picker-search:active {
   box-shadow: inset 3px 3px 6px var(--bd-raise-dark),
     inset -3px -3px 6px var(--bd-raise-light);
   transform: translateY(1px);
 }
 
-.belarus-search__icon {
+.picker-search__icon {
   flex-shrink: 0;
   color: var(--bd-accent-primary);
 }
 
-.belarus-search__input {
+.picker-search__input {
   flex: 1;
   min-width: 0;
   font-size: 14px;
@@ -80,11 +133,11 @@
   outline: none;
 }
 
-.belarus-search__input::placeholder {
+.picker-search__input::placeholder {
   color: var(--bd-text-secondary);
 }
 
-.belarus-search__clear {
+.picker-search__clear {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,7 +153,7 @@
   box-shadow: 4px 4px 8px var(--bd-raise-dark), -4px -4px 8px var(--bd-raise-light);
 }
 
-.belarus-search__clear:active {
+.picker-search__clear:active {
   box-shadow: inset 2px 2px 4px var(--bd-raise-dark),
     inset -2px -2px 4px var(--bd-raise-light);
   transform: translateY(1px);
@@ -108,14 +161,14 @@
 
 /* ---------- Дрилл-даун: шапка ---------- */
 
-.belarus-drill-head {
+.picker-drill-head {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-top: 16px;
 }
 
-.belarus-drill-head__back {
+.picker-drill-head__back {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -126,17 +179,18 @@
   color: var(--bd-text-secondary);
   flex-shrink: 0;
   cursor: pointer;
+  border: none;
   box-shadow: 6px 6px 12px var(--bd-raise-dark), -6px -6px 12px var(--bd-raise-light);
   transition: box-shadow 0.18s ease, transform 0.12s ease;
 }
 
-.belarus-drill-head__back:active {
+.picker-drill-head__back:active {
   box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
     inset -4px -4px 8px var(--bd-raise-light);
   transform: translateY(1px);
 }
 
-.belarus-drill-head__title {
+.picker-drill-head__title {
   font-size: 18px;
   font-weight: 800;
   color: var(--bd-text-primary);
@@ -149,7 +203,7 @@
 
 /* ---------- Секция ---------- */
 
-.belarus-section__title {
+.picker-section__title {
   margin-top: 20px;
   margin-bottom: 12px;
   font-size: 15px;
@@ -161,7 +215,7 @@
 
 /* ---------- Строка-карточка ---------- */
 
-.belarus-row {
+.picker-row {
   width: 100%;
   display: flex;
   align-items: center;
@@ -169,11 +223,13 @@
   gap: 10px;
   padding: 12px 16px;
   margin-top: 10px;
+  border: none;
   border-radius: 18px;
   background-color: var(--bd-bg-base);
   color: var(--bd-text-primary);
   cursor: pointer;
   text-align: left;
+  font-family: inherit;
   font-size: 15px;
   font-weight: 600;
   transition: box-shadow 0.18s ease, transform 0.12s ease;
@@ -181,25 +237,25 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.belarus-row:active {
+.picker-row:active {
   box-shadow: inset 4px 4px 8px var(--bd-raise-dark),
     inset -4px -4px 8px var(--bd-raise-light);
   transform: translateY(1px);
 }
 
 /* Активная строка - синяя заливка как у популярных городов */
-.belarus-row--active {
+.picker-row--active {
   color: #fff;
   background: var(--bd-accent-primary);
   box-shadow: 0 4px 12px var(--bd-accent-soft);
 }
 
-.belarus-row--active:active {
+.picker-row--active:active {
   box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1);
   transform: translateY(1px);
 }
 
-.belarus-row__label {
+.picker-row__label {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -210,16 +266,16 @@
   white-space: nowrap;
 }
 
-.belarus-row__pin {
+.picker-row__icon {
   color: var(--bd-accent-primary);
   flex-shrink: 0;
 }
 
-.belarus-row--active .belarus-row__pin {
+.picker-row--active .picker-row__icon {
   color: #fff;
 }
 
-.belarus-row__sub {
+.picker-row__sub {
   display: inline;
   font-size: 13px;
   font-weight: 500;
@@ -227,18 +283,18 @@
   margin-left: 6px;
 }
 
-.belarus-row--active .belarus-row__sub {
+.picker-row--active .picker-row__sub {
   color: rgba(255, 255, 255, 0.75);
 }
 
-.belarus-row__meta {
+.picker-row__meta {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
 }
 
-.belarus-row__count {
+.picker-row__count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -253,23 +309,23 @@
   box-shadow: 2px 2px 4px var(--bd-raise-dark), -2px -2px 4px var(--bd-raise-light);
 }
 
-.belarus-row--active .belarus-row__count {
+.picker-row--active .picker-row__count {
   background: rgba(255, 255, 255, 0.25);
   color: #fff;
 }
 
-.belarus-row__chevron {
+.picker-row__chevron {
   color: var(--bd-text-secondary);
   flex-shrink: 0;
 }
 
-.belarus-row--active .belarus-row__chevron {
+.picker-row--active .picker-row__chevron {
   color: rgba(255, 255, 255, 0.7);
 }
 
 /* ---------- Пустой результат ---------- */
 
-.belarus-empty {
+.picker-empty {
   margin-top: 10px;
   padding: 14px 16px;
   border-radius: 18px;

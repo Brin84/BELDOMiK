@@ -1,34 +1,14 @@
-import {
-  Building2,
-  Home,
-  Fence,
-  Store,
-  CarFront,
-  Trees,
-  Percent,
-} from 'lucide-react';
+import { Percent } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import type { PropertyCategory } from '@/shared/api/types';
+import { CATEGORIES } from '@/shared/lib/propertyCategories';
 import { BynSymbol } from '@/shared/ui';
+
+export { CATEGORIES };
 
 // Прямоугольные кнопки категорий: иконка + подпись. Функционал прежний —
 // клик фильтрует каталог по type_id, повторный клик по активной снимает
 // фильтр. Активная кнопка заливается синим (как «Купить»/«Снять»);
 // неактивная — чёрная контурная иконка, рамка в цвете приложения.
-interface CategoryConfig {
-  key: PropertyCategory;
-  title: string;
-  icon: LucideIcon;
-}
-
-export const CATEGORIES: readonly CategoryConfig[] = [
-  { key: 'apartment', title: 'Квартиры', icon: Building2 },
-  { key: 'house', title: 'Дома', icon: Home },
-  { key: 'land', title: 'Участки', icon: Fence },
-  { key: 'commercial', title: 'Коммерческая', icon: Store },
-  { key: 'garage', title: 'Гаражи', icon: CarFront },
-  { key: 'dacha', title: 'Дачи', icon: Trees },
-];
 
 interface CategoryCardProps {
   title: string;

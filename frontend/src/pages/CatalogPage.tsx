@@ -389,7 +389,7 @@ export function CatalogPage() {
           onClose={() => setFilterOpen(false)}
           filters={filters}
           onFiltersChange={setFilters}
-          propertyTypes={propertyTypes.map((t) => ({ id: t.id, name: t.name }))}
+          propertyTypes={propertyTypes}
           renovationTypes={[...RENOVATION_TYPES]}
           onReset={resetFilters}
           hasActiveFilters={hasActiveFilters}

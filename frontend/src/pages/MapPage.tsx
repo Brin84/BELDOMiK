@@ -7,7 +7,7 @@ import { useGeographyStore } from '@/features/geography/geographyStore';
 import { useFavoritesStore } from '@/features/favorites';
 import { PropertyCard } from '@/entities/property';
 import { ListSkeleton, EmptyState, InlineError } from '@/shared/ui';
-import { FilterBottomSheet, ActiveFilterChips, SortSelector, QuickFilters } from '@/features/search/components';
+import { FilterBottomSheet, ActiveFilterChips, SortSelector, QuickFilters, PropertyTypePicker } from '@/features/search/components';
 import { MapView, PropertyMapPreview, MapControls } from '@/features/map/components';
 import { formatPriceByn, formatArea } from '@/shared/lib/format';
 import type { PropertyFilterParams } from '@/shared/api/types';
@@ -73,6 +73,9 @@ export function MapPage() {
   const [isGeolocationLoading, setIsGeolocationLoading] = useState(false);
   const [geolocationError, setGeolocationError] = useState<string | null>(null);
   const [filterBottomSheetOpen, setFilterBottomSheetOpen] = useState(false);
+  // Выбор типа недвижимости — отдельный полноэкранный экран (как города
+  // в «Вся Беларусь»), а не позиция внутри шторки «Все фильтры».
+  const [typePickerOpen, setTypePickerOpen] = useState(false);
 
   // Load geography data on mount
   useEffect(() => {
@@ -256,11 +259,6 @@ export function MapPage() {
   const renovationTypes = useMemo(() => {
     return ['Без ремонта', 'Косметический', 'Евроремонт', 'Дизайнерский', 'Требует ремонта'];
   }, []);
-
-  // Transform property types for filter UI
-  const propertyTypesForFilter = useMemo(() => {
-    return propertyTypes.map((t) => ({ id: t.id, name: t.name }));
-  }, [propertyTypes]);
 
   // Handle favorite toggle
   const handleFavoriteToggle = useCallback(
@@ -457,7 +455,7 @@ export function MapPage() {
               <button
                 onClick={() => {
                   trigger('light');
-                  setFilterBottomSheetOpen(true);
+                  setTypePickerOpen(true);
                 }}
                 className="search-row"
                 aria-haspopup="dialog"
@@ -555,13 +553,25 @@ export function MapPage() {
         </div>
       )}
 
+      {/* Выбор типа недвижимости — полноэкранный экран */}
+      <PropertyTypePicker
+        isOpen={typePickerOpen}
+        onClose={() => setTypePickerOpen(false)}
+        selectedTypeId={filters.type_id}
+        propertyTypes={propertyTypes}
+        onSelect={(typeId) => {
+          trigger('selection');
+          setFilters({ type_id: typeId });
+        }}
+      />
+
       {/* Filter Bottom Sheet */}
       <FilterBottomSheet
         isOpen={filterBottomSheetOpen}
         onClose={() => setFilterBottomSheetOpen(false)}
         filters={filters}
         onFiltersChange={updateFilters}
-        propertyTypes={propertyTypesForFilter}
+        propertyTypes={propertyTypes}
         renovationTypes={renovationTypes}
         onReset={handleResetAll}
         hasActiveFilters={hasActiveFilters}
