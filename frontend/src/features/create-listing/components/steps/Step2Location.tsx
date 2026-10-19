@@ -43,23 +43,13 @@ export function Step2Location() {
     addCity,
   } = useGeographyStore();
 
-  // Определяем, относится ли объявление к типу без квартир —
-  // для домов / участков / дач / гаражей неуместно спрашивать «номер квартиры».
+  // Определяем категорию выбранного типа недвижимости — по ней решаем,
+  // как задавать точный адрес. Только у квартиры адрес включает номер
+  // квартиры; для дома, участка, дачи, гаража и коммерческой недвижимости
+  // указывают адрес здания (улица, дом, корпус).
   const currentType = propertyTypes.find((t) => t.id === formData.property_type_id);
-  const typeName = (currentType?.name ?? '').toLowerCase();
-  const isWithoutApartment =
-    typeName.includes('гараж') ||
-    typeName.includes('машиномест') ||
-    typeName.includes('паркинг') ||
-    typeName.includes('дом') ||
-    typeName.includes('дач') ||
-    typeName.includes('земел') ||
-    typeName.includes('участок') ||
-    typeName.includes('house') ||
-    typeName.includes('land') ||
-    typeName.includes('dacha') ||
-    typeName.includes('garage') ||
-    typeName.includes('parking');
+  const propertyCategory = currentType?.category ?? 'apartment';
+  const isWithoutApartment = propertyCategory !== 'apartment';
 
   const addressTitle = isWithoutApartment
     ? 'Точный адрес (улица, номер дома, корпус)'
