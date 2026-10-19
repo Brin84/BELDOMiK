@@ -9,6 +9,7 @@ ordering in the feed.
 """
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from typing import Optional
 
@@ -62,7 +63,7 @@ def _load_catalog_from_db(db: Session) -> dict[PromotionType, PromotionProduct]:
     }
     
     for ptype, defaults_val in defaults.items():
-        db_price = base_prices.get(ptype.value)
+        db_price = base_prices.get(ptype)  # keys are PromotionType enums, not strings
         if db_price:
             catalog[ptype] = PromotionProduct(
                 type=ptype,
@@ -71,7 +72,7 @@ def _load_catalog_from_db(db: Session) -> dict[PromotionType, PromotionProduct]:
                 duration_days=db_price.duration_days,
                 priority=db_price.priority,
                 badge_color=db_price.badge_color,
-                features=eval(db_price.features) if db_price.features else defaults_val["features"],
+                features=json.loads(db_price.features) if db_price.features else defaults_val["features"],
             )
         else:
             catalog[ptype] = PromotionProduct(type=ptype, **defaults_val)

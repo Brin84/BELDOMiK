@@ -1,5 +1,6 @@
 """Webhook routes: Telegram + Payments."""
 import asyncio
+import json
 from contextlib import suppress
 
 import httpx
@@ -267,6 +268,9 @@ async def yookassa_webhook(request: Request, db: Session = Depends(get_db)):
         return {"ok": True}
 
     if parsed["status"] == "succeeded":
+        # Store yookassa_payment_id so confirm_payment can find it
+        if parsed.get("yookassa_payment_id"):
+            payment.provider_data = json.dumps({"yookassa_payment_id": parsed["yookassa_payment_id"]})
         try:
             MonetizationService.confirm_payment(db, payment_id, payment.user)
         except Exception:
@@ -292,6 +296,9 @@ async def ipay_webhook(request: Request, db: Session = Depends(get_db)):
         return {"ok": True}
 
     if parsed["status"] == "paid":
+        # Store ipay_order_id so confirm_payment can find it
+        if parsed.get("ipay_order_id"):
+            payment.provider_data = json.dumps({"ipay_order_id": parsed["ipay_order_id"]})
         try:
             MonetizationService.confirm_payment(db, payment_id, payment.user)
         except Exception:

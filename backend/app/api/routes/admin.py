@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_admin_user, get_db
 from app.models.moderation import ModerationAction, ModerationActionType
-from app.models.property import Property, PropertyView, Report
+from app.models.property import Property, PropertyStatus, PropertyView, Report
 from app.models.user import User
 from app.schemas.user import UserRead
 from app.services.moderation_service import _publish_to_channel
@@ -97,11 +97,11 @@ def get_dashboard(
         total_users=db.query(func.count(User.id)).scalar() or 0,
         total_properties=db.query(func.count(Property.id)).scalar() or 0,
         published_properties=db.query(func.count(Property.id))
-        .filter(Property.status == "published").scalar() or 0,
+        .filter(Property.status == PropertyStatus.PUBLISHED).scalar() or 0,
         pending_properties=db.query(func.count(Property.id))
-        .filter(Property.status.in_(["pending_moderation", "draft"])).scalar() or 0,
+        .filter(Property.status.in_([PropertyStatus.PENDING_MODERATION, PropertyStatus.DRAFT])).scalar() or 0,
         blocked_properties=db.query(func.count(Property.id))
-        .filter(Property.status == "blocked").scalar() or 0,
+        .filter(Property.status == PropertyStatus.BLOCKED).scalar() or 0,
         total_views=db.query(func.count(PropertyView.id)).scalar() or 0,
         total_favorites=db.query(
             func.count(func.distinct(PropertyView.user_id))
@@ -673,7 +673,7 @@ def get_promotion_base_prices(
             duration_days=bp.duration_days,
             priority=bp.priority,
             badge_color=bp.badge_color,
-            features=eval(bp.features) if bp.features else [],
+            features=json.loads(bp.features) if bp.features else [],
         ))
     return result
 
@@ -726,7 +726,7 @@ def update_promotion_base_price(
         duration_days=base_price.duration_days,
         priority=base_price.priority,
         badge_color=base_price.badge_color,
-        features=eval(base_price.features) if base_price.features else [],
+        features=json.loads(base_price.features) if base_price.features else [],
     )
 
 

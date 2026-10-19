@@ -73,17 +73,24 @@ def calculate_promo_price(
     return max(1, int(round(price)))
 
 
-def get_base_prices(db: Session) -> dict[str, PromotionBasePrice]:
-    """Get all active base prices keyed by promotion_type."""
+def get_base_prices(db: Session) -> dict[PromotionType, PromotionBasePrice]:
+    """Get all active base prices keyed by PromotionType enum."""
     prices = db.query(PromotionBasePrice).filter(
         PromotionBasePrice.is_active == True
     ).all()
     return {p.promotion_type: p for p in prices}
 
 
-def get_base_price(db: Session, promotion_type: str) -> PromotionBasePrice | None:
+def get_base_price(db: Session, promotion_type: str | PromotionType) -> PromotionBasePrice | None:
     """Get base price for a specific promotion type."""
+    if isinstance(promotion_type, str):
+        try:
+            ptype = PromotionType(promotion_type)
+        except ValueError:
+            return None
+    else:
+        ptype = promotion_type
     return db.query(PromotionBasePrice).filter(
-        PromotionBasePrice.promotion_type == promotion_type,
+        PromotionBasePrice.promotion_type == ptype,
         PromotionBasePrice.is_active == True
     ).first()

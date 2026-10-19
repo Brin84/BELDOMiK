@@ -1,8 +1,8 @@
 """YooKassa payment provider."""
 from __future__ import annotations
 
+import json
 import logging
-from decimal import Decimal
 
 from yookassa import Configuration, Payment as YooKassaPayment
 from yookassa.domain.notification import WebhookNotificationEventType, WebhookNotificationFactory
@@ -48,6 +48,9 @@ class YooKassaProvider(PaymentProvider):
         if not confirmation_url:
             raise ValueError("YooKassa не вернула confirmation_url")
 
+        # Persist yookassa_payment_id so confirm_payment / webhook can retrieve it
+        payment.provider_data = json.dumps({"yookassa_payment_id": yookassa_payment.id})
+
         return PaymentCheckout(
             payment_id=payment.id,
             amount_byn=payment.amount_byn,
@@ -63,7 +66,11 @@ class YooKassaProvider(PaymentProvider):
         """Check payment status via YooKassa API."""
         yookassa_payment_id = None
         if payment.provider_data:
-            yookassa_payment_id = payment.provider_data.get("yookassa_payment_id")
+            try:
+                data = json.loads(payment.provider_data)
+                yookassa_payment_id = data.get("yookassa_payment_id")
+            except (json.JSONDecodeError, TypeError):
+                pass
 
         if not yookassa_payment_id:
             logger.error("No yookassa_payment_id stored for payment %s", payment.id)

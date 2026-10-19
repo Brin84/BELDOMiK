@@ -6,8 +6,8 @@ from typing import Any
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.models.moderation import ModerationAction
-from app.models.property import Property, Report
+from app.models.moderation import ModerationAction, ModerationActionType
+from app.models.property import Property, PropertyStatus, Report
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ class ModerationService:
         """Get properties pending moderation."""
         query = (
             db.query(Property)
-            .filter(Property.status.in_(["pending", "draft"]))
+            .filter(Property.status.in_([PropertyStatus.PENDING_MODERATION, PropertyStatus.DRAFT]))
             .order_by(Property.created_at.asc())
         )
         total = query.count()
@@ -70,7 +70,7 @@ class ModerationService:
         """Get published properties for review."""
         query = (
             db.query(Property)
-            .filter(Property.status == "published")
+            .filter(Property.status == PropertyStatus.PUBLISHED)
             .order_by(Property.created_at.desc())
         )
         total = query.count()
@@ -112,20 +112,26 @@ class ModerationService:
 
         old_status = property_obj.status
         if action == "approve":
-            property_obj.status = "published"
+            property_obj.status = PropertyStatus.PUBLISHED
             property_obj.published_at = datetime.now(UTC)
         elif action == "reject":
-            property_obj.status = "rejected"
+            property_obj.status = PropertyStatus.REJECTED
         elif action == "block":
-            property_obj.status = "blocked"
+            property_obj.status = PropertyStatus.BLOCKED
 
-        moderation_action = ModerationAction(
-            admin_id=admin_id,
-            property_id=property_id,
-            action=action,
-            reason=reason,
-        )
-        db.add(moderation_action)
+        moderation_action_type = {
+            "approve": ModerationActionType.APPROVE,
+            "reject": ModerationActionType.REJECT,
+            "block": ModerationActionType.BLOCK,
+        }.get(action)
+        if moderation_action_type is not None:
+            moderation_action = ModerationAction(
+                property_id=property_id,
+                admin_id=admin_id,
+                action=moderation_action_type,
+                reason=reason,
+            )
+            db.add(moderation_action)
         db.commit()
         db.refresh(property_obj)
 
@@ -161,11 +167,11 @@ class ModerationService:
         """Get moderation dashboard stats."""
         return {
             "pending_properties": db.query(func.count(Property.id))
-            .filter(Property.status.in_(["pending", "draft"]))
+            .filter(Property.status.in_([PropertyStatus.PENDING_MODERATION, PropertyStatus.DRAFT]))
             .scalar()
             or 0,
             "published_properties": db.query(func.count(Property.id))
-            .filter(Property.status == "published")
+            .filter(Property.status == PropertyStatus.PUBLISHED)
             .scalar()
             or 0,
             "open_reports": db.query(func.count(Report.id))
@@ -173,7 +179,7 @@ class ModerationService:
             .scalar()
             or 0,
             "blocked_properties": db.query(func.count(Property.id))
-            .filter(Property.status == "blocked")
+            .filter(Property.status == PropertyStatus.BLOCKED)
             .scalar()
             or 0,
         }

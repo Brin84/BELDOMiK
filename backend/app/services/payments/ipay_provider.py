@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import json
 import logging
 from typing import Any
 
@@ -41,6 +42,8 @@ class IPayProvider(PaymentProvider):
 
     def create_payment(self, payment: Payment) -> PaymentCheckout:
         """Create an IPay payment and return checkout URL."""
+        # Store ipay_order_id on payment so webhook / confirm can find it
+        ipay_order_id = data.get("order_id") if False else None  # placeholder until after API call
         payload = {
             "account_id": self.account_id,
             "amount": int(payment.amount_byn * 100),  # IPay expects amount in kopecks
@@ -69,6 +72,10 @@ class IPayProvider(PaymentProvider):
         if not payment_url:
             raise ValueError("IPay не вернула payment_url")
 
+        # Persist ipay_order_id so confirm_payment / webhook can retrieve it
+        ipay_order_id = data.get("order_id") or payload["order_id"]
+        payment.provider_data = json.dumps({"ipay_order_id": ipay_order_id})
+
         return PaymentCheckout(
             payment_id=payment.id,
             amount_byn=payment.amount_byn,
@@ -76,7 +83,7 @@ class IPayProvider(PaymentProvider):
             provider=self.name,
             confirmation={
                 "url": payment_url,
-                "ipay_order_id": data.get("order_id"),
+                "ipay_order_id": ipay_order_id,
             },
         )
 
@@ -84,7 +91,11 @@ class IPayProvider(PaymentProvider):
         """Check payment status via IPay API."""
         ipay_order_id = None
         if payment.provider_data:
-            ipay_order_id = payment.provider_data.get("ipay_order_id")
+            try:
+                data = json.loads(payment.provider_data)
+                ipay_order_id = data.get("ipay_order_id")
+            except (json.JSONDecodeError, TypeError):
+                pass
 
         if not ipay_order_id:
             logger.error("No ipay_order_id stored for payment %s", payment.id)
