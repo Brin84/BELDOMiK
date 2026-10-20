@@ -24,7 +24,7 @@ function visibleBanners(): AdBannerItem[] {
  */
 export function AdBanner({ onBannerClick }: AdBannerProps) {
   const { trigger } = useHaptics();
-  const { openLink } = useTelegram();
+  const { openLink, openTelegramLink } = useTelegram();
   const navigate = useNavigate();
 
   const banners = visibleBanners();
@@ -173,7 +173,12 @@ export function AdBanner({ onBannerClick }: AdBannerProps) {
     // Внешняя ссылка (t.me/...) открывается через Telegram, внутренний путь —
     // через роутер приложения.
     if (banner.href.startsWith('http')) {
-      openLink(banner.href);
+      // t.me ссылки открываем через openTelegramLink для нативного перехода в приложение
+      if (banner.href.includes('t.me/') || banner.href.includes('telegram.me/')) {
+        openTelegramLink(banner.href);
+      } else {
+        openLink(banner.href);
+      }
     } else {
       navigate(banner.href);
     }

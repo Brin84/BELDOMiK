@@ -10,6 +10,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { AdBanner } from '../AdBanner';
 
 const openLink = vi.fn();
+const openTelegramLink = vi.fn();
 
 vi.mock('@/app/providers/TelegramProvider', () => ({
   useTelegram: () => ({
@@ -32,7 +33,7 @@ vi.mock('@/app/providers/TelegramProvider', () => ({
     backButton: { show: vi.fn(), hide: vi.fn(), onClick: vi.fn(), offClick: vi.fn() },
     setClosingConfirmation: vi.fn(),
     openLink: (url: string) => openLink(url),
-    openTelegramLink: vi.fn(),
+    openTelegramLink: (url: string) => openTelegramLink(url),
     close: vi.fn(),
     expand: vi.fn(),
     ready: vi.fn(),
@@ -88,7 +89,7 @@ describe('AdBanner', () => {
     await user.click(screen.getByRole('img', { name: /Новые объявления/ }));
 
     await waitFor(() => {
-      expect(openLink).toHaveBeenCalledWith('https://t.me/beldomik_by');
+      expect(openTelegramLink).toHaveBeenCalledWith('https://t.me/beldomik_by');
     });
   });
 

@@ -33,7 +33,7 @@ export interface AdBannerItem {
 }
 
 /** Версия картинок баннеров. Увеличьте, если замените файлы в public/banners/. */
-export const BANNERS_VERSION = 1;
+export const BANNERS_VERSION = 2;
 
 const v = BANNERS_VERSION;
 
