@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { PropertyDetailPage } from '../components/PropertyDetailPage';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
+import { useAuthStore } from '@/features/auth';
 import type { PropertyDetail } from '@/shared/api/types';
 
 // TelegramProvider замокан: странице нужны useTelegram().openLink (карта)
@@ -39,11 +40,17 @@ vi.mock('@/app/providers/TelegramProvider', () => {
   };
 });
 
+// Мок startChat: он же используется для проверки автозапуска переписки
+// (приход из канала по кнопке «Написать продавцу»).
+const chatMocks = vi.hoisted(() => ({
+  startChat: vi.fn(),
+}));
+
 vi.mock('@/features/favorites', () => ({
   useFavoritesStore: () => ({ toggleFavorite: vi.fn() }),
 }));
 vi.mock('@/features/chat', () => ({
-  useChatStore: () => ({ startChat: vi.fn() }),
+  useChatStore: () => ({ startChat: chatMocks.startChat }),
 }));
 vi.mock('@/shared/ui/Toast', () => ({
   useToast: () => ({ showToast: vi.fn() }),
@@ -145,11 +152,12 @@ function seedStore(detail: PropertyDetail) {
   });
 }
 
-function renderPage() {
+function renderPage(path = '/property/27') {
   return render(
-    <MemoryRouter initialEntries={['/property/27']}>
+    <MemoryRouter initialEntries={[path]}>
       <Routes>
         <Route path="/property/:id" element={<PropertyDetailPage />} />
+        <Route path="/messages/:id" element={<div>chat screen</div>} />
       </Routes>
     </MemoryRouter>
   );
@@ -184,5 +192,42 @@ describe('PropertyDetailPage', () => {
     expect(screen.getByText('Позвонить')).toBeInTheDocument();
     // Ошибка рендера не возникла.
     expect(screen.queryByText('Что-то пошло не так')).not.toBeInTheDocument();
+  });
+
+  it('автозапускает чат с продавцом при ?write=1 (кнопка «Написать продавцу» в канале)', async () => {
+    chatMocks.startChat.mockResolvedValue(555);
+    useAuthStore.setState({
+      accessToken: 'token',
+      user: { id: 1 } as never,
+      status: 'authenticated',
+    });
+    seedStore(makeDetail());
+
+    renderPage('/property/27?write=1');
+
+    await waitFor(() => {
+      expect(chatMocks.startChat).toHaveBeenCalledWith(27, undefined);
+    });
+    // Переход в окно переписки.
+    await waitFor(() => {
+      expect(screen.getByText('chat screen')).toBeInTheDocument();
+    });
+  });
+
+  it('НЕ автозапускает чат без флага ?write=1', async () => {
+    chatMocks.startChat.mockClear();
+    useAuthStore.setState({
+      accessToken: 'token',
+      user: { id: 1 } as never,
+      status: 'authenticated',
+    });
+    seedStore(makeDetail());
+
+    renderPage('/property/27');
+
+    await waitFor(() => {
+      expect(screen.getByText('Написать')).toBeInTheDocument();
+    });
+    expect(chatMocks.startChat).not.toHaveBeenCalled();
   });
 });

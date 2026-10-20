@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useHaptics } from '@/shared/lib/haptics';
 import { useTelegram } from '@/app/providers/TelegramProvider';
 import { usePropertiesStore } from '@/features/properties/propertiesStore';
@@ -25,6 +25,7 @@ import './PropertyDetail.css';
 export function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { trigger } = useHaptics();
   const { showToast } = useToast();
   const { initData } = useTelegram();
@@ -55,6 +56,54 @@ export function PropertyDetailPage() {
     }
   }, [propertyDetail?.owner_id, propertyDetail?.owner_is_following, propertyDetail?.owner_followers_count]);
 
+  // ── Авторизация по требованию ─────────────────────────────────────────
+  // При открытии из канала (startapp=property_<id>) авторизация идёт
+  // асинхронно (AppShell) и может не успеть/упасть на транзиентной ошибке —
+  // тогда пользователь видит «не работает». Для надёжности действия, которым
+  // нужен токен (чат, подписка), сами гарантируют его наличие:
+  //   1. Если токен есть → сразу.
+  //   2. Если уже идёт вход (status=authenticating) → ждём до 10 с.
+  //   3. Если ничего не идёт — запускаем login(initData) сами (до 3 попыток).
+  const ensureAccessToken = useCallback(async (): Promise<boolean> => {
+    const store = useAuthStore.getState();
+    let token = store.accessToken;
+    if (token) return true;
+
+    showToast('Секунду, авторизация…', 'info');
+
+    // 1) Если на сцене другой вход — просто ждём его завершения.
+    if (store.status === 'authenticating') {
+      const deadline = Date.now() + 10000;
+      while (Date.now() < deadline) {
+        await new Promise((r) => setTimeout(r, 200));
+        token = useAuthStore.getState().accessToken;
+        if (token) break;
+      }
+    }
+
+    // 2) Если входа нет — запускаем ourselves (can happen from channel).
+    if (!token && initData) {
+      for (let i = 0; i < 3; i++) {
+        if (useAuthStore.getState().accessToken) break;
+        try {
+          await useAuthStore.getState().login(initData);
+          break;
+        } catch {
+          // Транзиентные ошибки: сеть, бэкенд. Ждём перед следующей попыткой.
+          await new Promise((r) => setTimeout(r, 400 * (i + 1)));
+        }
+      }
+      token = useAuthStore.getState().accessToken;
+    }
+
+    if (!token) {
+      trigger('error');
+      showToast('Авторизация не завершилась — откройте приложение из бота и повторите', 'warning');
+      return false;
+    }
+    return true;
+  }, [initData, showToast, trigger]);
+
   // Load property detail on mount
   useEffect(() => {
     if (propertyId) {
@@ -64,6 +113,76 @@ export function PropertyDetailPage() {
       clearPropertyDetail();
     };
   }, [propertyId, fetchPropertyDetail, clearPropertyDetail]);
+
+  // ── Автозапуск чата с продавцом ────────────────────────────────────────
+  // Приход из канала по кнопке «Написать продавцу» (startapp=write_<id> →
+  // /property/<id>?write=1): сразу поднимаем диалог с продавцом, не прося
+  // пользователя ещё раз жать «Написать» на странице объявления.
+  // Чат создаётся на стороне клиента (POST /messages), поэтому в канале
+  // кнопка ведёт на объявление, а уже оттуда поднимается переписка.
+  const writeRequested = searchParams.get('write') === '1';
+  const autoWriteDone = useRef(false);
+  // Флаг «компонент жив»: cleanup ниже срабатывает при смене searchParams,
+  // поэтому отменять переход по уходу нужно отдельным счётчиком монтирования.
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!writeRequested) return;
+    // Повторный вход на ту же страницу (reload/назад) не должен заново
+    // поднимать чат — флаг срабатывает один раз.
+    if (autoWriteDone.current) return;
+    // Ждём загрузки объявления: из канала страница рендерится по скелетону.
+    if (!propertyDetail || !propertyId) return;
+
+    autoWriteDone.current = true;
+    // Убираем ?write=1 из URL, чтобы возврат на объявление не открывал
+    // переписку снова.
+    navigate(`/property/${propertyId}`, { replace: true });
+
+    (async () => {
+      // Токен может быть ещё не выдан (вход из канала идёт асинхронно) —
+      // дожидаемся/запрашиваем его сами.
+      if (!(await ensureAccessToken())) return;
+
+      const currentUserId = useAuthStore.getState().user?.id;
+      if (currentUserId && propertyDetail.owner_id === currentUserId) {
+        showToast('Это ваше объявление — переписка с самим собой недоступна', 'warning');
+        return;
+      }
+
+      try {
+        const conversationId = await startChat(propertyId, undefined);
+        if (mountedRef.current) navigate(`/messages/${conversationId}`);
+      } catch (error) {
+        if (!mountedRef.current) return;
+        trigger('error');
+        if (error instanceof AuthError) {
+          showToast('Войдите в аккаунт и попробуйте снова', 'warning');
+          return;
+        }
+        showToast(
+          error instanceof Error && error.message
+            ? error.message
+            : 'Не удалось открыть чат с продавцом',
+          'warning'
+        );
+      }
+    })();
+  }, [
+    writeRequested,
+    propertyDetail,
+    propertyId,
+    startChat,
+    navigate,
+    showToast,
+    trigger,
+    ensureAccessToken,
+  ]);
 
   // Handle loading state
   if (isLoadingDetail) {
@@ -139,54 +258,6 @@ export function PropertyDetailPage() {
   const handleCall = () => {
     trigger('light');
     setCallSheetOpen(true);
-  };
-
-  // ── Авторизация по требованию ─────────────────────────────────────────
-  // При открытии из канала (startapp=property_<id>) авторизация идёт
-  // асинхронно (AppShell) и может не успеть/упасть на транзиентной ошибке —
-  // тогда пользователь видит «не работает». Для надёжности действия, которым
-  // нужен токен (чат, подписка), сами гарантируют его наличие:
-  //   1. Если токен есть → сразу.
-  //   2. Если уже идёт вход (status=authenticating) → ждём до 10 с.
-  //   3. Если ничего не идёт — запускаем login(initData) сами (до 3 попыток).
-  const ensureAccessToken = async (): Promise<boolean> => {
-    const store = useAuthStore.getState();
-    let token = store.accessToken;
-    if (token) return true;
-
-    showToast('Секунду, авторизация…', 'info');
-
-    // 1) Если на сцене другой вход — просто ждём его завершения.
-    if (store.status === 'authenticating') {
-      const deadline = Date.now() + 10000;
-      while (Date.now() < deadline) {
-        await new Promise((r) => setTimeout(r, 200));
-        token = useAuthStore.getState().accessToken;
-        if (token) break;
-      }
-    }
-
-    // 2) Если входа нет — запускаем ourselves (can happen from channel).
-    if (!token && initData) {
-      for (let i = 0; i < 3; i++) {
-        if (useAuthStore.getState().accessToken) break;
-        try {
-          await useAuthStore.getState().login(initData);
-          break;
-        } catch {
-          // Транзиентные ошибки: сеть, бэкенд. Ждём перед следующей попыткой.
-          await new Promise((r) => setTimeout(r, 400 * (i + 1)));
-        }
-      }
-      token = useAuthStore.getState().accessToken;
-    }
-
-    if (!token) {
-      trigger('error');
-      showToast('Авторизация не завершилась — откройте приложение из бота и повторите', 'warning');
-      return false;
-    }
-    return true;
   };
 
   // ── Подписаться на продавца ───────────────────────────────────────────

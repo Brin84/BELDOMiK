@@ -53,12 +53,20 @@ export function App() {
 
   // Глубокая ссылка из бота/канала:
   // startapp=property_<id> → открываем конкретное объявление;
-  // startapp=chat_<id>    → открываем переписку (уведомление о сообщении).
+  // startapp=write_<id>    → открываем объявление и сразу поднимаем чат
+  //                          с продавцом (кнопка «Написать продавцу» в канале);
+  // startapp=chat_<id>     → открываем переписку (уведомление о сообщении).
   useEffect(() => {
     if (!startParam) return;
     const property = /^property_(\d+)$/.exec(startParam);
     if (property) {
       navigate(`/property/${property[1]}`, { replace: true });
+      return;
+    }
+    const write = /^write_(\d+)$/.exec(startParam);
+    if (write) {
+      // Флаг ?write=1 сигналит странице объявления поднять диалог с продавцом.
+      navigate(`/property/${write[1]}?write=1`, { replace: true });
       return;
     }
     const chat = /^chat_(\d+)$/.exec(startParam);

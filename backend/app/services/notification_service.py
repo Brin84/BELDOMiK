@@ -222,9 +222,14 @@ class NotificationService:
             description=description,
         )
         deep_link = NotificationService.miniapp_deep_link(f"property_{property_id}")
+        # Вторая кнопка — «Написать продавцу»: открывает MiniApp на этом же
+        # объявлении с автозапуском чата (startapp=write_<id> → фронт делает
+        # /property/<id>?write=1 и сам поднимает диалог с продавцом).
+        write_link = NotificationService.miniapp_deep_link(f"write_{property_id}")
         keyboard = {
             "inline_keyboard": [
                 [{"text": "👀 Открыть объявление", "url": deep_link}],
+                [{"text": "✉️ Написать продавцу", "url": write_link}],
             ]
         }
 

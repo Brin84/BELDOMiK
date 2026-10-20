@@ -56,3 +56,38 @@ def test_webapp_url_does_not_affect_deep_link(monkeypatch):
 
 def test_base_url_without_param_no_explicit():
     assert NotificationService.miniapp_deep_link() == "https://t.me/beldomik_bot"
+
+
+async def test_channel_post_has_open_and_write_buttons(monkeypatch):
+    """В посте объявления в канале две кнопки: «Открыть объявление» и
+    «Написать продавцу» (вторая — под первой)."""
+    monkeypatch.setattr(settings, "CHANNEL_URL", "https://t.me/beldomik_channel")
+    captured: dict = {}
+
+    async def _capture(chat_id, text, reply_markup=None, **kwargs):
+        captured["chat_id"] = chat_id
+        captured["reply_markup"] = reply_markup
+        return True
+
+    monkeypatch.setattr(NotificationService, "send_telegram_message", _capture)
+
+    await NotificationService.post_property_to_channel(
+        property_id=42,
+        type_name="Квартира",
+        operation_name="Продажа",
+        city_name="Минск",
+        district_name="Центральный",
+        price_byn=342000,
+        price_usd=106875,
+        total_area=78.0,
+        rooms_count=3,
+        description="Описание",
+        photo_url=None,
+    )
+
+    keyboard = captured["reply_markup"]["inline_keyboard"]
+    assert len(keyboard) == 2
+    assert keyboard[0][0]["text"] == "👀 Открыть объявление"
+    assert keyboard[0][0]["url"].endswith("?startapp=property_42")
+    assert keyboard[1][0]["text"] == "✉️ Написать продавцу"
+    assert keyboard[1][0]["url"].endswith("?startapp=write_42")
